@@ -209,17 +209,17 @@ export class GeneralPage extends Adw.PreferencesPage {
         }, false);
     }
 
-    _handleSave(path) {
+    async _handleSave(path) {
         try {
-            saveSettingsToFile(this._settings, path);
+            await saveSettingsToFile(this._settings, path);
         } catch (e) {
             error(`Export failed: ${e.message}`);
         }
     }
 
-    _handleLoad(path) {
+    async _handleLoad(path) {
         try {
-            loadSettingsFromFile(this._settings, path);
+            await loadSettingsFromFile(this._settings, path);
         } catch (e) {
             error(`Import failed: ${e.message}`);
         }

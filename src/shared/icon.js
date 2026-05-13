@@ -100,7 +100,7 @@ export function buildSymbolicCandidates(name, useSymbolic) {
 let _cacheDirPath = null;
 
 // Skip write if content matches existing file.
-export function writeCachedIcon(appId, pngBytes) {
+export async function writeCachedIcon(appId, pngBytes) {
     if (!appId || !pngBytes || pngBytes.length === 0)
         return null;
     const path = _cachedIconPath(appId);
@@ -108,8 +108,21 @@ export function writeCachedIcon(appId, pngBytes) {
 
     try {
         if (file.query_exists(null)) {
-            const [success, existing] = file.load_contents(null);
-            if (success && existing.length === pngBytes.length && _bytesEqual(existing, pngBytes))
+            const existing = await new Promise((resolve, reject) => {
+                file.load_contents_async(null, (obj, res) => {
+                    try {
+                        const [success, c] = obj.load_contents_finish(res);
+                        if (!success) {
+                            reject(new Error('Load failed'));
+                            return;
+                        }
+                        resolve(c);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
+            });
+            if (existing.length === pngBytes.length && _bytesEqual(existing, pngBytes))
                 return path;
         }
 

@@ -43,8 +43,8 @@ export function importSettingsFromJSON(settings, data) {
     });
 }
 
-export function saveSettingsToFile(settings, path) {
-    _rotateFile(path, settings.get_int('max-backups'));
+export async function saveSettingsToFile(settings, path) {
+    await _rotateFile(path, settings.get_int('max-backups'));
     const data = _exportSettingsToJSON(settings);
     const jsonString = JSON.stringify(data, null, 2);
 
@@ -52,7 +52,7 @@ export function saveSettingsToFile(settings, path) {
     file.replace_contents(new TextEncoder().encode(jsonString), null, false, Gio.FileCreateFlags.REPLACE_DESTINATION, null);
 }
 
-export function loadSettingsFromFile(settings, path) {
+export async function loadSettingsFromFile(settings, path) {
     const file = Gio.File.new_for_path(path);
     let jsonString;
 
@@ -64,9 +64,20 @@ export function loadSettingsFromFile(settings, path) {
         outStream.splice(converterStream, Gio.OutputStreamSpliceFlags.CLOSE_SOURCE | Gio.OutputStreamSpliceFlags.CLOSE_TARGET, null);
         jsonString = new TextDecoder().decode(outStream.steal_as_bytes().get_data());
     } else {
-        const [success, contents] = file.load_contents(null);
-        if (!success)
-            throw new Error('Failed to load file');
+        const contents = await new Promise((resolve, reject) => {
+            file.load_contents_async(null, (obj, res) => {
+                try {
+                    const [success, c] = obj.load_contents_finish(res);
+                    if (!success) {
+                        reject(new Error('Failed to load file'));
+                        return;
+                    }
+                    resolve(c);
+                } catch (e) {
+                    reject(e);
+                }
+            });
+        });
         jsonString = new TextDecoder().decode(contents);
     }
 
@@ -126,7 +137,7 @@ function _exportSettingsToJSON(settings) {
     return exportData;
 }
 
-function _rotateFile(path, maxBackups) {
+async function _rotateFile(path, maxBackups) {
     // Drop any backup slots above the new ceiling so a lowered max-backups
     // doesn't leave orphaned files behind.
     for (let i = maxBackups + 1; i <= BACKUP_SWEEP_CEILING; i++)
@@ -149,15 +160,26 @@ function _rotateFile(path, maxBackups) {
     if (mainFile.query_exists(null)) {
         const backupFile = Gio.File.new_for_path(`${path}.1.gz`);
         try {
-            const [success, content] = mainFile.load_contents(null);
-            if (success) {
-                const fileStream = backupFile.replace(null, false, Gio.FileCreateFlags.REPLACE_DESTINATION, null);
-                const compressor = Gio.ZlibCompressor.new(Gio.ZlibCompressorFormat.GZIP, -1);
-                const converterStream = Gio.ConverterOutputStream.new(fileStream, compressor);
+            const content = await new Promise((resolve, reject) => {
+                mainFile.load_contents_async(null, (obj, res) => {
+                    try {
+                        const [success, c] = obj.load_contents_finish(res);
+                        if (!success) {
+                            reject(new Error('Failed to load file'));
+                            return;
+                        }
+                        resolve(c);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
+            });
+            const fileStream = backupFile.replace(null, false, Gio.FileCreateFlags.REPLACE_DESTINATION, null);
+            const compressor = Gio.ZlibCompressor.new(Gio.ZlibCompressorFormat.GZIP, -1);
+            const converterStream = Gio.ConverterOutputStream.new(fileStream, compressor);
 
-                converterStream.write_all(content, null);
-                converterStream.close(null);
-            }
+            converterStream.write_all(content, null);
+            converterStream.close(null);
         } catch (e) {
             error(`Backup compression failed: ${e.message}`, e);
         }

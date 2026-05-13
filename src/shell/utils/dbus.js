@@ -15,6 +15,8 @@ export function loadInterfaceXML(extensionDir, fileName) {
     if (!interfaceFile.query_exists(null))
         throw new Error(`Interface file missing at ${interfaceFile.get_path()}`);
 
+    // One-shot read at init. File is bundled local, never re-read.
+    // Sync keeps proxy construction synchronous so callers don't need async chains.
     const [success, contents] = interfaceFile.load_contents(null);
     if (!success || !contents)
         throw new Error(`Failed to read content of ${fileName}`);

@@ -147,14 +147,14 @@ export async function resolveTrayIcon(proxy, settings, appId) {
         if (iconName.startsWith('/')) {
             const file = Gio.File.new_for_path(iconName);
             if (file.query_exists(null)) {
-                _snapshotIconToCache(settings, appId, file);
+                _snapshotIconToCache(settings, appId, file).catch(() => { /* best-effort */ });
                 return {gicon: new Gio.FileIcon({file}), iconName: null};
             }
         } else if (iconThemePath) {
             const resolvedPath = findIconInTheme(iconName, iconThemePath);
             if (resolvedPath) {
                 const file = Gio.File.new_for_path(resolvedPath);
-                _snapshotIconToCache(settings, appId, file);
+                _snapshotIconToCache(settings, appId, file).catch(() => { /* best-effort */ });
                 return {gicon: new Gio.FileIcon({file}), iconName: null};
             }
         }
@@ -215,7 +215,7 @@ export async function resolveTrayIcon(proxy, settings, appId) {
                 const pngBytes = _pixmapToPng(width, height, rawData);
                 if (pngBytes) {
                     if (appId) {
-                        const path = writeCachedIcon(appId, pngBytes);
+                        const path = await writeCachedIcon(appId, pngBytes);
                         if (path)
                             setAppConfigValue(settings, appId, 'cached_icon_path', path);
                     }
@@ -238,14 +238,27 @@ export async function resolveTrayIcon(proxy, settings, appId) {
 
 // Some apps store their IconThemePath in an ephemeral directory, so
 // copy the bytes into our cache. writeCachedIcon dedupes by content.
-function _snapshotIconToCache(settings, appId, file) {
+async function _snapshotIconToCache(settings, appId, file) {
     if (!appId || !file)
         return;
     try {
-        const [ok, contents] = file.load_contents(null);
-        if (!ok || !contents || contents.length === 0)
+        const contents = await new Promise((resolve, reject) => {
+            file.load_contents_async(null, (obj, res) => {
+                try {
+                    const [success, c] = obj.load_contents_finish(res);
+                    if (!success) {
+                        reject(new Error('Load failed'));
+                        return;
+                    }
+                    resolve(c);
+                } catch (e) {
+                    reject(e);
+                }
+            });
+        });
+        if (!contents || contents.length === 0)
             return;
-        const path = writeCachedIcon(appId, contents);
+        const path = await writeCachedIcon(appId, contents);
         if (!path)
             return;
         const existing = getAppConfigValue(settings, appId, 'cached_icon_path');

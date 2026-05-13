@@ -15,9 +15,12 @@
 ## About
 
 Better Tray Icons puts tray icons back into the GNOME panel where they belong. You pick how many icons stay visible, and the rest tuck away into a popup behind a toggle button.
+Better Tray Icons puts tray icons back into the GNOME panel where they belong. You pick how many icons stay visible, and the rest tuck away into a popup behind a toggle button.
 
 Every icon can be renamed, hidden, reordered or swapped out for a custom one. Clicks are fully configurable per button, with double-click and long-press support. Spacing, padding, colors, the toggle button styling, all of it is up to you.
+Every icon can be renamed, hidden, reordered or swapped out for a custom one. Clicks are fully configurable per button, with double-click and long-press support. Spacing, padding, colors, the toggle button styling, all of it is up to you.
 
+Settings can be exported, imported and even synced across devices through a shared JSON file with rotated backups.
 Settings can be exported, imported and even synced across devices through a shared JSON file with rotated backups.
 
 ## Features
@@ -31,6 +34,7 @@ Settings can be exported, imported and even synced across devices through a shar
 | Hover tooltips with configurable side and delay | ![](https://img.shields.io/badge/-✓-22c55e?style=flat-square) |
 | Rename, hide, reorder or override any icon per app | ![](https://img.shields.io/badge/-✓-22c55e?style=flat-square) |
 | Click actions for left, middle and right click, each plus double-click and long-press | ![](https://img.shields.io/badge/-✓-22c55e?style=flat-square) |
+| Extra toggle-button actions like open popup, cycle icons, action menu, open settings | ![](https://img.shields.io/badge/-✓-22c55e?style=flat-square) |
 | Extra toggle-button actions like open popup, cycle icons, action menu, open settings | ![](https://img.shields.io/badge/-✓-22c55e?style=flat-square) |
 | Independent styling for tray icons, toggle button and overflow container | ![](https://img.shields.io/badge/-✓-22c55e?style=flat-square) |
 | Symbolic icon mode where the app supports it | ![](https://img.shields.io/badge/-✓-22c55e?style=flat-square) |
@@ -61,15 +65,19 @@ Settings can be exported, imported and even synced across devices through a shar
 ## Installation
 
 The easiest way to install Better Tray Icons is from the [GNOME Extensions website](https://extensions.gnome.org/).
+The easiest way to install Better Tray Icons is from the [GNOME Extensions website](https://extensions.gnome.org/).
 
+If you'd rather grab the development version from source, head over to the [Installation wiki page](../../wiki/Installation).
 If you'd rather grab the development version from source, head over to the [Installation wiki page](../../wiki/Installation).
 
 ## Compatibility
 
 Better Tray Icons targets the two most recent stable GNOME Shell releases. Check `metadata.json` for the exact versions of the current build. Wayland only, X11 sessions are not supported.
+Better Tray Icons targets the two most recent stable GNOME Shell releases. Check `metadata.json` for the exact versions of the current build. Wayland only, X11 sessions are not supported.
 
 ## Conflicts
 
+Disable any other tray or AppIndicator extension before enabling this one, otherwise both will fight over the same DBus names. The Extensions app warns about this up front, because the conflicting UUIDs are declared in `metadata.json`:
 Disable any other tray or AppIndicator extension before enabling this one, otherwise both will fight over the same DBus names. The Extensions app warns about this up front, because the conflicting UUIDs are declared in `metadata.json`:
 
 - `appindicatorsupport@rgcjonas.gmail.com` (AppIndicator and KStatusNotifierItem Support)
@@ -78,16 +86,18 @@ Disable any other tray or AppIndicator extension before enabling this one, other
 
 ## Translating
 
-Help with translations is very welcome, both new languages and improvements to existing ones. Have a look at the [translation guidelines](CONTRIBUTING.md#translating) before opening a PR.
+Help with translations is very welcome, both new languages and improvements to existing ones. Have a look at the [translation guidelines]([CONTRIBUTING.md#translating](https://github.com/nexaknight/BetterTrayIcons/wiki/Translation-Guidelines) before opening a PR.
 
 ## Contributing
 
+This extension could be even better with your help. The [Contributing guide](CONTRIBUTING.md) walks you through setting up the dev environment, filing bug reports and submitting changes.
 This extension could be even better with your help. The [Contributing guide](CONTRIBUTING.md) walks you through setting up the dev environment, filing bug reports and submitting changes.
 
 ## Credits
 
 Better Tray Icons is inspired by [AppIndicator/KStatusNotifierItem support for GNOME Shell](https://github.com/ubuntu/gnome-shell-extension-appindicator) and uses the DBus interface XML files from the upstream specifications that project links to.
 
+The preferences window, especially the About page layout, takes a few cues from [Dash to Panel](https://github.com/home-sweet-gnome/dash-to-panel) by Home Sweet GNOME.
 The preferences window, especially the About page layout, takes a few cues from [Dash to Panel](https://github.com/home-sweet-gnome/dash-to-panel) by Home Sweet GNOME.
 
 ## License

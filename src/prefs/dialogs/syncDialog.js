@@ -264,9 +264,9 @@ function _buildActionRow(group, {title, btnLabel, onClick}) {
     return btn;
 }
 
-function _runSyncOp(op, toast, onAfter, {successMsg, failurePrefix}) {
+async function _runSyncOp(op, toast, onAfter, {successMsg, failurePrefix}) {
     try {
-        op();
+        await op();
         toast.add_toast(new Adw.Toast({title: successMsg}));
         onAfter();
     } catch (e) {

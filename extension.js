@@ -57,6 +57,7 @@ export default class BetterTrayIconsExtension extends Extension {
     }
 
     _setupAutoSync() {
+        disconnectSignal(this, this._fileMonitor, '_fileMonitorSignalId');
         disposeAll(this, 'cancel', '_fileMonitor', '_syncCancellable');
         clearIds(this, removeTimer, '_syncDebounceId');
 
@@ -69,7 +70,7 @@ export default class BetterTrayIconsExtension extends Extension {
         try {
             const file = Gio.File.new_for_path(path);
             this._fileMonitor = file.monitor_file(Gio.FileMonitorFlags.NONE, null);
-            this._fileMonitor.connect('changed', (_monitor, f, _other, eventType) => {
+            this._fileMonitorSignalId = this._fileMonitor.connect('changed', (_monitor, f, _other, eventType) => {
                 if (eventType === Gio.FileMonitorEvent.CHANGED || eventType === Gio.FileMonitorEvent.CREATED)
                     this._queueSyncImport(f);
             });
@@ -131,11 +132,8 @@ export default class BetterTrayIconsExtension extends Extension {
             clearIds(this, removeTimer, '_autoPushDebounceId');
             this._autoPushDebounceId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, AUTO_PUSH_DEBOUNCE_MS, () => {
                 this._autoPushDebounceId = 0;
-                try {
-                    saveSettingsToFile(this._settings, this._settings.get_string('sync-file-path'));
-                } catch (e) {
-                    warn(`Auto-push failed: ${e.message}`);
-                }
+                saveSettingsToFile(this._settings, this._settings.get_string('sync-file-path'))
+                    .catch(e => warn(`Auto-push failed: ${e.message}`));
                 return GLib.SOURCE_REMOVE;
             });
         });
@@ -150,6 +148,7 @@ export default class BetterTrayIconsExtension extends Extension {
         clearIds(this, removeTimer, '_enableTimeoutId', '_syncDebounceId', '_autoPushDebounceId');
         disconnectSignal(this, this._settings, '_autoPushSignalId');
         disconnectAll(this, this._settings, '_settingsSignals');
+        disconnectSignal(this, this._fileMonitor, '_fileMonitorSignalId');
 
         disposeAll(this, 'cancel', '_fileMonitor', '_syncCancellable');
         // SniWatcher and XEmbedTrayBridge use .disable() rather than .destroy().
