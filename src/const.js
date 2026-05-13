@@ -203,5 +203,5 @@ export const MAX_CONTRIBUTORS = 5;
 // GitHub usernames (lowercase, no leading "@") excluded from the About page
 // contributor strip. See CONTRIBUTING.md for the opt-out procedure.
 export const CONTRIBUTORS_OPTOUT = [
-    // 'username',
+    'github-actions[bot]',
 ];
