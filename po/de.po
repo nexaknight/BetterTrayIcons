@@ -1,0 +1,673 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: BetterTrayIcons 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-05-11 12:00+0000\n"
+"PO-Revision-Date: 2026-05-11 12:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: German\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "About"
+msgstr "Über"
+
+msgid "Action Menu"
+msgstr "Aktionsmenü"
+
+msgid "Actions"
+msgstr "Aktionen"
+
+msgid "Activate"
+msgstr "Aktivieren"
+
+msgid "Advanced"
+msgstr "Erweitert"
+
+msgid "All Icons"
+msgstr "Alle Icons"
+
+msgid "All settings will be restored to defaults and sync backups deleted. This cannot be undone."
+msgstr "Alle Einstellungen werden auf Standardwerte zurückgesetzt und Sync-Backups gelöscht. Dies kann nicht rückgängig gemacht werden."
+
+msgid "Appearance"
+msgstr "Erscheinungsbild"
+
+msgid "Applications"
+msgstr "Anwendungen"
+
+msgid "Apply"
+msgstr "Anwenden"
+
+msgid "App Settings"
+msgstr "App-Einstellungen"
+
+msgid "A shared JSON file on Nextcloud, a NAS, or another cloud folder."
+msgstr "Eine gemeinsame JSON-Datei auf Nextcloud, einem NAS oder in einem Cloud-Ordner."
+
+msgid "Auto-Sync"
+msgstr "Auto-Sync"
+
+msgid "Background"
+msgstr "Hintergrund"
+
+msgid "Background Color"
+msgstr "Hintergrundfarbe"
+
+msgid "Background, radius, spacing"
+msgstr "Hintergrund, Radius, Abstand"
+
+msgid "Backup"
+msgstr "Backup"
+
+msgid "Backup and Restore"
+msgstr "Sichern und Wiederherstellen"
+
+msgid "Backup restored"
+msgstr "Backup wiederhergestellt"
+
+msgid "Backups"
+msgstr "Backups"
+
+msgid "Behavior"
+msgstr "Verhalten"
+
+msgid "Bottom"
+msgstr "Unten"
+
+msgid "Cancel"
+msgstr "Abbrechen"
+
+msgid "Center"
+msgstr "Mitte"
+
+msgid "Changelog"
+msgstr "Änderungsprotokoll"
+
+msgid "Checking…"
+msgstr "Wird geprüft …"
+
+msgid "Choose file"
+msgstr "Datei wählen"
+
+msgid "Clean Up"
+msgstr "Bereinigen"
+
+msgid "Clean Up Legacy IDs"
+msgstr "Alte IDs bereinigen"
+
+msgid "Cloud Sync"
+msgstr "Cloud-Sync"
+
+msgid "Colors"
+msgstr "Farben"
+
+msgid "Configuration"
+msgstr "Konfiguration"
+
+msgid "Configure"
+msgstr "Konfigurieren"
+
+msgid "Configure advanced actions"
+msgstr "Erweiterte Aktionen konfigurieren"
+
+msgid "Confirm"
+msgstr "Bestätigen"
+
+msgid "Contacts api.github.com on demand."
+msgstr "Kontaktiert api.github.com auf Anforderung."
+
+msgid "Contributors"
+msgstr "Mitwirkende"
+
+msgid "Copy logs"
+msgstr "Logs kopieren"
+
+msgid "Corner Radius (px)"
+msgstr "Eckenradius (px)"
+
+msgid "Custom"
+msgstr "Benutzerdefiniert"
+
+msgid "Custom Icon"
+msgstr "Eigenes Icon"
+
+msgid "Custom Style"
+msgstr "Eigener Stil"
+
+msgid "Cycle Icons"
+msgstr "Icons durchblättern"
+
+msgid "Danger Zone"
+msgstr "Gefahrenzone"
+
+msgid "Debug Mode"
+msgstr "Debug-Modus"
+
+msgid "Default app icon"
+msgstr "Standard-App-Icon"
+
+msgid "Deletes all stored settings for this app."
+msgstr "Löscht alle gespeicherten Einstellungen dieser App."
+
+msgid "Detected Apps"
+msgstr "Erkannte Apps"
+
+msgid "Don’t show this icon in the tray."
+msgstr "Dieses Icon nicht im Tray anzeigen."
+
+msgid "Double Click"
+msgstr "Doppelklick"
+
+msgid "Enable"
+msgstr "Aktivieren"
+
+msgid "Error loading data"
+msgstr "Fehler beim Laden"
+
+msgid "Experimental"
+msgstr "Experimentell"
+
+msgid "Export"
+msgstr "Exportieren"
+
+msgid "Factory Reset"
+msgstr "Werkseinstellungen wiederherstellen"
+
+msgid "Failed to load changelog: "
+msgstr "Änderungsprotokoll konnte nicht geladen werden: "
+
+msgid "File"
+msgstr "Datei"
+
+msgid "File Chooser"
+msgstr "Dateiauswahl"
+
+msgid "File is not valid JSON"
+msgstr "Datei ist kein gültiges JSON"
+
+msgid "File not yet created"
+msgstr "Datei noch nicht vorhanden"
+
+msgid "Forget"
+msgstr "Vergessen"
+
+msgid "Forget App"
+msgstr "App vergessen"
+
+msgid "from"
+msgstr "von"
+
+msgid "General"
+msgstr "Allgemein"
+
+msgid "Grid"
+msgstr "Raster"
+
+msgid "Grid Columns"
+msgstr "Raster-Spalten"
+
+msgid "Help translate this extension."
+msgstr "Hilf mit, diese Erweiterung zu übersetzen."
+
+msgid "Hidden"
+msgstr "Versteckt"
+
+msgid "Hide Icon"
+msgstr "Icon verstecken"
+
+msgid "Higher values move the icon further left."
+msgstr "Höhere Werte verschieben das Icon weiter nach links."
+
+msgid "Horizontal (px)"
+msgstr "Horizontal (px)"
+
+msgid "Hover"
+msgstr "Hover"
+
+msgid "Icon"
+msgstr "Icon"
+
+msgid "Icon Color"
+msgstr "Icon-Farbe"
+
+msgid "Icon name or path"
+msgstr "Icon-Name oder Pfad"
+
+msgid "Icon, position, colors"
+msgstr "Icon, Position, Farben"
+
+msgid "Icon Size (px)"
+msgstr "Icon-Größe (px)"
+
+msgid "ID"
+msgstr "ID"
+
+msgid "Image Files"
+msgstr "Bilddateien"
+
+msgid "Import"
+msgstr "Importieren"
+
+msgid "Import settings?"
+msgstr "Einstellungen importieren?"
+
+msgid "Information"
+msgstr "Information"
+
+msgid "Inherit Style from Tray Icons"
+msgstr "Stil von Tray-Icons übernehmen"
+
+msgid "Keep Overflow Menu Open"
+msgstr "Overflow-Menü offen lassen"
+
+msgid "Keep settings in sync via a shared file."
+msgstr "Einstellungen über eine gemeinsame Datei synchron halten."
+
+msgid "Last Sync"
+msgstr "Letzte Synchronisation"
+
+msgid "Layout"
+msgstr "Layout"
+
+msgid "Left"
+msgstr "Links"
+
+msgid "Left Click"
+msgstr "Linksklick"
+
+msgid "Legal"
+msgstr "Rechtliches"
+
+msgid "License"
+msgstr "Lizenz"
+
+msgid "Load"
+msgstr "Laden"
+
+msgid "Loaded from GitHub"
+msgstr "Wird von GitHub geladen"
+
+msgid "Loading…"
+msgstr "Wird geladen …"
+
+msgid "Local settings will be overwritten."
+msgstr "Lokale Einstellungen werden überschrieben."
+
+msgid "Logs copied"
+msgstr "Logs kopiert"
+
+msgid "Logs saved"
+msgstr "Logs gespeichert"
+
+msgid "Log to journalctl."
+msgstr "Protokollieren in journalctl."
+
+msgid "Long Press"
+msgstr "Lang drücken"
+
+msgid "Manual Sync"
+msgstr "Manueller Sync"
+
+msgid "Margin"
+msgstr "Außenabstand"
+
+msgid "Match the look of tray icons; hides the controls below."
+msgstr "Übernimmt das Aussehen der Tray-Icons. Blendet die Optionen darunter aus."
+
+msgid "Menu items still close immediately on click."
+msgstr "Menüeinträge schließen weiterhin sofort beim Klick."
+
+msgid "More colors"
+msgstr "Weitere Farben"
+
+msgid "Middle Click"
+msgstr "Mittelklick"
+
+msgid "Name"
+msgstr "Name"
+
+msgid "Next"
+msgstr "Weiter"
+
+msgid "No apps detected"
+msgstr "Keine Apps erkannt"
+
+msgid "No contributors found"
+msgstr "Keine Mitwirkenden gefunden"
+
+msgid "No file selected"
+msgstr "Keine Datei ausgewählt"
+
+msgid "No logs found"
+msgstr "Keine Logs gefunden"
+
+msgid "None"
+msgstr "Keine"
+
+msgid "None available"
+msgstr "Keine verfügbar"
+
+msgid "No releases found."
+msgstr "Keine Veröffentlichungen gefunden."
+
+msgid "Open"
+msgstr "Öffnen"
+
+msgid "Open Menu"
+msgstr "Menü öffnen"
+
+msgid "Open on GitHub"
+msgstr "Auf GitHub öffnen"
+
+msgid "Open Overflow Menu"
+msgstr "Overflow-Menü öffnen"
+
+msgid "Open Settings"
+msgstr "Einstellungen öffnen"
+
+msgid "Open the gear for double-click and long-press."
+msgstr "Über das Zahnrad: Doppelklick und Langdruck."
+
+msgid "Order"
+msgstr "Reihenfolge"
+
+msgid "Overflow Container"
+msgstr "Overflow-Container"
+
+msgid "Overflow Layout"
+msgstr "Overflow-Layout"
+
+msgid "Overflow Menu"
+msgstr "Overflow-Menü"
+
+msgid "Padding"
+msgstr "Innenabstand"
+
+msgid "Panel Box"
+msgstr "Panel-Bereich"
+
+msgid "Position"
+msgstr "Position"
+
+msgid "Position in Box"
+msgstr "Position im Bereich"
+
+msgid "Powered by"
+msgstr "Bereitgestellt von"
+
+msgid "Previous"
+msgstr "Zurück"
+
+msgid "Proton"
+msgstr "Proton"
+
+msgid "Provided \"as is\", without warranty. The authors are not liable for damages."
+msgstr "Bereitgestellt „wie besehen“, ohne Gewährleistung. Die Autoren haften nicht für Schäden."
+
+msgid "Pull"
+msgstr "Pullen"
+
+msgid "Pull failed"
+msgstr "Pullen fehlgeschlagen"
+
+msgid "Pull from file?"
+msgstr "Aus Datei pullen?"
+
+msgid "Pull from File"
+msgstr "Aus Datei pullen"
+
+msgid "Push"
+msgstr "Pushen"
+
+msgid "Push failed"
+msgstr "Pushen fehlgeschlagen"
+
+msgid "Push on change, pull on remote update."
+msgstr "Push bei Änderung, Pull bei Remote-Update."
+
+msgid "Push to File"
+msgstr "In Datei pushen"
+
+msgid "Recent releases"
+msgstr "Neueste Versionen"
+
+msgid "Recommended"
+msgstr "Empfohlen"
+
+msgid "Relative to the tray icons."
+msgstr "Relativ zu den Tray-Icons."
+
+msgid "Remove leftovers from earlier versions."
+msgstr "Überreste aus älteren Versionen entfernen."
+
+msgid "Reorder (drag & drop)"
+msgstr "Neu anordnen (Drag & Drop)"
+
+msgid "Reset"
+msgstr "Zurücksetzen"
+
+msgid "Reset all settings?"
+msgstr "Alle Einstellungen zurücksetzen?"
+
+msgid "Reset icon"
+msgstr "Icon zurücksetzen"
+
+msgid "Reset name"
+msgstr "Name zurücksetzen"
+
+msgid "Restore"
+msgstr "Wiederherstellen"
+
+msgid "Reveal colors, padding and margin controls below."
+msgstr "Blendet Farben, Abstände und Ränder unten ein."
+
+msgid "Restore defaults and delete sync backups."
+msgstr "Standards wiederherstellen und Sync-Backups löschen."
+
+msgid "Restore failed: %s"
+msgstr "Wiederherstellung fehlgeschlagen: %s"
+
+msgid "Restore this backup?"
+msgstr "Dieses Backup wiederherstellen?"
+
+msgid "Right"
+msgstr "Rechts"
+
+msgid "Right Click"
+msgstr "Rechtsklick"
+
+msgid "Row"
+msgstr "Zeile"
+
+msgid "Run an app with a tray icon to see it here."
+msgstr "Eine App mit Tray-Icon starten, um sie hier zu sehen."
+
+msgid "Save"
+msgstr "Speichern"
+
+msgid "Save logs"
+msgstr "Logs speichern"
+
+msgid "Save settings as JSON or load them back."
+msgstr "Einstellungen als JSON speichern oder importieren."
+
+msgid "Schema key \"sync-file-path\" missing."
+msgstr "Schema-Schlüssel „sync-file-path“ fehlt."
+
+msgid "Search icons…"
+msgstr "Icons suchen …"
+
+msgid "Select Icon"
+msgstr "Icon wählen"
+
+msgid "Select Image"
+msgstr "Bild wählen"
+
+msgid "Select one to restore"
+msgstr "Eines zum Wiederherstellen wählen"
+
+msgid "Set a file path first."
+msgstr "Zuerst einen Dateipfad festlegen."
+
+msgid "Settings"
+msgstr "Einstellungen"
+
+msgid "Settings persist after the app closes."
+msgstr "Einstellungen bleiben nach dem Schließen der App erhalten."
+
+msgid "Settings pulled"
+msgstr "Einstellungen geholt"
+
+msgid "Settings pushed"
+msgstr "Einstellungen gesendet"
+
+msgid "Settings reset"
+msgstr "Einstellungen zurückgesetzt"
+
+msgid "Shape"
+msgstr "Form"
+
+msgid "Show icons from Wine and Proton apps."
+msgstr "Icons aus Wine- und Proton-Apps anzeigen."
+
+msgid "Show more"
+msgstr "Mehr anzeigen"
+
+msgid "Show the app title on hover."
+msgstr "Den App-Titel beim Überfahren anzeigen."
+
+msgid "Single clicks are briefly delayed while a double-click action is set, so the second click can be detected."
+msgstr "Einzelklicks werden kurz verzögert, solange eine Doppelklick-Aktion gesetzt ist, damit der zweite Klick erkannt wird."
+
+msgid "Show Tooltips"
+msgstr "Tooltips anzeigen"
+
+msgid "Side"
+msgstr "Seite"
+
+msgid "Size"
+msgstr "Größe"
+
+msgid "Size, padding, colors"
+msgstr "Größe, Abstand, Farben"
+
+msgid "Size (px)"
+msgstr "Größe (px)"
+
+msgid "Source Code"
+msgstr "Quellcode"
+
+msgid "Sponsor"
+msgstr "Unterstützen"
+
+msgid "Style"
+msgstr "Stil"
+
+msgid "Support development."
+msgstr "Entwicklung unterstützen."
+
+msgid "Symbolic Icons"
+msgstr "Symbolische Icons"
+
+msgid "Sync File"
+msgstr "Sync-Datei"
+
+msgid "System Icons"
+msgstr "System-Icons"
+
+msgid "this device"
+msgstr "diesem Gerät"
+
+msgid "Toggle Button"
+msgstr "Umschalt-Knopf"
+
+msgid "Toggle Button Clicks"
+msgstr "Klicks auf den Umschalt-Knopf"
+
+msgid "Toggle Menu"
+msgstr "Menü umschalten"
+
+msgid "Tooltip Delay (ms)"
+msgstr "Tooltip-Verzögerung (ms)"
+
+msgid "Tooltip Position"
+msgstr "Tooltip-Position"
+
+msgid "Top"
+msgstr "Oben"
+
+msgid "Translate"
+msgstr "Übersetzen"
+
+msgid "Tray Icon Clicks"
+msgstr "Klicks auf Tray-Icons"
+
+msgid "Tray Icons"
+msgstr "Tray-Icons"
+
+msgid "Tray icons are drawn by the app itself via XEmbed, so a custom icon cannot be applied."
+msgstr "Tray-Icons werden von der App selbst über XEmbed gezeichnet, daher kann kein eigenes Icon zugewiesen werden."
+
+msgid "Type a name or pick an SVG/PNG file."
+msgstr "Namen eingeben oder eine SVG-/PNG-Datei wählen."
+
+msgid "Unknown"
+msgstr "Unbekannt"
+
+msgid "Unknown App"
+msgstr "Unbekannte App"
+
+msgid "Use monochrome icons when available."
+msgstr "Monochrome Icons nutzen, wenn verfügbar."
+
+msgid "Version"
+msgstr "Version"
+
+msgid "Vertical (px)"
+msgstr "Vertikal (px)"
+
+msgid "Visible Icons"
+msgstr "Sichtbare Icons"
+
+msgid "Waiting for the file."
+msgstr "Warten auf die Datei."
+
+msgid "Watching for changes."
+msgstr "Datei wird beobachtet."
+
+msgid "Where icons appear in the top panel."
+msgstr "Wo Icons im oberen Panel erscheinen."
+
+msgid "Wine"
+msgstr "Wine"
+
+msgid "Wine App Icons"
+msgstr "Wine-App-Icons"
+
+msgid "available"
+msgstr "verfügbar"
+
+msgid "Backup deleted"
+msgstr "Backup gelöscht"
+
+msgid "Delete"
+msgstr "Löschen"
+
+msgid "Delete failed"
+msgstr "Löschen fehlgeschlagen"
+
+msgid "Delete this backup?"
+msgstr "Dieses Backup löschen?"
+
+msgid "Maximum Backups"
+msgstr "Maximale Backups"
+
+msgid "Restore failed"
+msgstr "Wiederherstellung fehlgeschlagen"
+
+msgid "The backup file will be permanently removed."
+msgstr "Die Backup-Datei wird endgültig entfernt."

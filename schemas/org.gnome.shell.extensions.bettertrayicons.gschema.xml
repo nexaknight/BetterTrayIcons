@@ -1,0 +1,385 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist gettext-domain="bettertrayicons">
+    <schema id="org.gnome.shell.extensions.bettertrayicons" path="/org/gnome/shell/extensions/bettertrayicons/">
+
+        <key name="app-configs" type="s">
+            <default>"{}"</default>
+            <summary>Per-application configuration store (JSON)</summary>
+            <description>
+                Structure: {
+                    "app-id": {
+                        "title": "App Name",
+                        "custom_title": "User override",
+                        "custom_icon": "icon-name or absolute path",
+                        "detected_icon": "...",
+                        "icon_theme_path": "...",
+                        "cached_icon_path": "...",
+                        "is_hidden": false,
+                        "priority": 0
+                    }
+                }
+            </description>
+        </key>
+
+        <!-- Behaviour -->
+        <key name="keep-popup-after-click" type="b">
+            <default>false</default>
+            <summary>Keep the overflow menu open after clicking an icon</summary>
+        </key>
+
+        <key name="enable-symbolic-icons" type="b">
+            <default>false</default>
+            <summary>Prefer monochrome symbolic icons when available</summary>
+        </key>
+
+        <key name="enable-tooltips" type="b">
+            <default>true</default>
+            <summary>Show tooltips when hovering tray icons</summary>
+        </key>
+
+        <key name="enable-wine-support" type="b">
+            <default>true</default>
+            <summary>Enable the XEmbed system-tray bridge for legacy and Wine apps</summary>
+        </key>
+
+        <key name="tooltip-delay" type="i">
+            <default>500</default>
+            <summary>Delay in milliseconds before a tooltip is shown</summary>
+        </key>
+
+        <key name="tooltip-position" type="s">
+            <default>'top'</default>
+            <summary>Tooltip placement relative to the icon (top or bottom)</summary>
+        </key>
+
+        <!-- Styling Switches -->
+        <key name="enable-custom-overflow-style" type="b">
+            <default>false</default>
+            <summary>Enable custom styling for the overflow container</summary>
+        </key>
+
+        <key name="enable-custom-icon-style" type="b">
+            <default>false</default>
+            <summary>Enable custom styling for tray icons</summary>
+        </key>
+
+        <key name="enable-custom-toggle-style" type="b">
+            <default>false</default>
+            <summary>Enable custom styling for the toggle button</summary>
+        </key>
+
+        <key name="toggle-inherit-icon-style" type="b">
+            <default>false</default>
+            <summary>Toggle button mirrors the tray icon style</summary>
+        </key>
+
+        <!-- Tray Icon Styling -->
+        <key name="icon-color" type="s">
+            <default>'#ffffff'</default>
+            <summary>Foreground colour for tray icons</summary>
+        </key>
+
+        <key name="icon-hover-color" type="s">
+            <default>'rgba(255, 255, 255, 0.1)'</default>
+            <summary>Foreground colour for tray icons on hover</summary>
+        </key>
+
+        <key name="icon-background-color" type="s">
+            <default>'rgba(0,0,0,0)'</default>
+            <summary>Background colour for tray icons</summary>
+        </key>
+
+        <key name="icon-hover-background-color" type="s">
+            <default>'rgba(255, 255, 255, 0.1)'</default>
+            <summary>Background colour for tray icons on hover</summary>
+        </key>
+
+        <key name="icon-border-radius" type="i">
+            <default>50</default>
+            <summary>Corner radius for tray icons in pixels</summary>
+        </key>
+
+        <key name="icon-size" type="i">
+            <default>20</default>
+            <summary>Tray icon size in pixels</summary>
+        </key>
+
+        <key name="icon-padding-horizontal" type="i">
+            <default>5</default>
+            <summary>Horizontal padding around each tray icon in pixels</summary>
+        </key>
+
+        <key name="icon-padding-vertical" type="i">
+            <default>5</default>
+            <summary>Vertical padding around each tray icon in pixels</summary>
+        </key>
+
+        <!-- Limits & Layout -->
+        <key name="visible-icon-limit" type="i">
+            <default>2</default>
+            <summary>Number of tray icons shown inline before overflow kicks in</summary>
+        </key>
+
+        <key name="overflow-layout-mode" type="s">
+            <default>'grid'</default>
+            <summary>Overflow popup layout mode (grid or row)</summary>
+        </key>
+
+        <key name="grid-column-limit" type="i">
+            <default>4</default>
+            <summary>Maximum columns in the grid overflow layout</summary>
+        </key>
+
+        <key name="tray-position" type="s">
+            <default>'right'</default>
+            <summary>Panel box for the tray (left, center, or right)</summary>
+        </key>
+
+        <key name="tray-order" type="i">
+            <default>0</default>
+            <summary>Position index within the chosen panel box</summary>
+        </key>
+
+        <!-- Toggle Button -->
+        <key name="toggle-position" type="s">
+            <default>'left'</default>
+            <summary>Toggle button placement relative to the tray (left or right)</summary>
+        </key>
+
+        <key name="toggle-icon-name" type="s">
+            <default>'applications-other-symbolic'</default>
+            <summary>Icon displayed on the toggle button</summary>
+        </key>
+
+        <key name="toggle-icon-size" type="i">
+            <default>20</default>
+            <summary>Toggle button icon size in pixels</summary>
+        </key>
+
+        <key name="toggle-icon-color" type="s">
+            <default>'#ffffff'</default>
+            <summary>Foreground colour for the toggle button icon</summary>
+        </key>
+
+        <key name="toggle-icon-hover-color" type="s">
+            <default>'#ffffff'</default>
+            <summary>Foreground colour for the toggle button icon on hover</summary>
+        </key>
+
+        <key name="toggle-icon-background-color" type="s">
+            <default>'rgba(0,0,0,0)'</default>
+            <summary>Background colour for the toggle button</summary>
+        </key>
+
+        <key name="toggle-icon-hover-background-color" type="s">
+            <default>'rgba(255, 255, 255, 0.1)'</default>
+            <summary>Background colour for the toggle button on hover</summary>
+        </key>
+
+        <key name="toggle-icon-border-radius" type="i">
+            <default>50</default>
+            <summary>Toggle button corner radius in pixels</summary>
+        </key>
+
+        <key name="toggle-padding-top" type="i">
+            <default>0</default>
+            <summary>Top padding inside the toggle button in pixels</summary>
+        </key>
+
+        <key name="toggle-padding-bottom" type="i">
+            <default>0</default>
+            <summary>Bottom padding inside the toggle button in pixels</summary>
+        </key>
+
+        <key name="toggle-padding-left" type="i">
+            <default>0</default>
+            <summary>Left padding inside the toggle button in pixels</summary>
+        </key>
+
+        <key name="toggle-padding-right" type="i">
+            <default>0</default>
+            <summary>Right padding inside the toggle button in pixels</summary>
+        </key>
+
+        <key name="toggle-margin-top" type="i">
+            <default>0</default>
+            <summary>Top margin around the toggle button in pixels</summary>
+        </key>
+
+        <key name="toggle-margin-bottom" type="i">
+            <default>0</default>
+            <summary>Bottom margin around the toggle button in pixels</summary>
+        </key>
+
+        <key name="toggle-margin-left" type="i">
+            <default>0</default>
+            <summary>Left margin around the toggle button in pixels</summary>
+        </key>
+
+        <key name="toggle-margin-right" type="i">
+            <default>0</default>
+            <summary>Right margin around the toggle button in pixels</summary>
+        </key>
+
+        <!-- Overflow Container -->
+        <key name="overflow-container-background-color" type="s">
+            <default>'#36363A'</default>
+            <summary>Background colour for the overflow popup</summary>
+        </key>
+
+        <key name="overflow-container-border-radius" type="i">
+            <default>25</default>
+            <summary>Overflow popup corner radius in pixels</summary>
+        </key>
+
+        <key name="overflow-container-padding-top" type="i">
+            <default>5</default>
+            <summary>Top padding inside the overflow popup in pixels</summary>
+        </key>
+
+        <key name="overflow-container-padding-bottom" type="i">
+            <default>5</default>
+            <summary>Bottom padding inside the overflow popup in pixels</summary>
+        </key>
+
+        <key name="overflow-container-padding-left" type="i">
+            <default>5</default>
+            <summary>Left padding inside the overflow popup in pixels</summary>
+        </key>
+
+        <key name="overflow-container-padding-right" type="i">
+            <default>5</default>
+            <summary>Right padding inside the overflow popup in pixels</summary>
+        </key>
+
+        <key name="overflow-container-margin-top" type="i">
+            <default>0</default>
+            <summary>Top margin around the overflow popup in pixels</summary>
+        </key>
+
+        <key name="overflow-container-margin-bottom" type="i">
+            <default>0</default>
+            <summary>Bottom margin around the overflow popup in pixels</summary>
+        </key>
+
+        <key name="overflow-container-margin-left" type="i">
+            <default>0</default>
+            <summary>Left margin around the overflow popup in pixels</summary>
+        </key>
+
+        <key name="overflow-container-margin-right" type="i">
+            <default>0</default>
+            <summary>Right margin around the overflow popup in pixels</summary>
+        </key>
+
+        <!-- Actions: Tray Icons -->
+        <key name="tray-action-left" type="s">
+            <default>'activate'</default>
+            <summary>Single left click action on tray icons</summary>
+        </key>
+
+        <key name="tray-action-left-double" type="s">
+            <default>'nothing'</default>
+            <summary>Double left click action on tray icons</summary>
+        </key>
+
+        <key name="tray-action-left-long" type="s">
+            <default>'drag-drop'</default>
+            <summary>Long left press action on tray icons</summary>
+        </key>
+
+        <key name="tray-action-middle" type="s">
+            <default>'nothing'</default>
+            <summary>Single middle click action on tray icons</summary>
+        </key>
+
+        <key name="tray-action-middle-double" type="s">
+            <default>'nothing'</default>
+            <summary>Double middle click action on tray icons</summary>
+        </key>
+
+        <key name="tray-action-middle-long" type="s">
+            <default>'nothing'</default>
+            <summary>Long middle press action on tray icons</summary>
+        </key>
+
+        <key name="tray-action-right" type="s">
+            <default>'menu'</default>
+            <summary>Single right click action on tray icons</summary>
+        </key>
+
+        <key name="tray-action-right-double" type="s">
+            <default>'nothing'</default>
+            <summary>Double right click action on tray icons</summary>
+        </key>
+
+        <key name="tray-action-right-long" type="s">
+            <default>'nothing'</default>
+            <summary>Long right press action on tray icons</summary>
+        </key>
+
+        <!-- Actions: Toggle Button -->
+        <key name="toggle-action-left" type="s">
+            <default>'toggle'</default>
+            <summary>Single left click action on the toggle button</summary>
+        </key>
+
+        <key name="toggle-action-left-double" type="s">
+            <default>'nothing'</default>
+            <summary>Double left click action on the toggle button</summary>
+        </key>
+
+        <key name="toggle-action-left-long" type="s">
+            <default>'nothing'</default>
+            <summary>Long left press action on the toggle button</summary>
+        </key>
+
+        <key name="toggle-action-middle" type="s">
+            <default>'nothing'</default>
+            <summary>Single middle click action on the toggle button</summary>
+        </key>
+
+        <key name="toggle-action-middle-double" type="s">
+            <default>'nothing'</default>
+            <summary>Double middle click action on the toggle button</summary>
+        </key>
+
+        <key name="toggle-action-middle-long" type="s">
+            <default>'nothing'</default>
+            <summary>Long middle press action on the toggle button</summary>
+        </key>
+
+        <key name="toggle-action-right" type="s">
+            <default>'action-menu'</default>
+            <summary>Single right click action on the toggle button</summary>
+        </key>
+
+        <key name="toggle-action-right-double" type="s">
+            <default>'nothing'</default>
+            <summary>Double right click action on the toggle button</summary>
+        </key>
+
+        <key name="toggle-action-right-long" type="s">
+            <default>'nothing'</default>
+            <summary>Long right press action on the toggle button</summary>
+        </key>
+
+        <!-- Sync -->
+        <key name="sync-file-path" type="s">
+            <default>''</default>
+            <summary>Filesystem path for the settings sync file</summary>
+        </key>
+
+        <key name="enable-auto-sync" type="b">
+            <default>false</default>
+            <summary>Enable bidirectional sync of settings via a JSON file</summary>
+        </key>
+
+        <key name="max-backups" type="i">
+            <range min="1" max="50"/>
+            <default>5</default>
+            <summary>Maximum number of rotated sync backups to keep</summary>
+        </key>
+
+    </schema>
+</schemalist>

@@ -1,0 +1,7 @@
+node_modules/
+locale/
+schemas/gschemas.compiled
+*.mo
+.DS_Store
+*.swp
+*.swo

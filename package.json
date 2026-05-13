@@ -1,0 +1,17 @@
+{
+  "name": "better-tray-icons",
+  "version": "0.1.0",
+  "description": "A GNOME Shell extension that brings tray icons back to the top panel.",
+  "type": "module",
+  "scripts": {
+    "lint": "eslint .",
+    "test": "npm run test:schema && npm run test:po && npm run lint",
+    "test:schema": "glib-compile-schemas --strict --dry-run schemas/",
+    "test:po": "for po in po/*.po; do [ -e \"$po\" ] || continue; msgfmt -c -o /dev/null \"$po\" || exit 1; done",
+    "compile-locales": "mkdir -p locale && for po in po/*.po; do lang=$(basename \"$po\" .po); mkdir -p locale/$lang/LC_MESSAGES; msgfmt \"$po\" -o locale/$lang/LC_MESSAGES/bettertrayicons.mo; done"
+  },
+  "devDependencies": {
+    "eslint": "^9.28.0",
+    "eslint-config-gnome": "git+https://gitlab.gnome.org/World/javascript/eslint-config-gnome.git#c479d059e8d9ea99c3b53c2ea43abf7fdb05eb51"
+  }
+}

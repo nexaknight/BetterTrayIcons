@@ -1,0 +1,574 @@
+import St from 'gi://St';
+import Clutter from 'gi://Clutter';
+import GLib from 'gi://GLib';
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
+
+import {warn} from '../shared/logging.js';
+import {getAppConfigValue, updateAppConfig, formatAppName} from '../shared/appConfig.js';
+import {clearIds, disconnectSignal, disconnectAll, disposeAll, removeTimer} from '../shared/lifecycle.js';
+import {getUniqueId, refreshPropertyOnProxy} from './utils/dbus.js';
+import {identifyApp, resolveTrayIcon} from './utils/icons.js';
+import {isDisposed} from './utils/actor.js';
+import {DBusMenuClient} from './dbusMenuClient.js';
+import {ClickController} from './features/clickController.js';
+import {
+    isDragEnabledFromSettings,
+    setupIconDragSource,
+} from './features/dragAndDrop.js';
+import {Tooltip} from './features/tooltip.js';
+import {
+    DEFAULT_HOVER_BG_COLOR,
+    DRAG_SETTING_KEYS,
+    ICON_UPDATE_DELAY_MS,
+    ICON_MARGIN_PX,
+    POPUP_ANIMATION_NONE,
+    MENU_REOPEN_GUARD_MS,
+    DRAGGING_SOURCE_OPACITY,
+    DEFAULT_PILL_RADIUS_PX,
+} from '../const.js';
+
+export class TrayIcon {
+    constructor(extensionDir, busName, objectPath, settings, proxy, onReady, onDestroy, onCloseMenu, onDragStateChange = null) {
+        this._extensionDir = extensionDir;
+        this.busName = busName;
+        this._objectPath = objectPath;
+        this._settings = settings;
+        this._proxy = proxy;
+        this._onReady = onReady;
+        this._onDestroy = onDestroy;
+        this._onCloseMenu = onCloseMenu;
+        this._onDragStateChange = onDragStateChange;
+
+        this.id = getUniqueId(busName, objectPath);
+        this.appId = null;
+        this.actor = null;
+        this._isDestroyed = false;
+
+        this._updateDeferId = 0;
+        this._settingsConnectId = 0;
+
+        this._proxySignals = [];
+        this._gObjectSignals = [];
+
+        this._menu = null;
+        this._menuClient = null;
+        this._menuManager = null;
+        this._tooltip = null;
+        this._clickController = null;
+        this._lastCloseTime = 0;
+
+        this._setup();
+    }
+
+    async _setup() {
+        if (this._isDestroyed)
+            return;
+
+        this._connectProxySignals();
+        this._connectPropertyChanges();
+        this._connectSettingsChanges();
+        this._createUI();
+
+        try {
+            const identity = await identifyApp(this._proxy, this.busName, this._settings);
+            if (this._isDestroyed)
+                return;
+
+            this.appId = identity.appId;
+            if (this.actor)
+                this.actor._appId = this.appId;
+
+            if (this._draggable)
+                this._draggable._appId = this.appId;
+
+
+            this._applyStoredConfig();
+            await this._updateIcon();
+            if (this._isDestroyed)
+                return;
+
+            this._swallow(this._updateTitle(), 'updateTitle');
+            this._swallow(this._updateMenuPath(), 'updateMenuPath');
+
+            if (this._onReady && !this._isDestroyed)
+                this._onReady(this.id, this.actor);
+        } catch (e) {
+            warn(`TrayIcon: Ident/Update failed: ${e.message}`);
+        }
+    }
+
+    _connectProxySignals() {
+        const handlers = {
+            NewIcon: () => this._queueUpdate(),
+            NewAttentionIcon: () => this._queueUpdate(),
+            NewOverlayIcon: () => this._queueUpdate(),
+            NewStatus: () => this._queueUpdate(),
+            NewTitle: () => this._swallow(this._updateTitle(), 'updateTitle'),
+        };
+        for (const [signal, handler] of Object.entries(handlers)) {
+            this._proxySignals.push(
+                this._proxy.connectSignal(signal, this._guarded(handler))
+            );
+        }
+    }
+
+    _connectPropertyChanges() {
+        this._gObjectSignals.push(
+            this._proxy.connect('g-properties-changed', this._guarded((_p, changed) => {
+                const unpacked = changed.deep_unpack();
+                if (unpacked['Menu'])
+                    this._swallow(this._updateMenuPath(), 'updateMenuPath');
+                if (unpacked['IconName'] || unpacked['IconPixmap'] || unpacked['Status'])
+                    this._queueUpdate();
+            }))
+        );
+    }
+
+    _connectSettingsChanges() {
+        const STYLE_KEY_PARTS = ['icon-size', 'padding', 'style', 'color', 'radius'];
+
+        const rules = [
+            {
+                match: key => key === 'app-configs', run: () => {
+                    this._applyStoredConfig();
+                    this._queueUpdate();
+                    this._swallow(this._updateTitle(), 'updateTitle');
+                },
+            },
+            {match: key => STYLE_KEY_PARTS.some(part => key.includes(part)), run: () => this._updateStyle()},
+            {match: key => key === 'enable-symbolic-icons', run: () => this._queueUpdate()},
+            {match: key => key === 'enable-tooltips', run: () => this._swallow(this._updateTitle(), 'updateTitle')},
+            {match: key => DRAG_SETTING_KEYS.includes(key), run: () => this._applyDragEnabled()},
+        ];
+
+        this._settingsConnectId = this._settings.connect(
+            'changed',
+            this._guarded((_settings, key) => {
+                for (const rule of rules) {
+                    if (rule.match(key))
+                        rule.run();
+                }
+            })
+        );
+    }
+
+    // Wraps a callback so it no-ops after destroy().
+    // For signals whose source can outlive `this`.
+    _guarded(fn) {
+        return (...args) => {
+            if (!this._isDestroyed)
+                fn.apply(this, args);
+        };
+    }
+
+    // Logs rejection on updates fired without await.
+    _swallow(promise, label) {
+        promise?.catch?.(e => warn(`${label} failed for ${this.id}: ${e.message}`));
+    }
+
+    _queueUpdate() {
+        if (this._isDestroyed)
+            return;
+        clearIds(this, removeTimer, '_updateDeferId');
+
+        this._updateDeferId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, ICON_UPDATE_DELAY_MS, () => {
+            this._updateDeferId = 0;
+            if (!this._isDestroyed)
+                this._swallow(this._updateIcon(), 'updateIcon');
+            return GLib.SOURCE_REMOVE;
+        });
+    }
+
+    _createUI() {
+        if (this._isDestroyed)
+            return;
+
+        this.actor = new St.Bin({
+            reactive: true,
+            can_focus: true,
+            track_hover: true,
+            y_expand: true,
+            x_expand: false,
+            y_align: Clutter.ActorAlign.FILL,
+            x_align: Clutter.ActorAlign.CENTER,
+        });
+
+        this._iconActor = new St.Icon({
+            style_class: 'system-status-icon',
+            x_align: Clutter.ActorAlign.CENTER,
+            y_align: Clutter.ActorAlign.CENTER,
+        });
+        this.actor.set_child(this._iconActor);
+
+        try {
+            this._tooltip = new Tooltip(this.actor, this._settings);
+        } catch (e) {
+            warn(`TrayIcon: Failed to create tooltip for ${this.id}: ${e.message}`);
+        }
+
+        this.actor.connect('notify::hover', () => {
+            if (this._isDestroyed)
+                return;
+            this._updateHoverState();
+
+            const isHovering = this.actor.hover;
+            const tooltipsEnabled = this._settings.get_boolean('enable-tooltips');
+
+            if (isHovering) {
+                if (this._tooltip && !this._tooltip._label.text)
+                    this._swallow(this._updateTitle(), 'updateTitle');
+
+                if (this._tooltip && tooltipsEnabled)
+                    this._tooltip.trigger();
+            } else if (this._tooltip) {
+                this._tooltip.hide();
+            }
+        });
+
+        this._draggable = setupIconDragSource({
+            actor: this.actor,
+            appId: this.appId || this.id,
+            settings: this._settings,
+            label: this.id,
+            onLocalDragStateChange: isDragging => {
+                if (this._isDestroyed || !this.actor)
+                    return;
+                this.actor.opacity = isDragging ? DRAGGING_SOURCE_OPACITY : 255;
+                // Hide on both begin and end, because notify::hover doesn't
+                // re-fire after a drag ends if the pointer never left the icon.
+                // A tooltip shown before would stick.
+                if (this._tooltip)
+                    this._tooltip.hide();
+            },
+            onForwardedDragStateChange: this._onDragStateChange,
+        });
+
+        this._clickController = new ClickController(
+            this.actor,
+            this._settings,
+            'tray',
+            action => this._executeAction(action),
+            {propagateEvent: true}
+        );
+
+        this._draggable?.setClickController(this._clickController);
+
+        this._menuManager = new PopupMenu.PopupMenuManager(this.actor);
+        this._updateStyle();
+    }
+
+    _applyDragEnabled() {
+        this._draggable?.setEnabled(isDragEnabledFromSettings(this._settings));
+    }
+
+    _executeAction(action) {
+        if (this._isDestroyed || !action || action === 'nothing')
+            return;
+
+        // 'drag-drop' is a config marker, not a click action. The actual
+        // drag is started by mouse motion, so there's nothing to fire on
+        // long-press release.
+        if (action === 'drag-drop')
+            return;
+
+        switch (action) {
+        case 'activate':
+            this._proxy?.ActivateRemote(0, 0);
+            this._onCloseMenu?.();
+            break;
+        case 'secondary':
+            this._proxy?.SecondaryActivateRemote(0, 0);
+            this._onCloseMenu?.();
+            break;
+        case 'menu':
+            // Guard against immediate reopen after a close. The click
+            // that closes a popup also fires here, which would toggle
+            // it right back on.
+            if (GLib.get_monotonic_time() - this._lastCloseTime < MENU_REOPEN_GUARD_MS * 1000)
+                return;
+            this._contextMenu();
+            break;
+        }
+    }
+
+    _updateStyle() {
+        if (this._isDestroyed || !this.actor)
+            return;
+
+        const enableCustom = this._settings.get_boolean('enable-custom-icon-style');
+        const size = this._settings.get_int('icon-size');
+        this._iconActor.set_icon_size(size);
+
+        this._queueUpdate();
+
+        const padV = this._settings.get_int('icon-padding-vertical');
+        const padH = this._settings.get_int('icon-padding-horizontal');
+        // Default mode keeps a 1px gap so neighbouring icons don't touch
+        // the panel-button frames. Custom mode honours the user's value.
+        const sideMargin = enableCustom ? 0 : ICON_MARGIN_PX;
+        const layoutFixes = `margin: 0px ${sideMargin}px; border: 0px; box-shadow: none;`;
+
+        if (enableCustom) {
+            this.actor.remove_style_class_name('panel-button');
+            this._iconActor.remove_style_class_name('system-status-icon');
+
+            const radius = this._settings.get_int('icon-border-radius');
+            const color = this._settings.get_string('icon-color');
+            const bg = this._settings.get_string('icon-background-color');
+
+            this._baseStyle = `
+                padding: ${padV}px ${padH}px;
+                border-radius: ${radius}px;
+                color: ${color};
+                background-color: ${bg};
+                ${layoutFixes}
+            `;
+        } else {
+            this.actor.add_style_class_name('panel-button');
+            this._iconActor.add_style_class_name('system-status-icon');
+
+            this._baseStyle = `
+                padding: ${padV}px ${padH}px;
+                border-radius: ${DEFAULT_PILL_RADIUS_PX}px;
+                ${layoutFixes}
+            `;
+        }
+
+        this.actor.set_style(this._baseStyle);
+        this.actor.queue_relayout();
+        this._updateHoverState();
+    }
+
+    _updateHoverState() {
+        if (!this.actor)
+            return;
+        const enableCustom = this._settings.get_boolean('enable-custom-icon-style');
+        const hoverBg = enableCustom
+            ? this._settings.get_string('icon-hover-background-color')
+            : DEFAULT_HOVER_BG_COLOR;
+
+        const baseStyle = this._baseStyle || '';
+
+        if (this.actor.hover) {
+            let style = `${baseStyle} background-color: ${hoverBg};`;
+            if (enableCustom) {
+                const hoverColor = this._settings.get_string('icon-hover-color');
+                if (hoverColor)
+                    style += ` color: ${hoverColor};`;
+            }
+            this.actor.set_style(style);
+        } else {
+            this.actor.set_style(baseStyle);
+        }
+    }
+
+    _applyStoredConfig() {
+        if (!this.appId || this._isDestroyed)
+            return;
+        const hidden = getAppConfigValue(this._settings, this.appId, 'is_hidden', false);
+        if (this.actor)
+            this.actor.visible = !hidden;
+    }
+
+    async _updateIcon() {
+        if (this._isDestroyed || !this._proxy || !this._iconActor)
+            return;
+
+        const {gicon, iconName} = await resolveTrayIcon(
+            this._proxy,
+            this._settings,
+            this.appId
+        );
+
+        if (this._isDestroyed)
+            return;
+
+        if (gicon) {
+            this._iconActor.icon_name = null;
+            this._iconActor.set_gicon(gicon);
+        } else if (iconName) {
+            this._iconActor.set_gicon(null);
+            this._iconActor.icon_name = iconName;
+        } else {
+            this._iconActor.set_gicon(null);
+            this._iconActor.icon_name = 'image-missing';
+        }
+
+        if (!this._isDestroyed && this.appId) {
+            const rawName = await refreshPropertyOnProxy(this._proxy, 'IconName');
+            const rawPath = await refreshPropertyOnProxy(this._proxy, 'IconThemePath');
+
+            if (rawName) {
+                const updateData = {detected_icon: rawName};
+                if (rawPath)
+                    updateData.icon_theme_path = rawPath;
+                updateAppConfig(this._settings, this.appId, updateData);
+            }
+        }
+    }
+
+    async _updateTitle() {
+        if (this._isDestroyed)
+            return;
+
+        const customTitle = getAppConfigValue(this._settings, this.appId, 'custom_title');
+        if (customTitle) {
+            const showTooltip = this._settings.get_boolean('enable-tooltips');
+            if (this.actor)
+                this.actor.accessible_name = showTooltip ? customTitle : '';
+            if (this._tooltip)
+                this._tooltip.text = customTitle;
+            return;
+        }
+
+        if (!this._proxy)
+            return;
+
+        let title = await refreshPropertyOnProxy(this._proxy, 'Title');
+
+        if (this._isDestroyed)
+            return;
+        const freshCustom = getAppConfigValue(this._settings, this.appId, 'custom_title');
+        if (freshCustom)
+            title = freshCustom;
+
+        if (!title && this.appId)
+            title = this.appId;
+        if (!title)
+            title = this.busName;
+        if (title)
+            title = formatAppName(title);
+
+        const showTooltip = this._settings.get_boolean('enable-tooltips');
+        if (this.actor)
+            this.actor.accessible_name = showTooltip && title ? title : '';
+        if (this._tooltip)
+            this._tooltip.text = title;
+    }
+
+    async _updateMenuPath() {
+        if (this._isDestroyed || !this._proxy)
+            return;
+        this._menuPath = await refreshPropertyOnProxy(this._proxy, 'Menu');
+    }
+
+    async _contextMenu() {
+        if (this._isMenuLoading || this._isDestroyed)
+            return;
+        if (this._menu?.isOpen) {
+            this._menu.toggle();
+            return;
+        }
+
+        if (!this._menuPath) {
+            this._fallbackToRemoteContextMenu();
+            return;
+        }
+
+        this._isMenuLoading = true;
+        try {
+            await this._ensureMenuClient();
+            if (this._isDestroyed)
+                return;
+
+            this._createMenu();
+            await this._menuClient.buildMenu(this._menu);
+            if (this._isDestroyed) {
+                this._menu?.destroy();
+                return;
+            }
+
+            this._presentMenu();
+        } catch (e) {
+            warn(`Failed to open context menu for ${this.id}: ${e.message}`);
+            if (this._menu) {
+                this._menu.destroy();
+                this._menu = null;
+            }
+        } finally {
+            this._isMenuLoading = false;
+        }
+    }
+
+    _fallbackToRemoteContextMenu() {
+        if (!this._proxy?.ContextMenuRemote)
+            return;
+        const [x, y] = global.get_pointer();
+        this._proxy.ContextMenuRemote(x, y);
+    }
+
+    async _ensureMenuClient() {
+        if (this._menuClient)
+            return;
+        this._menuClient = new DBusMenuClient(
+            this.busName,
+            this._menuPath,
+            this._extensionDir,
+            this._settings,
+            this._onCloseMenu
+        );
+        await this._menuClient.init();
+    }
+
+    _createMenu() {
+        if (this._menu) {
+            this._menu.destroy();
+            this._menu = null;
+        }
+
+        this._menu = new PopupMenu.PopupMenu(this.actor, 0.5, St.Side.TOP);
+        this._menu.actor.add_style_class_name('panel-menu');
+        Main.layoutManager.uiGroup.add_child(this._menu.actor);
+        this._menu.actor.hide();
+        this._menuManager.addMenu(this._menu);
+
+        this._menu.connect('open-state-changed', (_menu, isOpen) => {
+            if (!isOpen)
+                this._lastCloseTime = GLib.get_monotonic_time();
+        });
+    }
+
+    _presentMenu() {
+        if (this._menu.length === 0) {
+            this._menu.destroy();
+            this._menu = null;
+            return;
+        }
+
+        if (this._menu.setPosition)
+            this._menu.setPosition(this.actor, 0.5);
+        this._menu.open(POPUP_ANIMATION_NONE);
+        // ignoreRelease() was removed in GNOME Shell 45+.
+        this._menuManager.ignoreRelease?.();
+    }
+
+    destroy() {
+        if (this._isDestroyed)
+            return;
+        this._isDestroyed = true;
+
+        disposeAll(this, 'destroy', '_draggable', '_clickController', '_tooltip');
+        disconnectSignal(this, this._settings, '_settingsConnectId');
+        clearIds(this, removeTimer, '_updateDeferId');
+
+        if (this._proxy) {
+            disconnectAll(this, this._proxy, '_proxySignals', 'disconnectSignal');
+            disconnectAll(this, this._proxy, '_gObjectSignals');
+        }
+
+        // Menu actor may already have been C-disposed during shutdown.
+        if (this._menu && !isDisposed(this._menu.actor))
+            this._menu.destroy();
+        this._menu = null;
+        disposeAll(this, 'destroy', '_menuClient');
+        this._menuManager = null;
+
+        if (this.actor && !isDisposed(this.actor))
+            this.actor.destroy();
+        this.actor = null;
+
+        this._onDestroy?.(this.id);
+        this._proxy = null;
+    }
+}

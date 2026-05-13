@@ -1,0 +1,111 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    name: Build & verify
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    outputs:
+      uuid: ${{ steps.meta.outputs.uuid }}
+      zip: ${{ steps.meta.outputs.zip }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Lint workflows
+        uses: reviewdog/action-actionlint@v1
+        with:
+          reporter: github-check
+          fail_level: error
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install GNOME Shell and gettext
+        run: sudo apt-get update && sudo apt-get install -y gnome-shell gettext
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Run lint, schema and translation checks
+        run: npm test
+
+      - name: Validate metadata
+        id: meta
+        run: |
+          uuid=$(jq -r .uuid metadata.json)
+          schema=$(jq -r '."settings-schema"' metadata.json)
+          if [[ ! "$uuid" =~ ^[A-Za-z0-9._-]+@[A-Za-z0-9._-]+$ ]] || [[ "$uuid" == *gnome.org* ]]; then
+            echo "::error file=metadata.json::Invalid UUID '$uuid'"
+            exit 1
+          fi
+          if [[ ! -f "schemas/${schema}.gschema.xml" ]]; then
+            echo "::error::Missing schemas/${schema}.gschema.xml"
+            exit 1
+          fi
+          {
+            echo "uuid=$uuid"
+            echo "zip=${uuid}.shell-extension.zip"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Pack extension
+        run: |
+          gnome-extensions pack \
+            --podir=po \
+            --schema=schemas/*.gschema.xml \
+            --extra-source=src \
+            --extra-source=interfaces \
+            --force
+
+      - name: Run shexli
+        env:
+          ZIP: ${{ steps.meta.outputs.zip }}
+        run: pipx run shexli "$ZIP"
+        continue-on-error: true
+
+      - name: Upload package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.meta.outputs.uuid }}
+          path: ${{ steps.meta.outputs.zip }}
+          if-no-files-found: error
+          retention-days: 14
+
+  release:
+    name: Release
+    if: github.event_name == 'release'
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - name: Download package artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.build.outputs.uuid }}
+
+      - name: Attach asset to release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.release.tag_name }}
+          files: ${{ needs.build.outputs.zip }}
+          fail_on_unmatched_files: true
