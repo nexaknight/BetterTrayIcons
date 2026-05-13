@@ -1,0 +1,77 @@
+name: Release Asset Upload
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  upload:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Detect if this is a release commit
+        id: check
+        run: |
+          msg=$(git log -1 --pretty=%s "${{ github.event.workflow_run.head_sha }}")
+          if [[ "$msg" == "chore(main): release"* ]]; then
+            version=$(jq -r .version metadata.json)
+            uuid=$(jq -r .uuid metadata.json)
+            {
+              echo "is_release=true"
+              echo "tag=v${version}"
+              echo "uuid=${uuid}"
+            } >> "$GITHUB_OUTPUT"
+          else
+            echo "is_release=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Download CI artifact
+        if: steps.check.outputs.is_release == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ steps.check.outputs.uuid }}
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Rename asset
+        if: steps.check.outputs.is_release == 'true'
+        env:
+          UUID: ${{ steps.check.outputs.uuid }}
+        run: mv "${UUID}.shell-extension.zip" "${UUID}.zip"
+
+      - name: Wait for Release Please to create the release
+        if: steps.check.outputs.is_release == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.check.outputs.tag }}
+          REPO: ${{ github.repository }}
+        run: |
+          for i in {1..30}; do
+            if gh release view "$TAG" --repo "$REPO" > /dev/null 2>&1; then
+              echo "Release $TAG exists"
+              exit 0
+            fi
+            echo "Waiting for release $TAG to be created (attempt $i/30)..."
+            sleep 10
+          done
+          echo "::error::Release $TAG was not created within 5 minutes"
+          exit 1
+
+      - name: Attach asset to release
+        if: steps.check.outputs.is_release == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.check.outputs.tag }}
+          files: ${{ steps.check.outputs.uuid }}.zip
+          fail_on_unmatched_files: true

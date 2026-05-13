@@ -4,8 +4,6 @@ on:
   push:
     branches: [main]
   pull_request:
-  release:
-    types: [published]
   workflow_dispatch:
 
 permissions:
@@ -88,24 +86,3 @@ jobs:
           path: ${{ steps.meta.outputs.zip }}
           if-no-files-found: error
           retention-days: 14
-
-  release:
-    name: Release
-    if: github.event_name == 'release'
-    needs: build
-    runs-on: ubuntu-24.04
-    timeout-minutes: 15
-    permissions:
-      contents: write
-    steps:
-      - name: Download package artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ needs.build.outputs.uuid }}
-
-      - name: Attach asset to release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ github.event.release.tag_name }}
-          files: ${{ needs.build.outputs.zip }}
-          fail_on_unmatched_files: true
