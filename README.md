@@ -45,7 +45,7 @@ Settings can be exported, imported and even synced across devices through a shar
 
 | Tooltip | Custom styling | Drag and Drop |
 |:-:|:-:|:-:|
-| ![Tooltip](media/screenshots/tray-tooltip.png) | ![Custom container styling](media/screenshots/overflow-custom-style.png) | <video src="media/screenshots/drag-and-drop.mp4" autoplay loop muted playsinline width="300"></video> |
+| ![Tooltip](media/screenshots/tray-tooltip.png) | ![Custom container styling](media/screenshots/overflow-custom-style.png) | <video src="media/screenshots/drag-and-drop.gif" autoplay loop muted playsinline width="300"></video> |
 | Hover tooltip with configurable side and delay. | Background, radius, padding and hover color, all overridable. | Drag icons around to reorder them, both in the panel and the popup. |
 
 ### Preferences
