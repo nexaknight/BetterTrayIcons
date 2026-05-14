@@ -6,7 +6,7 @@
         {
           "type": "json",
           "path": "metadata.json",
-          "jsonpath": "$.version"
+          "jsonpath": "$[\"version-name\"]"
         }
       ]
     }
