@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.3](https://github.com/nexaknight/BetterTrayIcons/compare/v0.2.2...v0.2.3) (2026-05-14)
+
+
+### Bug Fixes
+
+* keep overflow popup open when tray icon updates ([06b6936](https://github.com/nexaknight/BetterTrayIcons/commit/06b6936c5a3d0ce9787a11ad587243ab8e3ccd7e))
+
 ## [0.2.2](https://github.com/nexaknight/BetterTrayIcons/compare/v0.2.1...v0.2.2) (2026-05-14)
 
 
