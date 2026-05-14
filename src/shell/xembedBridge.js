@@ -213,7 +213,7 @@ async function deriveAppMeta(rawIcon, cancellable) {
     let title;
     if (id.steamAppId) {
         candidate = `steam-app-${id.steamAppId}`;
-        title = (await steamAppNameFromManifest(id.steamAppId, cancellable)) || cleanWmClass || xTitle;
+        title = await steamAppNameFromManifest(id.steamAppId, cancellable) || cleanWmClass || xTitle;
     } else if (cleanWmClass) {
         candidate = cleanWmClass;
         title = wmGeneric ? xTitle || cleanWmClass : cleanWmClass;
