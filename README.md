@@ -16,7 +16,7 @@
 
 Better Tray Icons puts tray icons back into the GNOME panel where they belong. You pick how many icons stay visible, and the rest tuck away into a popup behind a toggle button.
 
-Every icon can be renamed, hidden, reordered or swapped out for a custom one. Clicks are fully configurable per button, with double-click and long-press support. Spacing, padding, colors, the toggle button styling, all of it is up to you.
+Every icon can be renamed, hidden, reordered or swapped out for a custom one. Clicks are fully configurable for Tray icons and Toggle Button, with double-click and long-press support. Spacing, padding, colors, the toggle button styling, all of it is up to you.
 
 Settings can be exported, imported and even synced across devices through a shared JSON file with rotated backups.
 
@@ -33,9 +33,8 @@ Settings can be exported, imported and even synced across devices through a shar
 | Rename, hide, reorder or override any icon per app | ![](https://img.shields.io/badge/-✓-22c55e?style=flat-square) |
 | Click actions for left, middle and right click, each plus double-click and long-press | ![](https://img.shields.io/badge/-✓-22c55e?style=flat-square) |
 | Extra toggle-button actions like open popup, cycle icons, action menu, open settings | ![](https://img.shields.io/badge/-✓-22c55e?style=flat-square) |
-| Extra toggle-button actions like open popup, cycle icons, action menu, open settings | ![](https://img.shields.io/badge/-✓-22c55e?style=flat-square) |
 | Independent styling for tray icons, toggle button and overflow container | ![](https://img.shields.io/badge/-✓-22c55e?style=flat-square) |
-| Symbolic icon mode where the app supports it | ![](https://img.shields.io/badge/-✓-22c55e?style=flat-square) |
+| Symbolic icon mode (if the app supports it) | ![](https://img.shields.io/badge/-✓-22c55e?style=flat-square) |
 | JSON export and import with optional cloud sync and rotated backups | ![](https://img.shields.io/badge/-✓-22c55e?style=flat-square) |
 
 ## Screenshots
