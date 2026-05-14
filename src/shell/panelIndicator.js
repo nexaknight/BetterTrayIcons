@@ -111,11 +111,15 @@ export const PanelIndicator = GObject.registerClass(
                 'grid-column-limit',
                 'visible-icon-limit',
                 'toggle-position',
-                'app-configs',
             ];
             for (const key of LAYOUT_KEYS)
                 this._settingsSignals.push(this._settings.connect(`changed::${key}`, queueLayout));
 
+            this._lastLayoutSignature = '';
+            this._settingsSignals.push(this._settings.connect('changed::app-configs', () => {
+                if (this._computeLayoutSignature() !== this._lastLayoutSignature)
+                    this._queueUpdateLayout();
+            }));
 
             // Inherit mode reads any icon-* key, so match by prefix.
             const STYLE_KEY_PREFIXES = ['toggle-', 'overflow-container-', 'icon-', 'enable-custom-'];
@@ -351,6 +355,25 @@ export const PanelIndicator = GObject.registerClass(
                 this.add_child(this._visibleBox);
                 this.add_child(this._toggleButton);
             }
+
+            this._lastLayoutSignature = this._computeLayoutSignature();
+        }
+
+        // Captures the fields _updateLayout actually reads from app-configs:
+        // which icons exist, whether each is hidden, and its sort priority.
+        _computeLayoutSignature() {
+            const configMap = {};
+            for (const c of getAppConfigs(this._settings))
+                configMap[c.id] = c;
+
+            const parts = [];
+            for (const [id, actor] of this._icons) {
+                const appId = actor?._appId || id;
+                const c = configMap[appId];
+                parts.push(`${appId}:${c?.is_hidden ? 1 : 0}:${c?.priority ?? 0}`);
+            }
+            parts.sort();
+            return parts.join('|');
         }
 
         _updateStyle() {
