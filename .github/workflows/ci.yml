@@ -68,7 +68,7 @@ jobs:
         run: |
           gnome-extensions pack \
             --podir=po \
-            --schema=schemas/*.gschema.xml \
+            $(for f in schemas/*.gschema.xml; do echo "--schema=$f"; done) \
             --extra-source=src \
             --extra-source=interfaces \
             --force
