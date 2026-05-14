@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2](https://github.com/nexaknight/BetterTrayIcons/compare/v0.2.1...v0.2.2) (2026-05-14)
+
+
+### Bug Fixes
+
+* convert /proc and Steam manifest reads to async file IO ([c9fe4b0](https://github.com/nexaknight/BetterTrayIcons/commit/c9fe4b0b13e64ebedfb2a9f052180a715980df53))
+
 ## [0.2.1](https://github.com/nexaknight/BetterTrayIcons/compare/v0.2.0...v0.2.1) (2026-05-13)
 
 
