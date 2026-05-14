@@ -62,7 +62,7 @@ Settings can be exported, imported and even synced across devices through a shar
 
 ## Installation
 
-The easiest way to install Better Tray Icons is from the [GNOME Extensions website](https://extensions.gnome.org/).
+The easiest way to install Better Tray Icons is from the [GNOME Extensions website](https://extensions.gnome.org/extension/9975/better-tray-icons/).
 
 If you'd rather grab the development version from source, head over to the [Installation wiki page](../../wiki/Installation).
 
