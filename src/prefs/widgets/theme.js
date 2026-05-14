@@ -43,7 +43,6 @@ function _bindToStyleManager(update) {
 }
 
 // Without a `lightFile` the dark SVG's white strokes are inverted to black.
-// Returns the signal id.
 export function bindLogoToTheme(logo, fallback, mediaDir, darkFile, lightFile = null) {
     const cache = {dark: null, light: null};
 

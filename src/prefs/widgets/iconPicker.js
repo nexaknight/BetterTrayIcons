@@ -291,8 +291,8 @@ export default class IconPickerWidget extends Adw.PreferencesDialog {
         const val = parseInt(inputEntry.text);
         const totalPages = Math.ceil(this._currentFilteredList.length / this._itemsPerPage) || 1;
 
-        // _updatePaginationUI sets the entry text via set_text, which fires
-        // 'changed'. Skip those redundant re-renders.
+        // _updatePaginationUI sets the entry text via set_text, which fires 'changed'.
+        // Skip those redundant re-renders.
         if (!isNaN(val) && val >= 1 && val <= totalPages && val - 1 !== this._currentPage) {
             this._currentPage = val - 1;
             this._renderAllIconsPage();
@@ -372,9 +372,9 @@ export default class IconPickerWidget extends Adw.PreferencesDialog {
             });
 
             const img = new Gtk.Image({pixel_size: 32});
-            // ThemedIcon with fallback: GTK4 shows a blank image when
-            // setting icon_name directly and the icon isn't in the current
-            // theme. The fallback chain forces "image-missing" instead.
+            // ThemedIcon with fallback: GTK4 shows a blank image when setting icon_name
+            // directly and the icon isn't in the current theme.
+            // The fallback chain forces "image-missing" instead.
             img.set_from_gicon(themedIconWithFallback(iconName));
             btn.set_child(img);
 

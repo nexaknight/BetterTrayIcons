@@ -25,6 +25,19 @@ import {
 
 let _bgFallbackColor;
 
+function loadBytesAsync(file, cancellable = null) {
+    return new Promise((resolve, reject) => {
+        file.load_contents_async(cancellable, (obj, res) => {
+            try {
+                const [success, contents] = obj.load_contents_finish(res);
+                resolve(success ? contents : null);
+            } catch (e) {
+                reject(e);
+            }
+        });
+    });
+}
+
 function parseCssColor(css) {
     if (!css || !Clutter?.Color?.from_string)
         return null;
@@ -47,27 +60,32 @@ function sanitizeId(s) {
         .replace(/^-+|-+$/g, '');
 }
 
-function readProcFile(pid, name) {
+// Cancellation re-thrown so callers can short-circuit; any other failure
+// (file missing, decode error) collapses to null.
+async function readProcFile(pid, name, cancellable) {
     if (!pid)
         return null;
     try {
-        const [ok, content] = Gio.File.new_for_path(`/proc/${pid}/${name}`).load_contents(null);
-        if (!ok || !content)
+        const file = Gio.File.new_for_path(`/proc/${pid}/${name}`);
+        const content = await loadBytesAsync(file, cancellable);
+        if (!content)
             return null;
         return new TextDecoder('utf-8', {fatal: false}).decode(content);
-    } catch {
+    } catch (e) {
+        if (e?.matches?.(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED))
+            throw e;
         return null;
     }
 }
 
-function readPpid(pid) {
-    const raw = readProcFile(pid, 'status');
+async function readPpid(pid, cancellable) {
+    const raw = await readProcFile(pid, 'status', cancellable);
     const m = raw?.match(/^PPid:\s+(\d+)/m);
     return m ? parseInt(m[1], 10) : 0;
 }
 
-function readEnviron(pid) {
-    const raw = readProcFile(pid, 'environ');
+async function readEnviron(pid, cancellable) {
+    const raw = await readProcFile(pid, 'environ', cancellable);
     if (!raw)
         return new Map();
     const map = new Map();
@@ -79,8 +97,9 @@ function readEnviron(pid) {
     return map;
 }
 
-function exeBaseFromCmdline(pid) {
-    const first = readProcFile(pid, 'cmdline')?.split('\0')[0];
+async function exeBaseFromCmdline(pid, cancellable) {
+    const raw = await readProcFile(pid, 'cmdline', cancellable);
+    const first = raw?.split('\0')[0];
     return first ? (first.split('/').pop() || '').toLowerCase() : null;
 }
 
@@ -102,7 +121,7 @@ function steamAppIdFromEnviron(env) {
 }
 
 const _manifestNameCache = new Map();
-function steamAppNameFromManifest(appId) {
+async function steamAppNameFromManifest(appId, cancellable) {
     if (!appId)
         return null;
     if (_manifestNameCache.has(appId))
@@ -116,17 +135,26 @@ function steamAppNameFromManifest(appId) {
         `${home}/.var/app/com.valvesoftware.Steam/.steam/root/steamapps/appmanifest_${appId}.acf`,
         `${home}/.var/app/com.valvesoftware.Steam/data/Steam/steamapps/appmanifest_${appId}.acf`,
     ];
+    /* eslint-disable no-await-in-loop */
     for (const path of candidates) {
-        const [ok, content] = Gio.File.new_for_path(path).load_contents(null);
-        if (!ok || !content)
-            continue;
-        const text = new TextDecoder('utf-8', {fatal: false}).decode(content);
-        const m = text.match(/"name"\s+"([^"]+)"/);
-        if (m) {
-            _manifestNameCache.set(appId, m[1]);
-            return m[1];
+        try {
+            const file = Gio.File.new_for_path(path);
+            const content = await loadBytesAsync(file, cancellable);
+            if (!content)
+                continue;
+            const text = new TextDecoder('utf-8', {fatal: false}).decode(content);
+            const m = text.match(/"name"\s+"([^"]+)"/);
+            if (m) {
+                _manifestNameCache.set(appId, m[1]);
+                return m[1];
+            }
+        } catch (e) {
+            if (e?.matches?.(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED))
+                throw e;
+            // Manifest missing on this path → try next candidate.
         }
     }
+    /* eslint-enable no-await-in-loop */
     _manifestNameCache.set(appId, null);
     return null;
 }
@@ -134,14 +162,15 @@ function steamAppNameFromManifest(appId) {
 // Environ is inherited across fork(), so walking up the parent chain reaches
 // the Proton launcher even when the tray icon was registered by a wineserver
 // helper several levels deep.
-function gatherWineIdentity(rawIcon) {
+async function gatherWineIdentity(rawIcon, cancellable) {
     let isWine = false;
     let isProton = false;
     let steamAppId = null;
 
     let pid = rawIcon.pid || 0;
+    /* eslint-disable no-await-in-loop */
     for (let depth = 0; depth < 5 && pid && pid !== 1; depth++) {
-        const env = readEnviron(pid);
+        const env = await readEnviron(pid, cancellable);
 
         if (env.has('STEAM_COMPAT_DATA_PATH') ||
             env.has('PROTON_LOG') ||
@@ -153,24 +182,25 @@ function gatherWineIdentity(rawIcon) {
             isWine = true;
         steamAppId ??= steamAppIdFromEnviron(env);
 
-        const exeBase = exeBaseFromCmdline(pid);
+        const exeBase = await exeBaseFromCmdline(pid, cancellable);
         if (exeBase && (/^wine(64)?(-preloader)?$/.test(exeBase) ||
                 exeBase === 'wineserver' || exeBase === 'wineboot'))
             isWine = true;
 
         if (steamAppId)
             break;
-        pid = readPpid(pid);
+        pid = await readPpid(pid, cancellable);
     }
+    /* eslint-enable no-await-in-loop */
 
     return {isWine, isProton, steamAppId};
 }
 
-function deriveAppMeta(rawIcon) {
+async function deriveAppMeta(rawIcon, cancellable) {
     const wmClass = (rawIcon.wm_class || '').toString().trim();
     const cleanWmClass = wmClass.replace(/\.exe$/i, '');
     const xTitle = (rawIcon.title || '').toString().trim();
-    const id = gatherWineIdentity(rawIcon);
+    const id = await gatherWineIdentity(rawIcon, cancellable);
 
     const wmGeneric = /^steam_app_/i.test(wmClass);
     const looksLikeExe = /\.exe$/i.test(wmClass);
@@ -183,7 +213,7 @@ function deriveAppMeta(rawIcon) {
     let title;
     if (id.steamAppId) {
         candidate = `steam-app-${id.steamAppId}`;
-        title = steamAppNameFromManifest(id.steamAppId) || cleanWmClass || xTitle;
+        title = (await steamAppNameFromManifest(id.steamAppId, cancellable)) || cleanWmClass || xTitle;
     } else if (cleanWmClass) {
         candidate = cleanWmClass;
         title = wmGeneric ? xTitle || cleanWmClass : cleanWmClass;
@@ -197,7 +227,14 @@ function deriveAppMeta(rawIcon) {
 }
 
 class XEmbedTrayIcon {
-    constructor(rawIcon, settings, onDestroy, onAfterClick, onDragStateChange = null) {
+    // Two-step construction: meta resolution awaits async /proc and Steam
+    // manifest reads, then the synchronous constructor wires up the actor.
+    static async create(rawIcon, settings, onDestroy, onAfterClick, onDragStateChange = null, cancellable = null) {
+        const meta = await deriveAppMeta(rawIcon, cancellable);
+        return new XEmbedTrayIcon(rawIcon, meta, settings, onDestroy, onAfterClick, onDragStateChange);
+    }
+
+    constructor(rawIcon, meta, settings, onDestroy, onAfterClick, onDragStateChange = null) {
         this._icon = rawIcon;
         this._settings = settings;
         this._onDestroy = onDestroy;
@@ -210,7 +247,6 @@ class XEmbedTrayIcon {
         this._settingsSignals = [];
         this._draggable = null;
 
-        const meta = deriveAppMeta(rawIcon);
         this.appId = meta.appId;
         // pid in the id prevents collisions between two instances of the
         // same Wine app running in different prefixes.
@@ -391,6 +427,9 @@ export class XEmbedTrayBridge {
         this._panelIndicator = panelIndicator;
         this._tray = null;
         this._wrappers = new Map();
+        // rawIcon → Gio.Cancellable for in-flight XEmbedTrayIcon.create calls.
+        // Lets _onIconRemoved and _stop abort meta resolution mid-flight.
+        this._pendingCreates = new Map();
         this._traySignals = [];
         this._bgSignalIds = [];
         this._enableSignalId = 0;
@@ -480,6 +519,12 @@ export class XEmbedTrayBridge {
         if (!this._tray)
             return;
 
+        // Abort any in-flight wrapper creations so their awaits short-circuit
+        // before they try to touch torn-down state.
+        for (const cancellable of this._pendingCreates.values())
+            cancellable.cancel();
+        this._pendingCreates.clear();
+
         disconnectAll(this, this._settings, '_bgSignalIds');
 
         // Disconnect first. Otherwise wrapper teardown below triggers
@@ -494,23 +539,50 @@ export class XEmbedTrayBridge {
         this._tray = null;
     }
 
-    _onIconAdded(rawIcon) {
-        if (!rawIcon || this._wrappers.has(rawIcon))
+    async _onIconAdded(rawIcon) {
+        if (!rawIcon || this._wrappers.has(rawIcon) || this._pendingCreates.has(rawIcon))
             return;
 
-        const wrapper = new XEmbedTrayIcon(
-            rawIcon,
-            this._settings,
-            id => this._afterWrapperDestroyed(rawIcon, id),
-            () => this._panelIndicator?._handleIconClick?.(),
-            forwardDragStateToIndicator(this._panelIndicator)
-        );
+        const cancellable = new Gio.Cancellable();
+        this._pendingCreates.set(rawIcon, cancellable);
+
+        let wrapper;
+        try {
+            wrapper = await XEmbedTrayIcon.create(
+                rawIcon,
+                this._settings,
+                id => this._afterWrapperDestroyed(rawIcon, id),
+                () => this._panelIndicator?._handleIconClick?.(),
+                forwardDragStateToIndicator(this._panelIndicator),
+                cancellable
+            );
+        } catch (e) {
+            if (!e?.matches?.(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED))
+                warn(`XEmbedTrayBridge: wrapper create failed: ${e.message}`);
+            return;
+        } finally {
+            this._pendingCreates.delete(rawIcon);
+        }
+
+        // Bridge state may have changed during async meta resolution: the bridge
+        // could have been stopped, or a removed→added cycle could have raced past us.
+        // Drop the wrapper instead of attaching it.
+        if (cancellable.is_cancelled() || !this._tray || this._wrappers.has(rawIcon)) {
+            wrapper.destroy();
+            return;
+        }
+
         this._wrappers.set(rawIcon, wrapper);
         wrapper.actor.visible = this._settings.get_boolean('enable-wine-support');
         this._panelIndicator.addIcon(wrapper.id, wrapper.actor);
     }
 
     _onIconRemoved(rawIcon) {
+        const cancellable = this._pendingCreates.get(rawIcon);
+        if (cancellable) {
+            cancellable.cancel();
+            this._pendingCreates.delete(rawIcon);
+        }
         this._wrappers.get(rawIcon)?.destroy();
     }
 

@@ -408,9 +408,9 @@ export const PanelIndicator = GObject.registerClass(
             }
         }
 
-        // Order matters: if menu was opened normally, manager holds `_grab`
-        // and `activeMenu`. removeMenu only nulls `_grab`, so the next emit calls
-        // Main.popModal(null) and throws "incorrect pop". Close first to clear both.
+        // Order matters: if menu was opened normally, manager holds `_grab` and `activeMenu`.
+        // removeMenu only nulls `_grab`, so the next emit calls Main.popModal(null)
+        // and throws "incorrect pop". Close first to clear both.
         // The detach-and-reopen path runs without manager-grab so DND keeps its own grab.
         _onAnyDragBegin() {
             if (!this._toggleButton?.visible || !this._overflowMenu)

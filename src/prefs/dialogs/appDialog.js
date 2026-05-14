@@ -69,9 +69,9 @@ export default class AppDialog extends Adw.PreferencesDialog {
 
         resetNameBtn.connect('clicked', () => {
             this._updateValue('custom_title', null);
-            // Suppress the debounced write that notify::text would otherwise
-            // schedule. Without this, the field value gets re-persisted as a
-            // custom_title and undoes the reset.
+            // Suppress the debounced write that notify::text would otherwise schedule.
+            // Without this, the field value gets re-persisted as a custom_title
+            // and undoes the reset.
             this._suppressNameNotify = true;
             nameRow.text = defaultName;
             this._suppressNameNotify = false;

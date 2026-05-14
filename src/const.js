@@ -116,9 +116,9 @@ export const BOX_SIDES = Object.freeze(['top', 'right', 'bottom', 'left']);
 
 // ------- Applications page -------
 
-// Wine and Proton icons render via XEmbed, so X11 surfaces can't be snapshotted
-// portably. Use a Wine glyph. Most distros only ship the colored `wine` icon,
-// hence the symbolic fallbacks.
+// Wine and Proton icons render via XEmbed, so X11 surfaces can't be
+// snapshotted portably. Use a Wine glyph. Most distros only ship the
+// colored `wine` icon, hence the symbolic fallbacks.
 export const WINE_ICON_NAMES = Object.freeze([
     'wine-symbolic',
     'wine',
@@ -200,8 +200,8 @@ export const RECOMMENDED_TOGGLE_ICONS = [
 // Contributor cards shown before a "Show more" card replaces the rest.
 export const MAX_CONTRIBUTORS = 5;
 
-// GitHub usernames (lowercase, no leading "@") excluded from the About page
-// contributor strip. See CONTRIBUTING.md for the opt-out procedure.
+// GitHub usernames (lowercase, no leading "@") excluded from the About page contributor strip.
+// See CONTRIBUTING.md for the opt-out procedure.
 export const CONTRIBUTORS_OPTOUT = [
     'github-actions[bot]',
 ];

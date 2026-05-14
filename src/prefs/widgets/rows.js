@@ -294,9 +294,8 @@ export function createBoxSidesGroup(title, settings, keyPrefix, {min = 0, max = 
     return group;
 }
 
-// Builds the Icon + Background color row pair used by tray icons and toggle
-// button. Each row has a paint-bucket variant button for the hover color.
-// `keyPrefix` examples: 'icon-' or 'toggle-icon-'.
+// Builds the Icon + Background color row pair used by tray icons and toggle button.
+// Each row has a paint-bucket variant button for the hover color.
 export function createIconColorPair(parent, settings, keyPrefix) {
     const specs = [
         {title: _('Icon'),       key: `${keyPrefix}color`,            hoverKey: `${keyPrefix}hover-color`,            variantTitle: _('Icon Color')},

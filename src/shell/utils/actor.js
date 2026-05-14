@@ -111,9 +111,9 @@ export function safelyReparentActor(actor, newParent) {
 }
 
 export function computeToggleStyle(settings) {
-    // panel-button and system-status-icon ship a min-size, border and hover
-    // frame. The caller strips both when custom styling takes over so a
-    // user-set 0 actually means 0.
+    // panel-button and system-status-icon ship a min-size, border and hover frame.
+    // The caller strips both when custom styling takes over so a user-set 0
+    // actually means 0.
     const customToggle = settings.get_boolean('enable-custom-toggle-style');
     const inheritIcons = customToggle && settings.get_boolean('toggle-inherit-icon-style');
 

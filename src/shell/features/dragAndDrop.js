@@ -102,8 +102,8 @@ class DraggableTrayIcon extends GObject.Object {
 
             this._draggable._draggableItem = this;
 
-            // GNOME's DND module passes actor._delegate as the source to drop
-            // targets. Without this, acceptDrop rejects every drop.
+            // GNOME's DND module passes actor._delegate as the source to drop targets.
+            // Without this, acceptDrop rejects every drop.
             this._actor._delegate = this;
 
             if (!this._actor._draggable)

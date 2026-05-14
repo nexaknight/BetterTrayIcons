@@ -24,12 +24,12 @@ export class OverflowMenu {
         this._menu = new PopupMenu.PopupMenu(this._toggleButton, 0.5, St.Side.TOP);
         this._menu.actor.add_style_class_name('panel-menu');
 
-        // The theme's .popup-menu rule pins a 15em min-width on the BoxPointer
-        // actor. BoxPointer._reposition then centers that 240px wrapper on the
-        // toggle and clamps to the work-area, which pushes the popup far left
-        // when the toggle sits in the left panel box. Forcing min-width: 0 on
-        // both actor and box lets the wrapper shrink to the container width
-        // so the arrow ends up over the toggle.
+        // The theme's .popup-menu rule pins a 15em min-width on the BoxPointer actor.
+        // BoxPointer._reposition then centers that 240px wrapper on the toggle and
+        // clamps to the work-area, which pushes the popup far left when the toggle
+        // sits in the left panel box. Forcing min-width: 0 on both actor and box
+        // lets the wrapper shrink to the container width so the arrow ends up
+        // over the toggle.
         this._menu.actor.set_style('min-width: 0; min-height: 0;');
 
         // Without these, menu.box inherits x_expand=true and the popup spans the monitor.

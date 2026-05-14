@@ -79,8 +79,8 @@ export default class ActionConfigWidget extends Adw.Dialog {
         this._addDoubleClickBanner(toolbarView);
     }
 
-    // Reveal an info banner whenever the dialog's `*-double` config is
-    // non-default. Explains the single-click delay that comes with it.
+    // Reveal an info banner whenever the dialog's `*-double` config is non-default.
+    // Explains the single-click delay that comes with it.
     _addDoubleClickBanner(toolbarView) {
         const doubleCfg = (this._data.configs || []).find(c => c.key && c.key.endsWith('-double'));
         if (!doubleCfg)

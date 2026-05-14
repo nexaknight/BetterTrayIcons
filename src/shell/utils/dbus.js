@@ -3,6 +3,19 @@ import GLib from 'gi://GLib';
 
 import {WINE_LAUNCHER_BINARIES} from '../../const.js';
 
+function loadBytesAsync(file, cancellable = null) {
+    return new Promise((resolve, reject) => {
+        file.load_contents_async(cancellable, (obj, res) => {
+            try {
+                const [success, contents] = obj.load_contents_finish(res);
+                resolve(success ? contents : null);
+            } catch (e) {
+                reject(e);
+            }
+        });
+    });
+}
+
 export function getUniqueId(busName, objectPath) {
     const safeBusName = busName ? busName.replace(/[:.]/g, '_') : 'unknown';
     const safePath = objectPath ? objectPath.replace(/\//g, '_') : 'unknown';
@@ -15,8 +28,9 @@ export function loadInterfaceXML(extensionDir, fileName) {
     if (!interfaceFile.query_exists(null))
         throw new Error(`Interface file missing at ${interfaceFile.get_path()}`);
 
-    // One-shot read at init. File is bundled local, never re-read.
-    // Sync keeps proxy construction synchronous so callers don't need async chains.
+    // One-shot init read of a bundled XML file, never re-read at runtime.
+    // Sync here so Gio.DBusProxy construction stays synchronous, otherwise
+    // every caller would have to thread async chains through proxy creation.
     const [success, contents] = interfaceFile.load_contents(null);
     if (!success || !contents)
         throw new Error(`Failed to read content of ${fileName}`);
@@ -82,8 +96,8 @@ export async function getProcessInfo(proxy, busName) {
         const fCmd = Gio.File.new_for_path(cmdlinePath);
 
         try {
-            const [succ, content] = fCmd.load_contents(null);
-            if (succ) {
+            const content = await loadBytesAsync(fCmd);
+            if (content) {
                 const dec = new TextDecoder('utf-8');
                 const raw = dec.decode(content);
                 const parts = raw.split('\0').filter(p => p.length > 0);
@@ -118,8 +132,8 @@ export async function getProcessInfo(proxy, busName) {
 
         try {
             const file = Gio.File.new_for_path(`/proc/${pid}/comm`);
-            const [s2, c2] = file.load_contents(null);
-            if (s2) {
+            const c2 = await loadBytesAsync(file);
+            if (c2) {
                 const dec = new TextDecoder('utf-8');
                 const name = dec.decode(c2).trim().toLowerCase();
                 if (name === 'xdg-dbus-proxy' || name === 'bwrap')

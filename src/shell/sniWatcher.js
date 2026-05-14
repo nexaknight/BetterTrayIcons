@@ -157,8 +157,8 @@ export class SniWatcher {
             sender = invocation.get_sender();
         } catch { /* anonymous client */ }
 
-        // KDE clients pass the object path here, freedesktop clients pass the
-        // bus name. Detect by the leading character.
+        // KDE clients pass the object path here, freedesktop clients pass the bus name.
+        // Detect by the leading character.
         let busName = sender || service;
         let objectPath = '/StatusNotifierItem';
 
