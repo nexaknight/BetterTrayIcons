@@ -19,21 +19,28 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 0
+          fetch-tags: true
 
       - name: Detect if this is a release commit
         id: check
         run: |
-          msg=$(git log -1 --pretty=%s "${{ github.event.workflow_run.head_sha }}")
-          if [[ "$msg" == "chore(main): release"* ]]; then
-            version=$(jq -r .version metadata.json)
+          sha="${{ github.event.workflow_run.head_sha }}"
+
+          # Look for a release tag pointing at this commit (vX.Y.Z format)
+          tag=$(git tag --points-at "$sha" | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -1)
+
+          if [[ -n "$tag" ]]; then
             uuid=$(jq -r .uuid metadata.json)
             {
               echo "is_release=true"
-              echo "tag=v${version}"
+              echo "tag=${tag}"
               echo "uuid=${uuid}"
             } >> "$GITHUB_OUTPUT"
+            echo "Detected release commit, tag: ${tag}"
           else
             echo "is_release=false" >> "$GITHUB_OUTPUT"
+            echo "Not a release commit"
           fi
 
       - name: Download CI artifact
