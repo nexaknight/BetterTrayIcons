@@ -1,10 +1,10 @@
 <p align="center">
-  <img src="media/logo.svg" alt="Better Tray Icons" width="128">
+  <img src="media/logo.svg" alt="Better Tray Icons" width="264">
 </p>
 
 <h1 align="center">
   <img src="media/icon.png" alt="" width="48" align="center">
-  &nbsp;&nbsp;Better Tray Icons
+  &nbsp;Better Tray Icons
 </h1>
 
 <p align="center">
