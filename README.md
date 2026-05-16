@@ -2,7 +2,10 @@
   <img src="media/logo.svg" alt="Better Tray Icons" width="128">
 </p>
 
-<h1 align="center">Better Tray Icons</h1>
+<h1 align="center">
+  <img src="media/icon.png" alt="" width="48" align="center">
+  &nbsp;&nbsp;Better Tray Icons
+</h1>
 
 <p align="center">
   A GNOME Shell extension that brings tray icons back to the top panel.
