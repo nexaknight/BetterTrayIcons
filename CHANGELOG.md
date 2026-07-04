@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.3](https://github.com/nexaknight/BetterTrayIcons/compare/v2.0.2...v2.0.3) (2026-07-04)
+
+
+### Bug Fixes
+
+* **tray:** parse the xembed background color with cogl ([c0fd41c](https://github.com/nexaknight/BetterTrayIcons/commit/c0fd41c881fdd028b9caf7ac07a2d20fe5fd36e5))
+
 ## [2.0.2](https://github.com/nexaknight/BetterTrayIcons/compare/v2.0.1...v2.0.2) (2026-07-04)
 
 
