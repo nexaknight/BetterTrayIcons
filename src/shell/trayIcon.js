@@ -492,7 +492,7 @@ export class TrayIcon {
             this._menu = null;
         }
 
-        this._menu = new PopupMenu.PopupMenu(this.actor, 0.5, St.Side.TOP);
+        this._menu = new PopupMenu.PopupMenu(this._menuAnchor(), 0.5, St.Side.TOP);
         this._menu.actor.add_style_class_name('panel-menu');
         Main.layoutManager.uiGroup.add_child(this._menu.actor);
         this._menu.actor.hide();
@@ -512,10 +512,25 @@ export class TrayIcon {
         }
 
         if (this._menu.setPosition)
-            this._menu.setPosition(this.actor, 0.5);
+            this._menu.setPosition(this._menuAnchor(), 0.5);
         this._menu.open(POPUP_ANIMATION_NONE);
         // ignoreRelease() was removed in GNOME Shell 45+.
         this._menuManager.ignoreRelease?.();
+    }
+
+    // Icons inside the overflow popup can't anchor the menu to themselves:
+    // that anchor chain ends in uiGroup, and intellihide panels like Dash
+    // to Panel then treat the menu grab as foreign and slide the panel
+    // away, taking the menu with it. The shell's dummy cursor placed on
+    // the icon's screen rect anchors identically and counts as a held grab.
+    _menuAnchor() {
+        if (Main.panel.contains(this.actor))
+            return this.actor;
+
+        const [x, y] = this.actor.get_transformed_position();
+        const [w, h] = this.actor.get_transformed_size();
+        Main.layoutManager.setDummyCursorGeometry(x, y, w, h);
+        return Main.layoutManager.dummyCursor;
     }
 
     destroy() {
