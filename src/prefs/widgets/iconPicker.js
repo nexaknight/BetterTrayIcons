@@ -66,7 +66,7 @@ export default class IconPickerWidget extends Adw.PreferencesDialog {
             this.add(pageRec);
         }
 
-        this._allSystemIcons = this._getSystemIcons();
+        this._allSystemIcons = _getSystemIcons();
         this._currentFilteredList = this._allSystemIcons;
         this._buildAllIconsPage();
 
@@ -310,6 +310,13 @@ export default class IconPickerWidget extends Adw.PreferencesDialog {
             child = next;
         }
 
+        // Buttons from discarded page renders would otherwise pile up
+        // and get restyled on every click.
+        for (const btn of this._activeGridBtns) {
+            if (!btn.get_root())
+                this._activeGridBtns.delete(btn);
+        }
+
         if (this._currentFilteredList.length === 0) {
             // Empty-state when the search filter excluded everything.
             const status = new Adw.StatusPage({
@@ -423,29 +430,6 @@ export default class IconPickerWidget extends Adw.PreferencesDialog {
         return wrapper;
     }
 
-    _getSystemIcons() {
-        const display = Gdk.Display.get_default();
-        const iconTheme = Gtk.IconTheme.get_for_display(display);
-        const icons = iconTheme.get_icon_names();
-
-        const filtered = icons.filter(name => {
-            if (!name.endsWith('-symbolic'))
-                return false;
-            if (name.includes('night') || name.includes('rtl') || name.startsWith('adw-'))
-                return false;
-
-            // Verify the icon resolves to an actual file. Icons from unrelated
-            // installed themes can appear in get_icon_names() without having
-            // a real backing file in the shell's icon lookup path.
-            const paintable = iconTheme.lookup_icon(
-                name, null, 16, 1, Gtk.TextDirection.LTR, 0
-            );
-            return paintable !== null && paintable.get_file() !== null;
-        });
-
-        return [...new Set(filtered)].sort();
-    }
-
     _openFileChooser(entryWidget) {
         const filter = new Gtk.FileFilter();
         filter.set_name(_('Image Files'));
@@ -481,4 +465,39 @@ export default class IconPickerWidget extends Adw.PreferencesDialog {
         clearIds(this, removeTimer, '_inputTimeoutId');
         super.vfunc_dispose();
     }
+}
+
+// Enumerating and lookup-validating every symbolic icon is a sweep over
+// thousands of names, so it runs once per process, not per picker open.
+let _systemIconsCache = null;
+let _themeWatchConnected = false;
+
+function _getSystemIcons() {
+    if (_systemIconsCache)
+        return _systemIconsCache;
+
+    const iconTheme = Gtk.IconTheme.get_for_display(Gdk.Display.get_default());
+    if (!_themeWatchConnected) {
+        _themeWatchConnected = true;
+        // Invalidate lazily, the next open re-enumerates.
+        iconTheme.connect('changed', () => (_systemIconsCache = null));
+    }
+
+    const filtered = iconTheme.get_icon_names().filter(name => {
+        if (!name.endsWith('-symbolic'))
+            return false;
+        if (name.includes('night') || name.includes('rtl') || name.startsWith('adw-'))
+            return false;
+
+        // Verify the icon resolves to an actual file. Icons from unrelated
+        // installed themes can appear in get_icon_names() without having
+        // a real backing file in the shell's icon lookup path.
+        const paintable = iconTheme.lookup_icon(
+            name, null, 16, 1, Gtk.TextDirection.LTR, 0
+        );
+        return paintable !== null && paintable.get_file() !== null;
+    });
+
+    _systemIconsCache = [...new Set(filtered)].sort();
+    return _systemIconsCache;
 }
