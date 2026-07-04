@@ -1,14 +1,15 @@
 import Adw from 'gi://Adw';
 import Gio from 'gi://Gio';
+import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
 import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
 import {getAppConfigs, deleteAppConfig, formatAppName} from '../../shared/appConfig.js';
-import {connectScoped} from '../../shared/lifecycle.js';
+import {connectScoped, clearIds, removeTimer} from '../../shared/lifecycle.js';
 import {resolveIcon} from '../../shared/icon.js';
 import AppDialog from '../dialogs/appDialog.js';
 import {createButton, createIconButton, createImage, applyResolvedIcon, attachBadge} from '../widgets/gtkHelpers.js';
-import {WINE_ICON_NAMES, LEGACY_ID_PATTERNS} from '../../const.js';
+import {WINE_ICON_NAMES, LEGACY_ID_PATTERNS, PAGE_REBUILD_DEBOUNCE_MS} from '../../const.js';
 
 const isLegacyAppId = id => LEGACY_ID_PATTERNS.some(rx => rx.test(id));
 
@@ -26,12 +27,23 @@ export class ApplicationsPage extends Adw.PreferencesPage {
         this._window = window;
         this._settings = settings;
         this._appsGroup = null;
+        this._rebuildTimeoutId = 0;
 
         this._buildUI();
 
+        // One edit can fire several app-configs writes in a row (rename
+        // debounce, priority spinner, detection updates from the shell).
+        // Coalesce them into a single rebuild.
         connectScoped(this, this._settings, 'changed::app-configs', () => {
-            this._buildUI();
+            clearIds(this, removeTimer, '_rebuildTimeoutId');
+            this._rebuildTimeoutId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, PAGE_REBUILD_DEBOUNCE_MS, () => {
+                this._rebuildTimeoutId = 0;
+                this._buildUI();
+                return GLib.SOURCE_REMOVE;
+            });
         });
+
+        this.connect('destroy', () => clearIds(this, removeTimer, '_rebuildTimeoutId'));
     }
 
     _buildUI() {

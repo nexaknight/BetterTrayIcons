@@ -31,6 +31,8 @@ export const GEOMETRY_SETTLE_MS = 50;
 export const ENTRY_DEBOUNCE_MS = 300;
 // Icon-picker page entry, slower to allow multi-digit input.
 export const PAGE_JUMP_DEBOUNCE_MS = 500;
+// Coalesce app-configs bursts into one Applications page rebuild.
+export const PAGE_REBUILD_DEBOUNCE_MS = 100;
 // Auto-sync filesystem writes, prevents reading mid-write.
 export const AUTO_SYNC_DEBOUNCE_MS = 1000;
 // Coalesce bursts of local settings changes before rewriting the file.
