@@ -46,14 +46,6 @@ export class ClickController {
         connect('destroy', () => this.destroy());
     }
 
-    _getDoubleClickTime() {
-        const shellSettings = Clutter.Settings.get_default();
-        let val = shellSettings ? shellSettings.double_click_time : DOUBLE_CLICK_MAX_DELAY_MS;
-        if (val > DOUBLE_CLICK_MAX_DELAY_MS)
-            val = DOUBLE_CLICK_MAX_DELAY_MS;
-        return val;
-    }
-
     _onPress(actor, event) {
         const button = event.get_button();
         const eventTime = event.get_time();
@@ -170,6 +162,14 @@ export class ClickController {
 
         this._state.clickCount = 0;
         this._state.lastClickTime = 0;
+    }
+
+    _getDoubleClickTime() {
+        const shellSettings = Clutter.Settings.get_default();
+        let val = shellSettings ? shellSettings.double_click_time : DOUBLE_CLICK_MAX_DELAY_MS;
+        if (val > DOUBLE_CLICK_MAX_DELAY_MS)
+            val = DOUBLE_CLICK_MAX_DELAY_MS;
+        return val;
     }
 
     _getButtonName(button) {

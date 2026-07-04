@@ -4,44 +4,6 @@ import GdkPixbuf from 'gi://GdkPixbuf';
 
 import {warn} from '../../shared/logging.js';
 
-function _readSvgString(mediaDir, filename) {
-    const file = mediaDir.get_child(filename);
-    if (!file.query_exists(null))
-        return null;
-    const [success, contents] = file.load_contents(null);
-    return success ? new TextDecoder().decode(contents) : null;
-}
-
-// Light theme needs dark strokes/fills, so white is rewritten to black.
-function _recolorWhiteToBlack(svgStr, {strict = false} = {}) {
-    if (strict) {
-        // Logo path: only rewrite stroke="white" forms, leaves fill colors alone.
-        return svgStr
-            .replaceAll('stroke="white"', 'stroke="black"')
-            .replaceAll('stroke:white', 'stroke:black')
-            .replaceAll('stroke="#FFF"', 'stroke="#000"');
-    }
-    return svgStr
-        .replace(/fill=["']?#fff(fff)?["']?/gi, 'fill="#000000"')
-        .replace(/fill=["']?white["']?/gi, 'fill="#000000"')
-        .replace(/stroke=["']?#fff(fff)?["']?/gi, 'stroke="#000000"')
-        .replace(/stroke=["']?white["']?/gi, 'stroke="#000000"');
-}
-
-function _svgToPixbuf(svgStr) {
-    const loader = new GdkPixbuf.PixbufLoader();
-    loader.write(new TextEncoder().encode(svgStr));
-    loader.close();
-    return loader.get_pixbuf();
-}
-
-function _bindToStyleManager(update) {
-    const styleManager = Adw.StyleManager.get_default();
-    const id = styleManager.connect('notify::dark', update);
-    update();
-    return id;
-}
-
 // Without a `lightFile` the dark SVG's white strokes are inverted to black.
 export function bindLogoToTheme(logo, fallback, mediaDir, darkFile, lightFile = null) {
     const cache = {dark: null, light: null};
@@ -105,4 +67,42 @@ export function bindSvgIconToTheme(image, mediaDir, filename, size = 0) {
             image.set_size_request(size, size);
         image.visible = true;
     });
+}
+
+function _bindToStyleManager(update) {
+    const styleManager = Adw.StyleManager.get_default();
+    const id = styleManager.connect('notify::dark', update);
+    update();
+    return id;
+}
+
+function _readSvgString(mediaDir, filename) {
+    const file = mediaDir.get_child(filename);
+    if (!file.query_exists(null))
+        return null;
+    const [success, contents] = file.load_contents(null);
+    return success ? new TextDecoder().decode(contents) : null;
+}
+
+// Light theme needs dark strokes/fills, so white is rewritten to black.
+function _recolorWhiteToBlack(svgStr, {strict = false} = {}) {
+    if (strict) {
+        // Logo path: only rewrite stroke="white" forms, leaves fill colors alone.
+        return svgStr
+            .replaceAll('stroke="white"', 'stroke="black"')
+            .replaceAll('stroke:white', 'stroke:black')
+            .replaceAll('stroke="#FFF"', 'stroke="#000"');
+    }
+    return svgStr
+        .replace(/fill=["']?#fff(fff)?["']?/gi, 'fill="#000000"')
+        .replace(/fill=["']?white["']?/gi, 'fill="#000000"')
+        .replace(/stroke=["']?#fff(fff)?["']?/gi, 'stroke="#000000"')
+        .replace(/stroke=["']?white["']?/gi, 'stroke="#000000"');
+}
+
+function _svgToPixbuf(svgStr) {
+    const loader = new GdkPixbuf.PixbufLoader();
+    loader.write(new TextEncoder().encode(svgStr));
+    loader.close();
+    return loader.get_pixbuf();
 }

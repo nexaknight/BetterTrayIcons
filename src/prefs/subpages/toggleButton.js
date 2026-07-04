@@ -63,18 +63,6 @@ export default class ToggleButtonSubpage extends Adw.NavigationPage {
         this._buildStyleGroups(page);
     }
 
-    // Placed above the gated style controls so users see it first.
-    _buildCustomStyleSwitch(page) {
-        const group = new Adw.PreferencesGroup();
-        group.add(createSwitchRow(
-            _('Custom Style'),
-            _('Reveal colors, padding and margin controls below.'),
-            this._settings,
-            'enable-custom-toggle-style'
-        ));
-        page.add(group);
-    }
-
     _buildIconGroup(page) {
         const group = new Adw.PreferencesGroup({title: _('Icon')});
         page.add(group);
@@ -104,6 +92,18 @@ export default class ToggleButtonSubpage extends Adw.NavigationPage {
             [_('Left'), _('Right')],
             ['left', 'right']
         ));
+    }
+
+    // Placed above the gated style controls so users see it first.
+    _buildCustomStyleSwitch(page) {
+        const group = new Adw.PreferencesGroup();
+        group.add(createSwitchRow(
+            _('Custom Style'),
+            _('Reveal colors, padding and margin controls below.'),
+            this._settings,
+            'enable-custom-toggle-style'
+        ));
+        page.add(group);
     }
 
     // Each style category lives in its own group so whole sections can be

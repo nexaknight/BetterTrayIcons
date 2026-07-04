@@ -9,16 +9,6 @@ import {error} from '../../shared/logging.js';
 import {buildSymbolicCandidates, themedIconWithFallback} from '../../shared/icon.js';
 import {connectScoped} from '../../shared/lifecycle.js';
 
-function _getAlign(str) {
-    switch (str) {
-    case 'center': return Gtk.Align.CENTER;
-    case 'start': return Gtk.Align.START;
-    case 'end': return Gtk.Align.END;
-    case 'fill':
-    default: return Gtk.Align.FILL;
-    }
-}
-
 export function createLabel(text, cssClasses = [], options = {}) {
     const label = new Gtk.Label({
         label: text,
@@ -28,36 +18,6 @@ export function createLabel(text, cssClasses = [], options = {}) {
         label.set_css_classes(cssClasses);
 
     return label;
-}
-
-// Pill-shaped tag. The `.bti-` prefix prevents clashes with Adwaita.
-let _badgeCssLoaded = false;
-function _ensureBadgeCss() {
-    if (_badgeCssLoaded)
-        return;
-    const display = Gdk.Display.get_default();
-    if (!display)
-        return;
-    const provider = new Gtk.CssProvider();
-    const css = `
-        .bti-badge {
-            padding: 1px 8px;
-            border-radius: 999px;
-            font-size: 0.78em;
-            font-weight: bold;
-            background-color: alpha(@warning_color, 0.18);
-            color: @warning_color;
-        }
-        .bti-badge.info {
-            background-color: alpha(@accent_color, 0.18);
-            color: @accent_color;
-        }
-    `;
-    provider.load_from_string(css);
-    Gtk.StyleContext.add_provider_for_display(
-        display, provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
-    );
-    _badgeCssLoaded = true;
 }
 
 export function attachBadge(row, text, {variant = 'warning'} = {}) {
@@ -327,4 +287,44 @@ export function applyResolvedIcon(image, iconResult, useSymbolic = false) {
 
     const names = [...buildSymbolicCandidates(name, useSymbolic), 'image-missing'];
     image.set_from_gicon(new Gio.ThemedIcon({names, use_default_fallbacks: true}));
+}
+
+// Pill-shaped tag. The `.bti-` prefix prevents clashes with Adwaita.
+let _badgeCssLoaded = false;
+function _ensureBadgeCss() {
+    if (_badgeCssLoaded)
+        return;
+    const display = Gdk.Display.get_default();
+    if (!display)
+        return;
+    const provider = new Gtk.CssProvider();
+    const css = `
+        .bti-badge {
+            padding: 1px 8px;
+            border-radius: 999px;
+            font-size: 0.78em;
+            font-weight: bold;
+            background-color: alpha(@warning_color, 0.18);
+            color: @warning_color;
+        }
+        .bti-badge.info {
+            background-color: alpha(@accent_color, 0.18);
+            color: @accent_color;
+        }
+    `;
+    provider.load_from_string(css);
+    Gtk.StyleContext.add_provider_for_display(
+        display, provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+    );
+    _badgeCssLoaded = true;
+}
+
+function _getAlign(str) {
+    switch (str) {
+    case 'center': return Gtk.Align.CENTER;
+    case 'start': return Gtk.Align.START;
+    case 'end': return Gtk.Align.END;
+    case 'fill':
+    default: return Gtk.Align.FILL;
+    }
 }

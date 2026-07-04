@@ -8,59 +8,6 @@ import {updateAppConfig, getAppConfigValue, setAppConfigValue} from '../../share
 import {readFileBytes} from '../../shared/fetch.js';
 import {refreshPropertyOnProxy, getProcessInfo} from './dbus.js';
 
-function _isGenericId(id) {
-    if (!id)
-        return true;
-    const lower = id.toLowerCase();
-    return lower.includes('chrome_status_icon') ||
-        lower.includes('status_icon') ||
-        lower.includes('indicator') ||
-        lower.startsWith('state-') ||
-        lower.startsWith('libappindicator') ||
-        lower.startsWith('task-') ||
-        lower === 'app';
-}
-
-function _isGenericIconName(name) {
-    if (!name)
-        return true;
-    const lower = name.toLowerCase();
-    return lower.startsWith('state-') ||
-        lower.startsWith('sync-') ||
-        lower === 'image-missing' ||
-        lower.includes('panel');
-}
-
-// Returns {candidate, isStable} or null.
-function _pickAppIdCandidate({processName, rawId, iconThemePath, iconName, title}) {
-    if (processName)
-        return {candidate: processName, isStable: true};
-
-    if (rawId && !_isGenericId(rawId))
-        return {candidate: rawId, isStable: true};
-
-    if (iconThemePath) {
-        const match = iconThemePath.match(/([a-z0-9-_]+\.[a-z0-9-_]+\.[a-z0-9-_]+)/i);
-        if (match && match[1] && !match[1].includes('freedesktop'))
-            return {candidate: match[1], isStable: true};
-    }
-
-    if (iconName && iconName.length > 2 && !_isGenericIconName(iconName)) {
-        const stripped = iconName.replace(/[-_](symbolic|tray|panel)$/i, '');
-        if (!_isGenericId(stripped))
-            return {candidate: stripped, isStable: true};
-    }
-
-    if (title && (!title.includes(' ') || title.length < 20))
-        return {candidate: title, isStable: true};
-
-    return null;
-}
-
-function _sanitizeAppId(raw) {
-    return raw.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-._]/g, '');
-}
-
 export async function identifyApp(proxy, busName, settings) {
     // The values are independent, so pay one bus latency instead of five.
     const [rawId, title, iconName, iconThemePath, processInfo] = await Promise.all([
@@ -252,6 +199,59 @@ export async function resolveTrayIcon(proxy, settings, appId, lastPixmapHash = n
     }
 
     return {gicon: null, iconName: 'image-missing', detected};
+}
+
+// Returns {candidate, isStable} or null.
+function _pickAppIdCandidate({processName, rawId, iconThemePath, iconName, title}) {
+    if (processName)
+        return {candidate: processName, isStable: true};
+
+    if (rawId && !_isGenericId(rawId))
+        return {candidate: rawId, isStable: true};
+
+    if (iconThemePath) {
+        const match = iconThemePath.match(/([a-z0-9-_]+\.[a-z0-9-_]+\.[a-z0-9-_]+)/i);
+        if (match && match[1] && !match[1].includes('freedesktop'))
+            return {candidate: match[1], isStable: true};
+    }
+
+    if (iconName && iconName.length > 2 && !_isGenericIconName(iconName)) {
+        const stripped = iconName.replace(/[-_](symbolic|tray|panel)$/i, '');
+        if (!_isGenericId(stripped))
+            return {candidate: stripped, isStable: true};
+    }
+
+    if (title && (!title.includes(' ') || title.length < 20))
+        return {candidate: title, isStable: true};
+
+    return null;
+}
+
+function _isGenericId(id) {
+    if (!id)
+        return true;
+    const lower = id.toLowerCase();
+    return lower.includes('chrome_status_icon') ||
+        lower.includes('status_icon') ||
+        lower.includes('indicator') ||
+        lower.startsWith('state-') ||
+        lower.startsWith('libappindicator') ||
+        lower.startsWith('task-') ||
+        lower === 'app';
+}
+
+function _isGenericIconName(name) {
+    if (!name)
+        return true;
+    const lower = name.toLowerCase();
+    return lower.startsWith('state-') ||
+        lower.startsWith('sync-') ||
+        lower === 'image-missing' ||
+        lower.includes('panel');
+}
+
+function _sanitizeAppId(raw) {
+    return raw.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-._]/g, '');
 }
 
 // Some apps store their IconThemePath in an ephemeral directory, so

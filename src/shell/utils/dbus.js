@@ -50,17 +50,6 @@ export async function refreshPropertyOnProxy(proxy, propertyName) {
     }
 }
 
-function _extractWineExeName(cmdlineParts) {
-    for (const part of cmdlineParts) {
-        if (!part || !part.toLowerCase().endsWith('.exe'))
-            continue;
-        const stem = part.replace(/\\/g, '/').split('/').pop().replace(/\.exe$/i, '');
-        if (stem)
-            return stem.toLowerCase();
-    }
-    return null;
-}
-
 export async function getProcessInfo(proxy, busName) {
     try {
         const connection = proxy.get_connection();
@@ -132,6 +121,17 @@ export async function getProcessInfo(proxy, busName) {
         } catch { /* /proc/PID/comm unreadable */ }
     } catch {
         return null;
+    }
+    return null;
+}
+
+function _extractWineExeName(cmdlineParts) {
+    for (const part of cmdlineParts) {
+        if (!part || !part.toLowerCase().endsWith('.exe'))
+            continue;
+        const stem = part.replace(/\\/g, '/').split('/').pop().replace(/\.exe$/i, '');
+        if (stem)
+            return stem.toLowerCase();
     }
     return null;
 }

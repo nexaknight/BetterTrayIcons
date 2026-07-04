@@ -1,13 +1,3 @@
-function _safeBounds(actor) {
-    try {
-        const [x, y] = actor.get_transformed_position();
-        const [w, h] = actor.get_transformed_size();
-        return [x, y, w, h];
-    } catch {
-        return null;
-    }
-}
-
 // DND passes the DraggableTrayIcon wrapper directly via actor._delegate.
 // The fallback paths cover older GNOME versions that surfaced the raw
 // actor or proxy instead.
@@ -91,5 +81,15 @@ export function dragStageCoords(dragActor) {
     } catch {
         // Drag actor disposed mid-call, so fall back to the pointer.
         return global.get_pointer();
+    }
+}
+
+function _safeBounds(actor) {
+    try {
+        const [x, y] = actor.get_transformed_position();
+        const [w, h] = actor.get_transformed_size();
+        return [x, y, w, h];
+    } catch {
+        return null;
     }
 }

@@ -68,6 +68,25 @@ export default class ActionConfigWidget extends Adw.Dialog {
         this._addDoubleClickBanner(toolbarView);
     }
 
+    _createRow(conf) {
+        switch (conf.type) {
+        case 'combo':
+            return createComboRow(conf.title, conf.subtitle, this._settings, conf.key, conf.options, conf.values, {
+                experimentalValues: conf.experimentalValues,
+            });
+        case 'spin':
+            return createSpinRow(conf.title, this._settings, conf.key, conf.min || 0, conf.max || 100, conf.step || 1);
+        case 'switch':
+            return createSwitchRow(conf.title, conf.subtitle, this._settings, conf.key);
+        case 'color':
+            return createColorRow(conf.title, this._settings, conf.key);
+        case 'entry':
+            return createEntryRow(conf.title, this._settings, conf.key);
+        default:
+            return null;
+        }
+    }
+
     // Reveal an info banner whenever the dialog's `*-double` config is non-default.
     // Explains the single-click delay that comes with it.
     _addDoubleClickBanner(toolbarView) {
@@ -87,24 +106,5 @@ export default class ActionConfigWidget extends Adw.Dialog {
 
         connectScoped(this, this._settings, `changed::${doubleCfg.key}`, update, 'closed');
         update();
-    }
-
-    _createRow(conf) {
-        switch (conf.type) {
-        case 'combo':
-            return createComboRow(conf.title, conf.subtitle, this._settings, conf.key, conf.options, conf.values, {
-                experimentalValues: conf.experimentalValues,
-            });
-        case 'spin':
-            return createSpinRow(conf.title, this._settings, conf.key, conf.min || 0, conf.max || 100, conf.step || 1);
-        case 'switch':
-            return createSwitchRow(conf.title, conf.subtitle, this._settings, conf.key);
-        case 'color':
-            return createColorRow(conf.title, this._settings, conf.key);
-        case 'entry':
-            return createEntryRow(conf.title, this._settings, conf.key);
-        default:
-            return null;
-        }
     }
 }

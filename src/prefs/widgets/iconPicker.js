@@ -11,11 +11,6 @@ import {createIconButton, createFileFilter} from './gtkHelpers.js';
 import {openFileChooser} from '../dialogs/dialogs.js';
 import {PAGE_JUMP_DEBOUNCE_MS} from '../../const.js';
 
-function _setVisibleButton(btn, on) {
-    btn.set_opacity(on ? 1 : 0);
-    btn.set_sensitive(on);
-}
-
 // Pass `options.showCustom: false` to hide the free-form tab.
 export default class IconPickerWidget extends Adw.PreferencesDialog {
     static {
@@ -441,6 +436,11 @@ export default class IconPickerWidget extends Adw.PreferencesDialog {
         clearIds(this, removeTimer, '_inputTimeoutId');
         super.vfunc_dispose();
     }
+}
+
+function _setVisibleButton(btn, on) {
+    btn.set_opacity(on ? 1 : 0);
+    btn.set_sensitive(on);
 }
 
 // Enumerating and lookup-validating every symbolic icon is a sweep over

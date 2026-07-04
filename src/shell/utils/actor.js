@@ -7,12 +7,6 @@ import {
     BOX_SIDES,
 } from '../../const.js';
 
-// Build {key: valueFn(key)} from a list of keys.
-function mapByKey(keys, valueFn) {
-    return Object.fromEntries(keys.map(key => [key, valueFn(key)]));
-}
-
-
 // GJS has no public predicate for disposed actors. The "(disposed)" marker
 // in toString output is the workaround.
 export function isDisposed(actor) {
@@ -63,8 +57,12 @@ export function generateBoxStyle(settings, prefix, options = {}) {
     if (extraCss)
         css += extraCss;
 
-
     return css;
+}
+
+// Build {key: valueFn(key)} from a list of keys.
+function mapByKey(keys, valueFn) {
+    return Object.fromEntries(keys.map(key => [key, valueFn(key)]));
 }
 
 export function placeIndicatorInPanel(indicator, settings) {
