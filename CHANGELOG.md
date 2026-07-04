@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.2](https://github.com/nexaknight/BetterTrayIcons/compare/v2.0.1...v2.0.2) (2026-07-04)
+
+
+### Bug Fixes
+
+* **tray:** keep auto-hide panels visible while a context menu is open ([ed91117](https://github.com/nexaknight/BetterTrayIcons/commit/ed91117d444b9009a59e634f62f86c3827e66622))
+
 ## [2.0.1](https://github.com/nexaknight/BetterTrayIcons/compare/v2.0.0...v2.0.1) (2026-07-04)
 
 
