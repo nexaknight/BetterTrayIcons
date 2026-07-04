@@ -304,8 +304,8 @@ function _isMalformedColor(key, val) {
     return key.includes('color') && typeof val === 'string' && !COLOR_PATTERN.test(val);
 }
 
-// Returns null if the icon path doesn't exist locally.
-// Prevents broken paths after sync between machines.
+// Null drops the whole entry, so an icon path that doesn't exist on
+// this machine never survives a cross-device import.
 function _sanitizeAppConfigForImport(appId, appConf, homeDir) {
     if (!appConf.custom_icon || typeof appConf.custom_icon !== 'string')
         return appConf;

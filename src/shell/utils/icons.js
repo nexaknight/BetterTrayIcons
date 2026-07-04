@@ -201,7 +201,6 @@ export async function resolveTrayIcon(proxy, settings, appId, lastPixmapHash = n
     return {gicon: null, iconName: 'image-missing', detected};
 }
 
-// Returns {candidate, isStable} or null.
 function _pickAppIdCandidate({processName, rawId, iconThemePath, iconName, title}) {
     if (processName)
         return {candidate: processName, isStable: true};
