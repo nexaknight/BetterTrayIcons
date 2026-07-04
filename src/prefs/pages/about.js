@@ -273,7 +273,7 @@ export class AboutPage extends Adw.PreferencesPage {
             if (data.length > MAX_CONTRIBUTORS) {
                 const moreUrl = `${GIT_REPO_URL.replace(/\.git$/, '')}/graphs/contributors`;
                 cards.push(createCard({
-                    iconName: 'application-other-symbolic',
+                    iconName: 'applications-other-symbolic',
                     iconSize: 48,
                     title: _('Show more'),
                     tooltip: _('Open on GitHub'),
