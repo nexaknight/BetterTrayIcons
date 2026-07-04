@@ -101,30 +101,25 @@ export async function identifyApp(proxy, busName, settings) {
 let _sharedIconTheme = null;
 
 export async function resolveTrayIcon(proxy, settings, appId, lastPixmapHash = null) {
-    const configVal = getAppConfigValue(settings, appId, 'custom_icon');
-    const myConfig = configVal ? {custom_icon: configVal} : null;
+    const customIcon = getAppConfigValue(settings, appId, 'custom_icon');
 
-    if (myConfig && myConfig.custom_icon) {
-        const useSymbolic = settings.get_boolean('enable-symbolic-icons');
-        const res = resolveIcon(myConfig);
+    if (customIcon) {
+        const res = resolveIcon({custom_icon: customIcon});
 
-        switch (res.type) {
-        case 'file': {
+        if (res.type === 'file') {
             const file = Gio.File.new_for_path(res.value);
             return {gicon: new Gio.FileIcon({file}), iconName: null};
         }
-        case 'gicon':
-            return {gicon: res.value, iconName: null};
-        default:
-            // Same fallback chain as the prefs side so both render identically.
-            return {
-                gicon: new Gio.ThemedIcon({
-                    names: buildSymbolicCandidates(res.value, useSymbolic),
-                    use_default_fallbacks: true,
-                }),
-                iconName: null,
-            };
-        }
+
+        // Same fallback chain as the prefs side so both render identically.
+        const useSymbolic = settings.get_boolean('enable-symbolic-icons');
+        return {
+            gicon: new Gio.ThemedIcon({
+                names: buildSymbolicCandidates(res.value, useSymbolic),
+                use_default_fallbacks: true,
+            }),
+            iconName: null,
+        };
     }
 
     if (!proxy)

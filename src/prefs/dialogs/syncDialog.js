@@ -189,8 +189,7 @@ function _buildAutoSyncGroup(page, settings, pathRow, cancellable) {
         _('Enable'),
         _('Push on change, pull on remote update.'),
         settings,
-        'enable-auto-sync',
-        {experimental: false}
+        'enable-auto-sync'
     );
     group.add(row);
 

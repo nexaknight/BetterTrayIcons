@@ -177,9 +177,7 @@ export class SniWatcher {
             busName = service;
         }
 
-        const uniqueId = getUniqueId(busName, objectPath);
-
-        this._registerItem(busName, objectPath, uniqueId);
+        this._registerItem(busName, objectPath);
 
         if (this._dbusImpl)
             this._dbusImpl.emit_signal('StatusNotifierItemRegistered', GLib.Variant.new('(s)', [service]));
@@ -228,11 +226,11 @@ export class SniWatcher {
         }
     }
 
-    _registerItem(busName, objectPath, explicitId) {
+    _registerItem(busName, objectPath) {
         if (!this._itemProxyClass)
             return;
 
-        const id = explicitId || getUniqueId(busName, objectPath);
+        const id = getUniqueId(busName, objectPath);
 
         if (this._items.has(id))
             return;

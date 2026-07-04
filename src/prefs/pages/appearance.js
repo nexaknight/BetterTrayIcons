@@ -49,7 +49,7 @@ export class AppearancePage extends Adw.PreferencesPage {
 
         group.add(createSwitchRow(switchTitle, null, this._settings, switchKey));
         group.add(createSubpageRow(
-            subpageTitle, subpageSubtitle, null,
+            subpageTitle, subpageSubtitle,
             this._window, subpageClass, this._settings, switchKey
         ));
     }
@@ -58,7 +58,7 @@ export class AppearancePage extends Adw.PreferencesPage {
         const group = new Adw.PreferencesGroup({title: _('Toggle Button')});
         this.add(group);
         group.add(createSubpageRow(
-            _('Configure'), _('Icon, position, colors'), null,
+            _('Configure'), _('Icon, position, colors'),
             this._window, ToggleButtonSubpage, this._settings
         ));
     }

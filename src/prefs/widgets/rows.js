@@ -8,8 +8,6 @@ import {pathOrThemedIcon} from '../../shared/icon.js';
 import {createColorButton, createIconButton, attachBadge} from './gtkHelpers.js';
 import {openStyleDialog, openUri} from '../dialogs/dialogs.js';
 
-export {attachBadge};
-
 export function buildPrefsWidget(page, settings, keysToReset) {
     const toolbarView = new Adw.ToolbarView();
     page.set_child(toolbarView);
@@ -28,9 +26,6 @@ export function buildPrefsWidget(page, settings, keysToReset) {
 
     const contentPage = new Adw.PreferencesPage();
     toolbarView.set_content(contentPage);
-
-    // Stash the toolbar so callers can pin a banner above the content.
-    contentPage._toolbarView = toolbarView;
 
     return contentPage;
 }
@@ -121,15 +116,13 @@ export function createEntryRow(title, settings, key) {
     return row;
 }
 
-export function createSubpageRow(title, subtitle, iconName, window, SubpageClass, settings, dependencyKey = null, invertDependency = false) {
+export function createSubpageRow(title, subtitle, window, SubpageClass, settings, dependencyKey = null) {
     const row = new Adw.ActionRow({
         title,
         subtitle: subtitle || '',
         activatable: true,
     });
 
-    if (iconName)
-        row.add_prefix(new Gtk.Image({icon_name: iconName, pixel_size: 24, valign: Gtk.Align.CENTER}));
     row.add_suffix(new Gtk.Image({icon_name: 'go-next-symbolic', valign: Gtk.Align.CENTER}));
 
     row.connect('activated', () => {
@@ -137,10 +130,8 @@ export function createSubpageRow(title, subtitle, iconName, window, SubpageClass
         window.push_subpage(subpage);
     });
 
-    if (dependencyKey) {
-        const flags = invertDependency ? Gio.SettingsBindFlags.INVERT_BOOLEAN : Gio.SettingsBindFlags.DEFAULT;
-        settings.bind(dependencyKey, row, 'sensitive', flags);
-    }
+    if (dependencyKey)
+        settings.bind(dependencyKey, row, 'sensitive', Gio.SettingsBindFlags.DEFAULT);
     return row;
 }
 

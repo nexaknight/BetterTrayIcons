@@ -138,14 +138,13 @@ export class DBusMenuClient {
                     item.setOrnament(toggleState === 1 ? PopupMenu.Ornament.CHECK : PopupMenu.Ornament.NONE);
             }
 
-            if (iconName) {
+            if (iconName && !(item instanceof PopupMenu.PopupSubMenuMenuItem)) {
                 const icon = new St.Icon({
                     icon_name: iconName,
                     style_class: 'popup-menu-icon',
                     icon_size: 16,
                 });
-                if (!(item instanceof PopupMenu.PopupSubMenuMenuItem))
-                    item.insert_child_at_index(icon, 1);
+                item.insert_child_at_index(icon, 1);
             }
 
             item.setSensitive(enabled);

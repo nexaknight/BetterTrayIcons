@@ -84,13 +84,12 @@ export function attachBadge(row, text, {variant = 'warning'} = {}) {
 }
 
 export function createButton({label, iconName, cssClasses = [], callback, ...props}) {
-    const params = {...props};
+    const params = {valign: Gtk.Align.CENTER, ...props};
     if (label !== undefined)
         params.label = label;
     if (iconName !== undefined)
         params.icon_name = iconName;
     const btn = new Gtk.Button(params);
-    btn.valign = Gtk.Align.CENTER;
     if (cssClasses.length > 0)
         btn.set_css_classes(cssClasses);
     if (callback)
@@ -310,11 +309,7 @@ export function applyResolvedIcon(image, iconResult, useSymbolic = false) {
         return;
     }
 
-    switch (iconResult.type) {
-    case 'gicon':
-        image.set_from_gicon(iconResult.value);
-        return;
-    case 'file': {
+    if (iconResult.type === 'file') {
         const file = Gio.File.new_for_path(iconResult.value);
         if (file.query_exists(null))
             image.set_from_gicon(new Gio.FileIcon({file}));
@@ -322,7 +317,6 @@ export function applyResolvedIcon(image, iconResult, useSymbolic = false) {
             image.set_from_gicon(themedIconWithFallback('image-missing'));
 
         return;
-    }
     }
 
     const name = iconResult.value;

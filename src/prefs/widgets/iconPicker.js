@@ -1,15 +1,14 @@
 import Adw from 'gi://Adw';
-import Gio from 'gi://Gio';
 import Gtk from 'gi://Gtk';
 import Gdk from 'gi://Gdk';
 import GObject from 'gi://GObject';
 import GLib from 'gi://GLib';
 import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
-import {warn} from '../../shared/logging.js';
 import {clearIds, removeTimer} from '../../shared/lifecycle.js';
 import {themedIconWithFallback, pathOrThemedIcon} from '../../shared/icon.js';
-import {createIconButton} from './gtkHelpers.js';
+import {createIconButton, createFileFilter} from './gtkHelpers.js';
+import {openFileChooser} from '../dialogs/dialogs.js';
 import {PAGE_JUMP_DEBOUNCE_MS} from '../../const.js';
 
 function _setVisibleButton(btn, on) {
@@ -431,34 +430,11 @@ export default class IconPickerWidget extends Adw.PreferencesDialog {
     }
 
     _openFileChooser(entryWidget) {
-        const filter = new Gtk.FileFilter();
-        filter.set_name(_('Image Files'));
-        filter.add_mime_type('image/svg+xml');
-        filter.add_mime_type('image/png');
-
-        const dialog = new Gtk.FileDialog({
+        const filter = createFileFilter(_('Image Files'), [], ['image/svg+xml', 'image/png']);
+        openFileChooser(this.get_root(), {
             title: _('Select Image'),
-            modal: true,
-            default_filter: filter,
-        });
-
-        const filters = new Gio.ListStore({item_type: Gtk.FileFilter});
-        filters.append(filter);
-        dialog.set_filters(filters);
-
-        dialog.open(this.get_root(), null, (d, res) => {
-            try {
-                const file = d.open_finish(res);
-                if (!file)
-                    return;
-                if (file.query_exists(null))
-                    entryWidget.set_text(file.get_path());
-                else
-                    warn(`IconPicker: Selected file does not exist: ${file.get_path()}`);
-            } catch {
-                // User cancelled, not an error.
-            }
-        });
+            filters: [filter],
+        }, path => entryWidget.set_text(path));
     }
 
     vfunc_dispose() {

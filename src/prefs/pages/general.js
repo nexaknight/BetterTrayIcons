@@ -153,7 +153,6 @@ export class GeneralPage extends Adw.PreferencesPage {
 
         group.add(row);
         group.add(createActionRow(_('Cloud Sync'), _('Keep settings in sync via a shared file.'), {
-            experimental: false,
             headerSuffix: createIconButton('emblem-synchronizing-symbolic', {
                 flat: false,
                 tooltip_text: _('Configure'),
