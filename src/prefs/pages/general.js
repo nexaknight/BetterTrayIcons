@@ -249,16 +249,16 @@ export class GeneralPage extends Adw.PreferencesPage {
         // Capture the path before resetting, because reset clears it.
         const syncPath = this._settings.get_string('sync-file-path');
 
-        const keys = this._settings.list_keys();
-        keys.forEach(key => this._settings.reset(key));
+        // A scratch instance in delay mode turns the reset into one dconf
+        // transaction. delay() on the shared instance would leave it
+        // delayed for good.
+        const batch = new Gio.Settings({settings_schema: this._settings.settings_schema});
+        batch.delay();
+        batch.list_keys().forEach(key => batch.reset(key));
+        batch.apply();
 
-        if (syncPath) {
-            try {
-                deleteBackups(syncPath);
-            } catch (e) {
-                error(`Factory Reset: Failed to delete files: ${e.message}`);
-            }
-        }
+        if (syncPath)
+            deleteBackups(syncPath);
 
         const root = this.get_root();
         if (root && root.add_toast)

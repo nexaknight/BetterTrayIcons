@@ -9,7 +9,12 @@ export function importSettingsFromJSON(settings, data) {
     if (!data || typeof data !== 'object')
         return;
 
-    const keys = settings.list_keys();
+    // A scratch instance in delay mode turns the import into one dconf
+    // transaction instead of a write plus signal fan-out per key.
+    const batch = new Gio.Settings({settings_schema: settings.settings_schema});
+    batch.delay();
+
+    const keys = batch.list_keys();
     const homeDir = GLib.get_home_dir();
 
     Object.keys(data).forEach(key => {
@@ -26,7 +31,6 @@ export function importSettingsFromJSON(settings, data) {
         if (typeof val === 'string' && val.includes('$HOME'))
             val = val.split('$HOME').join(homeDir);
 
-
         // app-configs is stored as a JSON string in GSettings, so re-encode it.
         if (key === 'app-configs' && typeof val === 'object') {
             val = JSON.stringify(safeMapFromParsed(val, (appId, conf) =>
@@ -34,13 +38,15 @@ export function importSettingsFromJSON(settings, data) {
             ));
         }
 
-        const typeString = settings.get_value(key).get_type_string();
+        const typeString = batch.get_value(key).get_type_string();
         try {
-            settings.set_value(key, GLib.Variant.new(typeString, val));
+            batch.set_value(key, GLib.Variant.new(typeString, val));
         } catch (e) {
             warn(`Failed to import key '${key}': ${e.message}`);
         }
     });
+
+    batch.apply();
 }
 
 export async function saveSettingsToFile(settings, path) {
