@@ -2,6 +2,7 @@ import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 
 import {warn} from './logging.js';
+import {readFileBytes} from './fetch.js';
 import {ICON_CACHE_SUBDIR} from '../const.js';
 
 // ------- Icon resolution -------
@@ -108,20 +109,7 @@ export async function writeCachedIcon(appId, pngBytes) {
 
     try {
         if (file.query_exists(null)) {
-            const existing = await new Promise((resolve, reject) => {
-                file.load_contents_async(null, (obj, res) => {
-                    try {
-                        const [success, c] = obj.load_contents_finish(res);
-                        if (!success) {
-                            reject(new Error('Load failed'));
-                            return;
-                        }
-                        resolve(c);
-                    } catch (e) {
-                        reject(e);
-                    }
-                });
-            });
+            const existing = await readFileBytes(file);
             if (existing.length === pngBytes.length && _bytesEqual(existing, pngBytes))
                 return path;
         }

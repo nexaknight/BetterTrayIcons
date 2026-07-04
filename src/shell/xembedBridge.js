@@ -7,6 +7,7 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
 import {warn, error} from '../shared/logging.js';
 import {updateAppConfig} from '../shared/appConfig.js';
+import {readFileBytes} from '../shared/fetch.js';
 import {clearIds, disconnectSignal, disconnectAll, disposeAll, removeTimer} from '../shared/lifecycle.js';
 import {
     isDragEnabledFromSettings,
@@ -24,19 +25,6 @@ import {
 } from '../const.js';
 
 let _bgFallbackColor;
-
-function loadBytesAsync(file, cancellable = null) {
-    return new Promise((resolve, reject) => {
-        file.load_contents_async(cancellable, (obj, res) => {
-            try {
-                const [success, contents] = obj.load_contents_finish(res);
-                resolve(success ? contents : null);
-            } catch (e) {
-                reject(e);
-            }
-        });
-    });
-}
 
 function parseCssColor(css) {
     if (!css || !Clutter?.Color?.from_string)
@@ -67,9 +55,7 @@ async function readProcFile(pid, name, cancellable) {
         return null;
     try {
         const file = Gio.File.new_for_path(`/proc/${pid}/${name}`);
-        const content = await loadBytesAsync(file, cancellable);
-        if (!content)
-            return null;
+        const content = await readFileBytes(file, cancellable);
         return new TextDecoder('utf-8', {fatal: false}).decode(content);
     } catch (e) {
         if (e?.matches?.(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED))
@@ -139,9 +125,7 @@ async function steamAppNameFromManifest(appId, cancellable) {
     for (const path of candidates) {
         try {
             const file = Gio.File.new_for_path(path);
-            const content = await loadBytesAsync(file, cancellable);
-            if (!content)
-                continue;
+            const content = await readFileBytes(file, cancellable);
             const text = new TextDecoder('utf-8', {fatal: false}).decode(content);
             const m = text.match(/"name"\s+"([^"]+)"/);
             if (m) {

@@ -5,6 +5,7 @@ import St from 'gi://St';
 
 import {resolveIcon, findIconInTheme, buildSymbolicCandidates, writeCachedIcon} from '../../shared/icon.js';
 import {updateAppConfig, getAppConfigValue, setAppConfigValue} from '../../shared/appConfig.js';
+import {readFileBytes} from '../../shared/fetch.js';
 import {refreshPropertyOnProxy, getProcessInfo} from './dbus.js';
 
 function _isGenericId(id) {
@@ -264,20 +265,7 @@ async function _snapshotIconToCache(settings, appId, file) {
     if (!appId || !file)
         return;
     try {
-        const contents = await new Promise((resolve, reject) => {
-            file.load_contents_async(null, (obj, res) => {
-                try {
-                    const [success, c] = obj.load_contents_finish(res);
-                    if (!success) {
-                        reject(new Error('Load failed'));
-                        return;
-                    }
-                    resolve(c);
-                } catch (e) {
-                    reject(e);
-                }
-            });
-        });
+        const contents = await readFileBytes(file);
         if (!contents || contents.length === 0)
             return;
         const path = await writeCachedIcon(appId, contents);

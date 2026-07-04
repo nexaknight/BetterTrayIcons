@@ -1,20 +1,8 @@
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 
+import {readFileBytes} from '../../shared/fetch.js';
 import {WINE_LAUNCHER_BINARIES} from '../../const.js';
-
-function loadBytesAsync(file, cancellable = null) {
-    return new Promise((resolve, reject) => {
-        file.load_contents_async(cancellable, (obj, res) => {
-            try {
-                const [success, contents] = obj.load_contents_finish(res);
-                resolve(success ? contents : null);
-            } catch (e) {
-                reject(e);
-            }
-        });
-    });
-}
 
 export function getUniqueId(busName, objectPath) {
     const safeBusName = busName ? busName.replace(/[:.]/g, '_') : 'unknown';
@@ -96,7 +84,7 @@ export async function getProcessInfo(proxy, busName) {
         const fCmd = Gio.File.new_for_path(cmdlinePath);
 
         try {
-            const content = await loadBytesAsync(fCmd);
+            const content = await readFileBytes(fCmd);
             if (content) {
                 const dec = new TextDecoder('utf-8');
                 const raw = dec.decode(content);
@@ -132,7 +120,7 @@ export async function getProcessInfo(proxy, busName) {
 
         try {
             const file = Gio.File.new_for_path(`/proc/${pid}/comm`);
-            const c2 = await loadBytesAsync(file);
+            const c2 = await readFileBytes(file);
             if (c2) {
                 const dec = new TextDecoder('utf-8');
                 const name = dec.decode(c2).trim().toLowerCase();

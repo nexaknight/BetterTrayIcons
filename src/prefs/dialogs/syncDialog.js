@@ -4,6 +4,7 @@ import GLib from 'gi://GLib';
 import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
 import {error} from '../../shared/logging.js';
+import {readFileBytes} from '../../shared/fetch.js';
 import {saveSettingsToFile, loadSettingsFromFile, deleteBackup, listBackups} from '../../shared/settingsIO.js';
 import {connectScoped} from '../../shared/lifecycle.js';
 import {createButton, createIconButton, createImage} from '../widgets/gtkHelpers.js';
@@ -159,18 +160,15 @@ function _probeSyncFile(path, statusRow, warningIcon, cancellable) {
             return;
         }
 
-        file.load_contents_async(cancellable, (src2, res2) => {
-            try {
-                const [, contents] = src2.load_contents_finish(res2);
-                const data = JSON.parse(new TextDecoder().decode(contents));
-                warningIcon.set_visible(false);
-                statusRow.set_subtitle(_formatSyncStatus(mtime, data._meta));
-            } catch (e) {
-                if (e?.matches?.(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED))
-                    return;
-                warningIcon.set_visible(true);
-                statusRow.set_subtitle(mtime ? mtime.format('%Y-%m-%d %H:%M:%S') : _('Unknown'));
-            }
+        readFileBytes(file, cancellable).then(contents => {
+            const data = JSON.parse(new TextDecoder().decode(contents));
+            warningIcon.set_visible(false);
+            statusRow.set_subtitle(_formatSyncStatus(mtime, data._meta));
+        }).catch(e => {
+            if (e?.matches?.(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED))
+                return;
+            warningIcon.set_visible(true);
+            statusRow.set_subtitle(mtime ? mtime.format('%Y-%m-%d %H:%M:%S') : _('Unknown'));
         });
     });
 }

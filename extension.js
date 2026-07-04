@@ -3,6 +3,7 @@ import Gio from 'gi://Gio';
 import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 
 import {error, warn} from './src/shared/logging.js';
+import {readFileBytes} from './src/shared/fetch.js';
 import {importSettingsFromJSON, saveSettingsToFile} from './src/shared/settingsIO.js';
 import {clearIds, disconnectSignal, disconnectAll, disposeAll, removeTimer} from './src/shared/lifecycle.js';
 import {placeIndicatorInPanel} from './src/shell/utils/actor.js';
@@ -91,24 +92,20 @@ export default class BetterTrayIconsExtension extends Extension {
             disposeAll(this, 'cancel', '_syncCancellable');
             this._syncCancellable = new Gio.Cancellable();
 
-            file.load_contents_async(this._syncCancellable, (obj, res) => {
-                try {
-                    const [success, contents] = obj.load_contents_finish(res);
-                    if (success && this._settings) {
-                        const data = JSON.parse(new TextDecoder().decode(contents));
+            readFileBytes(file, this._syncCancellable).then(contents => {
+                if (!this._settings)
+                    return;
+                const data = JSON.parse(new TextDecoder().decode(contents));
 
-                        // Skip changes this host wrote itself to avoid sync loops.
-                        if (data._meta && data._meta.source === GLib.get_host_name())
-                            return;
+                // Skip changes this host wrote itself to avoid sync loops.
+                if (data._meta && data._meta.source === GLib.get_host_name())
+                    return;
 
-                        this._lastImportAt = Date.now();
-                        importSettingsFromJSON(this._settings, data);
-                    }
-                } catch (e) {
-                    if (e?.matches?.(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED))
-                        return;
+                this._lastImportAt = Date.now();
+                importSettingsFromJSON(this._settings, data);
+            }).catch(e => {
+                if (!e?.matches?.(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED))
                     warn(`Auto-sync import failed: ${e.message}`);
-                }
             });
             return GLib.SOURCE_REMOVE;
         });

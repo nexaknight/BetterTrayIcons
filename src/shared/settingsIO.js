@@ -3,6 +3,7 @@ import GLib from 'gi://GLib';
 
 import {warn, error} from './logging.js';
 import {safeMapFromParsed} from './appConfig.js';
+import {readFileBytes} from './fetch.js';
 import {COLOR_PATTERN} from '../const.js';
 
 export function importSettingsFromJSON(settings, data) {
@@ -111,20 +112,7 @@ export async function loadSettingsFromFile(settings, path) {
         });
         jsonString = new TextDecoder().decode(outStream.steal_as_bytes().get_data());
     } else {
-        const contents = await new Promise((resolve, reject) => {
-            file.load_contents_async(null, (obj, res) => {
-                try {
-                    const [success, c] = obj.load_contents_finish(res);
-                    if (!success) {
-                        reject(new Error('Failed to load file'));
-                        return;
-                    }
-                    resolve(c);
-                } catch (e) {
-                    reject(e);
-                }
-            });
-        });
+        const contents = await readFileBytes(file);
         jsonString = new TextDecoder().decode(contents);
     }
 
@@ -252,20 +240,7 @@ async function _rotateFile(path, maxBackups) {
 
     const mainFile = Gio.File.new_for_path(path);
     try {
-        const content = await new Promise((resolve, reject) => {
-            mainFile.load_contents_async(null, (obj, res) => {
-                try {
-                    const [success, c] = obj.load_contents_finish(res);
-                    if (!success) {
-                        reject(new Error('Failed to load file'));
-                        return;
-                    }
-                    resolve(c);
-                } catch (e) {
-                    reject(e);
-                }
-            });
-        });
+        const content = await readFileBytes(mainFile);
         await _writeCompressed(`${path}.1.gz`, content);
     } catch (e) {
         // A missing main file just means there's nothing to back up yet.
