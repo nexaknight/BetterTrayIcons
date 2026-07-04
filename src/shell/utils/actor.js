@@ -1,6 +1,11 @@
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
-import {DEFAULT_HOVER_BG_COLOR, BOX_SIDES} from '../../const.js';
+import {
+    DEFAULT_HOVER_BG_COLOR,
+    DEFAULT_PILL_RADIUS_PX,
+    ICON_MARGIN_PX,
+    BOX_SIDES,
+} from '../../const.js';
 
 // Build {key: valueFn(key)} from a list of keys.
 function mapByKey(keys, valueFn) {
@@ -108,6 +113,41 @@ export function safelyReparentActor(actor, newParent) {
         oldParent.remove_child(actor);
 
     newParent.add_child(actor);
+}
+
+// Base and hover style pair shared by the SNI and XEmbed wrappers.
+// XEmbed icons are opaque X11 pixmaps, so `withColors: false` skips
+// the foreground color rules for them.
+export function computeTrayIconStyle(settings, {withColors = true} = {}) {
+    const enableCustom = settings.get_boolean('enable-custom-icon-style');
+    const padV = settings.get_int('icon-padding-vertical');
+    const padH = settings.get_int('icon-padding-horizontal');
+    // Default mode keeps a 1px gap so neighbouring icons don't touch
+    // the panel-button frames. Custom mode honours the user's value.
+    const sideMargin = enableCustom ? 0 : ICON_MARGIN_PX;
+    const layoutFixes = `margin: 0px ${sideMargin}px; border: 0px; box-shadow: none;`;
+
+    let baseStyle;
+    if (enableCustom) {
+        const radius = settings.get_int('icon-border-radius');
+        const bg = settings.get_string('icon-background-color');
+        const color = withColors ? ` color: ${settings.get_string('icon-color')};` : '';
+        baseStyle = `padding: ${padV}px ${padH}px; border-radius: ${radius}px;${color} background-color: ${bg}; ${layoutFixes}`;
+    } else {
+        baseStyle = `padding: ${padV}px ${padH}px; border-radius: ${DEFAULT_PILL_RADIUS_PX}px; ${layoutFixes}`;
+    }
+
+    const hoverBg = enableCustom
+        ? settings.get_string('icon-hover-background-color')
+        : DEFAULT_HOVER_BG_COLOR;
+    let hoverStyle = `${baseStyle} background-color: ${hoverBg};`;
+    if (enableCustom && withColors) {
+        const hoverColor = settings.get_string('icon-hover-color');
+        if (hoverColor)
+            hoverStyle += ` color: ${hoverColor};`;
+    }
+
+    return {enableCustom, baseStyle, hoverStyle};
 }
 
 export function computeToggleStyle(settings) {

@@ -11,8 +11,6 @@ import AppDialog from '../dialogs/appDialog.js';
 import {createButton, createIconButton, createImage, applyResolvedIcon, attachBadge} from '../widgets/gtkHelpers.js';
 import {WINE_ICON_NAMES, LEGACY_ID_PATTERNS, PAGE_REBUILD_DEBOUNCE_MS} from '../../const.js';
 
-const isLegacyAppId = id => LEGACY_ID_PATTERNS.some(rx => rx.test(id));
-
 export class ApplicationsPage extends Adw.PreferencesPage {
     static {
         GObject.registerClass(this);
@@ -144,4 +142,8 @@ export class ApplicationsPage extends Adw.PreferencesPage {
                 deleteAppConfig(this._settings, app.id);
         });
     }
+}
+
+function isLegacyAppId(id) {
+    return LEGACY_ID_PATTERNS.some(rx => rx.test(id));
 }

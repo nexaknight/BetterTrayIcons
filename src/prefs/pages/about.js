@@ -14,16 +14,6 @@ import {bindLogoToTheme, bindSvgIconToTheme} from '../widgets/theme.js';
 import {openUri, showTextDialog} from '../dialogs/dialogs.js';
 import {GIT_REPO_URL, LICENSE_URL, SPONSOR_URL, TRANSLATE_URL, MAX_CONTRIBUTORS, CONTRIBUTORS_OPTOUT} from '../../const.js';
 
-const _contributorOptOutSet = new Set(CONTRIBUTORS_OPTOUT.map(n => n.toLowerCase()));
-
-function filterContributors(list) {
-    if (!Array.isArray(list))
-        return [];
-    return list.filter(c =>
-        c && typeof c.login === 'string' && !_contributorOptOutSet.has(c.login.toLowerCase())
-    );
-}
-
 export class AboutPage extends Adw.PreferencesPage {
     static {
         GObject.registerClass(this);
@@ -309,4 +299,12 @@ export class AboutPage extends Adw.PreferencesPage {
         disconnectAll(this, Adw.StyleManager.get_default(), '_themeSignals');
         super.vfunc_unroot();
     }
+}
+
+function filterContributors(list) {
+    if (!Array.isArray(list))
+        return [];
+    return list.filter(c =>
+        c && typeof c.login === 'string' && !CONTRIBUTORS_OPTOUT.has(c.login.toLowerCase())
+    );
 }

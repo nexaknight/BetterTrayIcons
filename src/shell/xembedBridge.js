@@ -14,12 +14,11 @@ import {
     setupIconDragSource,
     forwardDragStateToIndicator,
 } from './features/dragAndDrop.js';
+import {computeTrayIconStyle} from './utils/actor.js';
 import {
-    DEFAULT_HOVER_BG_COLOR,
     DRAG_SETTING_KEYS,
     DRAGGING_SOURCE_OPACITY,
-    ICON_MARGIN_PX,
-    DEFAULT_PILL_RADIUS_PX,
+    WINE_LAUNCHER_BINARIES,
     XEMBED_STYLE_KEYS,
     XEMBED_BG_FALLBACK_HEX,
 } from '../const.js';
@@ -167,8 +166,7 @@ async function gatherWineIdentity(rawIcon, cancellable) {
         steamAppId ??= steamAppIdFromEnviron(env);
 
         const exeBase = await exeBaseFromCmdline(pid, cancellable);
-        if (exeBase && (/^wine(64)?(-preloader)?$/.test(exeBase) ||
-                exeBase === 'wineserver' || exeBase === 'wineboot'))
+        if (exeBase && WINE_LAUNCHER_BINARIES.has(exeBase))
             isWine = true;
 
         if (steamAppId)
@@ -226,6 +224,7 @@ class XEmbedTrayIcon {
         this._onDragStateChange = onDragStateChange;
         this._isDestroyed = false;
         this._baseStyle = '';
+        this._hoverStyle = '';
         this._pendingClickId = 0;
         this._actorSignals = [];
         this._settingsSignals = [];
@@ -353,37 +352,21 @@ class XEmbedTrayIcon {
         if (this._isDestroyed)
             return;
 
-        const enableCustom = this._settings.get_boolean('enable-custom-icon-style');
-        const padV = this._settings.get_int('icon-padding-vertical');
-        const padH = this._settings.get_int('icon-padding-horizontal');
-        const sideMargin = enableCustom ? 0 : ICON_MARGIN_PX;
-        const layoutFixes = `margin: 0px ${sideMargin}px; border: 0px; box-shadow: none;`;
-
-        if (enableCustom) {
+        const {enableCustom, baseStyle, hoverStyle} = computeTrayIconStyle(this._settings, {withColors: false});
+        if (enableCustom)
             this.actor.remove_style_class_name('panel-button');
-            const radius = this._settings.get_int('icon-border-radius');
-            const bg = this._settings.get_string('icon-background-color');
-            this._baseStyle = `padding: ${padV}px ${padH}px; border-radius: ${radius}px; background-color: ${bg}; ${layoutFixes}`;
-        } else {
+        else
             this.actor.add_style_class_name('panel-button');
-            this._baseStyle = `padding: ${padV}px ${padH}px; border-radius: ${DEFAULT_PILL_RADIUS_PX}px; ${layoutFixes}`;
-        }
 
-        this.actor.set_style(this._baseStyle);
-        this.actor.queue_relayout();
+        this._baseStyle = baseStyle;
+        this._hoverStyle = hoverStyle;
         this._updateHoverState();
     }
 
     _updateHoverState() {
         if (this._isDestroyed)
             return;
-        const enableCustom = this._settings.get_boolean('enable-custom-icon-style');
-        const hoverBg = enableCustom
-            ? this._settings.get_string('icon-hover-background-color')
-            : DEFAULT_HOVER_BG_COLOR;
-        this.actor.set_style(this.actor.hover
-            ? `${this._baseStyle} background-color: ${hoverBg};`
-            : this._baseStyle);
+        this.actor.set_style(this.actor.hover ? this._hoverStyle : this._baseStyle);
     }
 
     destroy() {

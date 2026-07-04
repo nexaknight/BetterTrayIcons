@@ -9,7 +9,7 @@ import {getAppConfigMap, getAppConfigValue, updateAppConfig, formatAppName} from
 import {clearIds, disconnectSignal, disconnectAll, disposeAll, removeTimer} from '../shared/lifecycle.js';
 import {getUniqueId, refreshPropertyOnProxy} from './utils/dbus.js';
 import {identifyApp, resolveTrayIcon} from './utils/icons.js';
-import {isDisposed} from './utils/actor.js';
+import {isDisposed, computeTrayIconStyle} from './utils/actor.js';
 import {DBusMenuClient} from './dbusMenuClient.js';
 import {ClickController} from './features/clickController.js';
 import {
@@ -18,14 +18,11 @@ import {
 } from './features/dragAndDrop.js';
 import {Tooltip} from './features/tooltip.js';
 import {
-    DEFAULT_HOVER_BG_COLOR,
     DRAG_SETTING_KEYS,
     ICON_UPDATE_DELAY_MS,
-    ICON_MARGIN_PX,
     POPUP_ANIMATION_NONE,
     MENU_REOPEN_GUARD_MS,
     DRAGGING_SOURCE_OPACITY,
-    DEFAULT_PILL_RADIUS_PX,
     TRAY_STYLE_KEYS,
     TRAY_CONFIG_RENDER_FIELDS,
 } from '../const.js';
@@ -320,53 +317,19 @@ export class TrayIcon {
         if (this._isDestroyed || !this.actor)
             return;
 
-        const enableCustom = this._settings.get_boolean('enable-custom-icon-style');
-        const size = this._settings.get_int('icon-size');
-        this._iconActor.set_icon_size(size);
+        this._iconActor.set_icon_size(this._settings.get_int('icon-size'));
 
-        const padV = this._settings.get_int('icon-padding-vertical');
-        const padH = this._settings.get_int('icon-padding-horizontal');
-        // Default mode keeps a 1px gap so neighbouring icons don't touch
-        // the panel-button frames. Custom mode honours the user's value.
-        const sideMargin = enableCustom ? 0 : ICON_MARGIN_PX;
-        const layoutFixes = `margin: 0px ${sideMargin}px; border: 0px; box-shadow: none;`;
-
+        const {enableCustom, baseStyle, hoverStyle} = computeTrayIconStyle(this._settings);
         if (enableCustom) {
             this.actor.remove_style_class_name('panel-button');
             this._iconActor.remove_style_class_name('system-status-icon');
-
-            const radius = this._settings.get_int('icon-border-radius');
-            const color = this._settings.get_string('icon-color');
-            const bg = this._settings.get_string('icon-background-color');
-
-            this._baseStyle = `
-                padding: ${padV}px ${padH}px;
-                border-radius: ${radius}px;
-                color: ${color};
-                background-color: ${bg};
-                ${layoutFixes}
-            `;
         } else {
             this.actor.add_style_class_name('panel-button');
             this._iconActor.add_style_class_name('system-status-icon');
-
-            this._baseStyle = `
-                padding: ${padV}px ${padH}px;
-                border-radius: ${DEFAULT_PILL_RADIUS_PX}px;
-                ${layoutFixes}
-            `;
         }
 
-        const hoverBg = enableCustom
-            ? this._settings.get_string('icon-hover-background-color')
-            : DEFAULT_HOVER_BG_COLOR;
-        this._hoverStyle = `${this._baseStyle} background-color: ${hoverBg};`;
-        if (enableCustom) {
-            const hoverColor = this._settings.get_string('icon-hover-color');
-            if (hoverColor)
-                this._hoverStyle += ` color: ${hoverColor};`;
-        }
-
+        this._baseStyle = baseStyle;
+        this._hoverStyle = hoverStyle;
         this._updateHoverState();
     }
 
