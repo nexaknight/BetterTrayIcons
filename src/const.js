@@ -175,12 +175,6 @@ export const POPUP_ANIMATION_NONE = 0;
 export const DBUS_MENU_YIELD_EVERY_N_ITEMS = 20;
 
 
-// ------- Backups -------
-
-// Sweep ceiling for orphaned backups, above any realistic max-backups value.
-export const BACKUP_SWEEP_CEILING = 100;
-
-
 // ------- Settings validation (sync import) -------
 
 // Colors feed inline set_style() strings, filter against CSS injection.

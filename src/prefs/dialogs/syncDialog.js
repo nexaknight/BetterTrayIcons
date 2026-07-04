@@ -4,12 +4,12 @@ import GLib from 'gi://GLib';
 import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
 import {error} from '../../shared/logging.js';
-import {saveSettingsToFile, loadSettingsFromFile, deleteBackup} from '../../shared/settingsIO.js';
+import {saveSettingsToFile, loadSettingsFromFile, deleteBackup, listBackups} from '../../shared/settingsIO.js';
 import {connectScoped} from '../../shared/lifecycle.js';
 import {createButton, createIconButton, createImage} from '../widgets/gtkHelpers.js';
 import {createSwitchRow, createSpinRow} from '../widgets/rows.js';
 import {showConfirmationDialog} from './dialogs.js';
-import {ENTRY_DEBOUNCE_MS, BACKUP_SWEEP_CEILING} from '../../const.js';
+import {ENTRY_DEBOUNCE_MS} from '../../const.js';
 
 export function openSyncDialog(parentWindow, settings, openJsonFileChooser) {
     const toolbarView = new Adw.ToolbarView();
@@ -33,25 +33,50 @@ export function openSyncDialog(parentWindow, settings, openJsonFileChooser) {
     let refreshAll = () => {};
 
     const file = _buildSyncLocationGroup(page, settings, openJsonFileChooser, cancellable);
-    const auto = _buildAutoSyncGroup(page, settings, file.pathRow);
-    const actions = _buildActionsGroup(page, file.pathRow, settings, dialog, toast, () => refreshAll({immediate: true}));
-    const backups = _buildBackupHistoryGroup(page, file.pathRow, dialog, toast, settings, () => refreshAll({immediate: true}));
+    const auto = _buildAutoSyncGroup(page, settings, file.pathRow, cancellable);
+    const actions = _buildActionsGroup(page, file.pathRow, settings, dialog, toast, () => refreshAll({immediate: true}), cancellable);
+    const backups = _buildBackupHistoryGroup(page, file.pathRow, dialog, toast, settings, () => refreshAll({immediate: true}), cancellable);
 
-    // `immediate` skips the Last-Sync probe's typing debounce after Push/Pull/Delete
-    // so the status row reflects the new mtime right away.
-    refreshAll = ({immediate = false} = {}) => {
-        file.refreshStatus({immediate});
+    const doRefresh = () => {
+        file.refreshStatus();
         auto.refreshStatus();
         actions.refreshButtons();
         backups.refresh();
     };
 
+    // Typing in the path row fires per keystroke and each probe below can
+    // stat a remote mount. One shared debounce covers them all; `immediate`
+    // skips it after Push/Pull/Delete so the rows update right away.
+    let refreshDebounceId = 0;
+    refreshAll = ({immediate = false} = {}) => {
+        if (refreshDebounceId) {
+            GLib.source_remove(refreshDebounceId);
+            refreshDebounceId = 0;
+        }
+        if (immediate) {
+            doRefresh();
+            return;
+        }
+        refreshDebounceId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, ENTRY_DEBOUNCE_MS, () => {
+            refreshDebounceId = 0;
+            doRefresh();
+            return GLib.SOURCE_REMOVE;
+        });
+    };
+
+    dialog.connect('closed', () => {
+        if (refreshDebounceId) {
+            GLib.source_remove(refreshDebounceId);
+            refreshDebounceId = 0;
+        }
+    });
+
     file.pathRow.connect('notify::text', () => refreshAll());
-    connectScoped(dialog, settings, 'changed::enable-auto-sync', () => refreshAll(), 'closed');
+    connectScoped(dialog, settings, 'changed::enable-auto-sync', () => refreshAll({immediate: true}), 'closed');
     connectScoped(dialog, settings, 'changed::max-backups', () => backups.refresh(), 'closed');
 
     GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
-        refreshAll();
+        refreshAll({immediate: true});
         return GLib.SOURCE_REMOVE;
     });
 
@@ -103,15 +128,8 @@ function _buildSyncLocationGroup(page, settings, openJsonFileChooser, cancellabl
     });
     group.add(statusRow);
 
-    let debounceId = 0;
-    const refreshStatus = ({immediate = false} = {}) => {
+    const refreshStatus = () => {
         const path = pathRow.text;
-
-        if (debounceId) {
-            GLib.source_remove(debounceId);
-            debounceId = 0;
-        }
-
         if (!path) {
             statusRow.set_subtitle(_('No file selected'));
             warningIcon.set_visible(false);
@@ -120,17 +138,7 @@ function _buildSyncLocationGroup(page, settings, openJsonFileChooser, cancellabl
 
         statusRow.set_subtitle(_('Checking…'));
         warningIcon.set_visible(false);
-
-        if (immediate) {
-            _probeSyncFile(path, statusRow, warningIcon, cancellable);
-            return;
-        }
-
-        debounceId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, ENTRY_DEBOUNCE_MS, () => {
-            debounceId = 0;
-            _probeSyncFile(path, statusRow, warningIcon, cancellable);
-            return GLib.SOURCE_REMOVE;
-        });
+        _probeSyncFile(path, statusRow, warningIcon, cancellable);
     };
 
     return {pathRow, refreshStatus};
@@ -175,7 +183,7 @@ function _formatSyncStatus(mtime, meta) {
     return `${timeStr} · ${_('from')} ${origin}`;
 }
 
-function _buildAutoSyncGroup(page, settings, pathRow) {
+function _buildAutoSyncGroup(page, settings, pathRow, cancellable) {
     const group = new Adw.PreferencesGroup({title: _('Auto-Sync')});
     page.add(group);
 
@@ -205,14 +213,15 @@ function _buildAutoSyncGroup(page, settings, pathRow) {
             row.set_subtitle(_('Set a file path first.'));
             return;
         }
-        const exists = Gio.File.new_for_path(path).query_exists(null);
-        row.set_subtitle(exists ? _('Watching for changes.') : _('Waiting for the file.'));
+        _checkExistsAsync(path, cancellable, exists => {
+            row.set_subtitle(exists ? _('Watching for changes.') : _('Waiting for the file.'));
+        });
     };
 
     return {refreshStatus};
 }
 
-function _buildActionsGroup(page, pathRow, settings, dialog, toast, onAfterAction) {
+function _buildActionsGroup(page, pathRow, settings, dialog, toast, onAfterAction, cancellable) {
     const group = new Adw.PreferencesGroup({title: _('Manual Sync')});
     page.add(group);
 
@@ -249,7 +258,12 @@ function _buildActionsGroup(page, pathRow, settings, dialog, toast, onAfterActio
     const refreshButtons = () => {
         const path = pathRow.text;
         pushBtn.sensitive = !!path;
-        pullBtn.sensitive = !!path && Gio.File.new_for_path(path).query_exists(null);
+        pullBtn.sensitive = false;
+        if (!path)
+            return;
+        _checkExistsAsync(path, cancellable, exists => {
+            pullBtn.sensitive = exists;
+        });
     };
 
     return {refreshButtons};
@@ -264,6 +278,27 @@ function _buildActionRow(group, {title, btnLabel, onClick}) {
     return btn;
 }
 
+// The path can sit on a network mount, so never stat it synchronously.
+function _checkExistsAsync(path, cancellable, onResult) {
+    Gio.File.new_for_path(path).query_info_async(
+        'standard::type',
+        Gio.FileQueryInfoFlags.NONE,
+        GLib.PRIORITY_DEFAULT,
+        cancellable,
+        (obj, res) => {
+            let exists = false;
+            try {
+                obj.query_info_finish(res);
+                exists = true;
+            } catch (e) {
+                if (e?.matches?.(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED))
+                    return;
+            }
+            onResult(exists);
+        }
+    );
+}
+
 async function _runSyncOp(op, toast, onAfter, {successMsg, failurePrefix}) {
     try {
         await op();
@@ -275,7 +310,7 @@ async function _runSyncOp(op, toast, onAfter, {successMsg, failurePrefix}) {
     }
 }
 
-function _buildBackupHistoryGroup(page, pathRow, dialog, toast, settings, onAfterAction) {
+function _buildBackupHistoryGroup(page, pathRow, dialog, toast, settings, onAfterAction, cancellable) {
     const group = new Adw.PreferencesGroup();
     page.add(group);
 
@@ -287,46 +322,53 @@ function _buildBackupHistoryGroup(page, pathRow, dialog, toast, settings, onAfte
     group.add(expander);
 
     let childRows = [];
+    let refreshGen = 0;
 
-    const refresh = () => {
-        const base = pathRow.text;
+    const clearRows = () => {
         for (const r of childRows)
             expander.remove(r);
         childRows = [];
+    };
+
+    const showEmpty = () => {
+        expander.sensitive = false;
+        expander.subtitle = _('None available');
+        expander.expanded = false;
+    };
+
+    const refresh = () => {
+        const base = pathRow.text;
+        const gen = ++refreshGen;
 
         if (!base) {
-            expander.sensitive = false;
-            expander.subtitle = _('None available');
-            expander.expanded = false;
+            clearRows();
+            showEmpty();
             return;
         }
 
-        const maxBackups = settings.get_int('max-backups');
-        const sweepLimit = Math.max(maxBackups, BACKUP_SWEEP_CEILING);
-        let count = 0;
-        for (let i = 1; i <= sweepLimit; i++) {
-            const p = `${base}.${i}.gz`;
-            const f = Gio.File.new_for_path(p);
-            if (!f.query_exists(null))
-                continue;
-            let mtime = null;
-            try {
-                mtime = f.query_info('time::modified', Gio.FileQueryInfoFlags.NONE, null).get_modification_date_time();
-            } catch { /* date is cosmetic */ }
-            const childRow = _buildBackupRow({
-                path: p, index: i, mtime,
-                pathRow, dialog, toast, settings, onAfterAction,
-            });
-            expander.add_row(childRow);
-            childRows.push(childRow);
-            count++;
-        }
+        listBackups(base).then(backups => {
+            // A newer refresh or a closed dialog superseded this one.
+            if (gen !== refreshGen || cancellable.is_cancelled())
+                return;
 
-        const has = count > 0;
-        expander.sensitive = has;
-        expander.subtitle = has ? `${count} ${_('available')}` : _('None available');
-        if (!has)
-            expander.expanded = false;
+            clearRows();
+            const compressed = backups.filter(b => b.compressed);
+            for (const b of compressed) {
+                const childRow = _buildBackupRow({
+                    path: b.path, index: b.index, mtime: b.mtime,
+                    pathRow, dialog, toast, settings, onAfterAction,
+                });
+                expander.add_row(childRow);
+                childRows.push(childRow);
+            }
+
+            if (compressed.length > 0) {
+                expander.sensitive = true;
+                expander.subtitle = `${compressed.length} ${_('available')}`;
+            } else {
+                showEmpty();
+            }
+        }).catch(() => { /* listing failed, keep current rows */ });
     };
 
     return {refresh};
