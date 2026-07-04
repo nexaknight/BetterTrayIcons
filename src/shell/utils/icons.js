@@ -61,11 +61,14 @@ function _sanitizeAppId(raw) {
 }
 
 export async function identifyApp(proxy, busName, settings) {
-    const rawId = await refreshPropertyOnProxy(proxy, 'Id');
-    const title = await refreshPropertyOnProxy(proxy, 'Title');
-    const iconName = await refreshPropertyOnProxy(proxy, 'IconName');
-    const iconThemePath = await refreshPropertyOnProxy(proxy, 'IconThemePath');
-    const processInfo = await getProcessInfo(proxy, busName);
+    // The values are independent, so pay one bus latency instead of five.
+    const [rawId, title, iconName, iconThemePath, processInfo] = await Promise.all([
+        refreshPropertyOnProxy(proxy, 'Id'),
+        refreshPropertyOnProxy(proxy, 'Title'),
+        refreshPropertyOnProxy(proxy, 'IconName'),
+        refreshPropertyOnProxy(proxy, 'IconThemePath'),
+        getProcessInfo(proxy, busName),
+    ]);
     const processName = processInfo ? processInfo.name : null;
     const isWine = !!(processInfo && processInfo.isWine);
 
@@ -92,7 +95,11 @@ export async function identifyApp(proxy, busName, settings) {
     return {appId, title: title || candidate, isWine};
 }
 
-export async function resolveTrayIcon(proxy, settings, appId) {
+// One shared theme for has_icon lookups. Constructing St.IconTheme per
+// resolution would re-read the theme index every time.
+let _sharedIconTheme = null;
+
+export async function resolveTrayIcon(proxy, settings, appId, lastPixmapHash = null) {
     const configVal = getAppConfigValue(settings, appId, 'custom_icon');
     const myConfig = configVal ? {custom_icon: configVal} : null;
 
@@ -133,29 +140,30 @@ export async function resolveTrayIcon(proxy, settings, appId) {
 
     const status = await refreshPropertyOnProxy(proxy, 'Status') ?? 'Passive';
 
-    let iconName = null;
+    let attentionName = null;
     if (status === 'NeedsAttention')
-        iconName = await getStr('AttentionIconName');
+        attentionName = await getStr('AttentionIconName');
 
-    if (!iconName)
-        iconName = await getStr('IconName');
-
+    const detectedName = await getStr('IconName');
+    const iconName = attentionName || detectedName;
 
     const iconThemePath = await getStr('IconThemePath');
+    // Raw values for the caller to persist, saves refetching them there.
+    const detected = {iconName: detectedName, iconThemePath};
 
     if (iconName) {
         if (iconName.startsWith('/')) {
             const file = Gio.File.new_for_path(iconName);
             if (file.query_exists(null)) {
                 _snapshotIconToCache(settings, appId, file).catch(() => { /* best-effort */ });
-                return {gicon: new Gio.FileIcon({file}), iconName: null};
+                return {gicon: new Gio.FileIcon({file}), iconName: null, detected};
             }
         } else if (iconThemePath) {
             const resolvedPath = findIconInTheme(iconName, iconThemePath);
             if (resolvedPath) {
                 const file = Gio.File.new_for_path(resolvedPath);
                 _snapshotIconToCache(settings, appId, file).catch(() => { /* best-effort */ });
-                return {gicon: new Gio.FileIcon({file}), iconName: null};
+                return {gicon: new Gio.FileIcon({file}), iconName: null, detected};
             }
         }
     }
@@ -171,8 +179,8 @@ export async function resolveTrayIcon(proxy, settings, appId) {
     if (themedCandidates && themedCandidates.length > 0) {
         let resolvesInTheme = false;
         try {
-            const iconTheme = new St.IconTheme();
-            resolvesInTheme = themedCandidates.some(n => n && iconTheme.has_icon(n));
+            _sharedIconTheme ??= new St.IconTheme();
+            resolvesInTheme = themedCandidates.some(n => n && _sharedIconTheme.has_icon(n));
         } catch {
             // Fall through to themed icon when the lookup fails (no theme yet).
             resolvesInTheme = true;
@@ -182,6 +190,7 @@ export async function resolveTrayIcon(proxy, settings, appId) {
             return {
                 gicon: new Gio.ThemedIcon({names: themedCandidates, use_default_fallbacks: true}),
                 iconName: null,
+                detected,
             };
         }
     }
@@ -200,7 +209,6 @@ export async function resolveTrayIcon(proxy, settings, appId) {
         if ((!pixmap || pixmap.length === 0) && pixmapProp !== 'IconPixmap')
             pixmap = await refreshPropertyOnProxy(proxy, 'IconPixmap');
 
-
         if (pixmap && pixmap.length > 0) {
             const targetSize = settings.get_int('icon-size') || 24;
             pixmap.sort((a, b) => {
@@ -212,7 +220,20 @@ export async function resolveTrayIcon(proxy, settings, appId) {
             const bestMatch = pixmap[0];
             if (bestMatch && bestMatch.length >= 3) {
                 const [width, height, rawData] = bestMatch;
-                const pngBytes = _pixmapToPng(width, height, rawData);
+                const src = _pixmapBytes(rawData);
+                const pixmapHash = src ? _hashPixmap(width, height, src) : null;
+
+                // Animated icons often resend identical frames. Matching the
+                // previous hash skips the swizzle, the PNG encode and the
+                // cache write.
+                if (pixmapHash !== null && pixmapHash === lastPixmapHash && appId) {
+                    const cachedPath = getAppConfigValue(settings, appId, 'cached_icon_path');
+                    const cachedFile = cachedPath ? Gio.File.new_for_path(cachedPath) : null;
+                    if (cachedFile?.query_exists(null))
+                        return {gicon: new Gio.FileIcon({file: cachedFile}), iconName: null, detected, pixmapHash};
+                }
+
+                const pngBytes = src ? _pixmapToPng(width, height, src) : null;
                 if (pngBytes) {
                     if (appId) {
                         const path = await writeCachedIcon(appId, pngBytes);
@@ -220,7 +241,7 @@ export async function resolveTrayIcon(proxy, settings, appId) {
                             setAppConfigValue(settings, appId, 'cached_icon_path', path);
                     }
                     const gicon = Gio.BytesIcon.new(GLib.Bytes.new(pngBytes));
-                    return {gicon, iconName: null};
+                    return {gicon, iconName: null, detected, pixmapHash};
                 }
             }
         }
@@ -230,10 +251,11 @@ export async function resolveTrayIcon(proxy, settings, appId) {
         return {
             gicon: new Gio.ThemedIcon({names: themedCandidates, use_default_fallbacks: true}),
             iconName: null,
+            detected,
         };
     }
 
-    return {gicon: null, iconName: 'image-missing'};
+    return {gicon: null, iconName: 'image-missing', detected};
 }
 
 // Some apps store their IconThemePath in an ephemeral directory, so
@@ -267,22 +289,32 @@ async function _snapshotIconToCache(settings, appId, file) {
     } catch { /* cache snapshot is best-effort */ }
 }
 
-function _pixmapToPng(width, height, rawData) {
-    if (!width || !height || !rawData)
+// SNI pixmaps arrive as ARGB in whatever array flavor the bindings picked.
+function _pixmapBytes(rawData) {
+    if (rawData instanceof Uint8Array)
+        return rawData;
+    if (rawData instanceof GLib.Bytes)
+        return rawData.toArray();
+    if (Array.isArray(rawData))
+        return new Uint8Array(rawData);
+    return null;
+}
+
+// FNV-1a, cheap enough to run on every frame.
+function _hashPixmap(width, height, src) {
+    let h = 0x811c9dc5;
+    h = Math.imul(h ^ width, 0x01000193);
+    h = Math.imul(h ^ height, 0x01000193);
+    for (let i = 0; i < src.length; i++)
+        h = Math.imul(h ^ src[i], 0x01000193);
+    return h >>> 0;
+}
+
+function _pixmapToPng(width, height, src) {
+    if (!width || !height || !src)
         return null;
 
     try {
-        let src;
-        if (rawData instanceof Uint8Array)
-            src = rawData;
-        else if (rawData instanceof GLib.Bytes)
-            src = rawData.toArray();
-        else if (Array.isArray(rawData))
-            src = new Uint8Array(rawData);
-        else
-            return null;
-
-
         const expectedLen = width * height * 4;
         if (src.length < expectedLen)
             return null;

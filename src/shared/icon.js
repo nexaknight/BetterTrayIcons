@@ -126,13 +126,24 @@ export async function writeCachedIcon(appId, pngBytes) {
                 return path;
         }
 
-        file.replace_contents(
-            pngBytes,
-            null,
-            false,
-            Gio.FileCreateFlags.REPLACE_DESTINATION,
-            null
-        );
+        // Async so a frame's cache write never blocks the compositor.
+        await new Promise((resolve, reject) => {
+            file.replace_contents_async(
+                GLib.Bytes.new(pngBytes),
+                null,
+                false,
+                Gio.FileCreateFlags.REPLACE_DESTINATION,
+                null,
+                (obj, res) => {
+                    try {
+                        obj.replace_contents_finish(res);
+                        resolve();
+                    } catch (e) {
+                        reject(e);
+                    }
+                }
+            );
+        });
         return path;
     } catch (e) {
         warn(`iconCache: write failed for ${appId}: ${e.message}`);

@@ -50,6 +50,7 @@ export class TrayIcon {
         this._updateDeferId = 0;
         this._settingsConnectId = 0;
         this._configSig = null;
+        this._pixmapHash = null;
         this._baseStyle = '';
         this._hoverStyle = '';
 
@@ -388,14 +389,17 @@ export class TrayIcon {
         if (this._isDestroyed || !this._proxy || !this._iconActor)
             return;
 
-        const {gicon, iconName} = await resolveTrayIcon(
+        const {gicon, iconName, detected, pixmapHash} = await resolveTrayIcon(
             this._proxy,
             this._settings,
-            this.appId
+            this.appId,
+            this._pixmapHash
         );
 
         if (this._isDestroyed)
             return;
+
+        this._pixmapHash = pixmapHash ?? null;
 
         if (gicon) {
             this._iconActor.icon_name = null;
@@ -408,16 +412,11 @@ export class TrayIcon {
             this._iconActor.icon_name = 'image-missing';
         }
 
-        if (!this._isDestroyed && this.appId) {
-            const rawName = await refreshPropertyOnProxy(this._proxy, 'IconName');
-            const rawPath = await refreshPropertyOnProxy(this._proxy, 'IconThemePath');
-
-            if (rawName) {
-                const updateData = {detected_icon: rawName};
-                if (rawPath)
-                    updateData.icon_theme_path = rawPath;
-                updateAppConfig(this._settings, this.appId, updateData);
-            }
+        if (this.appId && detected?.iconName) {
+            const updateData = {detected_icon: detected.iconName};
+            if (detected.iconThemePath)
+                updateData.icon_theme_path = detected.iconThemePath;
+            updateAppConfig(this._settings, this.appId, updateData);
         }
     }
 
