@@ -7,7 +7,7 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 import {gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
 
-import {getAppConfigs, setAppConfigValue} from '../shared/appConfig.js';
+import {getAppConfigMap, setAppPriorities} from '../shared/appConfig.js';
 import {clearIds, disconnectAll, disconnectSignal, disposeAll, removeTimer} from '../shared/lifecycle.js';
 import {safelyReparentActor, isDisposed, computeToggleStyle} from './utils/actor.js';
 import {
@@ -23,7 +23,6 @@ import {DragPlaceholder} from './features/dragAndDrop.js';
 import {
     LAYOUT_UPDATE_DELAY_MS,
     GEOMETRY_SETTLE_MS,
-    PRIORITY_STEP,
 } from '../const.js';
 
 export const PanelIndicator = GObject.registerClass(
@@ -55,6 +54,7 @@ export const PanelIndicator = GObject.registerClass(
 
             this._dragPlaceholder = new DragPlaceholder();
             this._menuRemovedForDrag = false;
+            this._dragItems = null;
 
             this._visibleBox = new St.BoxLayout({
                 style_class: 'tray-visible-box',
@@ -142,6 +142,7 @@ export const PanelIndicator = GObject.registerClass(
             if (!actor._appId)
                 actor._appId = id;
             this._icons.set(id, actor);
+            this._dragItems = null;
             this._queueUpdateLayout();
         }
 
@@ -149,6 +150,7 @@ export const PanelIndicator = GObject.registerClass(
             if (!this._icons.has(id))
                 return;
             this._icons.delete(id);
+            this._dragItems = null;
             this._queueUpdateLayout();
         }
 
@@ -185,11 +187,7 @@ export const PanelIndicator = GObject.registerClass(
         }
 
         _cycleIcons() {
-            const configs = getAppConfigs(this._settings);
-            const configMap = {};
-            configs.forEach(c => {
-                configMap[c.id] = c;
-            });
+            const configMap = getAppConfigMap(this._settings);
 
             const allItems = [];
             for (const [id, actor] of this._icons) {
@@ -211,12 +209,7 @@ export const PanelIndicator = GObject.registerClass(
             const rotated = allItems.shift();
             allItems.push(rotated);
 
-            // PRIORITY_STEP gaps leave room for manual inserts via the prefs UI.
-            let nextPriority = allItems.length * PRIORITY_STEP;
-            allItems.forEach(item => {
-                setAppConfigValue(this._settings, item.appId, 'priority', nextPriority);
-                nextPriority -= PRIORITY_STEP;
-            });
+            setAppPriorities(this._settings, allItems.map(item => item.appId));
         }
 
         _openActionMenu() {
@@ -273,9 +266,10 @@ export const PanelIndicator = GObject.registerClass(
                 return;
             this._hideDragPlaceholder();
 
+            this._dragItems = null;
             const limit = this._settings.get_int('visible-icon-limit');
             const togglePos = this._settings.get_string('toggle-position');
-            const configs = getAppConfigs(this._settings);
+            const configMap = getAppConfigMap(this._settings);
 
             if (this._overflowMenu.layoutNeedsRecreate()) {
                 this._overflowMenu.recreateContainer();
@@ -286,11 +280,6 @@ export const PanelIndicator = GObject.registerClass(
 
             if (!this._overflowMenu.container)
                 return;
-
-            const configMap = {};
-            configs.forEach(c => {
-                configMap[c.id] = c;
-            });
 
             const validIcons = [];
             for (const [id, actor] of this._icons) {
@@ -362,9 +351,7 @@ export const PanelIndicator = GObject.registerClass(
         // Captures the fields _updateLayout actually reads from app-configs:
         // which icons exist, whether each is hidden, and its sort priority.
         _computeLayoutSignature() {
-            const configMap = {};
-            for (const c of getAppConfigs(this._settings))
-                configMap[c.id] = c;
+            const configMap = getAppConfigMap(this._settings);
 
             const parts = [];
             for (const [id, actor] of this._icons) {
@@ -459,6 +446,7 @@ export const PanelIndicator = GObject.registerClass(
         }
 
         _onAnyDragEnd() {
+            this._dragItems = null;
             this._hideDragPlaceholder();
             if (this._overflowMenu?.isOpen)
                 this._overflowMenu.close();
@@ -474,8 +462,12 @@ export const PanelIndicator = GObject.registerClass(
             if (!draggableItem)
                 return DND.DragMotionResult.NO_DROP;
 
+            // Snapshot once per drag. This fires per pointer motion event
+            // and the icon set can't change while the user is dragging.
+            this._dragItems ??= this._getDropTargetIcons();
+
             const [sx, sy] = dragStageCoords(dragActor);
-            this._updateDragPlaceholder(sx, sy);
+            this._updateDragPlaceholder(this._dragItems, sx, sy);
             return DND.DragMotionResult.MOVE_DROP;
         }
 
@@ -487,7 +479,8 @@ export const PanelIndicator = GObject.registerClass(
                 return false;
 
             const draggedAppId = draggableItem.appId;
-            const items = this._getDropTargetIcons();
+            const items = this._dragItems ?? this._getDropTargetIcons();
+            this._dragItems = null;
 
             const currentIndex = items.findIndex(i => i.appId === draggedAppId);
             if (currentIndex === -1)
@@ -501,19 +494,12 @@ export const PanelIndicator = GObject.registerClass(
             const [moved] = items.splice(currentIndex, 1);
             items.splice(targetIndex, 0, moved);
 
-            // Priorities go from high to low. PRIORITY_STEP gaps leave room
-            // for manual inserts via the prefs UI.
-            let nextPriority = items.length * PRIORITY_STEP;
-            items.forEach(item => {
-                setAppConfigValue(this._settings, item.appId, 'priority', nextPriority);
-                nextPriority -= PRIORITY_STEP;
-            });
+            setAppPriorities(this._settings, items.map(item => item.appId));
 
             return true;
         }
 
-        _updateDragPlaceholder(x, y) {
-            const items = this._getDropTargetIcons();
+        _updateDragPlaceholder(items, x, y) {
             if (items.length === 0) {
                 this._hideDragPlaceholder();
                 return;
@@ -526,8 +512,7 @@ export const PanelIndicator = GObject.registerClass(
         }
 
         _getDropTargetIcons() {
-            const configs = getAppConfigs(this._settings);
-            const configMap = Object.fromEntries(configs.map(c => [c.id, c]));
+            const configMap = getAppConfigMap(this._settings);
 
             const items = [];
             for (const [id, actor] of this._icons) {

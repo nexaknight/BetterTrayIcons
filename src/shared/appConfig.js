@@ -1,6 +1,6 @@
 import {warn} from './logging.js';
 import {deleteCachedIcon} from './icon.js';
-import {RESERVED_OBJECT_KEYS} from '../const.js';
+import {PRIORITY_STEP, RESERVED_OBJECT_KEYS} from '../const.js';
 
 // Drops reserved keys so untrusted JSON (e.g. a sync file) can't reach
 // Object.prototype. `transform` returning null skips the entry.
@@ -73,6 +73,30 @@ export function setAppConfigValue(settings, appId, key, value) {
 
     map[appId][key] = value;
     settings.set_string('app-configs', JSON.stringify(map));
+}
+
+// Rewrites priorities high to low in one settings write. Per-icon
+// writes would emit one changed signal each, and every signal fans
+// out to all listeners in both processes.
+export function setAppPriorities(settings, appIdsInOrder) {
+    if (!settings || appIdsInOrder.length === 0)
+        return;
+    const map = getAppConfigMap(settings);
+
+    let changed = false;
+    let priority = appIdsInOrder.length * PRIORITY_STEP;
+    for (const appId of appIdsInOrder) {
+        if (!map[appId])
+            map[appId] = {};
+        if (map[appId].priority !== priority) {
+            map[appId].priority = priority;
+            changed = true;
+        }
+        priority -= PRIORITY_STEP;
+    }
+
+    if (changed)
+        settings.set_string('app-configs', JSON.stringify(map));
 }
 
 export function removeAppConfigKey(settings, appId, key) {
