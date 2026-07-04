@@ -5,7 +5,7 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
 import {warn} from '../shared/logging.js';
-import {getAppConfigValue, updateAppConfig, formatAppName} from '../shared/appConfig.js';
+import {getAppConfigMap, getAppConfigValue, updateAppConfig, formatAppName} from '../shared/appConfig.js';
 import {clearIds, disconnectSignal, disconnectAll, disposeAll, removeTimer} from '../shared/lifecycle.js';
 import {getUniqueId, refreshPropertyOnProxy} from './utils/dbus.js';
 import {identifyApp, resolveTrayIcon} from './utils/icons.js';
@@ -26,6 +26,8 @@ import {
     MENU_REOPEN_GUARD_MS,
     DRAGGING_SOURCE_OPACITY,
     DEFAULT_PILL_RADIUS_PX,
+    TRAY_STYLE_KEYS,
+    TRAY_CONFIG_RENDER_FIELDS,
 } from '../const.js';
 
 export class TrayIcon {
@@ -47,6 +49,9 @@ export class TrayIcon {
 
         this._updateDeferId = 0;
         this._settingsConnectId = 0;
+        this._configSig = null;
+        this._baseStyle = '';
+        this._hoverStyle = '';
 
         this._proxySignals = [];
         this._gObjectSignals = [];
@@ -82,7 +87,9 @@ export class TrayIcon {
             if (this._draggable)
                 this._draggable._appId = this.appId;
 
-
+            // Prime the signature so the change handler compares against
+            // the state this first render is about to use.
+            this._configChanged();
             this._applyStoredConfig();
             await this._updateIcon();
             if (this._isDestroyed)
@@ -126,18 +133,20 @@ export class TrayIcon {
     }
 
     _connectSettingsChanges() {
-        const STYLE_KEY_PARTS = ['icon-size', 'padding', 'style', 'color', 'radius'];
-
         const rules = [
             {
                 match: key => key === 'app-configs', run: () => {
+                    if (!this._configChanged())
+                        return;
                     this._applyStoredConfig();
                     this._queueUpdate();
                     this._swallow(this._updateTitle(), 'updateTitle');
                 },
             },
-            {match: key => STYLE_KEY_PARTS.some(part => key.includes(part)), run: () => this._updateStyle()},
-            {match: key => key === 'enable-symbolic-icons', run: () => this._queueUpdate()},
+            {match: key => TRAY_STYLE_KEYS.includes(key), run: () => this._updateStyle()},
+            // Only these change which icon gets resolved, styling alone
+            // doesn't warrant a refetch.
+            {match: key => key === 'icon-size' || key === 'enable-symbolic-icons', run: () => this._queueUpdate()},
             {match: key => key === 'enable-tooltips', run: () => this._swallow(this._updateTitle(), 'updateTitle')},
             {match: key => DRAG_SETTING_KEYS.includes(key), run: () => this._applyDragEnabled()},
         ];
@@ -151,6 +160,20 @@ export class TrayIcon {
                 }
             })
         );
+    }
+
+    // Every app-configs write lands on every icon, any app, any field.
+    // Comparing the fields this icon renders from keeps one write from
+    // fanning out into a refetch per icon.
+    _configChanged() {
+        if (!this.appId)
+            return true;
+        const entry = getAppConfigMap(this._settings)[this.appId] ?? {};
+        const sig = JSON.stringify(TRAY_CONFIG_RENDER_FIELDS.map(f => entry[f] ?? null));
+        if (sig === this._configSig)
+            return false;
+        this._configSig = sig;
+        return true;
     }
 
     // Wraps a callback so it no-ops after destroy().
@@ -300,8 +323,6 @@ export class TrayIcon {
         const size = this._settings.get_int('icon-size');
         this._iconActor.set_icon_size(size);
 
-        this._queueUpdate();
-
         const padV = this._settings.get_int('icon-padding-vertical');
         const padH = this._settings.get_int('icon-padding-horizontal');
         // Default mode keeps a 1px gap so neighbouring icons don't touch
@@ -335,32 +356,24 @@ export class TrayIcon {
             `;
         }
 
-        this.actor.set_style(this._baseStyle);
-        this.actor.queue_relayout();
-        this._updateHoverState();
-    }
-
-    _updateHoverState() {
-        if (!this.actor)
-            return;
-        const enableCustom = this._settings.get_boolean('enable-custom-icon-style');
         const hoverBg = enableCustom
             ? this._settings.get_string('icon-hover-background-color')
             : DEFAULT_HOVER_BG_COLOR;
-
-        const baseStyle = this._baseStyle || '';
-
-        if (this.actor.hover) {
-            let style = `${baseStyle} background-color: ${hoverBg};`;
-            if (enableCustom) {
-                const hoverColor = this._settings.get_string('icon-hover-color');
-                if (hoverColor)
-                    style += ` color: ${hoverColor};`;
-            }
-            this.actor.set_style(style);
-        } else {
-            this.actor.set_style(baseStyle);
+        this._hoverStyle = `${this._baseStyle} background-color: ${hoverBg};`;
+        if (enableCustom) {
+            const hoverColor = this._settings.get_string('icon-hover-color');
+            if (hoverColor)
+                this._hoverStyle += ` color: ${hoverColor};`;
         }
+
+        this._updateHoverState();
+    }
+
+    // Hover fires per pointer pass, so it only swaps precomputed strings.
+    _updateHoverState() {
+        if (!this.actor)
+            return;
+        this.actor.set_style(this.actor.hover ? this._hoverStyle : this._baseStyle);
     }
 
     _applyStoredConfig() {

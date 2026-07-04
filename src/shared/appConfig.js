@@ -31,8 +31,22 @@ export function formatAppName(input) {
     return name.charAt(0).toUpperCase() + name.slice(1);
 }
 
+export function getAppConfigMap(settings) {
+    if (!settings)
+        return Object.create(null);
+    try {
+        const jsonString = settings.get_string('app-configs');
+        if (!jsonString)
+            return Object.create(null);
+        return safeMapFromParsed(JSON.parse(jsonString));
+    } catch (e) {
+        warn(`Error parsing app-configs: ${e.message}`);
+        return Object.create(null);
+    }
+}
+
 export function getAppConfigs(settings) {
-    const map = _getRawConfigMap(settings);
+    const map = getAppConfigMap(settings);
     return Object.entries(map).map(([id, data]) => ({
         id,
         ...data,
@@ -40,7 +54,7 @@ export function getAppConfigs(settings) {
 }
 
 export function getAppConfigValue(settings, appId, key, defaultValue = null) {
-    const map = _getRawConfigMap(settings);
+    const map = getAppConfigMap(settings);
     if (map[appId] && map[appId][key] !== undefined)
         return map[appId][key];
 
@@ -50,7 +64,7 @@ export function getAppConfigValue(settings, appId, key, defaultValue = null) {
 export function setAppConfigValue(settings, appId, key, value) {
     if (!settings || !appId)
         return;
-    const map = _getRawConfigMap(settings);
+    const map = getAppConfigMap(settings);
     if (!map[appId])
         map[appId] = {};
 
@@ -64,7 +78,7 @@ export function setAppConfigValue(settings, appId, key, value) {
 export function removeAppConfigKey(settings, appId, key) {
     if (!settings || !appId)
         return;
-    const map = _getRawConfigMap(settings);
+    const map = getAppConfigMap(settings);
     if (!map[appId])
         return;
 
@@ -75,7 +89,7 @@ export function removeAppConfigKey(settings, appId, key) {
 export function deleteAppConfig(settings, appId) {
     if (!settings || !appId)
         return;
-    const map = _getRawConfigMap(settings);
+    const map = getAppConfigMap(settings);
     if (map[appId]) {
         delete map[appId];
         settings.set_string('app-configs', JSON.stringify(map));
@@ -89,7 +103,7 @@ export function updateAppConfig(settings, appId, detectedData) {
     if (!settings || !appId)
         return;
 
-    const map = _getRawConfigMap(settings);
+    const map = getAppConfigMap(settings);
     const existing = map[appId] || {};
 
     const merged = {};
@@ -119,18 +133,4 @@ export function updateAppConfig(settings, appId, detectedData) {
     };
 
     settings.set_string('app-configs', JSON.stringify(map));
-}
-
-function _getRawConfigMap(settings) {
-    if (!settings)
-        return Object.create(null);
-    try {
-        const jsonString = settings.get_string('app-configs');
-        if (!jsonString)
-            return Object.create(null);
-        return safeMapFromParsed(JSON.parse(jsonString));
-    } catch (e) {
-        warn(`Error parsing app-configs: ${e.message}`);
-        return Object.create(null);
-    }
 }

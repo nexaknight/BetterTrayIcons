@@ -76,6 +76,33 @@ export const DRAG_SETTING_KEYS = Object.freeze([
 ]);
 
 
+// ------- Tray icons -------
+
+// Tray icons restyle only on these keys.
+export const TRAY_STYLE_KEYS = Object.freeze([
+    'enable-custom-icon-style',
+    'icon-size',
+    'icon-padding-vertical',
+    'icon-padding-horizontal',
+    'icon-border-radius',
+    'icon-color',
+    'icon-hover-color',
+    'icon-background-color',
+    'icon-hover-background-color',
+]);
+
+// Config entry fields a tray icon renders from. Lets an icon skip the
+// refetch when an app-configs write didn't touch any of them.
+export const TRAY_CONFIG_RENDER_FIELDS = Object.freeze([
+    'is_hidden',
+    'custom_title',
+    'custom_icon',
+    'cached_icon_path',
+    'detected_icon',
+    'icon_theme_path',
+]);
+
+
 // ------- XEmbed tray -------
 
 // XEmbed wrappers re-render only on these keys.
