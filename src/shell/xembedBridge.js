@@ -488,8 +488,8 @@ async function readPpid(pid, cancellable) {
     return m ? parseInt(m[1], 10) : 0;
 }
 
-// Cancellation re-thrown so callers can short-circuit; any other failure
-// (file missing, decode error) collapses to null.
+// Cancellation is re-thrown so callers can short-circuit.
+// Any other failure (file missing, decode error) collapses to null.
 async function readProcFile(pid, name, cancellable) {
     if (!pid)
         return null;

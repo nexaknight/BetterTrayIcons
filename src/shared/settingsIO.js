@@ -213,7 +213,6 @@ function _exportSettingsToJSON(settings) {
         if (typeof nativeVal === 'string' && nativeVal.startsWith(homeDir))
             nativeVal = nativeVal.replace(homeDir, '$HOME');
 
-
         exportData[key] = nativeVal;
     });
 
@@ -311,10 +310,8 @@ function _sanitizeAppConfigForImport(appId, appConf, homeDir) {
     if (!appConf.custom_icon || typeof appConf.custom_icon !== 'string')
         return appConf;
 
-
     if (appConf.custom_icon.includes('$HOME'))
         appConf.custom_icon = appConf.custom_icon.split('$HOME').join(homeDir);
-
 
     if (appConf.custom_icon.startsWith('/')) {
         const f = Gio.File.new_for_path(appConf.custom_icon);

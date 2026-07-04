@@ -165,15 +165,15 @@ export const PanelIndicator = GObject.registerClass(
         }
 
         // SNI/XEmbed click handler. The action itself (Activate, Secondary)
-        // is fired by the icon; this only decides what the overflow popup
+        // is fired by the icon. This only decides what the overflow popup
         // should do afterwards.
         _handleIconClick() {
             if (!this._overflowMenu)
                 return;
             if (this._settings.get_boolean('keep-popup-after-click')) {
                 // The SNI action may shift focus (e.g. raises a window),
-                // which drops Shell's modal grab and closes the popup. Defer
-                // a re-open so it survives the focus transition.
+                // which drops Shell's modal grab and closes the popup.
+                // Defer a re-open so it survives the focus transition.
                 GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
                     if (this._overflowMenu && !this._overflowMenu.isOpen &&
                         this._settings?.get_boolean('keep-popup-after-click'))
@@ -231,7 +231,6 @@ export const PanelIndicator = GObject.registerClass(
 
             if (Main.panel.menuManager)
                 Main.panel.menuManager.addMenu(this._actionMenu);
-
 
             this._actionMenuOverflowItem = new PopupMenu.PopupMenuItem(_('Open Overflow Menu'));
             this._actionMenuOverflowItem.connect('activate', () => {

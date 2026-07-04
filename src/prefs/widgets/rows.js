@@ -244,10 +244,8 @@ export function createActionRow(title, subtitle, options = {}) {
     if (onActivate)
         row.connect('activated', onActivate);
 
-
     if (prefixIcon)
         row.add_prefix(new Gtk.Image({icon_name: prefixIcon, pixel_size: 24, valign: Gtk.Align.CENTER}));
-
 
     if (experimental)
         attachBadge(row, _('Experimental'));
@@ -261,7 +259,6 @@ export function createActionRow(title, subtitle, options = {}) {
     if (suffixIcon)
         row.add_suffix(new Gtk.Image({icon_name: suffixIcon, valign: Gtk.Align.CENTER}));
 
-
     return row;
 }
 
@@ -269,8 +266,6 @@ export function createLinkRow(title, subtitle, iconName, window, url) {
     return createActionRow(title, subtitle, {prefixIcon: iconName, onActivate: () => openUri(window, url)});
 }
 
-// `keyPrefix` is joined with each side: e.g. 'toggle-padding' →
-// 'toggle-padding-top', '-bottom', '-left', '-right'.
 export function createBoxSidesGroup(title, settings, keyPrefix, {min = 0, max = 50, step = 1} = {}) {
     const sides = [
         ['top', _('Top')],

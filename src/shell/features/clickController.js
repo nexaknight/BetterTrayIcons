@@ -60,7 +60,6 @@ export class ClickController {
         else
             this._state.clickCount = 1;
 
-
         this._state.lastClickTime = eventTime;
         this._state.isLongPress = false;
 
@@ -127,7 +126,6 @@ export class ClickController {
             this._onDoubleClickRelease(button);
         else
             this._state.clickCount = 0;
-
 
         return this._propagate ? Clutter.EVENT_PROPAGATE : Clutter.EVENT_STOP;
     }

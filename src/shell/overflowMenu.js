@@ -27,9 +27,9 @@ export class OverflowMenu {
         // The theme's .popup-menu rule pins a 15em min-width on the BoxPointer actor.
         // BoxPointer._reposition then centers that 240px wrapper on the toggle and
         // clamps to the work-area, which pushes the popup far left when the toggle
-        // sits in the left panel box. Forcing min-width: 0 on both actor and box
-        // lets the wrapper shrink to the container width so the arrow ends up
-        // over the toggle.
+        // sits in the left panel box.
+        // Forcing min-width: 0 on both actor and box lets the wrapper shrink to
+        // the container width so the arrow ends up over the toggle.
         this._menu.actor.set_style('min-width: 0; min-height: 0;');
 
         // Without these, menu.box inherits x_expand=true and the popup spans the monitor.

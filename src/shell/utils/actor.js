@@ -73,7 +73,6 @@ export function placeIndicatorInPanel(indicator, settings) {
     if (currentParent)
         currentParent.remove_child(indicator);
 
-
     const position = settings.get_string('tray-position');
     const order = settings.get_int('tray-order');
 

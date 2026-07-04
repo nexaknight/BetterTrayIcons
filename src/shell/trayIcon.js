@@ -303,9 +303,9 @@ export class TrayIcon {
             this._onCloseMenu?.();
             break;
         case 'menu':
-            // Guard against immediate reopen after a close. The click
-            // that closes a popup also fires here, which would toggle
-            // it right back on.
+            // Guard against immediate reopen after a close.
+            // The click that closes a popup also fires here, which would
+            // toggle it right back on.
             if (GLib.get_monotonic_time() - this._lastCloseTime < MENU_REOPEN_GUARD_MS * 1000)
                 return;
             this._contextMenu();

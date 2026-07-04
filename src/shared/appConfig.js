@@ -136,7 +136,6 @@ export function updateAppConfig(settings, appId, detectedData) {
             merged[k] = v;
     }
 
-
     let changed = !map[appId];
     for (const k of Object.keys(merged)) {
         if (existing[k] !== merged[k]) {

@@ -101,7 +101,6 @@ function _buildSyncLocationGroup(page, settings, openJsonFileChooser, cancellabl
     else
         pathRow.set_subtitle(_('Schema key "sync-file-path" missing.'));
 
-
     const warningIcon = createImage({
         icon_name: 'dialog-warning-symbolic',
         valign: 'center',

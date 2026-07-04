@@ -179,7 +179,7 @@ export class DBusMenuClient {
         }
 
         // Walk up the parent chain to find the outermost PopupMenu. Submenus
-        // expose `_parent`; the top-level PopupMenu reaches itself via the
+        // expose `_parent`. The top-level PopupMenu reaches itself via the
         // owning actor's `_delegate.menu`.
         let iter = parentMenu;
         while (iter) {

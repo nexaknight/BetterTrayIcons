@@ -97,7 +97,6 @@ export class ApplicationsPage extends Adw.PreferencesPage {
             else if (app.is_wine)
                 attachBadge(row, _('Wine'), {variant: 'info'});
 
-
             if (app.is_hidden) {
                 row.add_suffix(createIconButton('low-vision-symbolic', {
                     tooltip_text: _('Hidden'),

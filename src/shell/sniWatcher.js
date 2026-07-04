@@ -54,8 +54,9 @@ export class SniWatcher {
             };
 
             // DO_NOT_QUEUE makes a second instance exit via onLost instead
-            // of waiting in the bus queue. REPLACE is omitted, because it
-            // would take the well-known name from another running watcher.
+            // of waiting in the bus queue.
+            // REPLACE is omitted, because it would take the well-known name
+            // from another running watcher.
             const ownFlags = Gio.BusNameOwnerFlags.DO_NOT_QUEUE;
 
             this._kdeWatcherId = Gio.bus_own_name(
@@ -181,7 +182,6 @@ export class SniWatcher {
 
         if (this._dbusImpl)
             this._dbusImpl.emit_signal('StatusNotifierItemRegistered', GLib.Variant.new('(s)', [service]));
-
 
         invocation.return_value(null);
     }

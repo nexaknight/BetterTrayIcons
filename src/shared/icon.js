@@ -31,7 +31,6 @@ export function resolveIcon(config) {
         if (iconName.startsWith('/'))
             return {type: 'file', value: iconName};
 
-
         if (config.icon_theme_path) {
             const resolvedPath = findIconInTheme(iconName, config.icon_theme_path);
             if (resolvedPath)

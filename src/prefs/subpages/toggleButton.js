@@ -115,8 +115,7 @@ export default class ToggleButtonSubpage extends Adw.NavigationPage {
             this._settings,
             'toggle-inherit-icon-style'
         );
-        // Greyed out when tray icons have no custom style. Nothing to
-        // inherit from.
+        // Greyed out when tray icons have no custom style. Nothing to inherit from.
         this._settings.bind(
             'enable-custom-icon-style', inheritRow, 'sensitive',
             Gio.SettingsBindFlags.GET

@@ -68,7 +68,7 @@ export class AboutPage extends Adw.PreferencesPage {
         });
 
         githubBox.append(githubIcon);
-        githubBox.append(createLabel('Github', []));
+        githubBox.append(createLabel('GitHub', []));
 
         const sourceRow = createActionRow(_('Source Code'), '', {
             prefixIcon: 'applications-development-symbolic',
@@ -232,7 +232,7 @@ export class AboutPage extends Adw.PreferencesPage {
             group.remove(loadingRow);
 
             // Apply the opt-out filter before slicing, so an opted-out user
-            // never displaces a visible contributor from the top 5.
+            // never displaces a visible contributor.
             data = filterContributors(data);
 
             if (data.length === 0) {

@@ -2,7 +2,6 @@ import GLib from 'gi://GLib';
 
 export const removeTimer = id => GLib.source_remove(id);
 
-// Calls target[prop][method]() then nulls each prop.
 export function disposeAll(target, method, ...props) {
     for (const prop of props) {
         if (target[prop]) {
@@ -12,7 +11,7 @@ export function disposeAll(target, method, ...props) {
     }
 }
 
-// Calls remover(id) on each prop and zeros it. For timeouts or signal ids.
+// For timeout or signal ids.
 export function clearIds(target, remover, ...props) {
     for (const prop of props) {
         if (target[prop]) {
@@ -22,7 +21,7 @@ export function clearIds(target, remover, ...props) {
     }
 }
 
-// `method` defaults to 'disconnect'; Gio.DBusProxy uses 'disconnectSignal'.
+// `method` defaults to 'disconnect'. Gio.DBusProxy uses 'disconnectSignal'.
 export function disconnectSignal(target, source, prop, method = 'disconnect') {
     if (target[prop]) {
         try {

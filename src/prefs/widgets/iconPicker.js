@@ -40,8 +40,8 @@ export default class IconPickerWidget extends Adw.PreferencesDialog {
         this._itemsPerPage = 32;
         this._inputTimeoutId = 0;
 
-        // Both grids can highlight the current icon. Tracks every active
-        // button so a click can clear the others.
+        // Both grids can highlight the current icon.
+        // Tracks every active button so a click can clear the others.
         this._activeGridBtns = new Set();
 
         this._buildUI();
@@ -388,8 +388,8 @@ export default class IconPickerWidget extends Adw.PreferencesDialog {
 
             btn.connect('clicked', () => {
                 // Clear every previously highlighted button across all grids
-                // before marking the clicked one. Keeps Recommended and
-                // All Icons in sync.
+                // before marking the clicked one.
+                // Keeps Recommended and All Icons in sync.
                 this._activeGridBtns.forEach(b => b.set_css_classes(['flat', 'circular']));
                 this._activeGridBtns.clear();
                 btn.set_css_classes(['suggested-action', 'circular']);
