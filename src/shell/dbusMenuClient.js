@@ -9,6 +9,10 @@ import {clearIds, removeTimer} from '../shared/lifecycle.js';
 import {loadInterfaceXML} from './utils/dbus.js';
 import {GEOMETRY_SETTLE_MS, DBUS_MENU_YIELD_EVERY_N_ITEMS} from '../const.js';
 
+// One generated proxy class per process. Every icon builds its own
+// client, but the XML read and wrapper generation are identical.
+let _MenuProxyClass = null;
+
 export class DBusMenuClient {
     constructor(busName, objectPath, extensionDir, settings, onCloseMenu) {
         this.busName = busName;
@@ -22,11 +26,11 @@ export class DBusMenuClient {
     }
 
     init() {
-        const xmlContent = loadInterfaceXML(this.extensionDir, 'DBusMenu.xml');
-        const ProxyClass = Gio.DBusProxy.makeProxyWrapper(xmlContent);
+        _MenuProxyClass ??= Gio.DBusProxy.makeProxyWrapper(
+            loadInterfaceXML(this.extensionDir, 'DBusMenu.xml'));
 
         return new Promise((resolve, reject) => {
-            this.proxy = new ProxyClass(
+            this.proxy = new _MenuProxyClass(
                 Gio.DBus.session,
                 this.busName,
                 this.objectPath,
