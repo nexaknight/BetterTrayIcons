@@ -1,5 +1,26 @@
 # Changelog
 
+## [2.0.1](https://github.com/nexaknight/BetterTrayIcons/compare/v2.0.0...v2.0.1) (2026-07-04)
+
+
+### Bug Fixes
+
+* **about:** correct the show-more card icon name ([e219f05](https://github.com/nexaknight/BetterTrayIcons/commit/e219f052a60dc65db0e4e056b6258ac27e914c1b))
+
+
+### Performance Improvements
+
+* generate the dbusmenu proxy class once per process ([6e8f636](https://github.com/nexaknight/BetterTrayIcons/commit/6e8f6368e7f55e6cd553537562519e0f0021f369))
+* **prefs:** batch factory reset and import into one transaction ([48abaf0](https://github.com/nexaknight/BetterTrayIcons/commit/48abaf09260fe60bf95e46b808a3ab86dd34a218))
+* **prefs:** cache the system icon list across picker opens ([2a92fbc](https://github.com/nexaknight/BetterTrayIcons/commit/2a92fbc0586c7ba8c7c76df5a1e5a9da794ad2c1))
+* **prefs:** coalesce applications page rebuilds ([1c84c9d](https://github.com/nexaknight/BetterTrayIcons/commit/1c84c9d9efc8e9d17963c24c3510462b6d60480f))
+* **prefs:** defer about page artwork until the page is shown ([d118e6f](https://github.com/nexaknight/BetterTrayIcons/commit/d118e6f781ee1026db7344fbcd0486dbbe0fd016))
+* **prefs:** stop the sync dialog from stat-storming on keystrokes ([792c830](https://github.com/nexaknight/BetterTrayIcons/commit/792c830d51555c5d7874f9632947cecafc3c1601))
+* **sync:** make backup rotation and writes fully async ([5c5ff61](https://github.com/nexaknight/BetterTrayIcons/commit/5c5ff6135576e50cc359d86a35faad1b85e346e0))
+* **tray:** skip icon refetches for unrelated settings changes ([24a868f](https://github.com/nexaknight/BetterTrayIcons/commit/24a868ffd52f054952ca458986d8a63dd9e8e25f))
+* **tray:** trim d-bus traffic per icon update ([9200cb6](https://github.com/nexaknight/BetterTrayIcons/commit/9200cb67bd7a2edf8308a9810ba7f4919cfa5db0))
+* **tray:** write reorders as a single app-configs update ([5a5e248](https://github.com/nexaknight/BetterTrayIcons/commit/5a5e24872139d2e494216d250024277605f0020e))
+
 ## [2.0.0](https://github.com/nexaknight/BetterTrayIcons/compare/v1.999.999...v2.0.0) (2026-05-14)
 
 
