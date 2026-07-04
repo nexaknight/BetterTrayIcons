@@ -77,8 +77,6 @@ export class AboutPage extends Adw.PreferencesPage {
             content_fit: 2, // Gtk.ContentFit.CONTAIN
         });
 
-        this._themeSignals.push(bindSvgIconToTheme(githubIcon, mediaDir, 'github-icon.svg', 18));
-
         githubBox.append(githubIcon);
         githubBox.append(createLabel('Github', []));
 
@@ -157,9 +155,15 @@ export class AboutPage extends Adw.PreferencesPage {
         footerBox.append(logo);
         footerBox.append(fallbackLabel);
 
-        this._themeSignals.push(bindLogoToTheme(logo, fallbackLabel, mediaDir, 'logo.svg'));
-
         creditsGroup.add(footerBox);
+
+        // Reading and rasterizing the SVGs is the expensive part of this
+        // page, so defer it until the page is actually shown.
+        const mapId = this.connect('map', () => {
+            this.disconnect(mapId);
+            this._themeSignals.push(bindSvgIconToTheme(githubIcon, mediaDir, 'github-icon.svg', 18));
+            this._themeSignals.push(bindLogoToTheme(logo, fallbackLabel, mediaDir, 'logo.svg'));
+        });
     }
 
     async _fetchAndShowChangelog() {

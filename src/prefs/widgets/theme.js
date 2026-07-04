@@ -75,31 +75,34 @@ export function bindLogoToTheme(logo, fallback, mediaDir, darkFile, lightFile = 
 }
 
 // Like bindLogoToTheme but for non-logo icons that need pixel-exact sizing.
+// One read plus one render per mode, theme flips just swap textures.
 export function bindSvgIconToTheme(image, mediaDir, filename, size = 0) {
+    let rawSvg;
+    const textures = {dark: null, light: null};
+
     return _bindToStyleManager(() => {
-        const file = mediaDir.get_child(filename);
-        if (!file.query_exists(null)) {
-            warn(`Icon file not found: ${file.get_path()}`);
-            return;
+        if (rawSvg === undefined) {
+            rawSvg = _readSvgString(mediaDir, filename);
+            if (!rawSvg)
+                warn(`Icon file not found: ${mediaDir.get_child(filename).get_path()}`);
         }
-
-        let svgStr = _readSvgString(mediaDir, filename);
-        if (!svgStr)
+        if (!rawSvg)
             return;
 
-        if (!Adw.StyleManager.get_default().dark)
-            svgStr = _recolorWhiteToBlack(svgStr);
-
-        let pixbuf = _svgToPixbuf(svgStr);
-        if (pixbuf && size > 0)
-            pixbuf = pixbuf.scale_simple(size, size, GdkPixbuf.InterpType.BILINEAR);
-
-
-        if (pixbuf) {
-            image.set_paintable(Gdk.Texture.new_for_pixbuf(pixbuf));
-            if (size > 0)
-                image.set_size_request(size, size);
-            image.visible = true;
+        const mode = Adw.StyleManager.get_default().dark ? 'dark' : 'light';
+        if (!textures[mode]) {
+            const svgStr = mode === 'dark' ? rawSvg : _recolorWhiteToBlack(rawSvg);
+            let pixbuf = _svgToPixbuf(svgStr);
+            if (pixbuf && size > 0)
+                pixbuf = pixbuf.scale_simple(size, size, GdkPixbuf.InterpType.BILINEAR);
+            if (!pixbuf)
+                return;
+            textures[mode] = Gdk.Texture.new_for_pixbuf(pixbuf);
         }
+
+        image.set_paintable(textures[mode]);
+        if (size > 0)
+            image.set_size_request(size, size);
+        image.visible = true;
     });
 }
