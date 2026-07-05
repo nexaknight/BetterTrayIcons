@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.1.0](https://github.com/nexaknight/BetterTrayIcons/compare/v2.0.3...v2.1.0) (2026-07-05)
+
+
+### Features
+
+* **tray:** add hover tooltips to xembed icons ([7f67c93](https://github.com/nexaknight/BetterTrayIcons/commit/7f67c9327a97ac24f4909335b50df85c6dadda91))
+
+
+### Bug Fixes
+
+* **build:** ship the compiled gsettings schema in the release asset ([5263b55](https://github.com/nexaknight/BetterTrayIcons/commit/5263b55db867f618be4f9217e80771d099341e39)), closes [#12](https://github.com/nexaknight/BetterTrayIcons/issues/12)
+
 ## [2.0.3](https://github.com/nexaknight/BetterTrayIcons/compare/v2.0.2...v2.0.3) (2026-07-04)
 
 
