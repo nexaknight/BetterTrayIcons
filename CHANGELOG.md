@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.0](https://github.com/nexaknight/BetterTrayIcons/compare/v2.1.0...v2.2.0) (2026-07-05)
+
+
+### Features
+
+* **i18n:** add Russian translation ([2ad6f33](https://github.com/nexaknight/BetterTrayIcons/commit/2ad6f33b092e12c23f1ae9565b439f1ef6dcd430))
+
 ## [2.1.0](https://github.com/nexaknight/BetterTrayIcons/compare/v2.0.3...v2.1.0) (2026-07-05)
 
 
