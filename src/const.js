@@ -229,4 +229,5 @@ export const MAX_CONTRIBUTORS = 5;
 export const CONTRIBUTORS_OPTOUT = new Set([
     'github-actions[bot]',
     'dependabot[bot]',
+    'Agent19872',
 ]);
