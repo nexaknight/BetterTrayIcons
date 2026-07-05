@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.1](https://github.com/nexaknight/BetterTrayIcons/compare/v2.2.0...v2.2.1) (2026-07-05)
+
+
+### Bug Fixes
+
+* **about:** lowercase the contributor opt-out entry ([3f7d41a](https://github.com/nexaknight/BetterTrayIcons/commit/3f7d41acde0e75be42f3af38c9b43189211b63cc))
+
 ## [2.2.0](https://github.com/nexaknight/BetterTrayIcons/compare/v2.1.0...v2.2.0) (2026-07-05)
 
 
