@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.2](https://github.com/nexaknight/BetterTrayIcons/compare/v2.2.1...v2.2.2) (2026-07-06)
+
+
+### Bug Fixes
+
+* **prefs:** correct button alignment styling ([d18d01f](https://github.com/nexaknight/BetterTrayIcons/commit/d18d01f8e4641135f745c2755d2fcc5fd0146acf))
+
 ## [2.2.1](https://github.com/nexaknight/BetterTrayIcons/compare/v2.2.0...v2.2.1) (2026-07-05)
 
 
