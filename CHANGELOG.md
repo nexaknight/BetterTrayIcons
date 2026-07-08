@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.2.3](https://github.com/nexaknight/BetterTrayIcons/compare/v2.2.2...v2.2.3) (2026-07-08)
+
+
+### Bug Fixes
+
+* **tray:** cancel in-flight SNI registrations when their owner dies ([b553039](https://github.com/nexaknight/BetterTrayIcons/commit/b553039376d82aaeb900b3d789abf864bb4bef86)), closes [#14](https://github.com/nexaknight/BetterTrayIcons/issues/14)
+* **tray:** identify Wine tray icons by launcher and prefix ([8ba83ae](https://github.com/nexaknight/BetterTrayIcons/commit/8ba83ae3d82a542ac7be917365190abeecbf5301))
+
 ## [2.2.2](https://github.com/nexaknight/BetterTrayIcons/compare/v2.2.1...v2.2.2) (2026-07-06)
 
 
