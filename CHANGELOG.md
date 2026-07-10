@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.0](https://github.com/nexaknight/BetterTrayIcons/compare/v2.2.3...v2.3.0) (2026-07-10)
+
+
+### Features
+
+* **tray:** let a setting choose which menu opens on toggle hover ([6602996](https://github.com/nexaknight/BetterTrayIcons/commit/6602996d66730c5048c3d163263fe64364273746)), closes [#22](https://github.com/nexaknight/BetterTrayIcons/issues/22)
+
 ## [2.2.3](https://github.com/nexaknight/BetterTrayIcons/compare/v2.2.2...v2.2.3) (2026-07-08)
 
 
