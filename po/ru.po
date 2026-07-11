@@ -1,9 +1,12 @@
+#
+# Igor Zhitov <agent19872@icloud.com>, 2026.
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: BetterTrayIcons\n"
 "Report-Msgid-Bugs-To: https://github.com/nexaknight/BetterTrayIcons/issues\n"
 "POT-Creation-Date: 2026-05-11 10:26+0200\n"
-"PO-Revision-Date: 2026-07-06 02:54+0800\n"
+"PO-Revision-Date: 2026-07-11 19:56+0800\n"
 "Last-Translator: Igor Zhitov <agent19872@icloud.com>\n"
 "Language-Team: Russian\n"
 "Language: ru\n"
@@ -32,9 +35,11 @@ msgstr "Дополнительно"
 msgid "All Icons"
 msgstr "Все значки"
 
-msgid "All settings will be restored to defaults and sync backups deleted. This "
+msgid ""
+"All settings will be restored to defaults and sync backups deleted. This "
 "cannot be undone."
-msgstr "Все настройки будут сброшены до значений по умолчанию, а резервные копии "
+msgstr ""
+"Все настройки будут сброшены до значений по умолчанию, а резервные копии "
 "синхронизации удалены. Это действие нельзя отменить."
 
 msgid "Appearance"
@@ -143,7 +148,7 @@ msgid "Custom Style"
 msgstr "Пользовательский стиль"
 
 msgid "Cycle Icons"
-msgstr "Переключение значков"
+msgstr "Сдвинуть значки"
 
 msgid "Danger Zone"
 msgstr "Опасная зона"
@@ -325,6 +330,9 @@ msgstr "Использует внешний вид значков трея и с
 msgid "Menu items still close immediately on click."
 msgstr "Пункты меню всё равно закрываются сразу при нажатии."
 
+msgid "Menu on Hover"
+msgstr "Меню при наведении"
+
 msgid "More colors"
 msgstr "Дополнительные цвета"
 
@@ -388,6 +396,9 @@ msgstr "Макет меню скрытых значков"
 msgid "Overflow Menu"
 msgstr "Меню скрытых значков"
 
+msgid "Overflow Popup"
+msgstr "Скрытые значки"
+
 msgid "Padding"
 msgstr "Внутренние отступы"
 
@@ -409,8 +420,10 @@ msgstr "Предыдущая страница"
 msgid "Proton"
 msgstr "Proton"
 
-msgid "Provided \"as is\", without warranty. The authors are not liable for damages."
-msgstr "Предоставляется \"как есть\", без каких-либо гарантий. Авторы не несут "
+msgid ""
+"Provided \"as is\", without warranty. The authors are not liable for damages."
+msgstr ""
+"Предоставляется \"как есть\", без каких-либо гарантий. Авторы не несут "
 "ответственности за возможный ущерб."
 
 msgid "Pull"
@@ -601,7 +614,7 @@ msgid "Toggle Menu"
 msgstr "Переключить меню"
 
 msgid "Tooltip Delay (ms)"
-msgstr "Задержка подсказки (мс)"
+msgstr "Задержка появления подсказки (мс)"
 
 msgid "Tooltip Position"
 msgstr "Положение подсказки"
@@ -618,13 +631,15 @@ msgstr "Действия значков трея"
 msgid "Tray Icons"
 msgstr "Значки трея"
 
-msgid "Tray icons are drawn by the app itself via XEmbed, so a custom icon cannot "
+msgid ""
+"Tray icons are drawn by the app itself via XEmbed, so a custom icon cannot "
 "be applied."
-msgstr "Значки трея отрисовываются самим приложением через XEmbed, поэтому "
+msgstr ""
+"Значки трея отрисовываются самим приложением через XEmbed, поэтому "
 "пользовательский значок применить нельзя."
 
 msgid "Type a name or pick an SVG/PNG file."
-msgstr "Введите имя или выберите SVG/PNG файл."
+msgstr "Введите имя или выберите файл SVG/PNG."
 
 msgid "Unknown"
 msgstr "Неизвестно"
@@ -682,3 +697,8 @@ msgstr "Не удалось восстановить"
 
 msgid "The backup file will be permanently removed."
 msgstr "Файл резервной копии будет удалён безвозвратно."
+
+msgid "Which menu opens when you hover the toggle button"
+msgstr ""
+"Какое меню открывать при наведении на кнопку, когда открыто другое меню "
+"панели"
