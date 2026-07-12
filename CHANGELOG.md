@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.4.0](https://github.com/nexaknight/BetterTrayIcons/compare/v2.3.0...v2.4.0) (2026-07-12)
+
+
+### Features
+
+* **tray:** let selected colors follow the system accent ([558a8e8](https://github.com/nexaknight/BetterTrayIcons/commit/558a8e8414c16a96d53df1beb949f502b9eca7e6)), closes [#20](https://github.com/nexaknight/BetterTrayIcons/issues/20)
+
 ## [2.3.0](https://github.com/nexaknight/BetterTrayIcons/compare/v2.2.3...v2.3.0) (2026-07-10)
 
 
