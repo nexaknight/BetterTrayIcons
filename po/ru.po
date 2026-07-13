@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: BetterTrayIcons\n"
 "Report-Msgid-Bugs-To: https://github.com/nexaknight/BetterTrayIcons/issues\n"
 "POT-Creation-Date: 2026-05-11 10:26+0200\n"
-"PO-Revision-Date: 2026-07-11 19:56+0800\n"
+"PO-Revision-Date: 2026-07-13 15:54+0800\n"
 "Last-Translator: Igor Zhitov <agent19872@icloud.com>\n"
 "Language-Team: Russian\n"
 "Language: ru\n"
@@ -646,6 +646,14 @@ msgstr "Неизвестно"
 
 msgid "Unknown App"
 msgstr "Неизвестное приложение"
+
+msgid "Use Accent Color"
+msgstr "Использовать акцентный цвет"
+
+msgid "Use Accent Color on Hover"
+msgstr ""
+"Использовать акцентный цвет\n"
+"при наведении"
 
 msgid "Use monochrome icons when available."
 msgstr "Использовать монохромные значки, если они доступны."
