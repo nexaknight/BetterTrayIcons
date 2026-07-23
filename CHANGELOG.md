@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.1](https://github.com/nexaknight/BetterTrayIcons/compare/v3.0.0...v3.0.1) (2026-07-23)
+
+
+### Bug Fixes
+
+* **tray:** keep the context menu alive when the panel auto-hides ([62ab18a](https://github.com/nexaknight/BetterTrayIcons/commit/62ab18af2665e79d149743b2a1a04d75a1fba2b3)), closes [#33](https://github.com/nexaknight/BetterTrayIcons/issues/33) [#34](https://github.com/nexaknight/BetterTrayIcons/issues/34)
+
 ## [3.0.0](https://github.com/nexaknight/BetterTrayIcons/compare/v2.4.0...v3.0.0) (2026-07-23)
 
 
