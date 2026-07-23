@@ -1,5 +1,28 @@
 # Changelog
 
+## [3.0.0](https://github.com/nexaknight/BetterTrayIcons/compare/v2.4.0...v3.0.0) (2026-07-23)
+
+
+### ⚠ BREAKING CHANGES
+
+* **tray:** the tray detection core was reworked, so apps can be re-identified under new keys and settings synced from an older version may not apply cleanly. To be safe after updating, reset all settings and clear the backups under General so no stale or broken data is carried over.
+
+### Features
+
+* **actions:** touch gestures and scroll to cycle icons ([20511cb](https://github.com/nexaknight/BetterTrayIcons/commit/20511cbeb06498e54ec7a5f652140ef46e89dfcb)), closes [#30](https://github.com/nexaknight/BetterTrayIcons/issues/30)
+* bundle the extension's own icon theme ([2aba319](https://github.com/nexaknight/BetterTrayIcons/commit/2aba319dfe1ff58a73db73bf6a8ea01f7d782396))
+* **prefs:** sidebar redesign, live previews and cross-device merge ([470a996](https://github.com/nexaknight/BetterTrayIcons/commit/470a9965f79f14777b11f5660f14a8ea7fe73764))
+* **shell:** hide background apps and proxy icons for windowless apps ([fff0954](https://github.com/nexaknight/BetterTrayIcons/commit/fff09545ad6d0b307435ec9c0336046f297a0469))
+* **tray:** per-item identity, packaging split and status badges ([1e52b35](https://github.com/nexaknight/BetterTrayIcons/commit/1e52b359ac9a25ee93f17c3baed9bd65879bc7d3))
+
+
+### Bug Fixes
+
+* **prefs:** ship the svg assets the about page renders ([11f89d1](https://github.com/nexaknight/BetterTrayIcons/commit/11f89d1273909d17192357f57fab181a619b5f4d))
+* **prefs:** stop scoped handlers from leaking their widget ([bb3d17f](https://github.com/nexaknight/BetterTrayIcons/commit/bb3d17f022ca256e081b5834ad5f698c5b7b76f5))
+* **schema:** reject out-of-range values instead of storing them ([ed36840](https://github.com/nexaknight/BetterTrayIcons/commit/ed368406ac797aba2699cb0ab3c3af1a742b4ce6))
+* **sync:** keep the settings import off the shell main loop ([1a980b5](https://github.com/nexaknight/BetterTrayIcons/commit/1a980b58297cc783c0d6fa3d2a20b9243d3ccfd3))
+
 ## [2.4.0](https://github.com/nexaknight/BetterTrayIcons/compare/v2.3.0...v2.4.0) (2026-07-12)
 
 
