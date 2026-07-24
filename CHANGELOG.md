@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.2](https://github.com/nexaknight/BetterTrayIcons/compare/v3.0.1...v3.0.2) (2026-07-24)
+
+
+### Bug Fixes
+
+* clean up after a failed enable instead of only logging it ([f3239e3](https://github.com/nexaknight/BetterTrayIcons/commit/f3239e3b4bddb687fe5b5a8d6ba222dea0f148e7))
+
 ## [3.0.1](https://github.com/nexaknight/BetterTrayIcons/compare/v3.0.0...v3.0.1) (2026-07-23)
 
 
