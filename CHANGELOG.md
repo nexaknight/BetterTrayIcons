@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.3](https://github.com/nexaknight/BetterTrayIcons/compare/v3.0.2...v3.0.3) (2026-07-29)
+
+
+### Bug Fixes
+
+* **tray:** multi-color status icons and the unread badge ([4046722](https://github.com/nexaknight/BetterTrayIcons/commit/404672286801f3377f8c28c63026c779ee608a46)), closes [#33](https://github.com/nexaknight/BetterTrayIcons/issues/33) [#35](https://github.com/nexaknight/BetterTrayIcons/issues/35)
+
 ## [3.0.2](https://github.com/nexaknight/BetterTrayIcons/compare/v3.0.1...v3.0.2) (2026-07-24)
 
 
