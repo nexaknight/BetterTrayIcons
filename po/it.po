@@ -1,0 +1,885 @@
+#
+# Michele Pinchiarul <mikwii2000@gmail.com>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: BetterTrayIcons\n"
+"Report-Msgid-Bugs-To: https://github.com/nexaknight/BetterTrayIcons/issues\n"
+"POT-Creation-Date: 2026-05-11 10:26+0200\n"
+"PO-Revision-Date: 2026-07-30 14:00+0200\n"
+"Last-Translator: Michele Pinchiarul <mikwii2000@gmail.com>\n"
+"Language-Team: Italian\n"
+"Language: it\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "How many icons stay in the panel. Extra icons move to the overflow menu, and 0 moves them all."
+msgstr "Quante icone restano nel pannello. Le icone in eccesso passano al menu di overflow; con 0 passano tutte."
+
+msgid "About"
+msgstr "Informazioni"
+
+msgid "Action Menu"
+msgstr "Menu azioni"
+
+msgid "Actions"
+msgstr "Azioni"
+
+msgid "Activate"
+msgstr "Attiva"
+
+msgid "Add a state"
+msgstr "Aggiungi uno stato"
+
+msgid "Adds a tray icon for windowless background apps that lack one of their own."
+msgstr "Aggiunge un'icona nel tray alle app in background senza finestra che non ne hanno una propria."
+
+msgid "Advanced"
+msgstr "Avanzate"
+
+msgid "All Icons"
+msgstr "Tutte le icone"
+
+msgid "All settings will be restored to defaults and sync backups deleted. This cannot be undone."
+msgstr "Tutte le impostazioni verranno riportate ai valori predefiniti e i backup di sincronizzazione eliminati. L'operazione non può essere annullata."
+
+msgid "Appearance"
+msgstr "Aspetto"
+
+msgid "Applications"
+msgstr "Applicazioni"
+
+msgid "Applies only when the app itself reports attention."
+msgstr "Si applica solo quando è l'app stessa a richiedere attenzione."
+
+msgid "Apply"
+msgstr "Applica"
+
+msgid "App Settings"
+msgstr "Impostazioni dell'app"
+
+msgid "A shared JSON file on Nextcloud, a NAS, or another cloud folder."
+msgstr "Un file JSON condiviso su Nextcloud, un NAS o un'altra cartella cloud."
+
+msgid "Attention"
+msgstr "Attenzione"
+
+msgid "Automatic"
+msgstr "Automatica"
+
+msgid "Auto-Sync"
+msgstr "Sincronizzazione automatica"
+
+msgid "Back"
+msgstr "Indietro"
+
+msgid "Background"
+msgstr "Sfondo"
+
+msgid "Background App"
+msgstr "App in background"
+
+msgid "Create Tray Icons for Background Apps"
+msgstr "Crea icone nel tray per le app in background"
+
+msgid "Background Apps"
+msgstr "App in background"
+
+msgid "Background Color"
+msgstr "Colore di sfondo"
+
+msgid "Background, radius, spacing"
+msgstr "Sfondo, raggio, spaziatura"
+
+msgid "Backup"
+msgstr "Backup"
+
+msgid "Backup and Restore"
+msgstr "Backup e ripristino"
+
+msgid "Backup restored"
+msgstr "Backup ripristinato"
+
+msgid "Backups"
+msgstr "Backup"
+
+msgid "Behavior"
+msgstr "Comportamento"
+
+msgid "Bottom"
+msgstr "Basso"
+
+msgid "Cancel"
+msgstr "Annulla"
+
+msgid "Center"
+msgstr "Centro"
+
+msgid "Changelog"
+msgstr "Changelog"
+
+msgid "Checking…"
+msgstr "Controllo…"
+
+msgid "Choose file"
+msgstr "Scegli un file"
+
+msgid "Clean Up"
+msgstr "Pulisci"
+
+msgid "Clean Up Legacy IDs"
+msgstr "Pulisci i vecchi ID"
+
+msgid "Cloud Sync"
+msgstr "Sincronizzazione cloud"
+
+msgid "Colors"
+msgstr "Colori"
+
+msgid "Configuration"
+msgstr "Configurazione"
+
+msgid "Configure"
+msgstr "Configura"
+
+msgid "Configure advanced actions"
+msgstr "Configura le azioni avanzate"
+
+msgid "Confirm"
+msgstr "Conferma"
+
+msgid "Contacts api.github.com on demand."
+msgstr "Contatta api.github.com su richiesta."
+
+msgid "Contributors"
+msgstr "Collaboratori"
+
+msgid "Corner Radius (px)"
+msgstr "Raggio degli angoli (px)"
+
+msgid "Custom"
+msgstr "Personalizzata"
+
+msgid "Custom Icon"
+msgstr "Icona personalizzata"
+
+msgid "Custom Style"
+msgstr "Stile personalizzato"
+
+msgid "Cycle Icons"
+msgstr "Scorri le icone"
+
+msgid "Danger Zone"
+msgstr "Zona pericolosa"
+
+msgid "Default app icon"
+msgstr "Icona predefinita dell'app"
+
+msgid "Delay (ms)"
+msgstr "Ritardo (ms)"
+
+msgid "Deletes all stored settings for this app."
+msgstr "Elimina tutte le impostazioni salvate per questa app."
+
+msgid "Detected Apps"
+msgstr "App rilevate"
+
+msgid "Don’t show this icon in the tray."
+msgstr "Non mostrare questa icona nel tray."
+
+msgid "Double Tap"
+msgstr "Doppio tocco"
+
+msgid "Double Click"
+msgstr "Doppio clic"
+
+msgid "Elements"
+msgstr "Elementi"
+
+msgid "Enable"
+msgstr "Abilita"
+
+msgid "Error loading data"
+msgstr "Errore nel caricamento dei dati"
+
+msgid "Experimental"
+msgstr "Sperimentale"
+
+msgid "Export"
+msgstr "Esporta"
+
+msgid "Factory Reset"
+msgstr "Ripristino di fabbrica"
+
+msgid "Failed to load changelog: "
+msgstr "Impossibile caricare il changelog: "
+
+msgid "File"
+msgstr "File"
+
+msgid "File Chooser"
+msgstr "Selettore di file"
+
+msgid "File is not valid JSON"
+msgstr "Il file non è in formato JSON valido"
+
+msgid "File not yet created"
+msgstr "File non ancora creato"
+
+msgid "Forget"
+msgstr "Dimentica"
+
+msgid "Forget App"
+msgstr "Dimentica l'app"
+
+msgid "from"
+msgstr "da"
+
+msgid "General"
+msgstr "Generale"
+
+msgid "Grid"
+msgstr "Griglia"
+
+msgid "Grid Columns"
+msgstr "Colonne della griglia"
+
+msgid "Help translate this extension."
+msgstr "Aiuta a tradurre questa estensione."
+
+msgid "Hide Sidebar"
+msgstr "Nascondi la barra laterale"
+
+msgid "Hidden"
+msgstr "Nascosta"
+
+msgid "Hidden icons have no position."
+msgstr "Le icone nascoste non hanno una posizione."
+
+msgid "Hide Background Apps"
+msgstr "Nascondi le app in background"
+
+msgid "Hide Icon"
+msgstr "Nascondi l'icona"
+
+msgid "Hover"
+msgstr "Al passaggio del mouse"
+
+msgid "Icon"
+msgstr "Icona"
+
+msgid "Icon Color"
+msgstr "Colore dell'icona"
+
+msgid "Icon name or path"
+msgstr "Nome o percorso dell'icona"
+
+msgid "Icon, position, colors"
+msgstr "Icona, posizione, colori"
+
+msgid "Icon Size (px)"
+msgstr "Dimensione delle icone (px)"
+
+msgid "Icons"
+msgstr "Icone"
+
+msgid "ID"
+msgstr "ID"
+
+msgid "Image Files"
+msgstr "File immagine"
+
+msgid "JSON Files"
+msgstr "File JSON"
+
+msgid "Import"
+msgstr "Importa"
+
+msgid "Import settings?"
+msgstr "Importare le impostazioni?"
+
+msgid "Information"
+msgstr "Informazioni"
+
+msgid "Inherit Style from Tray Icons"
+msgstr "Eredita lo stile dalle icone del tray"
+
+msgid "Keep Overflow Menu Open"
+msgstr "Mantieni aperto il menu di overflow"
+
+msgid "Keep settings in sync via a shared file."
+msgstr "Mantiene le impostazioni sincronizzate tramite un file condiviso."
+
+msgid "Last Sync"
+msgstr "Ultima sincronizzazione"
+
+msgid "Left"
+msgstr "Sinistra"
+
+msgid "Left Click"
+msgstr "Clic sinistro"
+
+msgid "Legal"
+msgstr "Note legali"
+
+msgid "License"
+msgstr "Licenza"
+
+msgid "Live Preview"
+msgstr "Anteprima in tempo reale"
+
+msgid "Load"
+msgstr "Carica"
+
+msgid "Load older releases"
+msgstr "Carica le versioni precedenti"
+
+msgid "Loaded from GitHub"
+msgstr "Caricato da GitHub"
+
+msgid "Loading…"
+msgstr "Caricamento…"
+
+msgid "Local settings will be overwritten."
+msgstr "Le impostazioni locali verranno sovrascritte."
+
+msgid "Long Touch"
+msgstr "Tocco prolungato"
+
+msgid "Long Press"
+msgstr "Pressione prolungata"
+
+msgid "Manual Sync"
+msgstr "Sincronizzazione manuale"
+
+msgid "Margin"
+msgstr "Margine"
+
+msgid "Match the look of tray icons; hides the controls below."
+msgstr "Riprende l'aspetto delle icone del tray; nasconde i controlli sottostanti."
+
+msgid "Stays open after icon clicks and context menus alike."
+msgstr "Resta aperto sia dopo i clic sulle icone sia dopo i menu contestuali."
+
+msgid "Menu on Hover"
+msgstr "Menu al passaggio del mouse"
+
+msgid "Which menu opens when you hover the toggle button"
+msgstr "Quale menu si apre al passaggio del mouse sul pulsante di attivazione"
+
+msgid "More colors"
+msgstr "Altri colori"
+
+msgid "Middle Click"
+msgstr "Clic centrale"
+
+msgid "Name"
+msgstr "Nome"
+
+msgid "Next"
+msgstr "Successiva"
+
+msgid "No apps detected"
+msgstr "Nessuna app rilevata"
+
+msgid "No contributors found"
+msgstr "Nessun collaboratore trovato"
+
+msgid "No file selected"
+msgstr "Nessun file selezionato"
+
+msgid "No Icons Found"
+msgstr "Nessuna icona trovata"
+
+msgid "None"
+msgstr "Nessuna"
+
+msgid "None available"
+msgstr "Nessuno disponibile"
+
+msgid "No releases found."
+msgstr "Nessuna versione trovata."
+
+msgid "Not seen yet"
+msgstr "Non ancora visto"
+
+msgid "Open"
+msgstr "Apri"
+
+msgid "Open Menu"
+msgstr "Apri il menu"
+
+msgid "Open on GitHub"
+msgstr "Apri su GitHub"
+
+msgid "Open Overflow Menu"
+msgstr "Apri il menu di overflow"
+
+msgid "Open Settings"
+msgstr "Apri le impostazioni"
+
+msgid "Open the gear for double-click and long-press."
+msgstr "Aprire l'ingranaggio per doppio clic e pressione prolungata."
+
+msgid "Order within the chosen box."
+msgstr "Ordine all'interno dell'area scelta."
+
+msgid "Overflow Container"
+msgstr "Contenitore di overflow"
+
+msgid "Overflow Layout"
+msgstr "Disposizione dell'overflow"
+
+msgid "Overflow Menu"
+msgstr "Menu di overflow"
+
+msgid "Overflow Popup"
+msgstr "Popup di overflow"
+
+msgid "Override the icon for app states like attention or sync."
+msgstr "Sostituisce l'icona per stati dell'app come attenzione o sincronizzazione."
+
+msgid "Padding"
+msgstr "Spaziatura interna"
+
+msgid "Panel Box"
+msgstr "Area del pannello"
+
+msgid "Placement"
+msgstr "Posizionamento"
+
+msgid "Position"
+msgstr "Posizione"
+
+msgid "Position %1 of %2, counted from the left."
+msgstr "Posizione %1 di %2, contando da sinistra."
+
+msgid "Position in Box"
+msgstr "Posizione nell'area"
+
+msgid "Powered by"
+msgstr "Realizzato da"
+
+msgid "Previous"
+msgstr "Precedente"
+
+msgid "Proton"
+msgstr "Proton"
+
+msgid "Provided \"as is\", without warranty. The authors are not liable for damages."
+msgstr "Fornito «così com'è», senza garanzia. Gli autori non sono responsabili di eventuali danni."
+
+msgid "Pull"
+msgstr "Preleva"
+
+msgid "Pull failed"
+msgstr "Prelievo non riuscito"
+
+msgid "Pull from file?"
+msgstr "Prelevare dal file?"
+
+msgid "Pull from File"
+msgstr "Preleva dal file"
+
+msgid "Push"
+msgstr "Invia"
+
+msgid "Push failed"
+msgstr "Invio non riuscito"
+
+msgid "Push on change, pull on remote update."
+msgstr "Invia a ogni modifica, preleva a ogni aggiornamento remoto."
+
+msgid "Push to File"
+msgstr "Invia al file"
+
+msgid "Quit"
+msgstr "Esci"
+
+msgid "Recent releases"
+msgstr "Versioni recenti"
+
+msgid "Recommended"
+msgstr "Consigliate"
+
+msgid "Relative to the tray icons."
+msgstr "Rispetto alle icone del tray."
+
+msgid "Remove"
+msgstr "Rimuovi"
+
+msgid "Remove leftovers from earlier versions."
+msgstr "Rimuove i residui delle versioni precedenti."
+
+msgid "Removes GNOME's own list of windowless apps from Quick Settings."
+msgstr "Rimuove dalle impostazioni rapide l'elenco che GNOME dedica alle app senza finestra."
+
+msgid "Reorder (drag & drop)"
+msgstr "Riordina (trascina e rilascia)"
+
+msgid "Reset"
+msgstr "Ripristina"
+
+msgid "Reset all settings?"
+msgstr "Ripristinare tutte le impostazioni?"
+
+msgid "Reset icon"
+msgstr "Ripristina l'icona"
+
+msgid "Reset name"
+msgstr "Ripristina il nome"
+
+msgid "Restore"
+msgstr "Ripristina"
+
+msgid "Reveal colors, padding and margin controls below."
+msgstr "Mostra sotto i controlli per colori, spaziatura interna e margine."
+
+msgid "Restore defaults and delete sync backups."
+msgstr "Ripristina i valori predefiniti ed elimina i backup di sincronizzazione."
+
+msgid "Restore this backup?"
+msgstr "Ripristinare questo backup?"
+
+msgid "Right"
+msgstr "Destra"
+
+msgid "Right Click"
+msgstr "Clic destro"
+
+msgid "Row"
+msgstr "Riga"
+
+msgid "Run an app with a tray icon to see it here."
+msgstr "Avviare un'app con un'icona nel tray per vederla qui."
+
+msgid "Save"
+msgstr "Salva"
+
+msgid "Save settings as JSON or load them back."
+msgstr "Salva le impostazioni come JSON o le ricarica."
+
+msgid "Schema key \"sync-file-path\" missing."
+msgstr "Chiave dello schema «sync-file-path» mancante."
+
+msgid "Scroll"
+msgstr "Scorrimento"
+
+msgid "Scroll direction picks which way the icons rotate"
+msgstr "La direzione dello scorrimento decide in quale verso ruotano le icone"
+
+msgid "Search icons…"
+msgstr "Cerca icone…"
+
+msgid "Select Icon"
+msgstr "Seleziona un'icona"
+
+msgid "Select Image"
+msgstr "Seleziona un'immagine"
+
+msgid "Set a file path first."
+msgstr "Impostare prima un percorso file."
+
+msgid "Settings"
+msgstr "Impostazioni"
+
+msgid "Settings persist after the app closes."
+msgstr "Le impostazioni restano anche dopo la chiusura dell'app."
+
+msgid "Settings pulled"
+msgstr "Impostazioni prelevate"
+
+msgid "Settings pushed"
+msgstr "Impostazioni inviate"
+
+msgid "Settings reset"
+msgstr "Impostazioni ripristinate"
+
+msgid "Shape"
+msgstr "Forma"
+
+msgid "Show"
+msgstr "Mostra"
+
+msgid "Show icons from Wine and Proton apps."
+msgstr "Mostra le icone delle app Wine e Proton."
+
+msgid "Show Sidebar"
+msgstr "Mostra la barra laterale"
+
+msgid "Show more"
+msgstr "Mostra altri"
+
+msgid "Show the app title on hover."
+msgstr "Mostra il titolo dell'app al passaggio del mouse."
+
+msgid "Single clicks are briefly delayed while a double-click action is set, so the second click can be detected."
+msgstr "I clic singoli vengono ritardati leggermente quando è impostata un'azione per il doppio clic, così da poter rilevare il secondo clic."
+
+msgid "Show Tooltips"
+msgstr "Mostra i suggerimenti"
+
+msgid "Side"
+msgstr "Lato"
+
+msgid "Size, padding, colors"
+msgstr "Dimensione, spaziatura interna, colori"
+
+msgid "Size (px)"
+msgstr "Dimensione (px)"
+
+msgid "Source Code"
+msgstr "Codice sorgente"
+
+msgid "Sponsor"
+msgstr "Sostieni"
+
+msgid "State name, e.g. state-error"
+msgstr "Nome dello stato, ad es. state-error"
+
+msgid "Status Icons"
+msgstr "Icone di stato"
+
+msgid "Style"
+msgstr "Stile"
+
+msgid "Support development."
+msgstr "Sostieni lo sviluppo."
+
+msgid "Symbolic Icons"
+msgstr "Icone simboliche"
+
+msgid "Sync File"
+msgstr "File di sincronizzazione"
+
+msgid "System Icons"
+msgstr "Icone di sistema"
+
+msgid "This name is not allowed."
+msgstr "Questo nome non è consentito."
+
+msgid "This state already exists."
+msgstr "Questo stato esiste già."
+
+msgid "this device"
+msgstr "questo dispositivo"
+
+msgid "Toggle Button"
+msgstr "Pulsante di attivazione"
+
+msgid "Toggle Button Clicks"
+msgstr "Clic sul pulsante di attivazione"
+
+msgid "Toggle Menu"
+msgstr "Apri/chiudi il menu"
+
+msgid "Tap"
+msgstr "Tocco"
+
+msgid "Tap, double tap and long touch."
+msgstr "Tocco, doppio tocco e tocco prolungato."
+
+msgid "Touch"
+msgstr "Touch"
+
+msgid "Tooltips"
+msgstr "Suggerimenti"
+
+msgid "Top"
+msgstr "Alto"
+
+msgid "Translate"
+msgstr "Traduci"
+
+msgid "Tray Icon Clicks"
+msgstr "Clic sulle icone del tray"
+
+msgid "Tray Icons"
+msgstr "Icone del tray"
+
+msgid "Tray icons are drawn by the app itself via XEmbed, so a custom icon cannot be applied."
+msgstr "Le icone del tray sono disegnate dall'app stessa tramite XEmbed, quindi non è possibile applicare un'icona personalizzata."
+
+msgid "Try a different search term."
+msgstr "Provare con un altro termine di ricerca."
+
+msgid "Type a name or pick an SVG/PNG file."
+msgstr "Digitare un nome o scegliere un file SVG/PNG."
+
+msgid "Unknown"
+msgstr "Sconosciuto"
+
+msgid "Unknown App"
+msgstr "App sconosciuta"
+
+msgid "Use Accent Color"
+msgstr "Usa il colore d'accento"
+
+msgid "Use Accent Color on Hover"
+msgstr "Usa il colore d'accento al passaggio del mouse"
+
+msgid "Use monochrome icons when available."
+msgstr "Usa icone monocromatiche quando disponibili."
+
+msgid "Version"
+msgstr "Versione"
+
+msgid "Visible Icons"
+msgstr "Icone visibili"
+
+msgid "Waiting for the file."
+msgstr "In attesa del file."
+
+msgid "Watching for changes."
+msgstr "Monitoraggio delle modifiche."
+
+msgid "Which part of the panel holds the icons."
+msgstr "In quale parte del pannello si trovano le icone."
+
+msgid "Wine"
+msgstr "Wine"
+
+msgid "Wine App Icons"
+msgstr "Icone delle app Wine"
+
+msgid "available"
+msgstr "disponibili"
+
+msgid "Backup deleted"
+msgstr "Backup eliminato"
+
+msgid "Delete"
+msgstr "Elimina"
+
+msgid "Delete failed"
+msgstr "Eliminazione non riuscita"
+
+msgid "Delete this backup?"
+msgstr "Eliminare questo backup?"
+
+msgid "Maximum Backups"
+msgstr "Numero massimo di backup"
+
+msgid "Restore failed"
+msgstr "Ripristino non riuscito"
+
+msgid "The backup file will be permanently removed."
+msgstr "Il file di backup verrà rimosso definitivamente."
+
+msgid "commits"
+msgstr "commit"
+
+msgid "All apps forgotten"
+msgstr "Tutte le app dimenticate"
+
+msgid "All apps reset"
+msgstr "Tutte le app ripristinate"
+
+msgid "All values on this page will be restored to their defaults."
+msgstr "Tutti i valori di questa pagina verranno riportati ai valori predefiniti."
+
+msgid ""
+"All values of this page, including its dialogs and subpages, will be "
+"restored to their defaults."
+msgstr "Tutti i valori di questa pagina, comprese le sue finestre di dialogo e sottopagine, verranno riportati ai valori predefiniti."
+
+msgid "App forgotten"
+msgstr "App dimenticata"
+
+msgid "Deletes all stored settings for every detected app. Running apps are re-detected right away."
+msgstr "Elimina tutte le impostazioni salvate di ogni app rilevata. Le app in esecuzione vengono rilevate di nuovo subito."
+
+msgid "Forget All"
+msgstr "Dimentica tutte"
+
+msgid "Forget All Apps"
+msgstr "Dimentica tutte le app"
+
+msgid "Forget all apps?"
+msgstr "Dimenticare tutte le app?"
+
+msgid "Forget this app?"
+msgstr "Dimenticare questa app?"
+
+msgid "Reset All"
+msgstr "Ripristina tutte"
+
+msgid "Reset All Apps"
+msgstr "Ripristina tutte le app"
+
+msgid "Reset all apps?"
+msgstr "Ripristinare tutte le app?"
+
+msgid "Reset these settings?"
+msgstr "Ripristinare queste impostazioni?"
+
+msgid "Restores name, icon and status icons to defaults for every detected app. Their order is kept."
+msgstr "Riporta nome, icona e icone di stato ai valori predefiniti per ogni app rilevata. Il loro ordine viene mantenuto."
+
+msgid "Link: editing one side sets all four"
+msgstr "Collega: modificando un lato si impostano tutti e quattro"
+
+msgid "Unlink: edit each side on its own"
+msgstr "Scollega: ogni lato si modifica singolarmente"
+
+msgid "Status Icons and Badges"
+msgstr "Icone di stato e badge"
+
+msgid "Unread badge and per-state icons."
+msgstr "Badge dei non letti e icone per stato."
+
+msgid "Bottom Right"
+msgstr "In basso a destra"
+
+msgid "Bottom Left"
+msgstr "In basso a sinistra"
+
+msgid "Top Right"
+msgstr "In alto a destra"
+
+msgid "Top Left"
+msgstr "In alto a sinistra"
+
+msgid "0 uses the automatic size."
+msgstr "0 usa la dimensione automatica."
+
+msgid "Text Color"
+msgstr "Colore del testo"
+
+msgid "Size"
+msgstr "Dimensione"
+
+msgid "Badges"
+msgstr "Badge"
+
+msgid "Shows a badge on state changes, with the count when the app sends one."
+msgstr "Mostra un badge ai cambi di stato, con il conteggio se l'app lo invia."
+
+msgid "Shows the unread count when the app sends one."
+msgstr "Mostra il numero di elementi non letti se l'app lo invia."
+
+msgid "Status icons cannot work here: the app has no tray icon and never reports a status, its icon comes from its desktop entry."
+msgstr "Le icone di stato non possono funzionare qui: l'app non ha una propria icona nel tray e non segnala mai uno stato, la sua icona proviene dal file .desktop."
+
+msgid "0 is square, high is round."
+msgstr "0 è squadrato, valori alti sono arrotondati."
+
+msgid "Spacing"
+msgstr "Spaziatura"
+
+msgid "App settings are merged; other settings are taken from the file."
+msgstr "Le impostazioni delle app vengono unite; le altre sono prese dal file."
+
+msgid "Define"
+msgstr "Definisci"
+
+msgid "Resting State"
+msgstr "Stato di riposo"
+
+msgid "Resting state updated."
+msgstr "Stato di riposo aggiornato."
+
+msgid "Takes what the app shows right now as its calm look."
+msgstr "Usa come aspetto a riposo quello che l'app mostra in questo momento."
