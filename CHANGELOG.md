@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.5](https://github.com/nexaknight/BetterTrayIcons/compare/v3.0.4...v3.0.5) (2026-07-30)
+
+
+### Bug Fixes
+
+* **prefs:** show contributors missing from github's cached list ([361153b](https://github.com/nexaknight/BetterTrayIcons/commit/361153b75bf9576c2b9798e122fcfee4f5f8af29))
+
 ## [3.0.4](https://github.com/nexaknight/BetterTrayIcons/compare/v3.0.3...v3.0.4) (2026-07-30)
 
 
