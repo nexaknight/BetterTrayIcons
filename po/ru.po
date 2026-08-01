@@ -5,8 +5,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: BetterTrayIcons\n"
 "Report-Msgid-Bugs-To: https://github.com/nexaknight/BetterTrayIcons/issues\n"
-"POT-Creation-Date: 2026-05-11 10:26+0200\n"
-"PO-Revision-Date: 2026-07-24 15:40+0800\n"
+"POT-Creation-Date: 2026-07-31 06:49+0800\n"
+"PO-Revision-Date: 2026-08-02 07:29+0800\n"
 "Last-Translator: Igor Zhitov <agent19872@icloud.com>\n"
 "Language-Team: Russian\n"
 "Language: ru\n"
@@ -50,14 +50,14 @@ msgstr ""
 msgid "Advanced"
 msgstr "Дополнительно"
 
+msgid "All Icons"
+msgstr "Все значки"
+
 msgid "All apps forgotten"
 msgstr "Данные обо всех приложениях удалены"
 
 msgid "All apps reset"
 msgstr "Настройки всех приложений сброшены"
-
-msgid "All Icons"
-msgstr "Все значки"
 
 msgid ""
 "All settings will be restored to defaults and sync backups deleted. This "
@@ -77,11 +77,11 @@ msgid "All values on this page will be restored to their defaults."
 msgstr ""
 "Для всех параметров этой страницы будут восстановлены значения по умолчанию."
 
-msgid "App forgotten"
-msgstr "Данные о приложении удалены"
-
 msgid "App Settings"
 msgstr "Настройки приложения"
+
+msgid "App forgotten"
+msgstr "Данные о приложении удалены"
 
 msgid "App settings are merged; other settings are taken from the file."
 msgstr ""
@@ -109,9 +109,6 @@ msgstr "Автосинхронизация"
 
 msgid "Automatic"
 msgstr "Автоматически"
-
-msgid "available"
-msgstr "доступно"
 
 msgid "Back"
 msgstr "Назад"
@@ -188,9 +185,6 @@ msgstr "Облачная синхронизация"
 msgid "Colors"
 msgstr "Цвета"
 
-msgid "commits"
-msgstr "коммитов"
-
 msgid "Configuration"
 msgstr "Настройки"
 
@@ -232,6 +226,9 @@ msgstr "Опасная зона"
 
 msgid "Default app icon"
 msgstr "Стандартный значок приложения"
+
+msgid "Define"
+msgstr "Задать"
 
 msgid "Delay (ms)"
 msgstr "Задержка (мс)"
@@ -309,17 +306,14 @@ msgstr "Забыть всё"
 msgid "Forget All Apps"
 msgstr "Забыть все приложения"
 
-msgid "Forget all apps?"
-msgstr "Забыть все приложения?"
-
 msgid "Forget App"
 msgstr "Забыть приложение"
 
+msgid "Forget all apps?"
+msgstr "Забыть все приложения?"
+
 msgid "Forget this app?"
 msgstr "Забыть это приложение?"
-
-msgid "from"
-msgstr "с"
 
 msgid "General"
 msgstr "Общие"
@@ -358,26 +352,26 @@ msgstr ""
 "Количество значков, остающихся на панели. Остальные перемещаются в меню "
 "скрытых значков, а значение 0 перемещает туда все значки."
 
+msgid "ID"
+msgstr "ID"
+
 msgid "Icon"
 msgstr "Значок"
 
 msgid "Icon Color"
 msgstr "Цвет значка"
 
-msgid "Icon name or path"
-msgstr "Имя значка или путь"
-
 msgid "Icon Size (px)"
 msgstr "Размер значка (px)"
+
+msgid "Icon name or path"
+msgstr "Имя значка или путь"
 
 msgid "Icon, position, colors"
 msgstr "Значок, расположение и цвета"
 
 msgid "Icons"
 msgstr "Значки"
-
-msgid "ID"
-msgstr "ID"
 
 msgid "Image Files"
 msgstr "Файлы изображений"
@@ -472,6 +466,9 @@ msgstr "Название"
 msgid "Next"
 msgstr "Следующая страница"
 
+msgid "No Icons Found"
+msgstr "Значки не найдены"
+
 msgid "No apps detected"
 msgstr "Приложения не найдены"
 
@@ -480,9 +477,6 @@ msgstr "Участники не найдены"
 
 msgid "No file selected"
 msgstr "Файл не выбран"
-
-msgid "No Icons Found"
-msgstr "Значки не найдены"
 
 msgid "No releases found."
 msgstr "Выпуски не найдены."
@@ -502,17 +496,17 @@ msgstr "Открыть"
 msgid "Open Menu"
 msgstr "Открыть меню"
 
-msgid "Open on GitHub"
-msgstr "Открыть на GitHub"
-
 msgid "Open Overflow Menu"
 msgstr "Открыть меню скрытых значков"
 
 msgid "Open Settings"
 msgstr "Открыть настройки"
 
+msgid "Open on GitHub"
+msgstr "Открыть на GitHub"
+
 msgid "Open the gear for double-click and long-press."
-msgstr "Нажмите шестерёнку, чтобы настроить двойное нажатие и удержание."
+msgstr "Нажмите на шестерёнку, чтобы настроить двойное нажатие и удержание."
 
 msgid "Order within the chosen box."
 msgstr "Порядок внутри выбранной области."
@@ -640,6 +634,12 @@ msgstr "Сбросить название"
 msgid "Reset these settings?"
 msgstr "Сбросить эти настройки?"
 
+msgid "Resting State"
+msgstr "Состояние покоя"
+
+msgid "Resting state updated."
+msgstr "Состояние покоя обновлено."
+
 msgid "Restore"
 msgstr "Восстановить"
 
@@ -722,20 +722,20 @@ msgstr "Форма"
 msgid "Show"
 msgstr "Показать"
 
+msgid "Show Sidebar"
+msgstr "Показать боковую панель"
+
+msgid "Show Tooltips"
+msgstr "Показывать подсказки"
+
 msgid "Show icons from Wine and Proton apps."
 msgstr "Показывать значки приложений Wine и Proton."
 
 msgid "Show more"
 msgstr "Показать ещё"
 
-msgid "Show Sidebar"
-msgstr "Показать боковую панель"
-
 msgid "Show the app title on hover."
 msgstr "Показывать название приложения при наведении."
-
-msgid "Show Tooltips"
-msgstr "Показывать подсказки"
 
 msgid "Shows a badge on state changes, with the count when the app sends one."
 msgstr ""
@@ -811,6 +811,9 @@ msgstr "Файл синхронизации"
 msgid "System Icons"
 msgstr "Системные значки"
 
+msgid "Takes what the app shows right now as its calm look."
+msgstr "Использует текущий вид приложения как его обычное состояние."
+
 msgid "Tap"
 msgstr "Касание"
 
@@ -822,9 +825,6 @@ msgstr "Цвет текста"
 
 msgid "The backup file will be permanently removed."
 msgstr "Файл резервной копии будет удалён безвозвратно."
-
-msgid "this device"
-msgstr "этого устройства"
 
 msgid "This name is not allowed."
 msgstr "Это название недопустимо."
@@ -888,7 +888,7 @@ msgid "Unlink: edit each side on its own"
 msgstr "Разъединить: каждую сторону можно изменять отдельно"
 
 msgid "Unread badge and per-state icons."
-msgstr "Индикатор непрочитанного и отдельные значки для каждого состояния."
+msgstr "Индикатор непрочитанных и значки для отдельных состояний."
 
 msgid "Use Accent Color"
 msgstr "Использовать акцентный цвет"
@@ -924,3 +924,15 @@ msgstr "Wine"
 
 msgid "Wine App Icons"
 msgstr "Значки приложений Wine"
+
+msgid "available"
+msgstr "доступно"
+
+msgid "commits"
+msgstr "коммитов"
+
+msgid "from"
+msgstr "с"
+
+msgid "this device"
+msgstr "этого устройства"
