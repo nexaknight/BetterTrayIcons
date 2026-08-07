@@ -130,6 +130,36 @@ export function menuAnchorFor(actor) {
     return Main.layoutManager.dummyCursor;
 }
 
+// PopupMenuManager._onMenuOpenState closes the active menu whenever another
+// one opens, unconditionally: there is no child-menu exemption to opt into
+// (js/ui/popupMenu.js, GNOME Shell 50). With the overflow popup and an icon's
+// own context menu both in Main.panel.menuManager, opening the context menu
+// closed the popup out from under it.
+//
+// A second manager for the menus opened from inside the popup is what keeps
+// them apart. The managers push their modal grabs independently, so the
+// context menu stacks on top of the popup's grab instead of replacing it, and
+// closing it hands control back to the still-open popup.
+//
+// Panel icons keep using the panel's manager: there is no popup to protect,
+// and Hide Top Bar reads Main.panel.menuManager.activeMenu before it
+// collapses. For a popup icon that read still lands on the popup, which is
+// open the whole time the context menu is up.
+let _detachedMenuManager = null;
+
+export function registerMenu(menu, actor) {
+    let manager = Main.panel.menuManager;
+    if (!Main.panel.contains(actor))
+        manager = _detachedMenuManager ??= new PopupMenu.PopupMenuManager(Main.layoutManager.uiGroup);
+
+    menu._btiMenuManager = manager;
+    manager?.addMenu(menu);
+}
+
+export function clearDetachedMenuManager() {
+    _detachedMenuManager = null;
+}
+
 // The menu actor can already be C-disposed during shutdown.
 export function destroyMenuSafely(menu) {
     if (!menu || isDisposed(menu.actor))
@@ -140,7 +170,9 @@ export function destroyMenuSafely(menu) {
     if (menu.isOpen)
         menu.close(POPUP_ANIMATION_NONE);
 
-    Main.panel.menuManager?.removeMenu(menu);
+    // Menus opened from inside the overflow popup are held by the detached
+    // manager, and only the manager that owns one can drop it.
+    (menu._btiMenuManager ?? Main.panel.menuManager)?.removeMenu(menu);
     menu.destroy();
 }
 

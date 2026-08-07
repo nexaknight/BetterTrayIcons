@@ -13,6 +13,7 @@ import {placeIndicatorInPanel} from './src/shell/utils/actor.js';
 import {clearIconCaches} from './src/shell/utils/icons.js';
 import {enableLauncherEntries, disableLauncherEntries} from './src/shell/utils/launcherEntries.js';
 import {clearItemSplits} from './src/shell/utils/itemSplit.js';
+import {clearDetachedMenuManager} from './src/shell/utils/actor.js';
 
 import {PanelIndicator} from './src/shell/panel/panelIndicator.js';
 import {SniWatcher} from './src/shell/sni/sniWatcher.js';
@@ -222,6 +223,7 @@ export default class BetterTrayIconsExtension extends Extension {
         clearIconCaches();
         clearSeenCache();
         clearItemSplits();
+        clearDetachedMenuManager();
         clearWarnedOnce();
         this._settings = null;
     }

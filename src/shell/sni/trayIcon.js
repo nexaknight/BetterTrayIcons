@@ -1,5 +1,4 @@
 import GLib from 'gi://GLib';
-import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
 import {warn} from '../../shared/logging.js';
 import {configRenderDelta, getAppConfigMap, getAppConfigValue, setAppConfigValue, updateAppConfig, reseedIfForgotten, formatAppName, isVolatileIconName, unreadBadgeEnabled} from '../../shared/appConfig.js';
@@ -8,7 +7,7 @@ import {getItemAddress, refreshPropertyOnProxy, refreshStringOnProxy} from '../u
 import {identifyApp, resolveTrayIcon} from '../utils/icons.js';
 import {pickDisplayTitle} from '../utils/appId.js';
 import {forgetItem} from '../utils/itemSplit.js';
-import {attachStatusIcon, isDisposed, trackDisposal, createPanelMenu, menuAnchorFor, destroyMenuSafely, refreshTrayStyle, setBadgeContent, setIconContent, syncHoverStyle, POPUP_ANIMATION_NONE} from '../utils/actor.js';
+import {attachStatusIcon, isDisposed, registerMenu, trackDisposal, createPanelMenu, menuAnchorFor, destroyMenuSafely, refreshTrayStyle, setBadgeContent, setIconContent, syncHoverStyle, POPUP_ANIMATION_NONE} from '../utils/actor.js';
 import {addUnreadListener, unreadTargets} from '../utils/launcherEntries.js';
 import {DBusMenuClient} from './dbusMenuClient.js';
 import {ClickController} from '../features/clickController.js';
@@ -508,9 +507,10 @@ export class TrayIcon {
         this._menu = createPanelMenu(menuAnchorFor(this.actor));
         trackDisposal(this._menu.actor);
 
-        // Hide Top Bar reads Main.panel.menuManager.activeMenu before it collapses,
-        // and a private manager leaves that null while this menu is open.
-        Main.panel.menuManager?.addMenu(this._menu);
+        // The panel's manager for a panel icon, so Hide Top Bar still reads a
+        // live activeMenu; the detached one for an icon in the overflow popup,
+        // so opening this menu doesn't close the popup it was clicked in.
+        registerMenu(this._menu, this.actor);
 
         this._menu.connect('open-state-changed', (menu, isOpen) => {
             if (isOpen)

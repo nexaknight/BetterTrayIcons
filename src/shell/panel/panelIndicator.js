@@ -248,11 +248,6 @@ export const PanelIndicator = GObject.registerClass({GTypeName: 'BetterTrayIcons
             const overflowIcons = sortedActors.slice(visibleCount);
             const hasOverflow = overflowIcons.length > 0;
 
-            if (this._visibleBox.get_parent() === this)
-                this.remove_child(this._visibleBox);
-            if (toggleActor.get_parent() === this)
-                this.remove_child(toggleActor);
-
             if (hasOverflow) {
                 this._overflowMenu.attachToManager();
                 toggleActor.show();
@@ -270,18 +265,23 @@ export const PanelIndicator = GObject.registerClass({GTypeName: 'BetterTrayIcons
 
             debounceTo(this, '_settleTimeoutId', GEOMETRY_SETTLE_MS, () => this._overflowMenu.updateGeometry());
 
-            if (hasOverflow) {
-                if (togglePos === 'left') {
-                    this.add_child(toggleActor);
-                    this.add_child(this._visibleBox);
-                } else {
-                    this.add_child(this._visibleBox);
-                    this.add_child(toggleActor);
-                }
-            } else {
-                this.add_child(this._visibleBox);
-                this.add_child(toggleActor);
-            }
+            // Ordering by remove_child plus add_child unmaps the toggle for as
+            // long as it sits outside the tree, and PopupMenu closes itself the
+            // moment its source actor goes unmapped (js/ui/popupMenu.js, the
+            // notify::mapped handler on sourceActor). The toggle is exactly
+            // that source actor, so a relayout during an open popup shut it,
+            // which is what a drop does through its own reorder.
+            // set_child_at_index moves a child already in place instead.
+            const order = hasOverflow && togglePos === 'left'
+                ? [toggleActor, this._visibleBox]
+                : [this._visibleBox, toggleActor];
+
+            order.forEach((child, index) => {
+                if (child.get_parent() === this)
+                    this.set_child_at_index(child, index);
+                else
+                    this.insert_child_at_index(child, index);
+            });
 
             this._lastLayoutSignature = this._computeLayoutSignature();
         }
@@ -382,15 +382,14 @@ export const PanelIndicator = GObject.registerClass({GTypeName: 'BetterTrayIcons
             this._menuRemovedForDrag = false;
             this._toggleButton?.applyHoverMenuOrder();
 
-            if (!this._settings.get_boolean('keep-popup-after-click')) {
-                this._overflowMenu?.close();
-                this._overflowMenu?.attachToManager();
-                return;
-            }
-
-            // The popup stays open, it only lost its manager grab for the
-            // drag. DND pops its own grab right after this handler returns,
-            // so taking ours now would pop out of order.
+            // Not gated on keep-popup-after-click: that setting is about a
+            // click that fires an icon's own action, and closing the popup
+            // then is the point. A reorder only rearranges the popup itself,
+            // so it stays up for the next drag either way.
+            //
+            // The popup never really left, it only lost its manager grab for
+            // the drag. DND pops its own grab right after this handler
+            // returns, so taking ours now would pop out of order.
             debounceTo(this, '_menuRegrabId', MENU_REGRAB_DELAY_MS, () => {
                 this._overflowMenu?.attachToManager();
                 this._overflowMenu?.restoreManagerGrab();
