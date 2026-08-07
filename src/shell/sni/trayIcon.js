@@ -1,6 +1,6 @@
 import GLib from 'gi://GLib';
 
-import {warn} from '../../shared/logging.js';
+import {warn, warnOnce} from '../../shared/logging.js';
 import {configRenderDelta, getAppConfigMap, getAppConfigValue, setAppConfigValue, updateAppConfig, reseedIfForgotten, formatAppName, isVolatileIconName, unreadBadgeEnabled} from '../../shared/appConfig.js';
 import {clearIds, debounceTo, disconnectSignal, disconnectAll, disposeAll, removeTimer, ruleDispatcher} from '../../shared/lifecycle.js';
 import {getItemAddress, refreshPropertyOnProxy, refreshStringOnProxy} from '../utils/dbus.js';
@@ -283,12 +283,10 @@ export class TrayIcon {
 
         switch (action) {
         case 'activate':
-            this._proxy.ActivateRemote(0, 0);
-            this._onCloseMenu();
+            this._fireAndClose('ActivateRemote');
             break;
         case 'secondary':
-            this._proxy.SecondaryActivateRemote(0, 0);
-            this._onCloseMenu();
+            this._fireAndClose('SecondaryActivateRemote');
             break;
         case 'menu':
             // The click that closes a popup also fires here, which would
@@ -298,6 +296,28 @@ export class TrayIcon {
             this._contextMenu();
             break;
         }
+    }
+
+    // Closing the overflow popup is the reward for a click that landed. Items
+    // that never implemented the method answer UnknownMethod, LocalSend among
+    // them, and closing then drops the user out of the popup having achieved
+    // nothing. Leaving it up keeps the icon in reach for a right click or a
+    // double click instead. Only the reply says which of the two happened, so
+    // the close waits for it rather than assuming.
+    //
+    // An app that answers and then does nothing, OpenRGB among them, is
+    // indistinguishable from one that worked and stays on the closing path.
+    _fireAndClose(method) {
+        this._proxy[method](0, 0, (_result, err) => {
+            if (this._isDestroyed)
+                return;
+            if (err) {
+                warnOnce(`${method}:${this.appId}`,
+                    `${this.id} does not answer ${method}, leaving the popup open: ${err.message}`);
+                return;
+            }
+            this._onCloseMenu();
+        });
     }
 
     // Runs for an unidentified item too: it has no stored config, but the
