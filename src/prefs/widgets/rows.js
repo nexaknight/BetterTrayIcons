@@ -19,6 +19,7 @@ const BADGE_GAP_PX = 6;
 
 // The schema itself only floors these radii at 0, this is a UI-only cap.
 const MAX_BORDER_RADIUS_PX = 50;
+const MAX_BORDER_WIDTH_PX = 20;
 
 export const NEXT_ICON_NAME = 'bti-next-symbolic';
 export const GEAR_ICON_NAME = 'bti-gear-symbolic';
@@ -241,9 +242,10 @@ export function createSpinRow(title, settings, key, min = 0, max = 100, step = 1
     return row;
 }
 
-export function createShapeGroup(settings, key) {
+export function createShapeGroup(settings, radiusKey, borderWidthKey) {
     const group = new Adw.PreferencesGroup({title: _('Shape')});
-    group.add(createSpinRow(_('Corner Radius (px)'), settings, key, 0, MAX_BORDER_RADIUS_PX));
+    group.add(createSpinRow(_('Corner Radius (px)'), settings, radiusKey, 0, MAX_BORDER_RADIUS_PX));
+    group.add(createSpinRow(_('Border Width (px)'), settings, borderWidthKey, 0, MAX_BORDER_WIDTH_PX));
     return group;
 }
 
@@ -576,26 +578,27 @@ function _createSideSpinButton(settings, key, label, accessibleLabel, {min, max,
     return cell;
 }
 
-export function createIconColorPair(parent, settings, keyPrefix) {
-    const specs = [
+export function createIconColorRows(parent, settings, keyPrefix) {
+    return [
         {title: _('Icon'),       key: `${keyPrefix}color`,            hoverKey: `${keyPrefix}hover-color`,            variantTitle: _('Icon Color')},
         {title: _('Background'), key: `${keyPrefix}background-color`, hoverKey: `${keyPrefix}hover-background-color`, variantTitle: _('Background Color')},
-    ];
-    return specs.map(s => {
-        const accentKey = accentKeyFor(s.key);
-        const hoverAccentKey = accentKeyFor(s.hoverKey);
-        return createColorRow(s.title, settings, s.key, {
-            parent,
-            accentKey,
-            variants: {
-                title: s.variantTitle,
-                items: [
-                    {type: 'switch', title: _('Use Accent Color'), key: accentKey},
-                    {type: 'switch', title: _('Use Accent Color on Hover'), key: hoverAccentKey},
-                    {type: 'color', title: _('Hover'), key: s.hoverKey, hiddenByKey: hoverAccentKey},
-                ],
-            },
-        });
+        {title: _('Border'),     key: `${keyPrefix}border-color`,     hoverKey: `${keyPrefix}hover-border-color`,     variantTitle: _('Border Color')},
+    ].map(spec => createAccentColorRow(parent, settings, spec));
+}
+
+export function createAccentColorRow(parent, settings, {title, key, hoverKey = null, variantTitle}) {
+    const accentKey = accentKeyFor(key);
+    const items = [{type: 'switch', title: _('Use Accent Color'), key: accentKey}];
+    if (hoverKey) {
+        const hoverAccentKey = accentKeyFor(hoverKey);
+        items.push(
+            {type: 'switch', title: _('Use Accent Color on Hover'), key: hoverAccentKey},
+            {type: 'color', title: _('Hover'), key: hoverKey, hiddenByKey: hoverAccentKey});
+    }
+    return createColorRow(title, settings, key, {
+        parent,
+        accentKey,
+        variants: {title: variantTitle, items},
     });
 }
 

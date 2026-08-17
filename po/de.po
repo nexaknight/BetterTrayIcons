@@ -105,6 +105,15 @@ msgstr "Backups"
 msgid "Behavior"
 msgstr "Verhalten"
 
+msgid "Border"
+msgstr "Rahmen"
+
+msgid "Border Color"
+msgstr "Rahmenfarbe"
+
+msgid "Border Width (px)"
+msgstr "Rahmenbreite (px)"
+
 msgid "Bottom"
 msgstr "Unten"
 

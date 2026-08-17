@@ -3,7 +3,7 @@ import GObject from 'gi://GObject';
 import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
 import {
-    createColorRow,
+    createAccentColorRow,
     createSpinRow,
     buildPrefsWidget,
     bindVisibility,
@@ -29,7 +29,10 @@ export const OVERFLOW_STYLE_KEYS = Object.freeze([
     'overflow-container-margin-right',
     'overflow-container-background-color',
     'overflow-container-background-use-accent-color',
+    'overflow-container-border-color',
+    'overflow-container-border-use-accent-color',
     'overflow-container-border-radius',
+    'overflow-container-border-width',
     'enable-custom-overflow-style',
     spacingLinkKey('overflow-container-padding'),
     spacingLinkKey('overflow-container-margin'),
@@ -80,22 +83,16 @@ export default class OverflowMenuSubpage extends Adw.NavigationPage {
         contentPage.add(createCustomStyleSwitchGroup(this._settings, 'enable-custom-overflow-style'));
 
         const groupColor = new Adw.PreferencesGroup({title: _('Colors')});
-        groupColor.add(createColorRow(_('Background'), this._settings, 'overflow-container-background-color', {
-            parent: this._window,
-            accentKey: 'overflow-container-background-use-accent-color',
-            variants: {
-                title: _('Background Color'),
-                items: [
-                    {type: 'switch', title: _('Use Accent Color'), key: 'overflow-container-background-use-accent-color'},
-                ],
-            },
-        }));
+        groupColor.add(createAccentColorRow(this._window, this._settings,
+            {title: _('Background'), key: 'overflow-container-background-color', variantTitle: _('Background Color')}));
+        groupColor.add(createAccentColorRow(this._window, this._settings,
+            {title: _('Border'), key: 'overflow-container-border-color', variantTitle: _('Border Color')}));
         contentPage.add(groupColor);
 
         const spacingGroup = createSpacingGroup(this._settings, 'overflow-container');
         contentPage.add(spacingGroup);
 
-        const groupShape = createShapeGroup(this._settings, 'overflow-container-border-radius');
+        const groupShape = createShapeGroup(this._settings, 'overflow-container-border-radius', 'overflow-container-border-width');
         contentPage.add(groupShape);
 
         bindGroupsVisible(this, this._settings, [groupColor, spacingGroup, groupShape],

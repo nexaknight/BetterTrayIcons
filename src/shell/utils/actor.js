@@ -83,6 +83,7 @@ export function generateBoxStyle(settings, prefix, options = {}) {
             if (col)
                 css += `color: ${col};`;
         }
+        css += `border: ${_borderShorthand(settings, colorPrefix)};`;
     }
 
     if (extraCss)
@@ -208,7 +209,7 @@ export function computeTrayIconStyle(settings, {withColors = true} = {}) {
         const radius = settings.get_int('icon-border-radius');
         const bg = accentAwareColor(settings, 'icon-background-color', 'icon-background-use-accent-color');
         const color = withColors ? ` color: ${accentAwareColor(settings, 'icon-color', 'icon-use-accent-color')};` : '';
-        baseStyle = `padding: ${padding}; margin: ${margin}; border-radius: ${radius}px;${color} background-color: ${bg}; border: 0px; box-shadow: none;`;
+        baseStyle = `padding: ${padding}; margin: ${margin}; border-radius: ${radius}px;${color} background-color: ${bg}; border: ${_borderShorthand(settings, 'icon-')}; box-shadow: none;`;
     } else {
         // Stock mode ignores the padding/margin settings, both only take over
         // once there's a custom shape for them to size or space out.
@@ -219,10 +220,13 @@ export function computeTrayIconStyle(settings, {withColors = true} = {}) {
         ? accentAwareColor(settings, 'icon-hover-background-color', 'icon-hover-background-use-accent-color')
         : DEFAULT_HOVER_BG_COLOR;
     let hoverStyle = `${baseStyle} background-color: ${hoverBg};`;
-    if (enableCustom && withColors) {
-        const hoverColor = accentAwareColor(settings, 'icon-hover-color', 'icon-hover-use-accent-color');
-        if (hoverColor)
-            hoverStyle += ` color: ${hoverColor};`;
+    if (enableCustom) {
+        if (withColors) {
+            const hoverColor = accentAwareColor(settings, 'icon-hover-color', 'icon-hover-use-accent-color');
+            if (hoverColor)
+                hoverStyle += ` color: ${hoverColor};`;
+        }
+        hoverStyle += _hoverBorderCss(settings, 'icon-');
     }
 
     return {enableCustom, baseStyle, hoverStyle};
@@ -230,6 +234,13 @@ export function computeTrayIconStyle(settings, {withColors = true} = {}) {
 
 function _sidesShorthand(settings, prefix) {
     return BOX_SIDES.map(side => `${settings.get_int(`${prefix}-${side}`)}px`).join(' ');
+}
+
+// A missing color would leave an unparseable shorthand that St drops, and
+// the theme border would bleed through instead of staying stripped.
+function _borderShorthand(settings, prefix) {
+    const color = accentAwareColor(settings, `${prefix}border-color`, `${prefix}border-use-accent-color`);
+    return color ? `${settings.get_int(`${prefix}border-width`)}px solid ${color}` : '0px';
 }
 
 export function attachStatusIcon(actor) {
@@ -355,7 +366,8 @@ export function computeToggleStyle(settings) {
         const inheritedColor = accentAwareColor(settings, 'icon-color', 'icon-use-accent-color') || '#ffffff';
         return {
             baseStyle: _buildInheritedToggleBase(settings),
-            hoverStyle: `background-color: ${accentAwareColor(settings, 'icon-hover-background-color', 'icon-hover-background-use-accent-color')};`,
+            hoverStyle: `background-color: ${accentAwareColor(settings, 'icon-hover-background-color', 'icon-hover-background-use-accent-color')};${
+                _hoverBorderCss(settings, 'icon-')}`,
             iconColor: inheritedColor,
             iconHoverColor: accentAwareColor(settings, 'icon-hover-color', 'icon-hover-use-accent-color') ||
                 inheritedColor,
@@ -363,15 +375,15 @@ export function computeToggleStyle(settings) {
     }
 
     if (customToggle) {
-        const layoutFixes = 'border: 0; box-shadow: none;';
         const baseColor = accentAwareColor(settings, 'toggle-icon-color', 'toggle-icon-use-accent-color') || '#ffffff';
         return {
             baseStyle: generateBoxStyle(settings, 'toggle-', {
                 radiusPrefix: 'toggle-icon-',
                 colorPrefix: 'toggle-icon-',
-                extraCss: layoutFixes,
+                extraCss: 'box-shadow: none;',
             }),
-            hoverStyle: `background-color: ${accentAwareColor(settings, 'toggle-icon-hover-background-color', 'toggle-icon-hover-background-use-accent-color')};`,
+            hoverStyle: `background-color: ${accentAwareColor(settings, 'toggle-icon-hover-background-color', 'toggle-icon-hover-background-use-accent-color')};${
+                _hoverBorderCss(settings, 'toggle-icon-')}`,
             iconColor: baseColor,
             iconHoverColor: accentAwareColor(settings, 'toggle-icon-hover-color', 'toggle-icon-hover-use-accent-color') || baseColor,
         };
@@ -386,6 +398,11 @@ function _buildInheritedToggleBase(settings) {
     const radius = settings.get_int('icon-border-radius');
     const color = accentAwareColor(settings, 'icon-color', 'icon-use-accent-color');
     const bg = accentAwareColor(settings, 'icon-background-color', 'icon-background-use-accent-color');
-    return `padding: ${padding}; margin: ${margin}; border-radius: ${radius}px; color: ${color}; background-color: ${bg}; border: 0; box-shadow: none;`;
+    return `padding: ${padding}; margin: ${margin}; border-radius: ${radius}px; color: ${color}; background-color: ${bg}; border: ${_borderShorthand(settings, 'icon-')}; box-shadow: none;`;
+}
+
+function _hoverBorderCss(settings, prefix) {
+    const color = accentAwareColor(settings, `${prefix}hover-border-color`, `${prefix}hover-border-use-accent-color`);
+    return color ? ` border-color: ${color};` : '';
 }
 

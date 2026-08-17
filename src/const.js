@@ -29,14 +29,19 @@ export const TRAY_STYLE_KEYS = Object.freeze([
     'icon-margin-left',
     'icon-margin-right',
     'icon-border-radius',
+    'icon-border-width',
     'icon-color',
     'icon-hover-color',
     'icon-background-color',
     'icon-hover-background-color',
+    'icon-border-color',
+    'icon-hover-border-color',
     'icon-use-accent-color',
     'icon-hover-use-accent-color',
     'icon-background-use-accent-color',
     'icon-hover-background-use-accent-color',
+    'icon-border-use-accent-color',
+    'icon-hover-border-use-accent-color',
 ]);
 
 // The badge_style vocabulary the shell renders and the prefs dialog writes.

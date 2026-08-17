@@ -11,7 +11,7 @@ import {
     createSwitchRow,
     buildPrefsWidget,
     bindGroupsVisible,
-    createIconColorPair,
+    createIconColorRows,
     createSpacingGroup,
     createCustomStyleSwitchGroup,
     createShapeGroup,
@@ -37,11 +37,16 @@ export const TOGGLE_STYLE_KEYS = Object.freeze([
     'toggle-icon-hover-color',
     'toggle-icon-background-color',
     'toggle-icon-hover-background-color',
+    'toggle-icon-border-color',
+    'toggle-icon-hover-border-color',
     'toggle-icon-use-accent-color',
     'toggle-icon-hover-use-accent-color',
     'toggle-icon-background-use-accent-color',
     'toggle-icon-hover-background-use-accent-color',
+    'toggle-icon-border-use-accent-color',
+    'toggle-icon-hover-border-use-accent-color',
     'toggle-icon-border-radius',
+    'toggle-icon-border-width',
     'enable-custom-toggle-style',
     'toggle-inherit-icon-style',
     spacingLinkKey('toggle-padding'),
@@ -158,13 +163,13 @@ export default class ToggleButtonSubpage extends Adw.NavigationPage {
         page.add(inheritGroup);
 
         const colorsGroup = new Adw.PreferencesGroup({title: _('Colors')});
-        createIconColorPair(this._window, this._settings, 'toggle-icon-').forEach(r => colorsGroup.add(r));
+        createIconColorRows(this._window, this._settings, 'toggle-icon-').forEach(r => colorsGroup.add(r));
         page.add(colorsGroup);
 
         const spacingGroup = createSpacingGroup(this._settings, 'toggle');
         page.add(spacingGroup);
 
-        const shapeGroup = createShapeGroup(this._settings, 'toggle-icon-border-radius');
+        const shapeGroup = createShapeGroup(this._settings, 'toggle-icon-border-radius', 'toggle-icon-border-width');
         page.add(shapeGroup);
 
         const customOn = () => this._settings.get_boolean('enable-custom-toggle-style');

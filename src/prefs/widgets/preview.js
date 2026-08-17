@@ -187,7 +187,7 @@ function _toggleCss(settings, scopeClass) {
         return `${sel} { padding: ${_sidesShorthand(settings, 'toggle-padding')};` +
             ` margin: ${_sidesShorthand(settings, 'toggle-margin')};` +
             ` border-radius: ${settings.get_int('toggle-icon-border-radius')}px;` +
-            `${_cssDeclaration('color', color || 'white')}${_backgroundStyle(bg)} }` +
+            `${_cssDeclaration('color', color || 'white')}${_backgroundStyle(bg)}${_borderStyle(settings, 'toggle-icon')} }` +
             ` ${sel}:hover { ${_hoverStyle(settings, 'toggle-icon')} }`;
     }
 
@@ -206,13 +206,14 @@ function _customIconStyle(settings) {
     return `padding: ${_sidesShorthand(settings, 'icon-padding')};` +
         ` margin: ${_sidesShorthand(settings, 'icon-margin')};` +
         ` border-radius: ${settings.get_int('icon-border-radius')}px;` +
-        `${_cssDeclaration('color', color || 'white')}${_backgroundStyle(bg)}`;
+        `${_cssDeclaration('color', color || 'white')}${_backgroundStyle(bg)}${_borderStyle(settings, 'icon')}`;
 }
 
 function _hoverStyle(settings, prefix) {
     const color = _accentAwareColor(settings, `${prefix}-hover-color`, `${prefix}-hover-use-accent-color`);
     const bg = _accentAwareColor(settings, `${prefix}-hover-background-color`, `${prefix}-hover-background-use-accent-color`);
-    return `${_cssDeclaration('color', color)}${_backgroundStyle(bg)}`;
+    const border = _accentAwareColor(settings, `${prefix}-hover-border-color`, `${prefix}-hover-border-use-accent-color`);
+    return `${_cssDeclaration('color', color)}${_backgroundStyle(bg)}${_cssDeclaration('border-color', border)}`;
 }
 
 function _popupCss(settings, scopeClass) {
@@ -224,7 +225,13 @@ function _popupCss(settings, scopeClass) {
     return `.${scopeClass}-popup { padding: ${_sidesShorthand(settings, 'overflow-container-padding')};` +
         ` margin: ${_sidesShorthand(settings, 'overflow-container-margin')};` +
         ` border-radius: ${settings.get_int('overflow-container-border-radius')}px;` +
-        `${_backgroundStyle(bg)} }`;
+        `${_backgroundStyle(bg)}${_borderStyle(settings, 'overflow-container')} }`;
+}
+
+function _borderStyle(settings, prefix) {
+    const color = _accentAwareColor(settings, `${prefix}-border-color`, `${prefix}-border-use-accent-color`);
+    return _cssDeclaration('border',
+        color ? `${settings.get_int(`${prefix}-border-width`)}px solid ${color}` : '');
 }
 
 function _sidesShorthand(settings, keyPrefix) {

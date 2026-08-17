@@ -171,10 +171,36 @@
             <summary>Use the system accent colour for the tray icon background on hover</summary>
         </key>
 
+        <key name="icon-border-color" type="s">
+            <default>'#ffffff'</default>
+            <summary>Border colour for tray icons</summary>
+        </key>
+
+        <key name="icon-hover-border-color" type="s">
+            <default>'#ffffff'</default>
+            <summary>Border colour for tray icons on hover</summary>
+        </key>
+
+        <key name="icon-border-use-accent-color" type="b">
+            <default>false</default>
+            <summary>Use the system accent colour for the tray icon border</summary>
+        </key>
+
+        <key name="icon-hover-border-use-accent-color" type="b">
+            <default>false</default>
+            <summary>Use the system accent colour for the tray icon border on hover</summary>
+        </key>
+
         <key name="icon-border-radius" type="i">
             <range min="0"/>
             <default>50</default>
             <summary>Corner radius for tray icons in pixels</summary>
+        </key>
+
+        <key name="icon-border-width" type="i">
+            <range min="0"/>
+            <default>0</default>
+            <summary>Border width for tray icons in pixels</summary>
         </key>
 
         <key name="icon-size" type="i">
@@ -331,10 +357,36 @@
             <summary>Use the system accent colour for the toggle button background on hover</summary>
         </key>
 
+        <key name="toggle-icon-border-color" type="s">
+            <default>'#ffffff'</default>
+            <summary>Border colour for the toggle button</summary>
+        </key>
+
+        <key name="toggle-icon-hover-border-color" type="s">
+            <default>'#ffffff'</default>
+            <summary>Border colour for the toggle button on hover</summary>
+        </key>
+
+        <key name="toggle-icon-border-use-accent-color" type="b">
+            <default>false</default>
+            <summary>Use the system accent colour for the toggle button border</summary>
+        </key>
+
+        <key name="toggle-icon-hover-border-use-accent-color" type="b">
+            <default>false</default>
+            <summary>Use the system accent colour for the toggle button border on hover</summary>
+        </key>
+
         <key name="toggle-icon-border-radius" type="i">
             <range min="0"/>
             <default>50</default>
             <summary>Toggle button corner radius in pixels</summary>
+        </key>
+
+        <key name="toggle-icon-border-width" type="i">
+            <range min="0"/>
+            <default>0</default>
+            <summary>Toggle button border width in pixels</summary>
         </key>
 
         <key name="toggle-padding-top" type="i">
@@ -396,10 +448,26 @@
             <summary>Use the system accent colour for the overflow popup background</summary>
         </key>
 
+        <key name="overflow-container-border-color" type="s">
+            <default>'#ffffff'</default>
+            <summary>Border colour for the overflow popup</summary>
+        </key>
+
+        <key name="overflow-container-border-use-accent-color" type="b">
+            <default>false</default>
+            <summary>Use the system accent colour for the overflow popup border</summary>
+        </key>
+
         <key name="overflow-container-border-radius" type="i">
             <range min="0"/>
             <default>25</default>
             <summary>Overflow popup corner radius in pixels</summary>
+        </key>
+
+        <key name="overflow-container-border-width" type="i">
+            <range min="0"/>
+            <default>0</default>
+            <summary>Overflow popup border width in pixels</summary>
         </key>
 
         <key name="overflow-container-padding-top" type="i">

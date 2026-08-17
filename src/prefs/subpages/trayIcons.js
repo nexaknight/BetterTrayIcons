@@ -6,7 +6,7 @@ import {
     createSpinRow,
     createSwitchRow,
     buildPrefsWidget,
-    createIconColorPair,
+    createIconColorRows,
     bindGroupsVisible,
     createCustomStyleSwitchGroup,
     createShapeGroup,
@@ -68,13 +68,13 @@ export default class TrayIconsSubpage extends Adw.NavigationPage {
         page.add(createCustomStyleSwitchGroup(this._settings, 'enable-custom-icon-style'));
 
         const groupColor = new Adw.PreferencesGroup({title: _('Colors')});
-        createIconColorPair(this._window, this._settings, 'icon-').forEach(r => groupColor.add(r));
+        createIconColorRows(this._window, this._settings, 'icon-').forEach(r => groupColor.add(r));
         page.add(groupColor);
 
         const spacingGroup = createSpacingGroup(this._settings, 'icon');
         page.add(spacingGroup);
 
-        const groupShape = createShapeGroup(this._settings, 'icon-border-radius');
+        const groupShape = createShapeGroup(this._settings, 'icon-border-radius', 'icon-border-width');
         page.add(groupShape);
 
         bindGroupsVisible(this, this._settings, [groupColor, spacingGroup, groupShape],
