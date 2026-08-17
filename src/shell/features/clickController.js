@@ -38,9 +38,6 @@ export class ClickController {
     }
 
     _connectSignals() {
-        if (!this._actor)
-            return;
-
         const connect = (signal, callback) => {
             const id = this._actor.connect(signal, callback);
             this._signals.push(id);
@@ -211,7 +208,7 @@ export class ClickController {
 
         const actionName = this._settings.get_string(key);
 
-        if (actionName && this._onAction)
+        if (actionName)
             this._onAction(actionName);
     }
 

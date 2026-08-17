@@ -197,8 +197,6 @@ async function buildNsPidMap() {
 // Better than SteamGameId (0 for non-Steam shortcuts) or the generic
 // "steam_app_<id>" wm_class.
 function steamAppIdFromEnviron(env) {
-    if (!env.size)
-        return null;
     const compatMatch = env.get('STEAM_COMPAT_DATA_PATH')?.match(/\/compatdata\/(\d+)/);
     if (compatMatch && compatMatch[1] !== '0')
         return compatMatch[1];
@@ -214,9 +212,6 @@ function steamAppIdFromEnviron(env) {
 // is still a solid identity when nothing better exists. Numeric names
 // are compatdata layouts and belong to steamAppIdFromEnviron.
 function prefixIdFromEnviron(env) {
-    if (!env.size)
-        return null;
-
     const launcherName = launcherNameFromEnviron(env);
     if (launcherName)
         return sanitizeAppId(launcherName);

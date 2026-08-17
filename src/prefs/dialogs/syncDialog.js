@@ -80,10 +80,7 @@ function _buildSyncLocationGroup(page, settings, openJsonFileChooser, cancellabl
         show_apply_button: true,
     });
 
-    if (settings.settings_schema.has_key('sync-file-path'))
-        settings.bind('sync-file-path', pathRow, 'text', Gio.SettingsBindFlags.DEFAULT);
-    else
-        pathRow.set_subtitle(_('Schema key "sync-file-path" missing.'));
+    settings.bind('sync-file-path', pathRow, 'text', Gio.SettingsBindFlags.DEFAULT);
 
     const warningIcon = createImage({
         icon_name: 'bti-warning-symbolic',
@@ -98,8 +95,7 @@ function _buildSyncLocationGroup(page, settings, openJsonFileChooser, cancellabl
         callback: () => {
             openJsonFileChooser(path => {
                 pathRow.set_text(path);
-                if (settings.settings_schema.has_key('sync-file-path'))
-                    settings.set_string('sync-file-path', path);
+                settings.set_string('sync-file-path', path);
             }, true);
         },
     });

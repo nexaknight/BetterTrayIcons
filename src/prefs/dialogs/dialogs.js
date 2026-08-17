@@ -22,7 +22,7 @@ export function showConfirmationDialog(parent, title, message, onConfirm, confir
     });
 
     dialog.add_response('cancel', _('Cancel'));
-    dialog.add_response('confirm', confirmLabel || _('Confirm'));
+    dialog.add_response('confirm', confirmLabel);
     dialog.set_response_appearance(
         'confirm',
         isDestructive ? Adw.ResponseAppearance.DESTRUCTIVE : Adw.ResponseAppearance.SUGGESTED

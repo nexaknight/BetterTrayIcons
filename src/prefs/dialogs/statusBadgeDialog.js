@@ -419,7 +419,7 @@ export default class StatusBadgeDialog extends Adw.Dialog {
     }
 
     _addState(rawName) {
-        const name = (rawName ?? '').trim();
+        const name = rawName.trim();
         if (!name) {
             this._addStateEntryRow = null;
             this._rebuildStateRows();

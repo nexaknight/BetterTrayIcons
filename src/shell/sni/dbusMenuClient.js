@@ -57,9 +57,6 @@ export class DBusMenuClient {
     }
 
     async buildMenu(gnomeMenu) {
-        if (!this.proxy)
-            return;
-
         // Apps that fill the root only on demand answer the first GetLayout
         // with no children, and a childless root reads as "no menu at all".
         try {

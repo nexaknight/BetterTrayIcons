@@ -48,10 +48,7 @@ export function loadInterfaceXML(extensionDir, fileName) {
     // One-shot init read of a bundled XML file, never re-read at runtime.
     // Sync here so Gio.DBusProxy construction stays synchronous, otherwise
     // every caller would have to thread async chains through proxy creation.
-    const [success, contents] = interfaceFile.load_contents(null);
-    if (!success || !contents)
-        throw new Error(`Failed to read content of ${fileName}`);
-
+    const [, contents] = interfaceFile.load_contents(null);
     return new TextDecoder('utf-8').decode(contents);
 }
 

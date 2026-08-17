@@ -30,12 +30,12 @@ export default class IconPickerDialog extends Adw.PreferencesDialog {
 
         this._settings = settings;
         this._key = settingsKey;
-        this._iconList = iconList || [];
+        this._iconList = iconList;
         this._onSelectCallback = onSelectCallback;
         this._showCustom = options.showCustom !== false;
 
         this._currentIcon = initialIcon;
-        if (!this._currentIcon && this._settings && this._key)
+        if (!this._currentIcon && this._key)
             this._currentIcon = this._settings.get_string(this._key);
 
         this._allSystemIcons = [];
@@ -52,7 +52,7 @@ export default class IconPickerDialog extends Adw.PreferencesDialog {
     }
 
     _buildUI() {
-        if (this._iconList && this._iconList.length > 0) {
+        if (this._iconList.length > 0) {
             const pageRec = new Adw.PreferencesPage({
                 title: _('Recommended'),
                 icon_name: 'bti-star-symbolic',
@@ -174,7 +174,7 @@ export default class IconPickerDialog extends Adw.PreferencesDialog {
                 return;
             if (this._onSelectCallback)
                 this._onSelectCallback(value);
-            else if (this._settings && this._key)
+            else if (this._key)
                 this._settings.set_string(this._key, value);
             this.close();
         };
@@ -216,7 +216,7 @@ export default class IconPickerDialog extends Adw.PreferencesDialog {
     _setInitialTab() {
         this.connect('notify::visible-page-name', () => this._showPageWithCurrentIcon());
 
-        if (this._currentIcon && !this._iconList?.includes(this._currentIcon))
+        if (this._currentIcon && !this._iconList.includes(this._currentIcon))
             this.set_visible_page_name('all');
 
         // Without a recommended list the dialog already sits on 'all', so no
@@ -382,7 +382,7 @@ export default class IconPickerDialog extends Adw.PreferencesDialog {
 
                 if (this._onSelectCallback)
                     this._onSelectCallback(iconName);
-                else if (this._settings && this._key)
+                else if (this._key)
                     this._settings.set_string(this._key, iconName);
 
                 this.close();
@@ -448,7 +448,7 @@ function _getSystemIcons() {
         const paintable = iconTheme.lookup_icon(
             name, null, 16, 1, Gtk.TextDirection.LTR, 0
         );
-        return paintable !== null && paintable.get_file() !== null;
+        return paintable.get_file() !== null;
     });
 
     _systemIconsCache = [...new Set(filtered)].sort();

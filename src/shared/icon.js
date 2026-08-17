@@ -39,7 +39,7 @@ export async function probeIconPaths(configs, cancellable = null) {
     const paths = new Set();
     const themed = new Map();
     for (const config of configs) {
-        for (const p of [config?.custom_icon, config?.cached_icon_path]) {
+        for (const p of [config.custom_icon, config.cached_icon_path]) {
             if (typeof p === 'string' && p.startsWith('/'))
                 paths.add(p);
         }
@@ -59,17 +59,14 @@ export async function probeIconPaths(configs, cancellable = null) {
 
 // Null when resolveIcon could never reach the theme walk for this config.
 export function themeProbeKey(config) {
-    const name = config?.detected_icon;
-    if (config?.custom_icon || !name || name.startsWith('/') || !config?.icon_theme_path)
+    const name = config.detected_icon;
+    if (config.custom_icon || !name || name.startsWith('/') || !config.icon_theme_path)
         return null;
     return `${config.icon_theme_path}\0${name}`;
 }
 
 // Only the prefs side has an icon theme at hand to answer `hasThemeIcon`.
 export function resolveIcon(config, hasThemeIcon = null, cachedPathExists = null, themeHit = null) {
-    if (!config)
-        return {type: 'name', value: 'image-missing'};
-
     if (config.custom_icon) {
         if (config.custom_icon.startsWith('/'))
             return {type: 'file', value: config.custom_icon};
@@ -116,9 +113,6 @@ export function resolveIcon(config, hasThemeIcon = null, cachedPathExists = null
 }
 
 export function findIconInTheme(iconName, themePath, targetSize = 0) {
-    if (!iconName || !themePath)
-        return null;
-
     const {wanted, paths} = _candidatePaths(iconName, themePath);
     for (const fullPath of paths) {
         if (Gio.File.new_for_path(fullPath).query_exists(null))
@@ -131,9 +125,6 @@ export function findIconInTheme(iconName, themePath, targetSize = 0) {
 // The probe-phase twin of findIconInTheme. The walk is forked because the
 // sync and async enumerator APIs share no shape, the scoring stays shared.
 export async function findIconInThemeAsync(iconName, themePath, cancellable = null) {
-    if (!iconName || !themePath)
-        return null;
-
     const {wanted, paths} = _candidatePaths(iconName, themePath);
     const found = await Promise.all(paths.map(p => fileExists(p, cancellable)));
     const first = found.indexOf(true);
@@ -242,17 +233,13 @@ function _sizeDistance(path, targetSize) {
 // spelling it out here would bury a name it could still resolve (see
 // orderThemedNames). St needs the opposite, which orderThemedNames handles.
 export function themedIcon(name) {
-    return new Gio.ThemedIcon({name: name || 'image-missing'});
+    return new Gio.ThemedIcon({name});
 }
 
-// Leaving exists null keeps the blocking stat, same contract as resolveIcon.
-export function pathOrThemedIcon(value, exists = null) {
-    if (!value)
-        return themedIcon('image-missing');
+export function pathOrThemedIcon(value, exists) {
     if (value.startsWith('/')) {
         const file = Gio.File.new_for_path(value);
-        const found = exists ?? file.query_exists(null);
-        return found ? new Gio.FileIcon({file}) : themedIcon('image-missing');
+        return exists ? new Gio.FileIcon({file}) : themedIcon('image-missing');
     }
     return themedIcon(value);
 }
@@ -524,7 +511,7 @@ export function buildSymbolicCandidates(name, useSymbolic) {
 let _cacheDirPath = null;
 
 export async function writeCachedIcon(appId, pngBytes) {
-    const path = pngBytes?.length ? _cachedIconPath(appId) : null;
+    const path = _cachedIconPath(appId);
     if (!path)
         return null;
     const file = Gio.File.new_for_path(path);
@@ -589,8 +576,6 @@ function _ensureCacheDir() {
 }
 
 function _bytesEqual(a, b) {
-    if (a.length !== b.length)
-        return false;
     for (let i = 0; i < a.length; i++) {
         if (a[i] !== b[i])
             return false;

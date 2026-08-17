@@ -17,7 +17,7 @@ export function createLabel(text, cssClasses = [], options = {}) {
         label: text,
         ...options,
     });
-    if (cssClasses && cssClasses.length > 0)
+    if (cssClasses.length > 0)
         label.set_css_classes(cssClasses);
 
     return label;
@@ -393,12 +393,9 @@ export function createColorButton(settings, key, dialogTitle = '', {accentKey = 
 
 export function createFileFilter(name, patterns = [], mimeTypes = []) {
     const filter = new Gtk.FileFilter();
-    if (name)
-        filter.set_name(name);
-    if (patterns)
-        patterns.forEach(p => filter.add_pattern(p));
-    if (mimeTypes)
-        mimeTypes.forEach(m => filter.add_mime_type(m));
+    filter.set_name(name);
+    patterns.forEach(p => filter.add_pattern(p));
+    mimeTypes.forEach(m => filter.add_mime_type(m));
     return filter;
 }
 
@@ -408,15 +405,11 @@ const THEME_FILE_LOOKUP_PX = 128;
 
 let _iconTheme = null;
 export function hasThemeIcon(name) {
-    if (!name)
-        return false;
     _iconTheme ??= Gtk.IconTheme.get_for_display(Gdk.Display.get_default());
     return _iconTheme.has_icon(name);
 }
 
 export function applyPathIcon(image, value, settings = null, options = {}) {
-    if (!image)
-        return;
     if (!value) {
         image.clear();
         return;
@@ -488,7 +481,7 @@ export function devicePixelSize(widget, px = null) {
 // No themed icon first and a swap when the bytes land: GTK draws nothing at all
 // for some app logos (slack-symbolic and devpod-symbolic in MoreWaita, measured).
 export function applyTintedIcon(image, name, settings, options = {}) {
-    if (!image || !name)
+    if (!name)
         return;
     image._btiPendingIcon = name;
     _tintedFor(name, settings, image, options).then(tinted => {
@@ -521,9 +514,8 @@ export function applyIconPreview(imageWidget, iconResult, settings) {
 }
 
 export function applyResolvedIcon(image, iconResult, useSymbolic = false, iconPaths = null, tintedGicon = null) {
-    if (!image || !iconResult) {
-        if (image)
-            image.clear();
+    if (!iconResult) {
+        image.clear();
         return;
     }
 

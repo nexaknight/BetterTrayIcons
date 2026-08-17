@@ -42,7 +42,7 @@ export function probeImportIconPaths(data, cancellable = null) {
     return probePaths(paths, cancellable);
 }
 
-export function importSettingsFromJSON(settings, data, iconPaths = new Map(), {merge = false} = {}) {
+export function importSettingsFromJSON(settings, data, iconPaths, {merge = false} = {}) {
     if (!data || typeof data !== 'object')
         return;
 
@@ -219,8 +219,6 @@ function _byNewestFirst(a, b) {
 }
 
 export async function deleteBackups(path) {
-    if (!path)
-        return;
     const backups = await listBackups(path);
     await Promise.all([_deleteAsync(path), ...backups.map(b => _deleteAsync(b.path))]);
 }

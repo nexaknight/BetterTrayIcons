@@ -43,10 +43,8 @@ export class XEmbedTrayBridge {
         // Respect is_hidden here too, the layout pass corrects it only
         // after its debounce and user-hidden icons would flash visible.
         const configMap = getAppConfigMap(this._settings);
-        for (const wrapper of this._wrappers.values()) {
-            if (wrapper.actor)
-                wrapper.actor.visible = enabled && !configMap[wrapper.appId]?.is_hidden;
-        }
+        for (const wrapper of this._wrappers.values())
+            wrapper.actor.visible = enabled && !configMap[wrapper.appId]?.is_hidden;
     }
 
     _start() {
@@ -99,7 +97,7 @@ export class XEmbedTrayBridge {
     _preferredBgCss() {
         if (this._settings.get_boolean('enable-custom-overflow-style')) {
             const css = this._settings.get_string('overflow-container-background-color');
-            if (css?.trim().length > 0)
+            if (css.trim().length > 0)
                 return css;
         }
         return XEMBED_BG_FALLBACK_HEX;
@@ -189,8 +187,6 @@ export class XEmbedTrayBridge {
 
 // The TrayManager's bg-color property is a CoglColor on GNOME 49/50.
 function parseCssColor(css) {
-    if (!css)
-        return null;
     const [ok, parsed] = Cogl.color_from_string(css);
     return ok ? parsed : null;
 }

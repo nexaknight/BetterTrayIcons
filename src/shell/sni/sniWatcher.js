@@ -143,9 +143,6 @@ export class SniWatcher {
 
             const [names] = result.deep_unpack();
 
-            if (!names || !Array.isArray(names))
-                return;
-
             for (const name of names) {
                 // Accept both prefixes: KDE's KStatusNotifierItem registers
                 // org.kde.StatusNotifierItem-PID-ID, Chromium and Electron use
@@ -161,11 +158,7 @@ export class SniWatcher {
 
     async RegisterStatusNotifierItemAsync(params, invocation) {
         const service = params[0];
-        let sender = null;
-
-        try {
-            sender = invocation.get_sender();
-        } catch { /* anonymous client */ }
+        const sender = invocation.get_sender();
 
         // libappindicator and Ayatana clients pass an object path here, like
         // /org/ayatana/NotificationItem/..., KDE clients pass their bus name.
@@ -272,7 +265,7 @@ export class SniWatcher {
                 // Emitted only now: a consumer that answers this signal by
                 // reading RegisteredStatusNotifierItems must find the item,
                 // and one whose proxy failed must never be announced.
-                this._dbusImpl?.emit_signal('StatusNotifierItemRegistered',
+                this._dbusImpl.emit_signal('StatusNotifierItemRegistered',
                     GLib.Variant.new('(s)', [id]));
             }
         );
@@ -280,13 +273,11 @@ export class SniWatcher {
 
     _onItemDestroyed(id) {
         this._unwatchName(id);
-        if (this._items.has(id)) {
-            this._items.delete(id);
-            this._indicator.removeIcon(id);
+        this._items.delete(id);
+        this._indicator.removeIcon(id);
 
-            if (this._dbusImpl)
-                this._dbusImpl.emit_signal('StatusNotifierItemUnregistered', GLib.Variant.new('(s)', [id]));
-        }
+        if (this._dbusImpl)
+            this._dbusImpl.emit_signal('StatusNotifierItemUnregistered', GLib.Variant.new('(s)', [id]));
     }
 
     disable() {

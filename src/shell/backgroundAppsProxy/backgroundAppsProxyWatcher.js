@@ -180,7 +180,7 @@ export class BackgroundAppsProxyWatcher {
     // The portal lists one entry per flatpak instance, so an app running twice
     // arrives twice under one app_id.
     _portalApps() {
-        const listed = this._proxy?.get_cached_property('BackgroundApps')?.recursiveUnpack() ?? [];
+        const listed = this._proxy.get_cached_property('BackgroundApps')?.recursiveUnpack() ?? [];
         const apps = new Map();
 
         for (const entry of listed) {

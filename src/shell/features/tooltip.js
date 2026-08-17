@@ -47,8 +47,7 @@ export function syncTooltip(actor, tooltip, settings) {
 // tooltip announce the same thing, or nothing at all.
 export function applyTitle(actor, tooltip, settings, title) {
     const show = settings.get_boolean('enable-tooltips');
-    if (actor)
-        actor.accessible_name = show && title ? title : '';
+    actor.accessible_name = show && title ? title : '';
     if (tooltip)
         tooltip.text = title;
 }
@@ -102,7 +101,7 @@ export class Tooltip {
     }
 
     _show() {
-        if (!this._label || !this._sourceActor || !this._sourceActor.get_parent())
+        if (!this._sourceActor.get_parent())
             return;
         if (!this._label.text)
             return;
@@ -155,7 +154,7 @@ export class Tooltip {
     hide() {
         clearIds(this, removeTimer, '_timeoutId');
 
-        if (this._label && this._label.visible) {
+        if (this._label.visible) {
             this._label.remove_transition('opacity');
             this._label.opacity = 0;
             this._label.hide();

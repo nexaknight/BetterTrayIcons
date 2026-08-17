@@ -166,7 +166,7 @@ export class XEmbedTrayIcon {
             return;
         }
         // Clutter recycles event objects, so copy before deferring.
-        const eventCopy = event.copy() ?? event;
+        const eventCopy = event.copy();
         this._pendingClickId = GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
             this._pendingClickId = 0;
             if (!this._isDestroyed && this._icon)
@@ -205,7 +205,7 @@ export class XEmbedTrayIcon {
             return;
 
         this._customIcon = new St.Icon({
-            gicon: configuredIcon(value, this._settings)?.gicon ?? null,
+            gicon: configuredIcon(value, this._settings).gicon,
             icon_size: this._settings.get_int('icon-size'),
             x_align: Clutter.ActorAlign.CENTER,
             y_align: Clutter.ActorAlign.CENTER,

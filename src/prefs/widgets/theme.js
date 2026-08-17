@@ -20,12 +20,10 @@ export function bindLogoToTheme(logo, fallback, assetsDir, darkFile) {
         if (texture) {
             logo.set_paintable(texture);
             logo.visible = true;
-            if (fallback)
-                fallback.visible = false;
+            fallback.visible = false;
         } else {
             logo.visible = false;
-            if (fallback)
-                fallback.visible = true;
+            fallback.visible = true;
         }
     });
 }
@@ -42,8 +40,8 @@ function _readSvgString(assetsDir, filename) {
     const file = assetsDir.get_child(filename);
     if (!file.query_exists(null))
         return null;
-    const [success, contents] = file.load_contents(null);
-    return success ? new TextDecoder().decode(contents) : null;
+    const [, contents] = file.load_contents(null);
+    return new TextDecoder().decode(contents);
 }
 
 // Light theme needs dark strokes. Only the stroke forms though, the logo's
