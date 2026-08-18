@@ -1,5 +1,14 @@
 # Changelog
 
+## [3.1.0](https://github.com/nexaknight/BetterTrayIcons/compare/v3.0.6...v3.1.0) (2026-08-18)
+
+
+### Features
+
+* **dnd:** rework icon reordering around live slides ([580a499](https://github.com/nexaknight/BetterTrayIcons/commit/580a499a48cf145df5b08bbeb43a9916c05b9bec))
+* **popup:** keep the overflow menu open through context menus ([22f60e6](https://github.com/nexaknight/BetterTrayIcons/commit/22f60e63c693b3347087bdf87352ebfaa7ea6163)), closes [#49](https://github.com/nexaknight/BetterTrayIcons/issues/49)
+* **style:** border color and width for icons, toggle and popup ([b814f20](https://github.com/nexaknight/BetterTrayIcons/commit/b814f201b4972d5d6bfec6fa0234609f77ad597a))
+
 ## [3.0.6](https://github.com/nexaknight/BetterTrayIcons/compare/v3.0.5...v3.0.6) (2026-08-02)
 
 
