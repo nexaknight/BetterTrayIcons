@@ -1,3 +1,6 @@
+import GLib from 'gi://GLib';
+import Gio from 'gi://Gio';
+
 import {warnOnce} from './logging.js';
 import {deleteCachedIcon} from './icon.js';
 
@@ -93,10 +96,10 @@ export function formatAppName(input) {
 // formatAppName. Formatting the custom one too would mangle names with a
 // dot, the user typed exactly what they want to see.
 export function displayAppName(config, fallbackId = null) {
-    const custom = config?.custom_title;
+    const custom = config.custom_title;
     if (typeof custom === 'string' && custom)
         return custom;
-    return formatAppName(config?.title || fallbackId);
+    return formatAppName(config.title || fallbackId);
 }
 
 export function getAppConfigMap(settings) {
@@ -125,8 +128,6 @@ function _saveMap(settings, map) {
 // hash is over user-set fields only, so the shell rewriting a detected icon
 // touches nothing here.
 export function getSyncMeta(settings) {
-    if (!settings)
-        return _emptyMeta();
     try {
         const raw = settings.get_string('app-config-sync-meta');
         if (!raw)
@@ -161,7 +162,7 @@ function _saveSyncMeta(settings, meta) {
 export function userConfigFields(entry) {
     const own = {};
     // Sorted because insertion order carries no meaning.
-    for (const key of Object.keys(entry ?? {}).sort()) {
+    for (const key of Object.keys(entry).sort()) {
         if (!RUNTIME_APP_CONFIG_FIELDS.includes(key))
             own[key] = entry[key];
     }
@@ -411,7 +412,7 @@ const _sessionSeen = new Map();
 export function recordSeenStateIcons(settings, appId, names, map = null) {
     if (!settings || !appId)
         return;
-    const usable = (names ?? []).map(stateNameOf).filter(name =>
+    const usable = names.map(stateNameOf).filter(name =>
         name && !isVolatileIconName(name));
     if (usable.length === 0)
         return;
@@ -483,12 +484,48 @@ export function byPriorityThenAppId(a, b) {
     return b.priority - a.priority || (a.appId ?? '').localeCompare(b.appId ?? '');
 }
 
+// The shell writes the panel's real icon order here for the prefs. The
+// config blob also lists closed and uninstalled apps, so numbering from
+// it would not match the panel. tmpfs, so the sync read can't stall.
+export const VISIBLE_ORDER_PATH = GLib.build_filenamev(
+    [GLib.get_user_runtime_dir(), 'bettertrayicons', 'visible-order.json']);
+
+export function readVisibleOrder() {
+    try {
+        const [, bytes] = GLib.file_get_contents(VISIBLE_ORDER_PATH);
+        const ids = JSON.parse(new TextDecoder().decode(bytes));
+        return Array.isArray(ids) && ids.length ? ids : null;
+    } catch {
+        return null;
+    }
+}
+
+export function publishVisibleOrder(appIds) {
+    try {
+        GLib.mkdir_with_parents(GLib.path_get_dirname(VISIBLE_ORDER_PATH), 0o700);
+        Gio.File.new_for_path(VISIBLE_ORDER_PATH).replace_contents_bytes_async(
+            new GLib.Bytes(new TextEncoder().encode(JSON.stringify(appIds))),
+            null, false, Gio.FileCreateFlags.REPLACE_DESTINATION, null,
+            (file, res) => {
+                try {
+                    file.replace_contents_finish(res);
+                } catch { /* runtime dir gone, prefs fall back to config order */ }
+            });
+    } catch { /* runtime dir unavailable, prefs fall back to config order */ }
+}
+
+export function clearVisibleOrder() {
+    try {
+        Gio.File.new_for_path(VISIBLE_ORDER_PATH).delete(null);
+    } catch { /* never written */ }
+}
+
 // Hidden apps never take a slot.
 export function orderedAppIds(settings) {
     const map = getAppConfigMap(settings);
     return Object.entries(map)
-        .filter(([, conf]) => !conf?.is_hidden)
-        .map(([appId, conf]) => ({appId, priority: conf?.priority || 0}))
+        .filter(([, conf]) => !conf.is_hidden)
+        .map(([appId, conf]) => ({appId, priority: conf.priority || 0}))
         .sort(byPriorityThenAppId)
         .map(entry => entry.appId);
 }
@@ -519,7 +556,7 @@ export function setAppPriorities(settings, appIdsInOrder) {
     // Entries that never got a priority already sort below the numbered range,
     // and leaving them out keeps the blob from gaining one per app ever seen.
     const slots = Object.keys(map)
-        .filter(appId => !moving.has(appId) && map[appId]?.priority > 0)
+        .filter(appId => !moving.has(appId) && map[appId].priority > 0)
         .concat(ordered)
         .map(appId => ({appId, priority: map[appId]?.priority || 0}))
         .sort(byPriorityThenAppId);
@@ -572,9 +609,6 @@ export function deleteAppConfig(settings, appId) {
 // flicker while the shell re-resolves them, and priority survives so a
 // bulk reset can't reshuffle the tray order out from under the user.
 export function resetAllAppConfigs(settings) {
-    if (!settings)
-        return;
-
     const keep = new Set([...RUNTIME_APP_CONFIG_FIELDS, 'priority']);
     const map = getAppConfigMap(settings);
     let changed = false;

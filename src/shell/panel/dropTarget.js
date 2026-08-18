@@ -1,4 +1,4 @@
-import {safeBounds} from '../utils/actor.js';
+import {safeBounds, settledBounds} from '../utils/actor.js';
 
 // GNOME's dnd.js hands drop targets actor._delegate as source, which
 // dragAndDrop.js points at the DraggableTrayIcon wrapper. The fallbacks
@@ -23,38 +23,55 @@ export function isPointInActor(x, y, actor) {
     return x >= ax && x <= ax + aw && y >= ay && y <= ay + ah;
 }
 
-export function nearestRowIndex(items, x) {
-    for (const [i, [cx, , cw]] of _eachBounds(items)) {
-        if (x < cx + cw / 2)
-            return i;
-    }
-    return items.length;
+export function slotIndexAt(actors, x, y, dragged = null) {
+    const slots = _settledSlots(actors);
+    if (!slots.length)
+        return 0;
+    return _cellIndexAt(_rowFor(slots, y, dragged), x);
 }
 
-export function nearestGridIndex(items, x, y) {
-    for (const [i, [cx, cy, cw, ch]] of _eachBounds(items)) {
-        if (x >= cx && x <= cx + cw && y >= cy && y <= cy + ch)
-            return x > cx + cw / 2 ? i + 1 : i;
-    }
-
-    let nearest = -1;
-    let bestDist = Infinity;
-    let nearestX = 0, nearestW = 0;
-    for (const [i, [cx, cy, cw, ch]] of _eachBounds(items)) {
-        const dx = x - (cx + cw / 2);
-        const dy = y - (cy + ch / 2);
-        const d = dx * dx + dy * dy;
-        if (d < bestDist) {
-            bestDist = d;
-            nearest = i;
-            nearestX = cx;
-            nearestW = cw;
+function _settledSlots(actors) {
+    const slots = [];
+    actors.forEach((actor, index) => {
+        const bounds = settledBounds(actor);
+        if (bounds) {
+            const [x, y, width, height] = bounds;
+            slots.push({index, actor, x, y, height, end: x + width});
         }
+    });
+    return slots;
+}
+
+// The row that contains y wins, a y in the gap keeps the dragged icon's
+// row, so a drag never flips rows without really entering the other one.
+function _rowFor(slots, y, dragged) {
+    const rows = new Map();
+    for (const slot of slots) {
+        const key = Math.round(slot.y);
+        if (!rows.has(key))
+            rows.set(key, []);
+        rows.get(key).push(slot);
     }
 
-    if (nearest === -1)
-        return items.length;
-    return x > nearestX + nearestW / 2 ? nearest + 1 : nearest;
+    const bands = [...rows.values()];
+    return bands.find(band => y >= band[0].y && y <= band[0].y + band[0].height) ??
+        bands.find(band => band.some(slot => slot.actor === dragged)) ??
+        bands.reduce((best, band) => _rowDistance(band, y) < _rowDistance(best, y) ? band : best);
+}
+
+function _rowDistance(band, y) {
+    return Math.abs(y - band[0].y - band[0].height / 2);
+}
+
+// Cell boundaries sit at the midpoints of the gaps between neighbours.
+function _cellIndexAt(row, x) {
+    const cells = [...row].sort((a, b) => a.x - b.x);
+    for (let i = 0; i < cells.length - 1; i++) {
+        const gapMiddle = (cells[i].end + cells[i + 1].x) / 2;
+        if (x < gapMiddle)
+            return cells[i].index;
+    }
+    return cells.at(-1).index;
 }
 
 export function dragStageCoords(dragActor) {
@@ -63,12 +80,4 @@ export function dragStageCoords(dragActor) {
         return global.get_pointer();
     const [x, y, w, h] = b;
     return [x + w / 2, y + h / 2];
-}
-
-function* _eachBounds(items) {
-    for (let i = 0; i < items.length; i++) {
-        const b = safeBounds(items[i].actor);
-        if (b)
-            yield [i, b];
-    }
 }

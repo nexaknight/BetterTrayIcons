@@ -1,5 +1,6 @@
 import Clutter from 'gi://Clutter';
 import GObject from 'gi://GObject';
+import St from 'gi://St';
 import * as DND from 'resource:///org/gnome/shell/ui/dnd.js';
 
 import {warn, error} from '../../shared/logging.js';
@@ -38,9 +39,6 @@ export class DraggableTrayIcon extends GObject.Object {
         this._isDragging = false;
         this._draggableSignals = [];
 
-        if (!this._actor.reactive)
-            this._actor.reactive = true;
-
         // Back-link so callers reach the wrapper even while DnD is disabled.
         this._actor._draggableItem = this;
     }
@@ -77,6 +75,21 @@ export class DraggableTrayIcon extends GObject.Object {
         if (!this._actor)
             return null;
         const [w, h] = this._actor.get_size();
+        const icon = findIcon(this._actor);
+        if (icon?.gicon) {
+            const copy = new St.Bin({
+                width: w,
+                height: h,
+                style_class: this._actor.style_class,
+                style: this._actor.get_style(),
+            });
+            copy.set_child(new St.Icon({
+                gicon: icon.gicon,
+                icon_size: icon.icon_size,
+                style: icon.get_style(),
+            }));
+            return copy;
+        }
         return new Clutter.Clone({
             source: this._actor,
             width: w,
@@ -147,10 +160,9 @@ export class DraggableTrayIcon extends GObject.Object {
         }
 
         if (this._actor && !isDisposed(this._actor)) {
-            // makeDraggable attached its start gesture as an actor action and
-            // dnd.js never removes it. Left in place it keeps starting drags
-            // after teardown, one more per re-enable.
-            const gesture = this._draggable?.startGesture;
+            // dnd.js never removes the start gesture it attached, left in place it
+            // keeps starting drags after teardown, one more per re-enable.
+            const gesture = this._draggable.startGesture;
             if (gesture)
                 this._actor.remove_action(gesture);
             if (this._actor._delegate === this)
@@ -173,11 +185,6 @@ export class DraggableTrayIcon extends GObject.Object {
     }
 
     _onDragBegin() {
-        if (!this._enabled) {
-            this._cancelActiveDrag();
-            return;
-        }
-
         this._isDragging = true;
 
         if (this._clickController?.cancel)
@@ -185,18 +192,16 @@ export class DraggableTrayIcon extends GObject.Object {
 
         // Easing the source's scale or opacity here races DND's dragActorMaxSize
         // tween and produces NaN.
-        if (this._onDragStateChange)
-            this._onDragStateChange(true);
+        this._onDragStateChange(true);
     }
 
     _onDragStopped() {
         this._isDragging = false;
-        if (this._onDragStateChange)
-            this._onDragStateChange(false);
+        this._onDragStateChange(false);
     }
 
     _cancelActiveDrag() {
-        if (!this._draggable || !this._isDragging)
+        if (!this._isDragging)
             return;
         const time = global.get_current_time();
         this._draggable._cancelDrag?.(time);
@@ -216,6 +221,17 @@ export class DraggableTrayIcon extends GObject.Object {
     }
 }
 
+function findIcon(actor) {
+    if (actor instanceof St.Icon)
+        return actor;
+    for (const child of actor.get_children()) {
+        const found = findIcon(child);
+        if (found)
+            return found;
+    }
+    return null;
+}
+
 function isDragEnabledFromSettings(settings) {
     if (!settings)
         return false;
@@ -223,33 +239,25 @@ function isDragEnabledFromSettings(settings) {
 }
 
 export function syncDragEnabled(draggable, settings) {
-    draggable?.setEnabled(isDragEnabledFromSettings(settings));
+    draggable.setEnabled(isDragEnabledFromSettings(settings));
 }
 
 export function setupIconDragSource({
     actor,
     appId,
     settings,
-    label = appId,
     tooltip = null,
     onForwardedDragStateChange = null,
 }) {
-    let draggable;
-    try {
-        draggable = new DraggableTrayIcon(actor, appId, null, isDragging => {
-            if (!isDisposed(actor)) {
-                actor.opacity = isDragging ? DRAGGING_SOURCE_OPACITY : 255;
-                // Hide on both begin and end, because notify::hover doesn't
-                // re-fire after a drag ends if the pointer never left the icon.
-                // A tooltip shown before would stick.
-                tooltip?.hide();
-            }
-            onForwardedDragStateChange?.(isDragging);
-        });
-    } catch (e) {
-        warn(`setupIconDragSource: init failed for ${label}: ${e.message}`);
-        return null;
-    }
+    const draggable = new DraggableTrayIcon(actor, appId, null, isDragging => {
+        if (!isDisposed(actor)) {
+            actor.opacity = isDragging ? DRAGGING_SOURCE_OPACITY : 255;
+            // notify::hover does not re-fire if the pointer never left the icon, a
+            // tooltip shown before the drag would stick.
+            tooltip?.hide();
+        }
+        onForwardedDragStateChange?.(isDragging);
+    });
     syncDragEnabled(draggable, settings);
     return draggable;
 }

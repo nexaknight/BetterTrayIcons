@@ -39,8 +39,7 @@ export class OverflowMenu {
         });
 
         this._menu.connect('open-state-changed', (menu, isOpen) => {
-            if (this._onOpenStateChanged)
-                this._onOpenStateChanged(isOpen);
+            this._onOpenStateChanged(isOpen);
             if (isOpen)
                 this.updateGeometry();
         });
@@ -53,7 +52,7 @@ export class OverflowMenu {
     }
 
     get isOpen() {
-        return this._menu?.isOpen;
+        return this._menu.isOpen;
     }
 
     get isAttached() {
@@ -81,14 +80,11 @@ export class OverflowMenu {
             request_mode: Clutter.RequestMode.HEIGHT_FOR_WIDTH,
         });
 
-        if (this._menu && this._menu.box)
+        if (this._menu.box)
             this._menu.box.add_child(this._container);
     }
 
     updateGeometry(itemCount) {
-        if (!this._container)
-            return;
-
         itemCount ??= this._container.get_children().filter(child => child.visible).length;
 
         if (itemCount === 0) {
@@ -154,7 +150,7 @@ export class OverflowMenu {
         this._container.set_style(`${this._cachedBaseStyle} ${geometryStyle}`);
 
         this._container.queue_relayout();
-        if (this._menu && this._menu.box)
+        if (this._menu.box)
             this._menu.box.queue_relayout();
     }
 
@@ -176,9 +172,6 @@ export class OverflowMenu {
 
     applyStyle(enableCustomStyle) {
         this._enableCustomStyle = enableCustomStyle;
-        if (!this._container || !this._menu)
-            return;
-
         if (this._enableCustomStyle) {
             if (this._menu.box)
                 this._menu.box.set_style(`${POPUP_UNCLAMP_CSS} background-color: transparent; border: none; box-shadow: none; margin: 0; padding: 0;`);
@@ -216,20 +209,20 @@ export class OverflowMenu {
     // grab back. Closing and reopening would do it too, at the price of a
     // visible flicker.
     restoreManagerGrab() {
-        if (this._menu?.isOpen)
+        if (this._menu.isOpen)
             this._menu.emit('open-state-changed', true);
     }
 
     open() {
-        this._menu?.open();
+        this._menu.open();
     }
 
     close() {
-        this._menu?.close();
+        this._menu.close();
     }
 
     toggle() {
-        this._menu?.toggle();
+        this._menu.toggle();
     }
 
     destroy() {

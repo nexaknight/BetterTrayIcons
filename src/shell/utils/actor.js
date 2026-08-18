@@ -16,13 +16,9 @@ export const POPUP_ANIMATION_NONE = 0;
 // toString included, and its string carries no disposed marker anymore.
 // Probing is both noisy and blind, so track destruction ourselves.
 const _destroyedActors = new WeakSet();
-const _trackedActors = new WeakSet();
 
 export function trackDisposal(actor) {
-    if (actor && !_trackedActors.has(actor)) {
-        _trackedActors.add(actor);
-        actor.connect('destroy', () => _destroyedActors.add(actor));
-    }
+    actor.connect('destroy', () => _destroyedActors.add(actor));
     return actor;
 }
 
@@ -39,6 +35,16 @@ export function safeBounds(actor) {
     } catch {
         return null;
     }
+}
+
+// The allocation ignores a running slide, so this is where the actor will
+// settle, not where it is drawn right now.
+export function settledBounds(actor) {
+    if (!actor.has_allocation())
+        return null;
+    const [px, py] = actor.get_parent().get_transformed_position();
+    const box = actor.get_allocation_box();
+    return [px + box.x1, py + box.y1, box.x2 - box.x1, box.y2 - box.y1];
 }
 
 export function stageScaleFactor() {
@@ -146,9 +152,6 @@ export function destroyMenuSafely(menu) {
 }
 
 export function placeIndicatorInPanel(indicator, settings) {
-    if (!indicator)
-        return;
-
     const currentParent = indicator.get_parent();
     if (currentParent)
         currentParent.remove_child(indicator);
@@ -164,21 +167,22 @@ export function placeIndicatorInPanel(indicator, settings) {
         targetBox.insert_child_at_index(indicator, settings.get_int('tray-order'));
 }
 
-export function safelyReparentActor(actor, newParent) {
-    if (!newParent || isDisposed(actor) || isDisposed(newParent))
+// A placement pass walks every icon, each real mutation costs a full
+// container relayout.
+export function moveActorToIndex(actor, parent, index) {
+    if (isDisposed(actor) || isDisposed(parent))
         return;
 
-    const oldParent = actor.get_parent();
-
-    if (oldParent === newParent) {
-        newParent.set_child_above_sibling(actor, null);
+    const current = actor.get_parent();
+    if (current === parent) {
+        if (parent.get_children().indexOf(actor) === index)
+            return;
+        parent.set_child_at_index(actor, index);
         return;
     }
 
-    if (oldParent)
-        oldParent.remove_child(actor);
-
-    newParent.add_child(actor);
+    current?.remove_child(actor);
+    parent.insert_child_at_index(actor, index);
 }
 
 // Shell's own panel styling has to come off before a custom one can take
@@ -290,8 +294,6 @@ function _badgeAlign(position) {
 // under a visible badge.
 export function setBadgeContent(actor, settings, badge, style = null) {
     const label = actor._badge;
-    if (!label)
-        return;
     if (!badge) {
         label.visible = false;
         return;

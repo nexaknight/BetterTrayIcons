@@ -37,8 +37,7 @@ export class ToggleButton {
         this.actor.connect('scroll-event', (_actor, event) => this._onScroll(event));
         trackDisposal(this.actor);
 
-        // Unlike tray items, which pass events through so middle-click and DnD
-        // keep working, the toggle stops clicks from reaching the panel.
+        // Clicks on the toggle must not reach the panel.
         this._clickController = new ClickController(
             this.actor,
             this._settings,
@@ -48,16 +47,12 @@ export class ToggleButton {
         );
     }
 
-    // The overflow menu anchors its popup to `.actor`, so it can only be built
-    // after this constructor ran.
+    // The popup anchors to .actor and can only exist after this constructor.
     setOverflowMenu(overflowMenu) {
         this._overflowMenu = overflowMenu;
     }
 
     updateStyle() {
-        if (!this._icon || !this.actor || !this._settings)
-            return;
-
         // An imported blob can hold an empty string, the schema default is
         // the one place that knows the real fallback.
         const iconName = this._settings.get_string('toggle-icon-name') ||
@@ -82,18 +77,18 @@ export class ToggleButton {
     }
 
     updateState() {
-        const isMenuOpen = this._overflowMenu?.isOpen;
+        const isMenuOpen = this._overflowMenu.isOpen;
         const isHover = this.actor.hover;
         const isActive = isMenuOpen || isHover;
 
         if (this._baseStyle) {
             if (isActive) {
                 this.actor.set_style(`${this._baseStyle} ${this._hoverStyle}`);
-                if (this._icon && this._iconHoverColor)
+                if (this._iconHoverColor)
                     this._icon.set_style(`color: ${this._iconHoverColor};`);
             } else {
                 this.actor.set_style(this._baseStyle);
-                if (this._icon && this._iconColor)
+                if (this._iconColor)
                     this._icon.set_style(`color: ${this._iconColor};`);
             }
         } else if (isMenuOpen) {
@@ -103,21 +98,31 @@ export class ToggleButton {
         }
     }
 
-    applyHoverMenuOrder() {
+    // force is for the drag-end re-attach, the popup is open but not
+    // grabbed yet and waiting for a close would let the hover switch pick
+    // the wrong menu.
+    applyHoverMenuOrder(force = false) {
         const manager = Main.panel.menuManager;
-        if (!manager || !this._overflowMenu?.isAttached)
+        if (!manager || !this._overflowMenu.isAttached)
             return;
 
-        // The hover switch only picks between menus already in the manager,
-        // so the lazily built action menu has to exist before its first open.
+        // The hover switch only picks menus already in the manager, so the
+        // lazy action menu has to exist first.
         this._ensureActionMenu();
 
         // removeMenu on an open menu drops its modal grab.
-        if (this._actionMenu.isOpen || this._overflowMenu.isOpen)
+        if (this._actionMenu.isOpen)
             return;
+        if (this._overflowMenu.isOpen) {
+            if (force && this._settings.get_string('toggle-hover-menu') !== 'action-menu') {
+                manager.removeMenu(this._actionMenu);
+                manager.addMenu(this._actionMenu);
+            }
+            return;
+        }
 
-        // Both menus share the toggle as source actor, and the manager opens
-        // the first match it finds, so their order picks the hover menu.
+        // Both menus share the toggle as source actor, the manager opens
+        // the first match, so the order picks the hover menu.
         const actionFirst = this._settings.get_string('toggle-hover-menu') === 'action-menu';
 
         manager.removeMenu(this._actionMenu);
@@ -132,9 +137,8 @@ export class ToggleButton {
         }
     }
 
-    // Discrete directions only: SMOOTH carries the fractional deltas that
-    // proportional widgets like the volume slider consume, and rotating the
-    // order per delta would spin it.
+    // SMOOTH carries fractional deltas, rotating per delta would spin the
+    // order.
     _onScroll(event) {
         if (this._settings.get_string('toggle-action-scroll') !== 'cycle')
             return Clutter.EVENT_PROPAGATE;
@@ -164,8 +168,7 @@ export class ToggleButton {
 
     _openActionMenu() {
         this._ensureActionMenu();
-        if (this._actionMenuOverflowItem)
-            this._actionMenuOverflowItem.setSensitive(!!this.actor?.visible);
+        this._actionMenuOverflowItem.setSensitive(this.actor.visible);
 
         this._actionMenu.toggle();
     }
@@ -182,7 +185,7 @@ export class ToggleButton {
         this._actionMenuOverflowItem = new PopupMenu.PopupMenuItem(_('Open Overflow Menu'));
         this._actionMenuOverflowItem.connect('activate', () => {
             this._actionMenu.close();
-            if (this.actor?.visible)
+            if (this.actor.visible)
                 this._overflowMenu.open();
         });
         this._actionMenu.addMenuItem(this._actionMenuOverflowItem);
@@ -202,7 +205,7 @@ export class ToggleButton {
         disposeAll(this, 'destroy', '_clickController');
         this._actionMenuOverflowItem = null;
 
-        if (this.actor && !isDisposed(this.actor))
+        if (!isDisposed(this.actor))
             this.actor.destroy();
         this.actor = null;
         this._icon = null;

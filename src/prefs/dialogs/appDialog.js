@@ -3,7 +3,7 @@ import GObject from 'gi://GObject';
 import Gtk from 'gi://Gtk';
 import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
-import {setAppConfigValue, deleteAppConfig, displayAppName, formatAppName, orderedAppIds, setAppPriorities, getAppConfigMap} from '../../shared/appConfig.js';
+import {setAppConfigValue, deleteAppConfig, displayAppName, formatAppName, orderedAppIds, readVisibleOrder, setAppPriorities, getAppConfigMap} from '../../shared/appConfig.js';
 import {resolveIcon, themeProbeKey} from '../../shared/icon.js';
 import {clearIds, connectScoped, debounceTo, removeTimer} from '../../shared/lifecycle.js';
 import {createButton, createIconButton, createImage, applyIconPreview, hasThemeIcon} from '../widgets/gtkHelpers.js';
@@ -168,7 +168,7 @@ export default class AppDialog extends Adw.Dialog {
         this._positionRow.connect('notify::value', () => {
             if (this._suppressPositionNotify)
                 return;
-            const order = orderedAppIds(this._settings);
+            const order = this._positionOrder();
             const from = order.indexOf(this._appId);
             const to = this._positionRow.value - 1;
             if (from === -1 || from === to)
@@ -182,23 +182,34 @@ export default class AppDialog extends Adw.Dialog {
         return this._positionRow;
     }
 
-    _syncPositionRow() {
-        const order = orderedAppIds(this._settings);
-        const index = order.indexOf(this._appId);
-        const hidden = index === -1;
+    // The panel's own order when the shell publishes one: the config blob
+    // also holds closed and uninstalled apps, and their stale priorities
+    // would push the numbers away from what the panel shows.
+    _positionOrder() {
+        return readVisibleOrder() ?? orderedAppIds(this._settings);
+    }
 
-        this._positionRow.sensitive = !hidden && order.length > 1;
+    _syncPositionRow() {
+        const order = this._positionOrder();
+        const index = order.indexOf(this._appId);
+        const absent = index === -1;
+
+        this._positionRow.sensitive = !absent && order.length > 1;
         // Numbered placeholders so a translation can put the count first.
         // GJS ships no String.prototype.format, hence the plain replace.
-        this._positionRow.subtitle = hidden
-            ? _('Hidden icons have no position.')
-            : _('Position %1 of %2, counted from the left.')
+        if (this._data.is_hidden) {
+            this._positionRow.subtitle = _('Hidden icons have no position.');
+        } else if (absent) {
+            this._positionRow.subtitle = '';
+        } else {
+            this._positionRow.subtitle = _('Position %1 of %2, counted from the left.')
                 .replace('%1', String(index + 1))
                 .replace('%2', String(order.length));
+        }
 
         this._suppressPositionNotify = true;
         this._positionRow.adjustment.set_upper(Math.max(order.length, 1));
-        this._positionRow.adjustment.set_value(hidden ? 1 : index + 1);
+        this._positionRow.adjustment.set_value(absent ? 1 : index + 1);
         this._suppressPositionNotify = false;
     }
 
@@ -269,8 +280,7 @@ export default class AppDialog extends Adw.Dialog {
         this._data = fresh;
         // A drag or a scroll rewrites every priority, so the position follows
         // the blob rather than the snapshot this dialog opened with.
-        if (this._positionRow)
-            this._syncPositionRow();
+        this._syncPositionRow();
         if (this._statusBadgeRow)
             this._statusBadgeRow.visible = !!this._data.custom_icon;
     }
@@ -286,12 +296,12 @@ export default class AppDialog extends Adw.Dialog {
     }
 
     _cachedExists() {
-        return this._iconPaths?.get(this._data.cached_icon_path) ?? null;
+        return this._iconPaths.get(this._data.cached_icon_path) ?? null;
     }
 
     _themeHit() {
         const key = themeProbeKey(this._data);
-        return key ? this._iconPaths?.get(key) ?? null : null;
+        return key ? this._iconPaths.get(key) ?? null : null;
     }
 
     vfunc_dispose() {

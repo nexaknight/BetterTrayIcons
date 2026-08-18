@@ -151,7 +151,6 @@ export class XEmbedTrayIcon {
             actor: this.actor,
             appId: this.appId,
             settings: this._settings,
-            label: this.id,
             tooltip: this._tooltip,
             onForwardedDragStateChange: this._onDragStateChange,
         });
