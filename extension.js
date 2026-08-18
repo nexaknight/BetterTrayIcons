@@ -9,7 +9,7 @@ import {readFileText, isCancelledError} from './src/shared/fetch.js';
 import {importSettingsFromJSON, probeImportIconPaths, saveSettingsToFile, isOwnSyncSource} from './src/shared/settingsIO.js';
 import {clearIds, debounceTo, disconnectSignal, disconnectAll, disposeAll, removeTimer} from './src/shared/lifecycle.js';
 import {clearSeenCache, userConfigSignature} from './src/shared/appConfig.js';
-import {placeIndicatorInPanel} from './src/shell/utils/actor.js';
+import {clearDetachedMenuManager, placeIndicatorInPanel} from './src/shell/utils/actor.js';
 import {clearIconCaches} from './src/shell/utils/icons.js';
 import {enableLauncherEntries, disableLauncherEntries} from './src/shell/utils/launcherEntries.js';
 import {clearItemSplits} from './src/shell/utils/itemSplit.js';
@@ -219,6 +219,7 @@ export default class BetterTrayIconsExtension extends Extension {
         disposeAll(this, 'disable', '_backgroundAppsProxyWatcher', '_backgroundApps', '_xembedBridge', '_manager');
         disposeAll(this, 'destroy', '_indicator');
         disableLauncherEntries();
+        clearDetachedMenuManager();
         clearIconCaches();
         clearSeenCache();
         clearItemSplits();

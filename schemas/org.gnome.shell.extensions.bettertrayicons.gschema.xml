@@ -39,6 +39,11 @@
             <summary>Keep the overflow menu open after clicking an icon</summary>
         </key>
 
+        <key name="keep-popup-on-failed-click" type="b">
+            <default>true</default>
+            <summary>Keep the overflow menu open when a click had no effect</summary>
+        </key>
+
         <key name="enable-symbolic-icons" type="b">
             <default>false</default>
             <summary>Prefer monochrome symbolic icons when available</summary>

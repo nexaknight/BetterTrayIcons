@@ -240,6 +240,12 @@ msgstr "Vergessen"
 msgid "Forget App"
 msgstr "App vergessen"
 
+msgid "Stay Open When a Click Has No Effect"
+msgstr "Offen bleiben, wenn ein Klick keine Wirkung hat"
+
+msgid "Some apps never answer a click."
+msgstr "Manche Apps reagieren nicht auf Klicks."
+
 msgid "from"
 msgstr "von"
 

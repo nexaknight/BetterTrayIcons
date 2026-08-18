@@ -137,6 +137,23 @@ export function menuAnchorFor(actor) {
     return Main.layoutManager.dummyCursor;
 }
 
+let _detachedMenuManager = null;
+
+// The panel manager closes its open menu when another opens, which would
+// shut the popup under a context menu opened from inside it. A manager of
+// its own lets both stay open, the popup stays the panel's active menu.
+export function menuManagerFor(actor, settings) {
+    if (settings.get_boolean('keep-popup-after-click') && !Main.panel.contains(actor)) {
+        _detachedMenuManager ??= new PopupMenu.PopupMenuManager(Main.panel);
+        return _detachedMenuManager;
+    }
+    return Main.panel.menuManager;
+}
+
+export function clearDetachedMenuManager() {
+    _detachedMenuManager = null;
+}
+
 // The menu actor can already be C-disposed during shutdown.
 export function destroyMenuSafely(menu) {
     if (!menu || isDisposed(menu.actor))

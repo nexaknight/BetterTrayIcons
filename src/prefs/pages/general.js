@@ -18,6 +18,7 @@ import ConfigDialog from '../dialogs/configDialog.js';
 const GENERAL_RESET_KEYS = Object.freeze([
     'enable-wine-support',
     'keep-popup-after-click',
+    'keep-popup-on-failed-click',
     'hide-background-apps',
     'enable-background-proxy',
     'enable-tooltips',
@@ -66,11 +67,27 @@ export class GeneralPage extends Adw.PreferencesPage {
             'enable-wine-support'
         ));
 
-        group.add(createSwitchRow(
+        // The dialog's toggle matters exactly while this switch is off, so
+        // the gear must stay reachable either way.
+        group.add(createComplexSwitchRow(
             _('Keep Overflow Menu Open'),
             _('Stays open after icon clicks and context menus alike.'),
             this._settings,
-            'keep-popup-after-click'
+            'keep-popup-after-click',
+            this._window,
+            ConfigDialog,
+            {
+                pageTitle: _('Overflow Menu'),
+                groups: [{
+                    configs: [{
+                        type: 'switch',
+                        title: _('Stay Open When a Click Has No Effect'),
+                        subtitle: _('Some apps never answer a click.'),
+                        key: 'keep-popup-on-failed-click',
+                    }],
+                }],
+            },
+            {gearFollowsSwitch: false}
         ));
 
         group.add(createComplexSwitchRow(

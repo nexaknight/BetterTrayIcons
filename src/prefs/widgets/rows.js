@@ -53,7 +53,7 @@ export function buildPrefsWidget(page, settings, keysToReset, {window = null} = 
         }));
     }
 
-    if (keysToReset && keysToReset.length > 0)
+    if (keysToReset.length > 0)
         headerBar.pack_end(createResetButton(settings, keysToReset, {window}));
 
     return contentPage;
@@ -84,7 +84,7 @@ export function createResetButton(settings, keys, {window = null, includesSubpag
 }
 
 export function addConfigRows(group, settings, specs) {
-    for (const spec of specs ?? []) {
+    for (const spec of specs) {
         const row = createConfigRow(settings, spec);
         if (row)
             group.add(row);
@@ -276,7 +276,7 @@ export function createColorRow(title, settings, key, options = {}) {
 
     // Adw rows pack add_suffix() left-to-right, so the paint-bucket goes in
     // first to land left of the color swatch.
-    if (options.variants && Array.isArray(options.variants.items) && options.variants.items.length > 0) {
+    if (options.variants) {
         const variants = options.variants;
         const variantBtn = createIconButton('bti-color-symbolic', {
             tooltip_text: _('More colors'),
@@ -365,12 +365,13 @@ export function createComplexActionRow(title, subtitle, settings, mainKey, displ
 // Adw.SwitchRow packs its switch as the FIRST suffix, so a gear added
 // afterwards lands right of it. Built by hand to keep the gear left of the
 // control, the way the click rows sit.
-export function createComplexSwitchRow(title, subtitle, settings, key, window, DialogClass, dialogData) {
+export function createComplexSwitchRow(title, subtitle, settings, key, window, DialogClass, dialogData, {gearFollowsSwitch = true} = {}) {
     const gearBtn = createIconButton(GEAR_ICON_NAME, {
         tooltip_text: _('Configure'),
         callback: () => new DialogClass(window, settings, dialogData).present(window),
     });
-    settings.bind(key, gearBtn, 'sensitive', Gio.SettingsBindFlags.GET);
+    if (gearFollowsSwitch)
+        settings.bind(key, gearBtn, 'sensitive', Gio.SettingsBindFlags.GET);
 
     const toggle = new Gtk.Switch();
     settings.bind(key, toggle, 'active', Gio.SettingsBindFlags.DEFAULT);
@@ -426,8 +427,7 @@ export function createActionRow(title, subtitle, options = {}) {
     }
 
     if (headerSuffix) {
-        if (headerSuffix instanceof Gtk.Widget)
-            headerSuffix.valign = Gtk.Align.CENTER;
+        headerSuffix.valign = Gtk.Align.CENTER;
         row.add_suffix(headerSuffix);
     }
 
@@ -631,7 +631,7 @@ function _createBoundDropdown(settings, key, displayOptions, values, {flat = tru
 function _bindDropdownSelection(widget, settings, key, values) {
     _bindSelectionToSetting(widget, settings, key, {
         signal: 'notify::selected',
-        getValue: w => w.selected >= 0 && w.selected < values.length ? values[w.selected] : null,
+        getValue: w => w.selected < values.length ? values[w.selected] : null,
         setValue: (w, value) => {
             const idx = values.indexOf(value);
             if (idx !== -1)

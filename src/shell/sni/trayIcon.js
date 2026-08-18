@@ -1,14 +1,13 @@
 import GLib from 'gi://GLib';
-import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
-import {warn} from '../../shared/logging.js';
+import {warn, warnOnce} from '../../shared/logging.js';
 import {configRenderDelta, getAppConfigMap, getAppConfigValue, setAppConfigValue, updateAppConfig, reseedIfForgotten, formatAppName, isVolatileIconName, unreadBadgeEnabled} from '../../shared/appConfig.js';
 import {clearIds, debounceTo, disconnectSignal, disconnectAll, disposeAll, removeTimer, ruleDispatcher} from '../../shared/lifecycle.js';
 import {getItemAddress, refreshPropertyOnProxy, refreshStringOnProxy} from '../utils/dbus.js';
 import {identifyApp, resolveTrayIcon} from '../utils/icons.js';
 import {pickDisplayTitle} from '../utils/appId.js';
 import {forgetItem} from '../utils/itemSplit.js';
-import {attachStatusIcon, isDisposed, trackDisposal, createPanelMenu, menuAnchorFor, destroyMenuSafely, refreshTrayStyle, setBadgeContent, setIconContent, syncHoverStyle, POPUP_ANIMATION_NONE} from '../utils/actor.js';
+import {attachStatusIcon, isDisposed, trackDisposal, createPanelMenu, menuAnchorFor, menuManagerFor, destroyMenuSafely, refreshTrayStyle, setBadgeContent, setIconContent, syncHoverStyle, POPUP_ANIMATION_NONE} from '../utils/actor.js';
 import {addUnreadListener, unreadTargets} from '../utils/launcherEntries.js';
 import {DBusMenuClient} from './dbusMenuClient.js';
 import {ClickController} from '../features/clickController.js';
@@ -118,7 +117,7 @@ export class TrayIcon {
             this._swallow(this._updateTitle(), 'updateTitle');
             this._swallow(this._updateMenuPath(), 'updateMenuPath');
 
-            if (this._onReady && !this._isDestroyed)
+            if (!this._isDestroyed)
                 this._onReady(this.id, this.actor);
         } catch (e) {
             warn(`TrayIcon: Ident/Update failed: ${e.message}`);
@@ -258,7 +257,6 @@ export class TrayIcon {
             actor: this.actor,
             appId: this.appId,
             settings: this._settings,
-            label: this.id,
             tooltip: this._tooltip,
             onForwardedDragStateChange: this._onDragStateChange,
         });
@@ -284,12 +282,10 @@ export class TrayIcon {
 
         switch (action) {
         case 'activate':
-            this._proxy.ActivateRemote(0, 0);
-            this._onCloseMenu();
+            this._fireAndClose('ActivateRemote');
             break;
         case 'secondary':
-            this._proxy.SecondaryActivateRemote(0, 0);
-            this._onCloseMenu();
+            this._fireAndClose('SecondaryActivateRemote');
             break;
         case 'menu':
             // The click that closes a popup also fires here, which would
@@ -301,6 +297,21 @@ export class TrayIcon {
         }
     }
 
+    // Items without Activate answer UnknownMethod, the click did nothing
+    // and closing would gain nothing, so the close waits for the reply.
+    _fireAndClose(method) {
+        this._proxy[method](0, 0, (_result, err) => {
+            if (this._isDestroyed)
+                return;
+            if (err && this._settings.get_boolean('keep-popup-on-failed-click')) {
+                warnOnce(`${method}:${this.appId}`,
+                    `${this.id} does not answer ${method}, leaving the popup open: ${err.message}`);
+                return;
+            }
+            this._onCloseMenu();
+        });
+    }
+
     // Runs for an unidentified item too: it has no stored config, but the
     // Passive rule still decides whether it shows.
     _applyStoredConfig() {
@@ -309,7 +320,7 @@ export class TrayIcon {
     }
 
     async _updateIcon() {
-        if (this._isDestroyed || !this._proxy || !this._iconActor)
+        if (this._isDestroyed)
             return;
 
         // _queueUpdate only guards against a second timer, not against a second
@@ -346,14 +357,13 @@ export class TrayIcon {
         if (!unchanged)
             setIconContent(this._iconActor, gicon, iconName || 'image-missing');
         // Also on unchanged frames: a count change reuses the cached pixmap.
-        setBadgeContent(this.actor, this._settings, badge ?? null,
+        setBadgeContent(this.actor, this._settings, badge,
             badge ? entry?.badge_style ?? null : null);
 
-        // Alert names are not the app's calm baseline, and volatile counter
-        // names would rewrite the blob on every animation frame. A missing
-        // baseline is seeded even during an alert, apps booting in attention
-        // state would otherwise never get one.
-        if (this.appId && detected?.iconName &&
+        // Alert names are not the calm baseline and volatile names would
+        // rewrite the blob per frame. A missing baseline is seeded even during
+        // an alert, apps booting in attention state would never get one.
+        if (this.appId && detected.iconName &&
             (!detected.hasAlert || detected.baselineMissing) &&
             !isVolatileIconName(detected.iconName)) {
             const updateData = {detected_icon: detected.iconName};
@@ -399,9 +409,6 @@ export class TrayIcon {
         const gen = ++this._titleGen;
         let title = getAppConfigValue(this._settings, this.appId, 'custom_title');
         if (!title) {
-            if (!this._proxy)
-                return;
-
             const raw = await refreshStringOnProxy(this._proxy, 'Title');
             if (this._isDestroyed || gen !== this._titleGen)
                 return;
@@ -424,7 +431,7 @@ export class TrayIcon {
     }
 
     async _updateMenuPath() {
-        if (this._isDestroyed || !this._proxy)
+        if (this._isDestroyed)
             return;
         const path = await refreshPropertyOnProxy(this._proxy, 'Menu');
         if (this._isDestroyed)
@@ -508,9 +515,9 @@ export class TrayIcon {
         this._menu = createPanelMenu(menuAnchorFor(this.actor));
         trackDisposal(this._menu.actor);
 
-        // Hide Top Bar reads Main.panel.menuManager.activeMenu before it collapses,
-        // and a private manager leaves that null while this menu is open.
-        Main.panel.menuManager?.addMenu(this._menu);
+        // Hide Top Bar only stays put while Main.panel.menuManager.activeMenu
+        // is set, held either by this menu or by the open popup underneath.
+        menuManagerFor(this.actor, this._settings)?.addMenu(this._menu);
 
         this._menu.connect('open-state-changed', (menu, isOpen) => {
             if (isOpen)
@@ -559,15 +566,13 @@ export class TrayIcon {
         disconnectSignal(this, this._settings, '_settingsConnectId');
         clearIds(this, removeTimer, '_updateDeferId', '_titleDeferId', '_menuDropId');
 
-        if (this._proxy) {
-            disconnectAll(this, this._proxy, '_proxySignals', 'disconnectSignal');
-            disconnectAll(this, this._proxy, '_gObjectSignals');
-        }
+        disconnectAll(this, this._proxy, '_proxySignals', 'disconnectSignal');
+        disconnectAll(this, this._proxy, '_gObjectSignals');
 
         this._disposeMenu();
         disposeAll(this, 'destroy', '_menuClient');
 
-        if (this.actor && !isDisposed(this.actor))
+        if (!isDisposed(this.actor))
             this.actor.destroy();
         this.actor = null;
 

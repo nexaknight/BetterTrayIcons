@@ -1,14 +1,13 @@
 import Clutter from 'gi://Clutter';
 import Gio from 'gi://Gio';
 import {gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
-import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 import * as Util from 'resource:///org/gnome/shell/misc/util.js';
 
 import {warn} from '../../shared/logging.js';
 import {configRenderDelta, displayAppName, reseedIfForgotten, unreadBadgeEnabled, updateAppConfig} from '../../shared/appConfig.js';
 import {disconnectAll, disposeAll, ruleDispatcher} from '../../shared/lifecycle.js';
-import {attachStatusIcon, createPanelMenu, destroyMenuSafely, isDisposed, menuAnchorFor, refreshTrayStyle, setBadgeContent, setIconContent, syncHoverStyle, trackDisposal, POPUP_ANIMATION_NONE} from '../utils/actor.js';
+import {attachStatusIcon, createPanelMenu, destroyMenuSafely, isDisposed, menuAnchorFor, menuManagerFor, refreshTrayStyle, setBadgeContent, setIconContent, syncHoverStyle, trackDisposal, POPUP_ANIMATION_NONE} from '../utils/actor.js';
 import {configuredIcon} from '../utils/icons.js';
 import {addUnreadListener, unreadBadge, unreadTargets} from '../utils/launcherEntries.js';
 import {applyTitle, createTrayActor, syncTooltip} from '../features/tooltip.js';
@@ -54,7 +53,6 @@ export class BackgroundAppsProxyIcon {
             actor: this.actor,
             appId,
             settings,
-            label: this.id,
             tooltip,
             onForwardedDragStateChange: onDragStateChange,
         });
@@ -140,7 +138,7 @@ export class BackgroundAppsProxyIcon {
     _createMenu() {
         const menu = createPanelMenu(menuAnchorFor(this.actor));
         trackDisposal(menu.actor);
-        Main.panel.menuManager?.addMenu(menu);
+        menuManagerFor(this.actor, this._settings)?.addMenu(menu);
 
         const show = new PopupMenu.PopupMenuItem(_('Show'));
         show.connect('activate', () => this._activate());
@@ -223,7 +221,7 @@ export class BackgroundAppsProxyIcon {
             return;
         this._isDestroyed = true;
 
-        this._unreadUnsub?.();
+        this._unreadUnsub();
         this._unreadUnsub = null;
 
         disposeAll(this, 'destroy', '_draggable', '_tooltip');
