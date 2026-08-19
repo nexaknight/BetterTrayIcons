@@ -5,8 +5,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: BetterTrayIcons\n"
 "Report-Msgid-Bugs-To: https://github.com/nexaknight/BetterTrayIcons/issues\n"
-"POT-Creation-Date: 2026-07-31 06:49+0800\n"
-"PO-Revision-Date: 2026-08-02 07:29+0800\n"
+"POT-Creation-Date: 2026-08-19 05:59+0800\n"
+"PO-Revision-Date: 2026-08-19 16:19+0800\n"
 "Last-Translator: Igor Zhitov <agent19872@icloud.com>\n"
 "Language-Team: Russian\n"
 "Language: ru\n"
@@ -17,29 +17,334 @@ msgstr ""
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "X-Generator: Gtranslator 50.0\n"
 
-msgid "0 is square, high is round."
-msgstr "0 — квадратная форма, максимальное значение — круглая."
+msgid "Show"
+msgstr "Показать"
 
-msgid "0 uses the automatic size."
-msgstr "При значении 0 размер выбирается автоматически."
+msgid "Quit"
+msgstr "Выйти"
 
-msgid "A shared JSON file on Nextcloud, a NAS, or another cloud folder."
-msgstr "Общий JSON-файл в Nextcloud, на NAS или в другой облачной папке."
+msgid "Open Overflow Menu"
+msgstr "Открыть меню скрытых значков"
+
+msgid "Open Settings"
+msgstr "Открыть настройки"
 
 msgid "About"
 msgstr "О расширении"
 
-msgid "Action Menu"
-msgstr "Меню действий"
+msgid "Help translate this extension."
+msgstr "Помогите перевести это расширение."
+
+msgid "Translate"
+msgstr "Перевести"
+
+msgid "Information"
+msgstr "Информация"
+
+msgid "Version"
+msgstr "Версия"
+
+msgid "Open on GitHub"
+msgstr "Открыть на GitHub"
+
+msgid "Source Code"
+msgstr "Исходный код"
+
+msgid "Changelog"
+msgstr "Журнал изменений"
+
+msgid "Recent releases"
+msgstr "Последние выпуски"
+
+msgid "Sponsor"
+msgstr "Спонсировать"
+
+msgid "Support development."
+msgstr "Поддержать разработку."
+
+msgid "Contributors"
+msgstr "Участники"
+
+msgid "Legal"
+msgstr "Правовые сведения"
+
+msgid "License"
+msgstr "Лицензия"
+
+msgid ""
+"Provided \"as is\", without warranty. The authors are not liable for damages."
+msgstr ""
+"Предоставляется \"как есть\", без каких-либо гарантий. Авторы не несут "
+"ответственности за возможный ущерб."
+
+msgid "Powered by"
+msgstr "Предоставлено"
+
+msgid "No releases found."
+msgstr "Выпуски не найдены."
+
+msgid "Failed to load changelog: "
+msgstr "Не удалось загрузить журнал изменений: "
+
+msgid "Load older releases"
+msgstr "Загрузить более старые выпуски"
+
+msgid "Load"
+msgstr "Загрузить"
+
+msgid "Loaded from GitHub"
+msgstr "Загрузить с GitHub"
+
+msgid "Contacts api.github.com on demand."
+msgstr "Обращается к api.github.com по запросу."
+
+msgid "Loading…"
+msgstr "Загрузка…"
+
+msgid "No contributors found"
+msgstr "Участники не найдены"
+
+msgid "commits"
+msgstr "коммитов"
+
+msgid "Show more"
+msgstr "Показать ещё"
+
+msgid "Error loading data"
+msgstr "Ошибка загрузки данных"
 
 msgid "Actions"
 msgstr "Действия"
 
+msgid "Left Click"
+msgstr "Левая кнопка"
+
+msgid "Middle Click"
+msgstr "Средняя кнопка"
+
+msgid "Right Click"
+msgstr "Правая кнопка"
+
 msgid "Activate"
 msgstr "Активировать"
 
-msgid "Add a state"
-msgstr "Добавить состояние"
+msgid "Open Menu"
+msgstr "Открыть меню"
+
+msgid "None"
+msgstr "Ничего"
+
+msgid "Reorder (drag & drop)"
+msgstr "Перетаскивание значков"
+
+msgid "Toggle Menu"
+msgstr "Переключить меню"
+
+msgid "Cycle Icons"
+msgstr "Сдвинуть значки"
+
+msgid "Action Menu"
+msgstr "Меню действий"
+
+msgid "Tray Icon Clicks"
+msgstr "Действия значков трея"
+
+msgid "Open the gear for double-click and long-press."
+msgstr ""
+"Нажмите на кнопку настроек, чтобы настроить двойное нажатие и удержание."
+
+msgid "Toggle Button Clicks"
+msgstr "Действия кнопки скрытых значков"
+
+msgid "Scroll"
+msgstr "Прокрутка"
+
+msgid "Scroll direction picks which way the icons rotate"
+msgstr "Направление прокрутки определяет, в какую сторону сдвигаются значки."
+
+msgid "Menu on Hover"
+msgstr "Меню при наведении"
+
+msgid "Which menu opens when you hover the toggle button"
+msgstr ""
+"Какое меню открывать при наведении на кнопку, если уже открыто другое меню "
+"панели."
+
+msgid "Overflow Popup"
+msgstr "Скрытые значки"
+
+msgid "Advanced"
+msgstr "Дополнительно"
+
+msgid "Double Click"
+msgstr "Двойное нажатие"
+
+msgid "Long Press"
+msgstr "Удержание"
+
+msgid "Touch"
+msgstr "Касание"
+
+msgid "Tap"
+msgstr "Касание"
+
+msgid "Double Tap"
+msgstr "Двойное касание"
+
+msgid "Long Touch"
+msgstr "Долгое касание"
+
+msgid "Tap, double tap and long touch."
+msgstr "Касание, двойное касание и долгое касание."
+
+msgid "Configure"
+msgstr "Настроить"
+
+msgid "Appearance"
+msgstr "Внешний вид"
+
+msgid "Elements"
+msgstr "Элементы"
+
+msgid "Tray Icons"
+msgstr "Значки трея"
+
+msgid "Size, padding, colors"
+msgstr "Размер, отступы и цвета"
+
+msgid "Toggle Button"
+msgstr "Кнопка скрытых значков"
+
+msgid "Icon, position, colors"
+msgstr "Значок, расположение и цвета"
+
+msgid "Overflow Menu"
+msgstr "Меню скрытых значков"
+
+msgid "Background, radius, spacing"
+msgstr "Фон, радиус и интервалы"
+
+msgid "Applications"
+msgstr "Приложения"
+
+msgid "Detected Apps"
+msgstr "Найденные приложения"
+
+msgid "Settings persist after the app closes."
+msgstr "Настройки сохраняются после закрытия приложения."
+
+msgid "No apps detected"
+msgstr "Приложения не найдены"
+
+msgid "Run an app with a tray icon to see it here."
+msgstr "Запустите приложение со значком в трее, чтобы увидеть его здесь."
+
+msgid "Proton"
+msgstr "Proton"
+
+msgid "Wine"
+msgstr "Wine"
+
+msgid "Hidden"
+msgstr "Скрыто"
+
+msgid "Background App"
+msgstr "Фоновое приложение"
+
+msgid "Unknown App"
+msgstr "Неизвестное приложение"
+
+msgid "ID"
+msgstr "ID"
+
+msgid "Clean Up"
+msgstr "Очистить"
+
+msgid "Clean Up Legacy IDs"
+msgstr "Очистить устаревшие ID"
+
+msgid "Remove leftovers from earlier versions."
+msgstr "Удаляет остатки предыдущих версий."
+
+msgid "App forgotten"
+msgstr "Данные о приложении удалены"
+
+msgid "Forget All Apps"
+msgstr "Забыть все приложения"
+
+msgid "Reset All Apps"
+msgstr "Сбросить настройки всех приложений"
+
+msgid "Forget all apps?"
+msgstr "Забыть все приложения?"
+
+msgid ""
+"Deletes all stored settings for every detected app. Running apps are re-"
+"detected right away."
+msgstr ""
+"Удаляет все сохранённые настройки обнаруженных приложений. Запущенные "
+"приложения будут сразу обнаружены заново."
+
+msgid "Forget All"
+msgstr "Забыть всё"
+
+msgid "All apps forgotten"
+msgstr "Данные обо всех приложениях удалены"
+
+msgid "Reset all apps?"
+msgstr "Сбросить настройки всех приложений?"
+
+msgid ""
+"Restores name, icon and status icons to defaults for every detected app. "
+"Their order is kept."
+msgstr ""
+"Восстанавливает название, значок и значки состояния каждого обнаруженного "
+"приложения по умолчанию. Порядок приложений сохраняется."
+
+msgid "Reset All"
+msgstr "Сбросить всё"
+
+msgid "All apps reset"
+msgstr "Настройки всех приложений сброшены"
+
+msgid "General"
+msgstr "Общие"
+
+msgid "Behavior"
+msgstr "Поведение"
+
+msgid "Wine App Icons"
+msgstr "Значки приложений Wine"
+
+msgid "Show icons from Wine and Proton apps."
+msgstr "Показывать значки приложений Wine и Proton."
+
+msgid "Keep Overflow Menu Open"
+msgstr "Оставлять меню скрытых значков открытым"
+
+msgid "Stays open after icon clicks and context menus alike."
+msgstr ""
+"Остаётся открытым как после нажатия на значок, так и после использования "
+"контекстного меню."
+
+msgid "Stay Open When a Click Has No Effect"
+msgstr "Не закрывать, если нажатие не сработало"
+
+msgid "Some apps never answer a click."
+msgstr "Некоторые приложения не реагируют на нажатие."
+
+msgid "Hide Background Apps"
+msgstr "Скрыть список фоновых приложений"
+
+msgid "Removes GNOME's own list of windowless apps from Quick Settings."
+msgstr ""
+"Удаляет встроенный список GNOME с приложениями без окон из быстрых настроек."
+
+msgid "Background Apps"
+msgstr "Фоновые приложения"
+
+msgid "Create Tray Icons for Background Apps"
+msgstr "Создавать значки для фоновых приложений"
 
 msgid ""
 "Adds a tray icon for windowless background apps that lack one of their own."
@@ -47,17 +352,87 @@ msgstr ""
 "Добавляет значок трея фоновым приложениям без окон, у которых нет "
 "собственного значка."
 
-msgid "Advanced"
-msgstr "Дополнительно"
+msgid "Show Tooltips"
+msgstr "Показывать подсказки"
 
-msgid "All Icons"
-msgstr "Все значки"
+msgid "Show the app title on hover."
+msgstr "Показывать название приложения при наведении."
 
-msgid "All apps forgotten"
-msgstr "Данные обо всех приложениях удалены"
+msgid "Tooltips"
+msgstr "Всплывающие подсказки"
 
-msgid "All apps reset"
-msgstr "Настройки всех приложений сброшены"
+msgid "Position"
+msgstr "Расположение"
+
+msgid "Top"
+msgstr "Сверху"
+
+msgid "Bottom"
+msgstr "Снизу"
+
+msgid "Delay (ms)"
+msgstr "Задержка (мс)"
+
+msgid "Placement"
+msgstr "Размещение"
+
+msgid "Panel Box"
+msgstr "Область панели"
+
+msgid "Which part of the panel holds the icons."
+msgstr "Часть панели, в которой размещаются значки."
+
+msgid "Left"
+msgstr "Слева"
+
+msgid "Center"
+msgstr "По центру"
+
+msgid "Right"
+msgstr "Справа"
+
+msgid "Position in Box"
+msgstr "Положение в области"
+
+msgid "Order within the chosen box."
+msgstr "Порядок внутри выбранной области."
+
+msgid "Visible Icons"
+msgstr "Видимые значки"
+
+msgid ""
+"How many icons stay in the panel. Extra icons move to the overflow menu, and "
+"0 moves them all."
+msgstr ""
+"Количество значков, остающихся на панели. Остальные перемещаются в меню "
+"скрытых значков, а значение 0 перемещает туда все значки."
+
+msgid "Import"
+msgstr "Импорт"
+
+msgid "Export"
+msgstr "Экспорт"
+
+msgid "Backup and Restore"
+msgstr "Резервное копирование и восстановление"
+
+msgid "Save settings as JSON or load them back."
+msgstr "Сохранение настроек в JSON и восстановление из него."
+
+msgid "Cloud Sync"
+msgstr "Облачная синхронизация"
+
+msgid "Keep settings in sync via a shared file."
+msgstr "Синхронизация настроек через общий файл."
+
+msgid "Danger Zone"
+msgstr "Опасная зона"
+
+msgid "Reset"
+msgstr "Сбросить"
+
+msgid "Reset all settings?"
+msgstr "Сбросить все настройки?"
 
 msgid ""
 "All settings will be restored to defaults and sync backups deleted. This "
@@ -65,6 +440,465 @@ msgid ""
 msgstr ""
 "Все настройки будут сброшены до значений по умолчанию, а резервные копии "
 "синхронизации удалены. Это действие нельзя отменить."
+
+msgid "Factory Reset"
+msgstr "Полный сброс"
+
+msgid "Restore defaults and delete sync backups."
+msgstr "Сбросить настройки и удалить резервные копии синхронизации."
+
+msgid "Import settings?"
+msgstr "Импортировать настройки?"
+
+msgid "Local settings will be overwritten."
+msgstr "Локальные настройки будут перезаписаны."
+
+msgid "JSON Files"
+msgstr "Файлы JSON"
+
+msgid "Save"
+msgstr "Сохранить"
+
+msgid "Open"
+msgstr "Открыть"
+
+msgid "Settings reset"
+msgstr "Настройки сброшены"
+
+msgid "App Settings"
+msgstr "Настройки приложения"
+
+msgid ""
+"Tray icons are drawn by the app itself via XEmbed, so a custom icon cannot "
+"be applied."
+msgstr ""
+"Значки трея отрисовываются самим приложением через XEmbed, поэтому "
+"пользовательский значок применить нельзя."
+
+msgid "Configuration"
+msgstr "Настройки"
+
+msgid "Name"
+msgstr "Название"
+
+msgid "Reset name"
+msgstr "Сбросить название"
+
+msgid "Hide Icon"
+msgstr "Скрыть значок"
+
+msgid "Don’t show this icon in the tray."
+msgstr "Не показывать этот значок в трее."
+
+msgid "Forget"
+msgstr "Забыть"
+
+msgid "Forget this app?"
+msgstr "Забыть это приложение?"
+
+msgid "Deletes all stored settings for this app."
+msgstr "Удаляет все сохранённые настройки этого приложения."
+
+msgid "Forget App"
+msgstr "Забыть приложение"
+
+msgid "Hidden icons have no position."
+msgstr "У скрытых значков нет позиции."
+
+msgid "Position %1 of %2, counted from the left."
+msgstr "Позиция %1 из %2, считая слева."
+
+msgid "Reset icon"
+msgstr "Сбросить значок"
+
+msgid "Default app icon"
+msgstr "Стандартный значок приложения"
+
+msgid "Custom Icon"
+msgstr "Пользовательский значок"
+
+msgid "Status Icons and Badges"
+msgstr "Значки состояния и индикаторы"
+
+msgid "Unread badge and per-state icons."
+msgstr "Индикатор непрочитанных и значки для отдельных состояний."
+
+msgid "Experimental"
+msgstr "Экспериментально"
+
+msgid "Badges"
+msgstr "Индикаторы"
+
+msgid "Shows the unread count when the app sends one."
+msgstr ""
+"Показывает количество непрочитанных элементов, если приложение его передаёт."
+
+msgid "Shows a badge on state changes, with the count when the app sends one."
+msgstr ""
+"Показывает индикатор при изменении состояния, включая число, если приложение "
+"его передаёт."
+
+msgid "Background Color"
+msgstr "Цвет фона"
+
+msgid "Text Color"
+msgstr "Цвет текста"
+
+msgid ""
+"Status icons cannot work here: the app has no tray icon and never reports a "
+"status, its icon comes from its desktop entry."
+msgstr ""
+"Значки состояния здесь недоступны: у приложения нет значка в области "
+"уведомлений и оно не сообщает о своём состоянии, поэтому используется значок "
+"из его .desktop-файла."
+
+msgid "Define"
+msgstr "Задать"
+
+msgid "Resting state updated."
+msgstr "Состояние покоя обновлено."
+
+msgid "Resting State"
+msgstr "Состояние покоя"
+
+msgid "Takes what the app shows right now as its calm look."
+msgstr "Использует текущий вид приложения как его обычное состояние."
+
+msgid "Bottom Right"
+msgstr "Снизу справа"
+
+msgid "Bottom Left"
+msgstr "Снизу слева"
+
+msgid "Top Right"
+msgstr "Сверху справа"
+
+msgid "Top Left"
+msgstr "Сверху слева"
+
+msgid "Corner Radius (px)"
+msgstr "Радиус углов (px)"
+
+msgid "0 is square, high is round."
+msgstr "0 — квадратная форма, максимальное значение — круглая."
+
+msgid "Size"
+msgstr "Размер"
+
+msgid "0 uses the automatic size."
+msgstr "При значении 0 размер выбирается автоматически."
+
+msgid "More colors"
+msgstr "Дополнительные цвета"
+
+msgid "Use Accent Color"
+msgstr "Использовать акцентный цвет"
+
+msgid "Add a state"
+msgstr "Добавить состояние"
+
+msgid "Status Icons"
+msgstr "Значки состояния"
+
+msgid "Override the icon for app states like attention or sync."
+msgstr ""
+"Заменяет значок для состояний приложения, например требования внимания или "
+"синхронизации."
+
+msgid "State name, e.g. state-error"
+msgstr "Название состояния, например state-error"
+
+msgid "Remove"
+msgstr "Удалить"
+
+msgid "Applies only when the app itself reports attention."
+msgstr ""
+"Применяется только тогда, когда само приложение сообщает, что требует "
+"внимания."
+
+msgid "Automatic"
+msgstr "Автоматически"
+
+msgid "Attention"
+msgstr "Внимание"
+
+msgid "Not seen yet"
+msgstr "Пока не обнаружено"
+
+msgid "This name is not allowed."
+msgstr "Это название недопустимо."
+
+msgid "This state already exists."
+msgstr "Такое состояние уже существует."
+
+msgid "Overflow Container"
+msgstr "Контейнер меню скрытых значков"
+
+msgid "Overflow Layout"
+msgstr "Макет меню скрытых значков"
+
+msgid "Row"
+msgstr "Строка"
+
+msgid "Grid"
+msgstr "Сетка"
+
+msgid "Grid Columns"
+msgstr "Столбцы сетки"
+
+msgid "Colors"
+msgstr "Цвета"
+
+msgid "Background"
+msgstr "Фон"
+
+msgid "Border"
+msgstr "Рамка"
+
+msgid "Border Color"
+msgstr "Цвет рамки"
+
+msgid "Icon"
+msgstr "Значок"
+
+msgid "Size (px)"
+msgstr "Размер (px)"
+
+msgid "Side"
+msgstr "Сторона"
+
+msgid "Relative to the tray icons."
+msgstr "Относительно значков трея."
+
+msgid "Inherit Style from Tray Icons"
+msgstr "Наследовать стиль значков трея"
+
+msgid "Match the look of tray icons; hides the controls below."
+msgstr "Использует внешний вид значков трея и скрывает настройки ниже."
+
+msgid "Icons"
+msgstr "Значки"
+
+msgid "Symbolic Icons"
+msgstr "Символические значки"
+
+msgid "Use monochrome icons when available."
+msgstr "Использовать монохромные значки, если они доступны."
+
+msgid "Icon Size (px)"
+msgstr "Размер значка (px)"
+
+msgid ""
+"Single clicks are briefly delayed while a double-click action is set, so the "
+"second click can be detected."
+msgstr ""
+"Если задано действие для двойного нажатия, одиночные нажатия срабатывают с "
+"небольшой задержкой, чтобы можно было распознать второе нажатие."
+
+msgid "Select Icon"
+msgstr "Выбрать значок"
+
+msgid "Recommended"
+msgstr "Рекомендуемые"
+
+msgid "All Icons"
+msgstr "Все значки"
+
+msgid "Search icons…"
+msgstr "Поиск значков…"
+
+msgid "System Icons"
+msgstr "Системные значки"
+
+msgid "Previous"
+msgstr "Предыдущая страница"
+
+msgid "Next"
+msgstr "Следующая страница"
+
+msgid "Custom"
+msgstr "Пользовательский"
+
+msgid "Type a name or pick an SVG/PNG file."
+msgstr "Введите имя или выберите файл SVG/PNG."
+
+msgid "Icon name or path"
+msgstr "Имя значка или путь"
+
+msgid "Choose file"
+msgstr "Выбрать файл"
+
+msgid "Apply"
+msgstr "Применить"
+
+msgid "No Icons Found"
+msgstr "Значки не найдены"
+
+msgid "Try a different search term."
+msgstr "Попробуйте изменить поисковый запрос."
+
+msgid "Image Files"
+msgstr "Файлы изображений"
+
+msgid "Select Image"
+msgstr "Выбрать изображение"
+
+msgid "Sync File"
+msgstr "Файл синхронизации"
+
+msgid "A shared JSON file on Nextcloud, a NAS, or another cloud folder."
+msgstr "Общий JSON-файл в Nextcloud, на NAS или в другой облачной папке."
+
+msgid "File"
+msgstr "Файл"
+
+msgid "File is not valid JSON"
+msgstr "Файл не является допустимым JSON"
+
+msgid "Last Sync"
+msgstr "Последняя синхронизация"
+
+msgid "No file selected"
+msgstr "Файл не выбран"
+
+msgid "Checking…"
+msgstr "Проверка…"
+
+msgid "File not yet created"
+msgstr "Файл ещё не создан"
+
+msgid "Unknown"
+msgstr "Неизвестно"
+
+msgid "this device"
+msgstr "этого устройства"
+
+msgid "from"
+msgstr "с"
+
+msgid "Auto-Sync"
+msgstr "Автосинхронизация"
+
+msgid "Enable"
+msgstr "Включить"
+
+msgid "Push on change, pull on remote update."
+msgstr "Отправляет при изменении и получает при обновлении удалённого файла."
+
+msgid "Maximum Backups"
+msgstr "Максимум резервных копий"
+
+msgid "Set a file path first."
+msgstr "Сначала укажите путь к файлу синхронизации."
+
+msgid "Watching for changes."
+msgstr "Отслеживание изменений."
+
+msgid "Waiting for the file."
+msgstr "Ожидание файла."
+
+msgid "Manual Sync"
+msgstr "Ручная синхронизация"
+
+msgid "Push to File"
+msgstr "Отправить в файл"
+
+msgid "Push"
+msgstr "Отправить"
+
+msgid "Settings pushed"
+msgstr "Настройки отправлены"
+
+msgid "Push failed"
+msgstr "Не удалось отправить"
+
+msgid "Pull from File"
+msgstr "Получить из файла"
+
+msgid "Pull"
+msgstr "Получить"
+
+msgid "Pull from file?"
+msgstr "Получить из файла?"
+
+msgid "App settings are merged; other settings are taken from the file."
+msgstr ""
+"Настройки приложений объединяются; остальные настройки берутся из файла."
+
+msgid "Settings pulled"
+msgstr "Настройки получены"
+
+msgid "Pull failed"
+msgstr "Не удалось получить"
+
+msgid "Backups"
+msgstr "Резервные копии"
+
+msgid "None available"
+msgstr "Нет доступных резервных копий"
+
+msgid "available"
+msgstr "доступно"
+
+msgid "Backup"
+msgstr "Резервная копия"
+
+msgid "Delete"
+msgstr "Удалить"
+
+msgid "Delete this backup?"
+msgstr "Удалить эту резервную копию?"
+
+msgid "The backup file will be permanently removed."
+msgstr "Файл резервной копии будет удалён безвозвратно."
+
+msgid "Backup deleted"
+msgstr "Резервная копия удалена"
+
+msgid "Delete failed"
+msgstr "Не удалось удалить"
+
+msgid "Restore"
+msgstr "Восстановить"
+
+msgid "Restore this backup?"
+msgstr "Восстановить эту резервную копию?"
+
+msgid "Backup restored"
+msgstr "Резервная копия восстановлена"
+
+msgid "Restore failed"
+msgstr "Не удалось восстановить"
+
+msgid "Cancel"
+msgstr "Отмена"
+
+msgid "File Chooser"
+msgstr "Выбор файла"
+
+msgid "Style"
+msgstr "Стиль"
+
+msgid "Unlink: edit each side on its own"
+msgstr "Разъединить: каждую сторону можно изменять отдельно"
+
+msgid "Link: editing one side sets all four"
+msgstr "Связать: изменение одной стороны применяется ко всем четырём"
+
+msgid "Hide Sidebar"
+msgstr "Скрыть боковую панель"
+
+msgid "Show Sidebar"
+msgstr "Показать боковую панель"
+
+msgid "Settings"
+msgstr "Настройки"
+
+msgid "Back"
+msgstr "Назад"
+
+msgid "Reset these settings?"
+msgstr "Сбросить эти настройки?"
 
 msgid ""
 "All values of this page, including its dialogs and subpages, will be "
@@ -77,862 +911,38 @@ msgid "All values on this page will be restored to their defaults."
 msgstr ""
 "Для всех параметров этой страницы будут восстановлены значения по умолчанию."
 
-msgid "App Settings"
-msgstr "Настройки приложения"
+msgid "Shape"
+msgstr "Форма"
 
-msgid "App forgotten"
-msgstr "Данные о приложении удалены"
-
-msgid "App settings are merged; other settings are taken from the file."
-msgstr ""
-"Настройки приложений объединяются; остальные настройки берутся из файла."
-
-msgid "Appearance"
-msgstr "Внешний вид"
-
-msgid "Applications"
-msgstr "Приложения"
-
-msgid "Applies only when the app itself reports attention."
-msgstr ""
-"Применяется только тогда, когда само приложение сообщает, что требует "
-"внимания."
-
-msgid "Apply"
-msgstr "Применить"
-
-msgid "Attention"
-msgstr "Внимание"
-
-msgid "Auto-Sync"
-msgstr "Автосинхронизация"
-
-msgid "Automatic"
-msgstr "Автоматически"
-
-msgid "Back"
-msgstr "Назад"
-
-msgid "Background"
-msgstr "Фон"
-
-msgid "Background App"
-msgstr "Фоновое приложение"
-
-msgid "Background Apps"
-msgstr "Фоновые приложения"
-
-msgid "Background Color"
-msgstr "Цвет фона"
-
-msgid "Background, radius, spacing"
-msgstr "Фон, радиус и интервалы"
-
-msgid "Backup"
-msgstr "Резервная копия"
-
-msgid "Backup and Restore"
-msgstr "Резервное копирование и восстановление"
-
-msgid "Backup deleted"
-msgstr "Резервная копия удалена"
-
-msgid "Backup restored"
-msgstr "Резервная копия восстановлена"
-
-msgid "Backups"
-msgstr "Резервные копии"
-
-msgid "Badges"
-msgstr "Индикаторы"
-
-msgid "Behavior"
-msgstr "Поведение"
-
-msgid "Bottom"
-msgstr "Снизу"
-
-msgid "Bottom Left"
-msgstr "Снизу слева"
-
-msgid "Bottom Right"
-msgstr "Снизу справа"
-
-msgid "Cancel"
-msgstr "Отмена"
-
-msgid "Center"
-msgstr "По центру"
-
-msgid "Changelog"
-msgstr "Журнал изменений"
-
-msgid "Checking…"
-msgstr "Проверка…"
-
-msgid "Choose file"
-msgstr "Выбрать файл"
-
-msgid "Clean Up"
-msgstr "Очистить"
-
-msgid "Clean Up Legacy IDs"
-msgstr "Очистить устаревшие ID"
-
-msgid "Cloud Sync"
-msgstr "Облачная синхронизация"
-
-msgid "Colors"
-msgstr "Цвета"
-
-msgid "Configuration"
-msgstr "Настройки"
-
-msgid "Configure"
-msgstr "Настроить"
-
-msgid "Configure advanced actions"
-msgstr "Настроить дополнительные действия"
-
-msgid "Confirm"
-msgstr "Подтвердить"
-
-msgid "Contacts api.github.com on demand."
-msgstr "Обращается к api.github.com по запросу."
-
-msgid "Contributors"
-msgstr "Участники"
-
-msgid "Corner Radius (px)"
-msgstr "Радиус углов (px)"
-
-msgid "Create Tray Icons for Background Apps"
-msgstr "Создавать значки для фоновых приложений"
-
-msgid "Custom"
-msgstr "Пользовательский"
-
-msgid "Custom Icon"
-msgstr "Пользовательский значок"
+msgid "Border Width (px)"
+msgstr "Ширина рамки (px)"
 
 msgid "Custom Style"
 msgstr "Пользовательский стиль"
 
-msgid "Cycle Icons"
-msgstr "Сдвинуть значки"
-
-msgid "Danger Zone"
-msgstr "Опасная зона"
-
-msgid "Default app icon"
-msgstr "Стандартный значок приложения"
-
-msgid "Define"
-msgstr "Задать"
-
-msgid "Delay (ms)"
-msgstr "Задержка (мс)"
-
-msgid "Delete"
-msgstr "Удалить"
-
-msgid "Delete failed"
-msgstr "Не удалось удалить"
-
-msgid "Delete this backup?"
-msgstr "Удалить эту резервную копию?"
-
-msgid ""
-"Deletes all stored settings for every detected app. Running apps are re-"
-"detected right away."
-msgstr ""
-"Удаляет все сохранённые настройки обнаруженных приложений. Запущенные "
-"приложения будут сразу обнаружены заново."
-
-msgid "Deletes all stored settings for this app."
-msgstr "Удаляет все сохранённые настройки этого приложения."
-
-msgid "Detected Apps"
-msgstr "Найденные приложения"
-
-msgid "Don’t show this icon in the tray."
-msgstr "Не показывать этот значок в трее."
-
-msgid "Double Click"
-msgstr "Двойное нажатие"
-
-msgid "Double Tap"
-msgstr "Двойное касание"
-
-msgid "Elements"
-msgstr "Элементы"
-
-msgid "Enable"
-msgstr "Включить"
-
-msgid "Error loading data"
-msgstr "Ошибка загрузки данных"
-
-msgid "Experimental"
-msgstr "Экспериментально"
-
-msgid "Export"
-msgstr "Экспорт"
-
-msgid "Factory Reset"
-msgstr "Сброс к заводским настройкам"
-
-msgid "Failed to load changelog: "
-msgstr "Не удалось загрузить журнал изменений: "
-
-msgid "File"
-msgstr "Файл"
-
-msgid "File Chooser"
-msgstr "Выбор файла"
-
-msgid "File is not valid JSON"
-msgstr "Файл не является допустимым JSON"
-
-msgid "File not yet created"
-msgstr "Файл ещё не создан"
-
-msgid "Forget"
-msgstr "Забыть"
-
-msgid "Forget All"
-msgstr "Забыть всё"
-
-msgid "Forget All Apps"
-msgstr "Забыть все приложения"
-
-msgid "Forget App"
-msgstr "Забыть приложение"
-
-msgid "Forget all apps?"
-msgstr "Забыть все приложения?"
-
-msgid "Forget this app?"
-msgstr "Забыть это приложение?"
-
-msgid "General"
-msgstr "Общие"
-
-msgid "Grid"
-msgstr "Сетка"
-
-msgid "Grid Columns"
-msgstr "Столбцы сетки"
-
-msgid "Help translate this extension."
-msgstr "Помогите перевести это расширение."
-
-msgid "Hidden"
-msgstr "Скрыто"
-
-msgid "Hidden icons have no position."
-msgstr "У скрытых значков нет позиции."
-
-msgid "Hide Background Apps"
-msgstr "Скрыть фоновые приложения"
-
-msgid "Hide Icon"
-msgstr "Скрыть значок"
-
-msgid "Hide Sidebar"
-msgstr "Скрыть боковую панель"
-
-msgid "Hover"
-msgstr "При наведении"
-
-msgid ""
-"How many icons stay in the panel. Extra icons move to the overflow menu, and "
-"0 moves them all."
-msgstr ""
-"Количество значков, остающихся на панели. Остальные перемещаются в меню "
-"скрытых значков, а значение 0 перемещает туда все значки."
-
-msgid "ID"
-msgstr "ID"
-
-msgid "Icon"
-msgstr "Значок"
-
-msgid "Icon Color"
-msgstr "Цвет значка"
-
-msgid "Icon Size (px)"
-msgstr "Размер значка (px)"
-
-msgid "Icon name or path"
-msgstr "Имя значка или путь"
-
-msgid "Icon, position, colors"
-msgstr "Значок, расположение и цвета"
-
-msgid "Icons"
-msgstr "Значки"
-
-msgid "Image Files"
-msgstr "Файлы изображений"
-
-msgid "Import"
-msgstr "Импорт"
-
-msgid "Import settings?"
-msgstr "Импортировать настройки?"
-
-msgid "Information"
-msgstr "Информация"
-
-msgid "Inherit Style from Tray Icons"
-msgstr "Наследовать стиль значков трея"
-
-msgid "JSON Files"
-msgstr "Файлы JSON"
-
-msgid "Keep Overflow Menu Open"
-msgstr "Оставлять меню скрытых значков открытым"
-
-msgid "Keep settings in sync via a shared file."
-msgstr "Синхронизация настроек через общий файл."
-
-msgid "Last Sync"
-msgstr "Последняя синхронизация"
-
-msgid "Left"
-msgstr "Слева"
-
-msgid "Left Click"
-msgstr "Левая кнопка"
-
-msgid "Legal"
-msgstr "Правовые сведения"
-
-msgid "License"
-msgstr "Лицензия"
-
-msgid "Link: editing one side sets all four"
-msgstr "Связать: изменение одной стороны применяется ко всем четырём"
-
-msgid "Live Preview"
-msgstr "Предпросмотр"
-
-msgid "Load"
-msgstr "Загрузить"
-
-msgid "Load older releases"
-msgstr "Загрузить более старые выпуски"
-
-msgid "Loaded from GitHub"
-msgstr "Загрузить с GitHub"
-
-msgid "Loading…"
-msgstr "Загрузка…"
-
-msgid "Local settings will be overwritten."
-msgstr "Локальные настройки будут перезаписаны."
-
-msgid "Long Press"
-msgstr "Удержание"
-
-msgid "Long Touch"
-msgstr "Долгое касание"
-
-msgid "Manual Sync"
-msgstr "Ручная синхронизация"
-
-msgid "Margin"
-msgstr "Внешние отступы"
-
-msgid "Match the look of tray icons; hides the controls below."
-msgstr "Использует внешний вид значков трея и скрывает настройки ниже."
-
-msgid "Maximum Backups"
-msgstr "Максимум резервных копий"
-
-msgid "Menu on Hover"
-msgstr "Меню при наведении"
-
-msgid "Middle Click"
-msgstr "Средняя кнопка"
-
-msgid "More colors"
-msgstr "Дополнительные цвета"
-
-msgid "Name"
-msgstr "Название"
-
-msgid "Next"
-msgstr "Следующая страница"
-
-msgid "No Icons Found"
-msgstr "Значки не найдены"
-
-msgid "No apps detected"
-msgstr "Приложения не найдены"
-
-msgid "No contributors found"
-msgstr "Участники не найдены"
-
-msgid "No file selected"
-msgstr "Файл не выбран"
-
-msgid "No releases found."
-msgstr "Выпуски не найдены."
-
-msgid "None"
-msgstr "Ничего"
-
-msgid "None available"
-msgstr "Нет доступных резервных копий"
-
-msgid "Not seen yet"
-msgstr "Пока не обнаружено"
-
-msgid "Open"
-msgstr "Открыть"
-
-msgid "Open Menu"
-msgstr "Открыть меню"
-
-msgid "Open Overflow Menu"
-msgstr "Открыть меню скрытых значков"
-
-msgid "Open Settings"
-msgstr "Открыть настройки"
-
-msgid "Open on GitHub"
-msgstr "Открыть на GitHub"
-
-msgid "Open the gear for double-click and long-press."
-msgstr "Нажмите на шестерёнку, чтобы настроить двойное нажатие и удержание."
-
-msgid "Order within the chosen box."
-msgstr "Порядок внутри выбранной области."
-
-msgid "Overflow Container"
-msgstr "Контейнер меню скрытых значков"
-
-msgid "Overflow Layout"
-msgstr "Макет меню скрытых значков"
-
-msgid "Overflow Menu"
-msgstr "Меню скрытых значков"
-
-msgid "Overflow Popup"
-msgstr "Скрытые значки"
-
-msgid "Override the icon for app states like attention or sync."
-msgstr ""
-"Заменяет значок для состояний приложения, например требования внимания или "
-"синхронизации."
-
-msgid "Padding"
-msgstr "Внутренние отступы"
-
-msgid "Panel Box"
-msgstr "Область панели"
-
-msgid "Placement"
-msgstr "Размещение"
-
-msgid "Position"
-msgstr "Расположение"
-
-msgid "Position %1 of %2, counted from the left."
-msgstr "Позиция %1 из %2, считая слева."
-
-msgid "Position in Box"
-msgstr "Положение в области"
-
-msgid "Powered by"
-msgstr "Предоставлено"
-
-msgid "Previous"
-msgstr "Предыдущая страница"
-
-msgid "Proton"
-msgstr "Proton"
-
-msgid ""
-"Provided \"as is\", without warranty. The authors are not liable for damages."
-msgstr ""
-"Предоставляется \"как есть\", без каких-либо гарантий. Авторы не несут "
-"ответственности за возможный ущерб."
-
-msgid "Pull"
-msgstr "Получить"
-
-msgid "Pull failed"
-msgstr "Не удалось получить"
-
-msgid "Pull from File"
-msgstr "Получить из файла"
-
-msgid "Pull from file?"
-msgstr "Получить из файла?"
-
-msgid "Push"
-msgstr "Отправить"
-
-msgid "Push failed"
-msgstr "Не удалось отправить"
-
-msgid "Push on change, pull on remote update."
-msgstr "Отправляет при изменении и получает при обновлении удалённого файла."
-
-msgid "Push to File"
-msgstr "Отправить в файл"
-
-msgid "Quit"
-msgstr "Выйти"
-
-msgid "Recent releases"
-msgstr "Последние выпуски"
-
-msgid "Recommended"
-msgstr "Рекомендуется"
-
-msgid "Relative to the tray icons."
-msgstr "Относительно значков трея."
-
-msgid "Remove"
-msgstr "Удалить"
-
-msgid "Remove leftovers from earlier versions."
-msgstr "Удаляет остатки предыдущих версий."
-
-msgid "Removes GNOME's own list of windowless apps from Quick Settings."
-msgstr ""
-"Удаляет встроенный список GNOME с приложениями без окон из быстрых настроек."
-
-msgid "Reorder (drag & drop)"
-msgstr "Перетаскивание значков"
-
-msgid "Reset"
-msgstr "Сбросить"
-
-msgid "Reset All"
-msgstr "Сбросить всё"
-
-msgid "Reset All Apps"
-msgstr "Сбросить настройки всех приложений"
-
-msgid "Reset all apps?"
-msgstr "Сбросить настройки всех приложений?"
-
-msgid "Reset all settings?"
-msgstr "Сбросить все настройки?"
-
-msgid "Reset icon"
-msgstr "Сбросить значок"
-
-msgid "Reset name"
-msgstr "Сбросить название"
-
-msgid "Reset these settings?"
-msgstr "Сбросить эти настройки?"
-
-msgid "Resting State"
-msgstr "Состояние покоя"
-
-msgid "Resting state updated."
-msgstr "Состояние покоя обновлено."
-
-msgid "Restore"
-msgstr "Восстановить"
-
-msgid "Restore defaults and delete sync backups."
-msgstr "Сбросить настройки и удалить резервные копии синхронизации."
-
-msgid "Restore failed"
-msgstr "Не удалось восстановить"
-
-msgid "Restore this backup?"
-msgstr "Восстановить эту резервную копию?"
-
-msgid ""
-"Restores name, icon and status icons to defaults for every detected app. "
-"Their order is kept."
-msgstr ""
-"Восстанавливает стандартные название, значок и значки состояния для каждого "
-"обнаруженного приложения. Порядок приложений сохраняется."
-
 msgid "Reveal colors, padding and margin controls below."
 msgstr "Показывать ниже настройки цветов, внутренних и внешних отступов."
 
-msgid "Right"
-msgstr "Справа"
-
-msgid "Right Click"
-msgstr "Правая кнопка"
-
-msgid "Row"
-msgstr "Строка"
-
-msgid "Run an app with a tray icon to see it here."
-msgstr "Запустите приложение со значком в трее, чтобы увидеть его здесь."
-
-msgid "Save"
-msgstr "Сохранить"
-
-msgid "Save settings as JSON or load them back."
-msgstr "Сохранение настроек в JSON и восстановление из него."
-
-msgid "Schema key \"sync-file-path\" missing."
-msgstr "Ключ \"sync-file-path\" отсутствует в схеме."
-
-msgid "Scroll"
-msgstr "Прокрутка"
-
-msgid "Scroll direction picks which way the icons rotate"
-msgstr "Направление прокрутки определяет, в какую сторону сдвигаются значки."
-
-msgid "Search icons…"
-msgstr "Поиск значков…"
-
-msgid "Select Icon"
-msgstr "Выбрать значок"
-
-msgid "Select Image"
-msgstr "Выбрать изображение"
-
-msgid "Set a file path first."
-msgstr "Сначала укажите путь к файлу синхронизации."
-
-msgid "Settings"
-msgstr "Настройки"
-
-msgid "Settings persist after the app closes."
-msgstr "Настройки сохраняются после закрытия приложения."
-
-msgid "Settings pulled"
-msgstr "Настройки получены"
-
-msgid "Settings pushed"
-msgstr "Настройки отправлены"
-
-msgid "Settings reset"
-msgstr "Настройки сброшены"
-
-msgid "Shape"
-msgstr "Форма"
-
-msgid "Show"
-msgstr "Показать"
-
-msgid "Show Sidebar"
-msgstr "Показать боковую панель"
-
-msgid "Show Tooltips"
-msgstr "Показывать подсказки"
-
-msgid "Show icons from Wine and Proton apps."
-msgstr "Показывать значки приложений Wine и Proton."
-
-msgid "Show more"
-msgstr "Показать ещё"
-
-msgid "Show the app title on hover."
-msgstr "Показывать название приложения при наведении."
-
-msgid "Shows a badge on state changes, with the count when the app sends one."
-msgstr ""
-"Показывает индикатор при изменении состояния, включая число, если приложение "
-"его передаёт."
-
-msgid "Shows the unread count when the app sends one."
-msgstr ""
-"Показывает количество непрочитанных элементов, если приложение его передаёт."
-
-msgid "Side"
-msgstr "Сторона"
-
-msgid ""
-"Single clicks are briefly delayed while a double-click action is set, so the "
-"second click can be detected."
-msgstr ""
-"Если задано действие для двойного нажатия, одиночные нажатия срабатывают с "
-"небольшой задержкой, чтобы можно было распознать второе нажатие."
-
-msgid "Size"
-msgstr "Размер"
-
-msgid "Size (px)"
-msgstr "Размер (px)"
-
-msgid "Size, padding, colors"
-msgstr "Размер, отступы и цвета"
-
-msgid "Source Code"
-msgstr "Исходный код"
+msgid "Configure advanced actions"
+msgstr "Настроить дополнительные действия"
 
 msgid "Spacing"
 msgstr "Интервал"
 
-msgid "Sponsor"
-msgstr "Спонсировать"
+msgid "Margin"
+msgstr "Внешние отступы"
 
-msgid "State name, e.g. state-error"
-msgstr "Название состояния, например state-error"
+msgid "Padding"
+msgstr "Внутренние отступы"
 
-msgid "Status Icons"
-msgstr "Значки состояния"
-
-msgid "Status Icons and Badges"
-msgstr "Значки состояния и индикаторы"
-
-msgid ""
-"Status icons cannot work here: the app has no tray icon and never reports a "
-"status, its icon comes from its desktop entry."
-msgstr ""
-"Значки состояния здесь недоступны: у приложения нет значка в области "
-"уведомлений и оно не сообщает о своём состоянии, поэтому используется значок "
-"из его файла desktop."
-
-msgid "Stays open after icon clicks and context menus alike."
-msgstr ""
-"Остаётся открытым как после нажатия на значок, так и после использования "
-"контекстного меню."
-
-msgid "Style"
-msgstr "Стиль"
-
-msgid "Support development."
-msgstr "Поддержать разработку."
-
-msgid "Symbolic Icons"
-msgstr "Символические значки"
-
-msgid "Sync File"
-msgstr "Файл синхронизации"
-
-msgid "System Icons"
-msgstr "Системные значки"
-
-msgid "Takes what the app shows right now as its calm look."
-msgstr "Использует текущий вид приложения как его обычное состояние."
-
-msgid "Tap"
-msgstr "Касание"
-
-msgid "Tap, double tap and long touch."
-msgstr "Касание, двойное касание и долгое касание."
-
-msgid "Text Color"
-msgstr "Цвет текста"
-
-msgid "The backup file will be permanently removed."
-msgstr "Файл резервной копии будет удалён безвозвратно."
-
-msgid "This name is not allowed."
-msgstr "Это название недопустимо."
-
-msgid "This state already exists."
-msgstr "Такое состояние уже существует."
-
-msgid "Toggle Button"
-msgstr "Кнопка скрытых значков"
-
-msgid "Toggle Button Clicks"
-msgstr "Действия кнопки скрытых значков"
-
-msgid "Toggle Menu"
-msgstr "Переключить меню"
-
-msgid "Tooltips"
-msgstr "Всплывающие подсказки"
-
-msgid "Top"
-msgstr "Сверху"
-
-msgid "Top Left"
-msgstr "Сверху слева"
-
-msgid "Top Right"
-msgstr "Сверху справа"
-
-msgid "Touch"
-msgstr "Касание"
-
-msgid "Translate"
-msgstr "Перевести"
-
-msgid "Tray Icon Clicks"
-msgstr "Действия значков трея"
-
-msgid "Tray Icons"
-msgstr "Значки трея"
-
-msgid ""
-"Tray icons are drawn by the app itself via XEmbed, so a custom icon cannot "
-"be applied."
-msgstr ""
-"Значки трея отрисовываются самим приложением через XEmbed, поэтому "
-"пользовательский значок применить нельзя."
-
-msgid "Try a different search term."
-msgstr "Попробуйте изменить поисковый запрос."
-
-msgid "Type a name or pick an SVG/PNG file."
-msgstr "Введите имя или выберите файл SVG/PNG."
-
-msgid "Unknown"
-msgstr "Неизвестно"
-
-msgid "Unknown App"
-msgstr "Неизвестное приложение"
-
-msgid "Unlink: edit each side on its own"
-msgstr "Разъединить: каждую сторону можно изменять отдельно"
-
-msgid "Unread badge and per-state icons."
-msgstr "Индикатор непрочитанных и значки для отдельных состояний."
-
-msgid "Use Accent Color"
-msgstr "Использовать акцентный цвет"
+msgid "Icon Color"
+msgstr "Цвет значка"
 
 msgid "Use Accent Color on Hover"
 msgstr "Использовать акцентный цвет при наведении"
 
-msgid "Use monochrome icons when available."
-msgstr "Использовать монохромные значки, если они доступны."
+msgid "Hover"
+msgstr "При наведении"
 
-msgid "Version"
-msgstr "Версия"
-
-msgid "Visible Icons"
-msgstr "Видимые значки"
-
-msgid "Waiting for the file."
-msgstr "Ожидание файла."
-
-msgid "Watching for changes."
-msgstr "Отслеживание изменений."
-
-msgid "Which menu opens when you hover the toggle button"
-msgstr ""
-"Какое меню открывать при наведении на кнопку, если уже открыто другое меню "
-"панели."
-
-msgid "Which part of the panel holds the icons."
-msgstr "Часть панели, в которой размещаются значки."
-
-msgid "Wine"
-msgstr "Wine"
-
-msgid "Wine App Icons"
-msgstr "Значки приложений Wine"
-
-msgid "available"
-msgstr "доступно"
-
-msgid "commits"
-msgstr "коммитов"
-
-msgid "from"
-msgstr "с"
-
-msgid "this device"
-msgstr "этого устройства"
+msgid "Live Preview"
+msgstr "Предпросмотр"
