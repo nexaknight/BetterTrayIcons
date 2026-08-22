@@ -1,4 +1,3 @@
-import Clutter from 'gi://Clutter';
 import Gio from 'gi://Gio';
 import {gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
@@ -8,21 +7,27 @@ import {warn} from '../../shared/logging.js';
 import {configRenderDelta, displayAppName, reseedIfForgotten, unreadBadgeEnabled, updateAppConfig} from '../../shared/appConfig.js';
 import {disconnectAll, disposeAll, ruleDispatcher} from '../../shared/lifecycle.js';
 import {attachStatusIcon, createPanelMenu, destroyMenuSafely, isDisposed, menuAnchorFor, menuManagerFor, refreshTrayStyle, setBadgeContent, setIconContent, syncHoverStyle, trackDisposal, POPUP_ANIMATION_NONE} from '../utils/actor.js';
-import {configuredIcon} from '../utils/icons.js';
+import {configuredIcon, themedIconContent} from '../utils/icons.js';
 import {addUnreadListener, unreadBadge, unreadTargets} from '../utils/launcherEntries.js';
 import {applyTitle, createTrayActor, syncTooltip} from '../features/tooltip.js';
 import {DRAG_SETTING_KEYS, setupIconDragSource, syncDragEnabled} from '../features/dragAndDrop.js';
+import {ClickController} from '../features/clickController.js';
 import {TRAY_STYLE_KEYS} from '../../const.js';
 
 export const BACKGROUND_PROXY_ID_PREFIX = 'bgproxy:';
 
 const FLATPAK_KILL_ARGV = Object.freeze(['flatpak', 'kill']);
 
+const QUIT_ACTION_RE = /^quit$/i;
+
+const NEW_WINDOW_ACTION = 'new-window';
+
 export class BackgroundAppsProxyIcon {
     constructor(appId, entry, settings, {onAfterClick, onDragStateChange, onQuit}) {
         this._settings = settings;
         this._app = entry.app;
         this._flatpakId = entry.flatpakId;
+        this._message = entry.message;
         this._onAfterClick = onAfterClick;
         this._onQuit = onQuit;
         this._isDestroyed = false;
@@ -32,6 +37,8 @@ export class BackgroundAppsProxyIcon {
         this._config = {};
         this._configSig = '';
         this._customIconValue = undefined;
+        this._statusItem = null;
+        this._detectedIcon = _themedIconName(this._app);
 
         this.appId = appId;
         this.id = `${BACKGROUND_PROXY_ID_PREFIX}${appId}`;
@@ -66,7 +73,7 @@ export class BackgroundAppsProxyIcon {
             title: this._app.get_name(),
             is_background_proxy: true,
             packaging: 'flatpak',
-            detected_icon: _themedIconName(this._app),
+            detected_icon: this._detectedIcon,
         };
         updateAppConfig(settings, appId, this._identitySeed);
 
@@ -75,19 +82,28 @@ export class BackgroundAppsProxyIcon {
         this._applyConfig();
     }
 
+    setMessage(message) {
+        this._message = message;
+        this._statusItem?.label.set_text(this._statusText());
+    }
+
     _connectSignals() {
         this._actorSignals.push(
-            this.actor.connect('button-release-event', (_actor, event) => {
-                if (event.get_button() === Clutter.BUTTON_SECONDARY)
-                    this._openMenu();
-                else
-                    this._activate();
-                return Clutter.EVENT_PROPAGATE;
-            }),
             this.actor.connect('notify::hover', () => {
                 syncHoverStyle(this.actor);
                 syncTooltip(this.actor, this._tooltip, this._settings);
             }));
+
+        // A proxy is a tray icon to the user, so it answers to the same
+        // bindings, double click and long press included.
+        this._clickController = new ClickController(
+            this.actor,
+            this._settings,
+            'tray',
+            action => this._executeAction(action),
+            {propagateEvent: true}
+        );
+        this._draggable.setClickController(this._clickController);
 
         const rules = [
             {match: key => TRAY_STYLE_KEYS.includes(key), run: () => refreshTrayStyle(this.actor, this._iconActor, this._settings)},
@@ -114,9 +130,22 @@ export class BackgroundAppsProxyIcon {
         this._settingsSignals.push(this._settings.connect('changed', ruleDispatcher(rules)));
     }
 
+    // An app has no SecondaryActivate to answer, so 'secondary' resolves to
+    // nothing here. 'drag-drop' is a config marker, the drag starts on motion.
+    _executeAction(action) {
+        switch (action) {
+        case 'activate':
+            this._activate();
+            break;
+        case 'menu':
+            this._openMenu();
+            break;
+        }
+    }
+
     _activate() {
-        this._app.activate();
         this._onAfterClick();
+        this._app.activate();
     }
 
     _openMenu() {
@@ -138,39 +167,81 @@ export class BackgroundAppsProxyIcon {
     _createMenu() {
         const menu = createPanelMenu(menuAnchorFor(this.actor));
         trackDisposal(menu.actor);
-        menuManagerFor(this.actor, this._settings)?.addMenu(menu);
+        menuManagerFor(this.actor, this._settings).addMenu(menu);
+
+        this._statusItem = new PopupMenu.PopupMenuItem(this._statusText(),
+            {reactive: false, can_focus: false});
+        menu.addMenuItem(this._statusItem);
+        menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+
+        const actions = this._desktopActions();
+        for (const [action, label] of actions) {
+            const item = new PopupMenu.PopupMenuItem(label);
+            item.connect('activate', (_item, event) =>
+                this._app.launch_action(action, event.get_time(), -1));
+            menu.addMenuItem(item);
+        }
+        if (actions.length > 0)
+            menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
         const show = new PopupMenu.PopupMenuItem(_('Show'));
         show.connect('activate', () => this._activate());
         menu.addMenuItem(show);
 
         const quit = new PopupMenu.PopupMenuItem(_('Quit'));
-        quit.connect('activate', () => this._quit());
+        quit.connect('activate', (_item, event) => this._quit(event.get_time()));
         menu.addMenuItem(quit);
         return menu;
+    }
+
+    _statusText() {
+        return this._message ?? _('Running in the background');
+    }
+
+    _desktopActions() {
+        const info = this._app.app_info;
+        const quitAction = this._quitAction();
+        return info.list_actions()
+            .filter(action => action !== NEW_WINDOW_ACTION && action !== quitAction)
+            .map(action => [action, info.get_action_name(action)]);
+    }
+
+    _quitAction() {
+        return this._app.app_info.list_actions().find(name => QUIT_ACTION_RE.test(name));
     }
 
     _destroyMenu() {
         destroyMenuSafely(this._menu);
         this._menu = null;
+        this._statusItem = null;
     }
 
-    // Measured on KeePassXC: it owns only org.keepassxc.KeePassXC.MainWindow and
-    // no quit action, so the item would sit there doing nothing. The shell's own
-    // background apps list falls back the same way. One fork per explicit click,
-    // never on the refresh path.
-    async _quit() {
+    async _quit(timestamp) {
+        if (await this._requestQuit(timestamp))
+            this._onQuit();
+    }
+
+    // Three ways out, gentlest first. Nextcloud ships a quit action but no quit
+    // GAction, so without the first one it would take the kill.
+    async _requestQuit(timestamp) {
+        const action = this._quitAction();
+        if (action) {
+            this._app.launch_action(action, timestamp, -1);
+            return true;
+        }
+
         try {
             await this._app.activate_action('quit', null, 0, -1, null);
+            return true;
         } catch {
             try {
                 Util.trySpawn([...FLATPAK_KILL_ARGV, this._flatpakId]);
+                return true;
             } catch (e) {
                 warn(`BackgroundAppsProxyIcon: quit failed for ${this.appId}: ${e.message}`);
-                return;
+                return false;
             }
         }
-        this._onQuit();
     }
 
     _applyConfig() {
@@ -192,7 +263,7 @@ export class BackgroundAppsProxyIcon {
             ? unreadBadge(this._unreadTargets)
             : null;
         setBadgeContent(this.actor, this._settings, badge,
-            badge ? this._config.badge_style ?? null : null);
+            badge ? this._config.badge_style : null);
     }
 
     _applyCustomIcon() {
@@ -203,9 +274,15 @@ export class BackgroundAppsProxyIcon {
 
         const {gicon, iconName} = value
             ? configuredIcon(value, this._settings)
-            : {gicon: this._app.get_icon(), iconName: null};
+            : this._appIcon();
 
         setIconContent(this._iconActor, gicon, iconName);
+    }
+
+    _appIcon() {
+        return this._detectedIcon
+            ? themedIconContent(this._detectedIcon, this._settings)
+            : {gicon: this._app.get_icon(), iconName: null};
     }
 
     // One source with the prefs row, which renders the same config fields.

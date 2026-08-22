@@ -156,7 +156,10 @@ export class BackgroundAppsProxyWatcher {
                 this._dropIcon(appId);
         }
         for (const [appId, entry] of live) {
-            if (!this._icons.has(appId))
+            const icon = this._icons.get(appId);
+            if (icon)
+                icon.setMessage(entry.message);
+            else
                 this._addIcon(appId, entry);
         }
     }
@@ -171,7 +174,7 @@ export class BackgroundAppsProxyWatcher {
         const mine = new Set([...this._icons.values()].map(icon => icon.actor));
         const covered = new Set();
         for (const actor of this._panelIndicator._icons.values()) {
-            if (actor?._appId && !mine.has(actor) && !isDisposed(actor))
+            if (actor._appId && !mine.has(actor) && !isDisposed(actor))
                 covered.add(actor._appId);
         }
         return covered;
@@ -184,24 +187,26 @@ export class BackgroundAppsProxyWatcher {
         const apps = new Map();
 
         for (const entry of listed) {
-            if (!entry?.app_id || !entry.instance)
+            if (!entry.app_id || !entry.instance)
                 continue;
             // The key an SNI item of the same flatpak would land on, which is
             // what makes the comparison against live tray icons exact.
             const appId = pickAppId({packaging: {kind: 'flatpak', id: entry.app_id}});
             // Without a desktop entry there is no icon and no name to render.
             const app = Shell.AppSystem.get_default().lookup_app(`${entry.app_id}.desktop`);
-            if (!appId || !app)
+            if (!app)
                 continue;
 
             const known = apps.get(appId);
             if (known) {
                 known.instances.push(entry.instance);
+                known.message ??= entry.message;
             } else {
                 apps.set(appId, {
                     app,
                     flatpakId: entry.app_id,
                     instances: [entry.instance],
+                    message: entry.message,
                 });
             }
         }
