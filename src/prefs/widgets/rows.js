@@ -115,6 +115,12 @@ function createConfigRow(settings, conf) {
         connectScoped(row, settings, `changed::${key}`, sync);
     }
 
+    const visibleKeys = [conf.visibleByKey ?? []].flat();
+    if (visibleKeys.length) {
+        bindGroupsVisible(row, settings, [row],
+            () => visibleKeys.every(key => settings.get_boolean(key)), ...visibleKeys);
+    }
+
     return row;
 }
 

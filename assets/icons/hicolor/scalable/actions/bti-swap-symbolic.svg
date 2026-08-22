@@ -1,0 +1,4 @@
+<!-- Derived from Lucide "arrow-left-right" (stroke outlined to fill). ISC - Copyright (c) 2026 Lucide Icons and Contributors -->
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" version="1.1">
+	<path d="M 4 8 L 20 8 A 1 1 0 0 1 20 6 L 4 6 A 1 1 0 0 1 4 8 Z M 7.293 2.293 L 3.293 6.293 A 1 1 0 0 1 4.707 7.707 L 8.707 3.707 A 1 1 0 0 1 7.293 2.293 Z M 3.293 7.707 L 7.293 11.707 A 1 1 0 0 1 8.707 10.293 L 4.707 6.293 A 1 1 0 0 1 3.293 7.707 Z M 20 16 L 4 16 A 1 1 0 0 1 4 18 L 20 18 A 1 1 0 0 1 20 16 Z M 15.293 13.707 L 19.293 17.707 A 1 1 0 0 1 20.707 16.293 L 16.707 12.293 A 1 1 0 0 1 15.293 13.707 Z M 19.293 16.293 L 15.293 20.293 A 1 1 0 0 1 16.707 21.707 L 20.707 17.707 A 1 1 0 0 1 19.293 16.293 Z" stroke="none" fill="#000"/>
+</svg>

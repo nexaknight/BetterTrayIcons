@@ -21,6 +21,8 @@ export class ToggleButton {
             icon_name: this._settings.get_string('toggle-icon-name'),
             style_class: 'system-status-icon',
         });
+        this._icon.set_pivot_point(0.5, 0.5);
+        this._iconAngle = 0;
 
         this.actor = new St.Button({
             child: this._icon,
@@ -53,13 +55,6 @@ export class ToggleButton {
     }
 
     updateStyle() {
-        // An imported blob can hold an empty string, the schema default is
-        // the one place that knows the real fallback.
-        const iconName = this._settings.get_string('toggle-icon-name') ||
-            this._settings.get_default_value('toggle-icon-name').unpack();
-        if (this._icon.icon_name !== iconName)
-            this._icon.icon_name = iconName;
-
         const customToggle = this._settings.get_boolean('enable-custom-toggle-style');
         applyPanelClasses(this.actor, this._icon, customToggle);
 
@@ -80,6 +75,8 @@ export class ToggleButton {
         const isMenuOpen = this._overflowMenu.isOpen;
         const isHover = this.actor.hover;
         const isActive = isMenuOpen || isHover;
+
+        this._applyIconState(isMenuOpen);
 
         if (this._baseStyle) {
             if (isActive) {
@@ -135,6 +132,50 @@ export class ToggleButton {
             this._overflowMenu.attachToManager();
             manager.addMenu(this._actionMenu);
         }
+    }
+
+    // The open menu either swaps the icon or turns it, never both.
+    _applyIconState(isMenuOpen) {
+        const rotate = this._settings.get_boolean('toggle-icon-rotate');
+        const iconName = this._iconNameFor(isMenuOpen && !rotate
+            ? 'toggle-icon-active-name'
+            : 'toggle-icon-name');
+        if (this._icon.icon_name !== iconName)
+            this._icon.icon_name = iconName;
+
+        const angle = isMenuOpen && rotate ? this._rotationAngle() : 0;
+        // Hover fires while the turn is still running, comparing against the
+        // live angle would restart it mid-flight.
+        if (this._iconAngle === angle)
+            return;
+
+        this._iconAngle = angle;
+        if (!this._settings.get_boolean('toggle-icon-rotate-animate')) {
+            this._icon.rotation_angle_z = angle;
+            return;
+        }
+
+        // The shell zeroes every animation while it renders without hardware
+        // acceleration, which is every VM. The switch above decides this one.
+        this._icon.ease({
+            rotation_angle_z: angle,
+            duration: this._settings.get_int('toggle-icon-rotate-duration'),
+            delay: this._settings.get_int('toggle-icon-rotate-delay'),
+            mode: Clutter.AnimationMode.EASE_OUT_QUAD,
+            animationRequired: true,
+        });
+    }
+
+    _rotationAngle() {
+        const degrees = Number.parseInt(this._settings.get_string('toggle-icon-rotate-angle'), 10);
+        return this._settings.get_boolean('toggle-icon-rotate-reverse') ? -degrees : degrees;
+    }
+
+    // An imported blob can hold an empty string, the schema default is the
+    // one place that knows the real fallback.
+    _iconNameFor(key) {
+        return this._settings.get_string(key) ||
+            this._settings.get_default_value(key).unpack();
     }
 
     // SMOOTH carries fractional deltas, rotating per delta would spin the

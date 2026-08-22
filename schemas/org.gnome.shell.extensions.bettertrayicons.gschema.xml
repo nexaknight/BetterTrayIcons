@@ -272,6 +272,50 @@
             <summary>Icon displayed on the toggle button</summary>
         </key>
 
+        <key name="toggle-icon-active-name" type="s">
+            <default>'view-more-symbolic'</default>
+            <summary>Icon displayed on the toggle button while the overflow menu is open</summary>
+        </key>
+
+        <key name="toggle-icon-rotate" type="b">
+            <default>false</default>
+            <summary>Rotate the toggle button icon while the overflow menu is open instead of swapping it</summary>
+        </key>
+
+        <key name="toggle-icon-rotate-angle" type="s">
+            <choices>
+                <choice value="90"/>
+                <choice value="180"/>
+                <choice value="270"/>
+            </choices>
+            <default>'180'</default>
+            <summary>Rotation in degrees applied to the toggle button icon while the overflow menu is open</summary>
+        </key>
+
+        <key name="toggle-icon-rotate-reverse" type="b">
+            <default>false</default>
+            <summary>Turn the toggle button icon counter-clockwise instead of clockwise</summary>
+        </key>
+
+        <key name="toggle-icon-rotate-animate" type="b">
+            <default>false</default>
+            <summary>Animate the toggle button icon rotation instead of snapping to the angle</summary>
+        </key>
+
+        <!-- The prefs read both ranges below off this schema. A turn slower
+             than the cap reads as a stuck icon. -->
+        <key name="toggle-icon-rotate-duration" type="i">
+            <range min="0" max="5000"/>
+            <default>150</default>
+            <summary>How long the toggle button icon takes to turn, in milliseconds</summary>
+        </key>
+
+        <key name="toggle-icon-rotate-delay" type="i">
+            <range min="0" max="5000"/>
+            <default>0</default>
+            <summary>Wait before the toggle button icon starts to turn, in milliseconds</summary>
+        </key>
+
         <key name="toggle-icon-size" type="i">
             <range min="1"/>
             <default>20</default>

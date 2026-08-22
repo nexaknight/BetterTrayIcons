@@ -1,4 +1,5 @@
 import Adw from 'gi://Adw';
+import Gio from 'gi://Gio';
 import GObject from 'gi://GObject';
 import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
@@ -15,15 +16,25 @@ import {
     createSpacingGroup,
     createCustomStyleSwitchGroup,
     createShapeGroup,
+    createExpanderSection,
+    createDialogGearButton,
 } from '../widgets/rows.js';
 import {createPreviewGroup, buildTogglePreview} from '../widgets/preview.js';
 import IconPickerDialog from '../dialogs/iconPicker.js';
+import ConfigDialog from '../dialogs/configDialog.js';
 import {spacingLinkKey} from '../widgets/gtkHelpers.js';
 import {TRAY_ICON_STYLE_KEYS} from './trayIcons.js';
 
 export const TOGGLE_STYLE_KEYS = Object.freeze([
     'toggle-position',
     'toggle-icon-name',
+    'toggle-icon-active-name',
+    'toggle-icon-rotate',
+    'toggle-icon-rotate-angle',
+    'toggle-icon-rotate-reverse',
+    'toggle-icon-rotate-animate',
+    'toggle-icon-rotate-duration',
+    'toggle-icon-rotate-delay',
     'toggle-icon-size',
     'toggle-padding-top',
     'toggle-padding-bottom',
@@ -52,6 +63,10 @@ export const TOGGLE_STYLE_KEYS = Object.freeze([
     spacingLinkKey('toggle-padding'),
     spacingLinkKey('toggle-margin'),
 ]);
+
+const ROTATE_TIMING_STEP_MS = 50;
+
+const ROTATE_ANIMATION_KEYS = ['toggle-icon-rotate', 'toggle-icon-rotate-animate'];
 
 const RECOMMENDED_TOGGLE_ICONS = [
     'view-grid-symbolic',
@@ -121,17 +136,83 @@ export default class ToggleButtonSubpage extends Adw.NavigationPage {
         const group = new Adw.PreferencesGroup({title: _('Icon')});
         page.add(group);
 
-        group.add(createIconPickerRow(
-            _('Icon'),
+        const {expander, setRows} = createExpanderSection({
+            title: _('Icon'),
+            subtitle: _('One icon per overflow menu state.'),
+            headerSuffix: createDialogGearButton(this._window, this._settings,
+                ConfigDialog, this._iconDialogData()),
+        });
+
+        const openRow = this._createIconRow(_('Menu Open'), 'toggle-icon-active-name');
+        this._settings.bind('toggle-icon-rotate', openRow, 'visible',
+            Gio.SettingsBindFlags.GET | Gio.SettingsBindFlags.INVERT_BOOLEAN);
+
+        setRows([this._createIconRow(_('Menu Closed'), 'toggle-icon-name'), openRow]);
+        group.add(expander);
+
+        group.add(createSpinRow(_('Size (px)'), this._settings, 'toggle-icon-size', 8, 64));
+    }
+
+    _createIconRow(title, key) {
+        return createIconPickerRow(
+            title,
             this._settings,
-            'toggle-icon-name',
+            key,
             this._window,
             IconPickerDialog,
             RECOMMENDED_TOGGLE_ICONS,
             {showCustom: false}
-        ));
+        );
+    }
 
-        group.add(createSpinRow(_('Size (px)'), this._settings, 'toggle-icon-size', 8, 64));
+    _iconDialogData() {
+        return {
+            pageTitle: _('Icon'),
+            groups: [{
+                configs: [
+                    {
+                        type: 'switch',
+                        title: _('Rotate While Open'),
+                        subtitle: _('Turn the icon instead of swapping it for a second one.'),
+                        key: 'toggle-icon-rotate',
+                    },
+                    {
+                        type: 'segmented',
+                        title: _('Angle'),
+                        key: 'toggle-icon-rotate-angle',
+                        options: ['90°', '180°', '270°'],
+                        values: ['90', '180', '270'],
+                        visibleByKey: 'toggle-icon-rotate',
+                        negate: {
+                            key: 'toggle-icon-rotate-reverse',
+                            iconName: 'bti-swap-symbolic',
+                            tooltip: _('Reverse the turning direction'),
+                        },
+                    },
+                    {
+                        type: 'switch',
+                        title: _('Animate Rotation'),
+                        subtitle: _('Off turns the icon in one jump.'),
+                        key: 'toggle-icon-rotate-animate',
+                        visibleByKey: 'toggle-icon-rotate',
+                    },
+                    {
+                        type: 'spin',
+                        title: _('Duration (ms)'),
+                        key: 'toggle-icon-rotate-duration',
+                        step: ROTATE_TIMING_STEP_MS,
+                        visibleByKey: ROTATE_ANIMATION_KEYS,
+                    },
+                    {
+                        type: 'spin',
+                        title: _('Delay (ms)'),
+                        key: 'toggle-icon-rotate-delay',
+                        step: ROTATE_TIMING_STEP_MS,
+                        visibleByKey: ROTATE_ANIMATION_KEYS,
+                    },
+                ],
+            }],
+        };
     }
 
     _buildPositionGroup(page) {
