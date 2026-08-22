@@ -3,6 +3,7 @@ import GLib from 'gi://GLib';
 
 import {warnOnce} from './logging.js';
 import {fileExists, readFileBytes, readFileText, probePaths} from './fetch.js';
+import {usesAccent} from './accentColor.js';
 
 // symbolic is the freedesktop convention, panel the Ubuntu/ayatana one.
 const MONO_ICON_SUFFIXES = Object.freeze(['-symbolic', '-panel']);
@@ -51,7 +52,7 @@ export async function probeIconPaths(configs, cancellable = null) {
     const map = await probePaths(paths, cancellable);
     await Promise.all([...themed].map(async ([key, config]) => {
         const hit = await findIconInThemeAsync(
-            config.detected_icon, config.icon_theme_path, cancellable);
+            config.detected_icon, config.icon_theme_path, {cancellable});
         map.set(key, hit ?? false);
     }));
     return map;
@@ -76,7 +77,7 @@ export function resolveIcon(config, hasThemeIcon = null, cachedPathExists = null
 
     const iconName = config.detected_icon;
 
-    // A resolvable name beats any cached copy: the theme recolors it for
+    // A resolvable name beats any cached copy. The theme recolors it for
     // light and dark and renders it at the exact size, a snapshot does
     // neither. Also repairs entries an older version polluted with a copy
     // of the theme file.
@@ -96,15 +97,8 @@ export function resolveIcon(config, hasThemeIcon = null, cachedPathExists = null
         if (iconName.startsWith('/'))
             return {type: 'file', value: iconName};
 
-        if (config.icon_theme_path) {
-            // null keeps the blocking walk, which only a caller off the
-            // render path can afford, same contract as cachedPathExists.
-            const resolvedPath = themeHit === null
-                ? findIconInTheme(iconName, config.icon_theme_path)
-                : themeHit;
-            if (resolvedPath)
-                return {type: 'file', value: resolvedPath};
-        }
+        if (config.icon_theme_path && themeHit)
+            return {type: 'file', value: themeHit};
 
         return {type: 'name', value: iconName};
     }
@@ -112,26 +106,14 @@ export function resolveIcon(config, hasThemeIcon = null, cachedPathExists = null
     return {type: 'name', value: 'image-missing'};
 }
 
-export function findIconInTheme(iconName, themePath, targetSize = 0) {
-    const {wanted, paths} = _candidatePaths(iconName, themePath);
-    for (const fullPath of paths) {
-        if (Gio.File.new_for_path(fullPath).query_exists(null))
-            return fullPath;
-    }
-
-    return _findIconInThemeTree(Gio.File.new_for_path(themePath), wanted, targetSize);
-}
-
-// The probe-phase twin of findIconInTheme. The walk is forked because the
-// sync and async enumerator APIs share no shape, the scoring stays shared.
-export async function findIconInThemeAsync(iconName, themePath, cancellable = null) {
+export async function findIconInThemeAsync(iconName, themePath, {targetSize = 0, cancellable = null} = {}) {
     const {wanted, paths} = _candidatePaths(iconName, themePath);
     const found = await Promise.all(paths.map(p => fileExists(p, cancellable)));
     const first = found.indexOf(true);
     if (first !== -1)
         return paths[first];
 
-    return _findIconInThemeTreeAsync(Gio.File.new_for_path(themePath), wanted, cancellable);
+    return _findIconInThemeTree(Gio.File.new_for_path(themePath), wanted, targetSize, cancellable);
 }
 
 // A bare name can also be a file with its extension already attached, so
@@ -142,7 +124,7 @@ function _candidatePaths(iconName, themePath) {
     return {wanted: new Set(candidates), paths: candidates.map(cand => `${cleanPath}${cand}`)};
 }
 
-async function _findIconInThemeTreeAsync(dir, wanted, cancellable) {
+async function _findIconInThemeTree(dir, wanted, targetSize, cancellable) {
     let best = null;
     let bestScore = Infinity;
 
@@ -164,44 +146,6 @@ async function _findIconInThemeTreeAsync(dir, wanted, cancellable) {
             }
             if (!wanted.has(info.get_name()))
                 continue;
-            const score = _sizeDistance(child.get_path(), 0);
-            if (best === null || score < bestScore) {
-                bestScore = score;
-                best = child.get_path();
-            }
-        }
-    };
-    await walk(dir, 0);
-
-    return best;
-}
-
-// KDE apps point IconThemePath at a directory laid out like a real icon theme
-// (<path>/hicolor/22x22/apps/foo.png) rather than the flat folder probed
-// above, and both <size>/<context> and <context>/<size> orderings ship in the
-// wild, so match on the file name and read the size off the path afterwards.
-function _findIconInThemeTree(dir, wanted, targetSize) {
-    let best = null;
-    let bestScore = Infinity;
-
-    const walk = (current, depth) => {
-        if (depth > ICON_THEME_TREE_MAX_DEPTH)
-            return;
-        let children;
-        try {
-            children = current.enumerate_children('standard::name,standard::type',
-                Gio.FileQueryInfoFlags.NONE, null);
-        } catch {
-            return;
-        }
-        for (let info = children.next_file(null); info; info = children.next_file(null)) {
-            const child = children.get_child(info);
-            if (info.get_file_type() === Gio.FileType.DIRECTORY) {
-                walk(child, depth + 1);
-                continue;
-            }
-            if (!wanted.has(info.get_name()))
-                continue;
             const score = _sizeDistance(child.get_path(), targetSize);
             // A tree whose paths carry no size segment scores every file
             // Infinity, and Infinity < Infinity kept none of them, so a
@@ -211,9 +155,8 @@ function _findIconInThemeTree(dir, wanted, targetSize) {
                 best = child.get_path();
             }
         }
-        children.close(null);
     };
-    walk(dir, 0);
+    await walk(dir, 0);
 
     return best;
 }
@@ -295,9 +238,10 @@ function _wantsTint(path, text) {
 export function symbolicTint(settings, accentColor = null) {
     if (!settings.get_boolean('enable-custom-icon-style'))
         return '#ffffff';
-    if (accentColor && settings.get_boolean('icon-use-accent-color'))
+    const value = settings.get_string('icon-color');
+    if (accentColor && usesAccent(value))
         return accentColor;
-    return settings.get_string('icon-color');
+    return value;
 }
 
 // Tinted bytes live only in memory, so the panel never writes to the SSD.
@@ -311,7 +255,7 @@ const _tintCache = new Map();
 export async function tintedSymbolicIcon(value, tint, {size = 0, lookupThemeFile = null, cancellable = null} = {}) {
     const path = typeof value === 'string' && value.startsWith('/')
         ? value
-        : lookupThemeFile?.(value) ?? null;
+        : lookupThemeFile?.(value);
     const color = _cssColor(tint);
     // Only an SVG has somewhere to put a stylesheet.
     if (!color || !path?.toLowerCase().endsWith('.svg'))
@@ -380,10 +324,9 @@ function _retintNeutrals(text, color) {
         _isChromatic(_parseRgb(value)) ? declaration : declaration.replace(value, color));
 }
 
-// Neither toolkit rasterizes these bytes at the size it asks for
-// (gtkiconpaintable.c icon_ensure_paintable__locked passes none), so a 16px
-// source arrives soft at 32. A missing viewBox comes from the old size,
-// otherwise resizing crops.
+// GTK and St render the SVG at its own declared size, not the requested one
+// (gtkiconpaintable.c), so the size is written into the bytes. Without a
+// viewBox one is added from the old size, or the resize would crop.
 function _sizedSvg(text, px) {
     // The root can carry a namespace prefix, and MoreWaita ships icons whose
     // root really is <svg:svg>. Anything new is spliced in after the element
@@ -459,8 +402,6 @@ function _cssColor(tint) {
 // The forms a color reaches us in: #rgb and #rrggbb from gsettings, the same
 // with a trailing alpha from St's to_string, and rgb()/rgba() from GTK.
 function _parseRgb(color) {
-    if (typeof color !== 'string')
-        return null;
     const hex = color.trim().match(/^#([0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i);
     if (hex) {
         const h = hex[1];
@@ -475,16 +416,11 @@ function _parseRgb(color) {
         : null;
 }
 
-// GTK and St disagree on how they resolve a multi-name themed icon, so the one
-// order that is right for both is: the name we already know resolves, first.
-// GTK is theme-major (gtkicontheme.c real_choose_icon, themes outer), a name
-// the active theme carries beats one only reachable further down the chain, so
-// a trailing image-missing buries e.g. a flatpak icon living in hicolor.
-// St is name-major (st-icon-theme.c real_choose_icon, names outer), the first
-// name wins wherever it lives, but St paints nothing when none resolve, so
-// image-missing still has to be there once nothing else can render.
-// `themeKnown` false means nobody could answer, so leave the choice to the
-// render-time lookup rather than pinning a fallback it might not need.
+// GTK and St walk a multi-name icon differently (gtkicontheme.c themes-first,
+// st-icon-theme.c names-first). A name we know resolves goes first, that wins
+// under both. image-missing sits last because St paints nothing otherwise,
+// but under GTK it would bury names further down the theme chain. With no
+// theme answer yet the render-time lookup decides, without a pinned fallback.
 export function orderThemedNames(candidates, existing, themeKnown = true) {
     if (existing)
         return [existing, ...candidates.filter(n => n !== existing)];
@@ -492,9 +428,6 @@ export function orderThemedNames(candidates, existing, themeKnown = true) {
 }
 
 export function buildSymbolicCandidates(name, useSymbolic) {
-    if (!name)
-        return [];
-
     const base = name.replace(MONO_ASSET_SUFFIX_RE, '');
     if (base && base !== name) {
         const variants = MONO_ICON_SUFFIXES.map(suffix => `${base}${suffix}`);

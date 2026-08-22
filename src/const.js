@@ -1,7 +1,6 @@
-// Two kinds of values live here: ones shared across the shell and prefs
-// processes that have no owning shared module, and ones that stay central
-// because outside contributors edit them. Everything else sits at the top
-// of the module that uses it.
+// Only two kinds of values belong here. Ones both processes need with no
+// shared module to own them, and ones outside contributors edit.
+// Everything else sits at the top of the module that uses it.
 
 export const ITEM_SPACING_PX = 6;
 
@@ -36,12 +35,6 @@ export const TRAY_STYLE_KEYS = Object.freeze([
     'icon-hover-background-color',
     'icon-border-color',
     'icon-hover-border-color',
-    'icon-use-accent-color',
-    'icon-hover-use-accent-color',
-    'icon-background-use-accent-color',
-    'icon-hover-background-use-accent-color',
-    'icon-border-use-accent-color',
-    'icon-hover-border-use-accent-color',
 ]);
 
 // The badge_style vocabulary the shell renders and the prefs dialog writes.

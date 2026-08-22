@@ -4,7 +4,7 @@ import GdkPixbuf from 'gi://GdkPixbuf';
 import St from 'gi://St';
 import Shell from 'gi://Shell';
 
-import {resolveIcon, findIconInTheme, buildSymbolicCandidates, orderThemedNames, writeCachedIcon, deleteCachedIcon, tintedSymbolicIcon, symbolicTint, clearTintCache, MONO_ASSET_SUFFIX_RE} from '../../shared/icon.js';
+import {resolveIcon, findIconInThemeAsync, buildSymbolicCandidates, orderThemedNames, writeCachedIcon, deleteCachedIcon, tintedSymbolicIcon, symbolicTint, clearTintCache, MONO_ASSET_SUFFIX_RE} from '../../shared/icon.js';
 import {updateAppConfig, migrateLegacyConfig, claimAppId, getAppConfigMap, getAppConfigValue, setAppConfigValue, findStateIconEntry, recordSeenStateIcons, isVolatileIconName, stateNameOf, unreadBadgeEnabled, ATTENTION_STATE_KEY} from '../../shared/appConfig.js';
 import {readFileBytes, fileExists} from '../../shared/fetch.js';
 import {warnOnce} from '../../shared/logging.js';
@@ -23,7 +23,7 @@ const ICON_CACHE_SNAPSHOT_MS = 2000;
 // the prefs offer is 128, which needs 256 device pixels at scale 2.
 const MAX_PIXMAP_SIZE_PX = 512;
 
-export async function identifyApp(proxy, busName, settings, onRekey = null) {
+export async function identifyApp(proxy, busName, settings, onRekey) {
     const [rawId, title, iconName, iconThemePath, processInfo, status] = await Promise.all([
         refreshStringOnProxy(proxy, 'Id'),
         refreshStringOnProxy(proxy, 'Title'),
@@ -32,9 +32,9 @@ export async function identifyApp(proxy, busName, settings, onRekey = null) {
         getProcessInfo(proxy, busName),
         refreshStringOnProxy(proxy, 'Status'),
     ]);
-    const processName = processInfo?.name ?? null;
+    const processName = processInfo?.name;
     const isWine = !!processInfo?.isWine;
-    const packaging = processInfo?.packaging ?? null;
+    const packaging = processInfo?.packaging;
 
     const identity = {processName, rawId, pid: processInfo?.pid, iconThemePath, iconName, title, packaging};
     const base = pickAppId(identity);
@@ -47,7 +47,7 @@ export async function identifyApp(proxy, busName, settings, onRekey = null) {
     const objectPath = proxy.get_object_path();
     const appId = resolveItemId(settings, {
         key: getItemAddress(busName, objectPath),
-        pid: processInfo?.pid ?? null,
+        pid: processInfo?.pid,
         base,
         // Only a process-derived key can collide, an id taken from the item
         // itself already differs per item.
@@ -56,7 +56,7 @@ export async function identifyApp(proxy, busName, settings, onRekey = null) {
         rekey: onRekey,
     });
 
-    // Claim before migrating: an app identified earlier must not be able to
+    // Claim before migrating, an app identified earlier must not be able to
     // carry this id away as its own legacy key.
     claimAppId(appId);
     // A contained build copies instead of moving, because the key it starts
@@ -84,7 +84,7 @@ export async function identifyApp(proxy, busName, settings, onRekey = null) {
         seed.packaging = packaging.kind;
     updateAppConfig(settings, appId, seed);
 
-    return {appId, seed, processName, pid: processInfo?.pid ?? null};
+    return {appId, seed, processName, pid: processInfo?.pid};
 }
 
 // Constructing St.IconTheme per resolution would re-read the theme index
@@ -224,8 +224,9 @@ async function _resolveIcon(proxy, settings, appId, lastPixmapHash, status, dete
             if (await fileExists(iconName))
                 return fileIconResult(iconName);
         } else if (iconThemePath) {
-            // findIconInTheme only returns a path it has already proven.
-            const resolvedPath = findIconInTheme(iconName, iconThemePath, _deviceIconSize(settings));
+            // findIconInThemeAsync only returns a path it has already proven.
+            const resolvedPath = await findIconInThemeAsync(iconName, iconThemePath,
+                {targetSize: _deviceIconSize(settings)});
             if (resolvedPath)
                 return fileIconResult(resolvedPath);
         }
@@ -348,13 +349,15 @@ async function _liveIconContentHash(proxy, settings, detectedName) {
             path = detectedName;
         } else {
             const themePath = await refreshStringOnProxy(proxy, 'IconThemePath');
-            if (themePath)
-                path = findIconInTheme(detectedName, themePath, _deviceIconSize(settings));
+            if (themePath) {
+                path = await findIconInThemeAsync(detectedName, themePath,
+                    {targetSize: _deviceIconSize(settings)});
+            }
         }
         if (!path || !await fileExists(path))
             return null;
         const bytes = await readFileBytes(Gio.File.new_for_path(path));
-        return bytes?.length ? _hashBytes(bytes) : null;
+        return bytes.length ? _hashBytes(bytes) : null;
     }
 
     const pixmap = await refreshPropertyOnProxy(proxy, 'IconPixmap', {cache: false});
@@ -371,7 +374,7 @@ async function _liveIconContentHash(proxy, settings, detectedName) {
 function _appIcon(pid) {
     if (!pid)
         return null;
-    return Shell.WindowTracker.get_default().get_app_from_pid(pid)?.get_icon() ?? null;
+    return Shell.WindowTracker.get_default().get_app_from_pid(pid)?.get_icon();
 }
 
 // The panel paints in device pixels, so at scale 2 a 22px variant would beat
@@ -388,32 +391,28 @@ function _themedIconFromName(iconName, settings, requireInTheme = true, appId = 
 
     let existing = null;
     let themeFile = null;
-    let themeReady = false;
-    try {
-        _sharedIconTheme ??= new St.IconTheme();
-        // lookup_icon, not has_icon: St's has_icon only searches the theme index
-        // and answers false for an unthemed icon in /usr/share/pixmaps, which
-        // then loses to an image-missing tail. Gtk's has_icon does see those, so
-        // this is what keeps the prefs and the panel on the same icon.
-        const size = _deviceIconSize(settings);
-        for (const name of candidates) {
-            const info = name ? _sharedIconTheme.lookup_icon(name, size, 0) : null;
-            if (!info)
-                continue;
-            existing = name;
-            themeFile = info.get_filename() ?? null;
-            break;
-        }
-        themeReady = true;
-    } catch { /* no theme available yet, let the render-time lookup decide */ }
+    _sharedIconTheme ??= new St.IconTheme();
+    // lookup_icon, not has_icon: St's has_icon only searches the theme index
+    // and answers false for an unthemed icon in /usr/share/pixmaps, which
+    // then loses to an image-missing tail. Gtk's has_icon does see those, so
+    // this is what keeps the prefs and the panel on the same icon.
+    const size = _deviceIconSize(settings);
+    for (const name of candidates) {
+        const info = _sharedIconTheme.lookup_icon(name, size, 0);
+        if (!info)
+            continue;
+        existing = name;
+        themeFile = info.get_filename();
+        break;
+    }
 
-    if (requireInTheme && themeReady && !existing)
+    if (requireInTheme && !existing)
         return null;
 
     if (appId && existing)
         _dropCachedIcon(settings, appId, map);
 
-    const names = orderThemedNames(candidates, existing, themeReady);
+    const names = orderThemedNames(candidates, existing, true);
 
     return {
         gicon: new Gio.ThemedIcon({names, use_default_fallbacks: true}),
@@ -446,7 +445,7 @@ function _tinted(path, settings, tint) {
 // The icon update runs on the shell's main loop, where a blocking stat stalls
 // the whole desktop rather than one window.
 async function _configuredIconAsync(value, settings, tint = null) {
-    const exists = value?.startsWith('/') ? await fileExists(value) : null;
+    const exists = value.startsWith('/') ? await fileExists(value) : null;
     if (exists) {
         const gicon = await _tinted(value, settings, tint);
         if (gicon)
@@ -470,7 +469,13 @@ export function configuredIcon(value, settings, exists = null) {
     }
 
     // Same fallback chain as the prefs side so both render identically.
-    return _themedIconFromName(res.value, settings, false);
+    return themedIconContent(res.value, settings);
+}
+
+// Named apart from the prefs-side themedIcon in shared/icon.js, which hands
+// back a bare Gio.ThemedIcon. This one returns what setIconContent takes.
+export function themedIconContent(iconName, settings) {
+    return _themedIconFromName(iconName, settings, false);
 }
 
 
@@ -551,7 +556,7 @@ const _snapshotSeq = new Map();
 // Some apps store their IconThemePath in an ephemeral directory, so copy
 // the bytes into our cache.
 async function _snapshotIconToCache(settings, appId, file, generation) {
-    if (!appId || !file)
+    if (!appId)
         return;
     const seq = (_snapshotSeq.get(appId) ?? 0) + 1;
     _snapshotSeq.set(appId, seq);
@@ -565,7 +570,7 @@ async function _writeIconSnapshot(settings, appId, file, generation, seq) {
         if (overtaken())
             return;
         const contents = await readFileBytes(file);
-        if (!contents || contents.length === 0 || overtaken())
+        if (contents.length === 0 || overtaken())
             return;
         const path = await writeCachedIcon(appId, contents);
         if (!path || overtaken())
@@ -591,8 +596,6 @@ function _usablePixmapEntry(entry) {
 function _pixmapBytes(rawData) {
     if (rawData instanceof Uint8Array)
         return rawData;
-    if (rawData instanceof GLib.Bytes)
-        return rawData.toArray();
     if (Array.isArray(rawData))
         return new Uint8Array(rawData);
     return null;
@@ -618,9 +621,6 @@ function _hashPixmap(width, height, src) {
 }
 
 function _pixmapToPng(width, height, src) {
-    if (!width || !height || !src)
-        return null;
-
     try {
         const expectedLen = width * height * 4;
         if (src.length < expectedLen)
@@ -647,8 +647,8 @@ function _pixmapToPng(width, height, src) {
         if (!pixbuf)
             return null;
 
-        const [success, pngBuffer] = pixbuf.save_to_bufferv('png', [], []);
-        if (!success || !pngBuffer || pngBuffer.length === 0)
+        const [, pngBuffer] = pixbuf.save_to_bufferv('png', [], []);
+        if (pngBuffer.length === 0)
             return null;
         return pngBuffer;
     } catch {

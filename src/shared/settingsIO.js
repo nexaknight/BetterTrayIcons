@@ -5,13 +5,18 @@ import {warn, warnOnce, error} from './logging.js';
 import {safeMapFromParsed, getAppConfigMap, getSyncMeta, mergeAppConfigs, syncMetaForReplace} from './appConfig.js';
 import {readFileBytes, readFileText, probePaths} from './fetch.js';
 import {BADGE_POSITIONS} from '../const.js';
+import {ACCENT_COLOR_VALUE, accentValueKeeping} from './accentColor.js';
 
 // Colors feed inline set_style() strings, filter against CSS injection.
-const COLOR_PATTERN = /^(#[0-9a-f]{3,8}|rgba?\(\s*[\d.,\s]+\s*\))$/i;
+const COLOR_LITERAL = '#[0-9a-f]{3,8}|rgba?\\(\\s*[\\d.,\\s]+\\s*\\)';
+const COLOR_PATTERN = new RegExp(
+    `^(${COLOR_LITERAL}|${ACCENT_COLOR_VALUE}(:(${COLOR_LITERAL}))?)$`, 'i');
 
-// A pull must not rewire the sync it arrived through: importing another
+// A pull must not rewire the sync it arrived through. Importing another
 // host's file path or auto switch retargets or severs the link.
 const IMPORT_EXCLUDED_KEYS = new Set(['sync-file-path', 'enable-auto-sync']);
+
+const ACCENT_KEY_SUFFIX = 'use-accent-color';
 
 // Await this before importSettingsFromJSON, which has to stay synchronous so
 // the shell's _importing flag spans exactly its own writes.
@@ -56,8 +61,15 @@ export function importSettingsFromJSON(settings, data, iconPaths, {merge = false
     // Written once after the loop, when the file carried app-configs, so the
     // local sync metadata matches whatever landed.
     let syncMeta;
+    const legacyAccentColorKeys = [];
 
     Object.keys(data).forEach(key => {
+        if (key.endsWith(ACCENT_KEY_SUFFIX)) {
+            if (data[key] === true)
+                legacyAccentColorKeys.push(`${key.slice(0, -ACCENT_KEY_SUFFIX.length)}color`);
+            return;
+        }
+
         // The sync metadata travels as _app_config_meta and is applied together
         // with app-configs below, never set from a raw key.
         if (!keys.includes(key) || IMPORT_EXCLUDED_KEYS.has(key) || key === 'app-config-sync-meta')
@@ -98,6 +110,10 @@ export function importSettingsFromJSON(settings, data, iconPaths, {merge = false
             warn(`Failed to import key '${key}': ${e.message}`);
         }
     });
+
+    legacyAccentColorKeys
+        .filter(colorKey => keys.includes(colorKey))
+        .forEach(colorKey => batch.set_string(colorKey, accentValueKeeping(batch.get_string(colorKey))));
 
     if (syncMeta && keys.includes('app-config-sync-meta'))
         batch.set_string('app-config-sync-meta', JSON.stringify(syncMeta));
@@ -226,8 +242,6 @@ export async function deleteBackups(path) {
 // Deriving the path from the position would address a different file as
 // soon as another writer added or pruned one.
 export function deleteBackup(backupPath) {
-    if (!backupPath)
-        return Promise.resolve();
     return _deleteAsync(backupPath);
 }
 
@@ -328,13 +342,10 @@ function _exportSettingsToJSON(settings) {
     return exportData;
 }
 
-// Each backup gets a name of its own instead of everything shifting up a slot.
-// Two processes can write the sync file at once (the shell auto-pushes while
-// the prefs push), and the old shift interleaved: measured over three runs it
-// left holes in the chain, the same generation in two slots, and whole
-// generations gone. Distinct names cannot collide, so this needs no lock, which
-// also keeps it working on the network mounts these files tend to live on,
-// where advisory locks are not dependable.
+// Every backup gets its own name instead of shifting slots. Shell and prefs
+// can write at the same time, and interleaved shifts lost whole generations
+// Distinct names cannot collide, so no lock, which network mounts
+// would not honor reliably anyway.
 async function _writeBackup(path, maxBackups) {
     const mainFile = Gio.File.new_for_path(path);
     let content;
@@ -342,7 +353,7 @@ async function _writeBackup(path, maxBackups) {
         content = await readFileBytes(mainFile);
     } catch (e) {
         // A missing main file just means there's nothing to back up yet.
-        if (!e.matches?.(Gio.IOErrorEnum, Gio.IOErrorEnum.NOT_FOUND))
+        if (!e.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.NOT_FOUND))
             error(`Backup read failed: ${e.message}`, e);
         return;
     }

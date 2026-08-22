@@ -3,11 +3,12 @@ import Gdk from 'gi://Gdk';
 import Adw from 'gi://Adw';
 import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
-import {warn} from '../../shared/logging.js';
 import {connectScoped} from '../../shared/lifecycle.js';
 import {ensurePrefsCss, clearChildren} from './gtkHelpers.js';
+import {boxGeometryCss, borderShorthand} from '../../shared/boxStyle.js';
+import {usesAccent} from '../../shared/accentColor.js';
 import {
-    BOX_SIDES, DEFAULT_PILL_RADIUS_PX, DEFAULT_ICON_PADDING_PX, ICON_MARGIN_PX, ITEM_SPACING_PX,
+    DEFAULT_PILL_RADIUS_PX, DEFAULT_ICON_PADDING_PX, ICON_MARGIN_PX, ITEM_SPACING_PX,
     PREVIEW_ELEMENT_SHADOW_CSS, PREVIEW_STOCK_POPUP_CSS,
 } from '../../const.js';
 
@@ -25,6 +26,7 @@ const PREVIEW_SAMPLE_ICONS = Object.freeze([
 ]);
 
 let _instanceSeq = 0;
+
 
 // Rebuilding on every watched change instead of diffing widgets keeps
 // the preview from ever drifting, the cost is a handful of images.
@@ -75,11 +77,7 @@ export function createPreviewGroup(settings, {watch, render}) {
         widget.hexpand = true;
         clearChildren(backdrop);
         backdrop.append(widget);
-        try {
-            provider.load_from_string(css);
-        } catch (e) {
-            warn(`preview: bad css: ${e.message}`);
-        }
+        provider.load_from_string(css);
     };
 
     // The accent keys resolve through the system accent, which can change
@@ -156,10 +154,9 @@ function _createSampleIcon(iconName, size, scopeClass) {
     return new Gtk.Image({icon_name: iconName, pixel_size: size, css_classes: [`${scopeClass}-icon`]});
 }
 
-// The shell computes the same styles in computeTrayIconStyle and
-// computeToggleStyle (src/shell/utils/actor.js). That module needs St, and
-// its -st-accent-color keyword only St resolves, so the preview redoes the
-// math against GTK's accent. Keep both in sync when a style key changes.
+// The box math is shared with the shell through boxStyle.js. Only the color
+// lookup differs, St resolves its own accent keyword and GTK cannot, so the
+// accent turns into a literal color here.
 function _trayIconCss(settings, scopeClass, {hover = false} = {}) {
     if (!settings.get_boolean('enable-custom-icon-style'))
         return `.${scopeClass}-icon { ${_stockIconStyle()} margin: 0 ${ICON_MARGIN_PX}px; }`;
@@ -182,11 +179,10 @@ function _toggleCss(settings, scopeClass) {
     }
 
     if (custom) {
-        const color = _accentAwareColor(settings, 'toggle-icon-color', 'toggle-icon-use-accent-color');
-        const bg = _accentAwareColor(settings, 'toggle-icon-background-color', 'toggle-icon-background-use-accent-color');
-        return `${sel} { padding: ${_sidesShorthand(settings, 'toggle-padding')};` +
-            ` margin: ${_sidesShorthand(settings, 'toggle-margin')};` +
-            ` border-radius: ${settings.get_int('toggle-icon-border-radius')}px;` +
+        const color = _resolveColor(settings, 'toggle-icon-color');
+        const bg = _resolveColor(settings, 'toggle-icon-background-color');
+        const geometry = boxGeometryCss(settings, {spacingPrefix: 'toggle', radiusPrefix: 'toggle-icon'});
+        return `${sel} { ${geometry}` +
             `${_cssDeclaration('color', color || 'white')}${_backgroundStyle(bg)}${_borderStyle(settings, 'toggle-icon')} }` +
             ` ${sel}:hover { ${_hoverStyle(settings, 'toggle-icon')} }`;
     }
@@ -201,18 +197,16 @@ function _stockIconStyle() {
 }
 
 function _customIconStyle(settings) {
-    const color = _accentAwareColor(settings, 'icon-color', 'icon-use-accent-color');
-    const bg = _accentAwareColor(settings, 'icon-background-color', 'icon-background-use-accent-color');
-    return `padding: ${_sidesShorthand(settings, 'icon-padding')};` +
-        ` margin: ${_sidesShorthand(settings, 'icon-margin')};` +
-        ` border-radius: ${settings.get_int('icon-border-radius')}px;` +
+    const color = _resolveColor(settings, 'icon-color');
+    const bg = _resolveColor(settings, 'icon-background-color');
+    return `${boxGeometryCss(settings, {spacingPrefix: 'icon'})}` +
         `${_cssDeclaration('color', color || 'white')}${_backgroundStyle(bg)}${_borderStyle(settings, 'icon')}`;
 }
 
 function _hoverStyle(settings, prefix) {
-    const color = _accentAwareColor(settings, `${prefix}-hover-color`, `${prefix}-hover-use-accent-color`);
-    const bg = _accentAwareColor(settings, `${prefix}-hover-background-color`, `${prefix}-hover-background-use-accent-color`);
-    const border = _accentAwareColor(settings, `${prefix}-hover-border-color`, `${prefix}-hover-border-use-accent-color`);
+    const color = _resolveColor(settings, `${prefix}-hover-color`);
+    const bg = _resolveColor(settings, `${prefix}-hover-background-color`);
+    const border = _resolveColor(settings, `${prefix}-hover-border-color`);
     return `${_cssDeclaration('color', color)}${_backgroundStyle(bg)}${_cssDeclaration('border-color', border)}`;
 }
 
@@ -220,22 +214,14 @@ function _popupCss(settings, scopeClass) {
     if (!settings.get_boolean('enable-custom-overflow-style'))
         return `.${scopeClass}-popup { ${PREVIEW_STOCK_POPUP_CSS} }`;
 
-    const bg = _accentAwareColor(settings, 'overflow-container-background-color',
-        'overflow-container-background-use-accent-color');
-    return `.${scopeClass}-popup { padding: ${_sidesShorthand(settings, 'overflow-container-padding')};` +
-        ` margin: ${_sidesShorthand(settings, 'overflow-container-margin')};` +
-        ` border-radius: ${settings.get_int('overflow-container-border-radius')}px;` +
+    const bg = _resolveColor(settings, 'overflow-container-background-color');
+    return `.${scopeClass}-popup { ${boxGeometryCss(settings, {spacingPrefix: 'overflow-container'})}` +
         `${_backgroundStyle(bg)}${_borderStyle(settings, 'overflow-container')} }`;
 }
 
 function _borderStyle(settings, prefix) {
-    const color = _accentAwareColor(settings, `${prefix}-border-color`, `${prefix}-border-use-accent-color`);
-    return _cssDeclaration('border',
-        color ? `${settings.get_int(`${prefix}-border-width`)}px solid ${color}` : '');
-}
-
-function _sidesShorthand(settings, keyPrefix) {
-    return BOX_SIDES.map(side => `${settings.get_int(`${keyPrefix}-${side}`)}px`).join(' ');
+    const border = borderShorthand(settings, prefix, key => _resolveColor(settings, key));
+    return border === '0px' ? '' : ` border: ${border};`;
 }
 
 // An empty declaration would fail the whole sheet, so absent values vanish.
@@ -251,8 +237,9 @@ function _backgroundStyle(bg) {
     return _cssDeclaration('background-color', bg) + (visible ? ` ${PREVIEW_ELEMENT_SHADOW_CSS}` : '');
 }
 
-function _accentAwareColor(settings, colorKey, accentKey) {
-    if (settings.get_boolean(accentKey))
-        return Adw.StyleManager.get_default().get_accent_color_rgba().to_string();
-    return settings.get_string(colorKey);
+function _resolveColor(settings, colorKey) {
+    const value = settings.get_string(colorKey);
+    return usesAccent(value)
+        ? Adw.StyleManager.get_default().get_accent_color_rgba().to_string()
+        : value;
 }

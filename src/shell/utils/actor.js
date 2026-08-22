@@ -3,7 +3,9 @@ import St from 'gi://St';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
-import {DEFAULT_PILL_RADIUS_PX, DEFAULT_ICON_PADDING_PX, ICON_MARGIN_PX, BOX_SIDES, BADGE_POSITIONS, BADGE_DEFAULT_COLOR, BADGE_DEFAULT_TEXT_COLOR} from '../../const.js';
+import {DEFAULT_PILL_RADIUS_PX, DEFAULT_ICON_PADDING_PX, ICON_MARGIN_PX, BADGE_POSITIONS, BADGE_DEFAULT_COLOR, BADGE_DEFAULT_TEXT_COLOR} from '../../const.js';
+import {usesAccent} from '../../shared/accentColor.js';
+import {boxGeometryCss, borderShorthand} from '../../shared/boxStyle.js';
 
 const DEFAULT_HOVER_BG_COLOR = 'rgba(255,255,255,0.1)';
 
@@ -26,15 +28,14 @@ export function isDisposed(actor) {
     return !actor || _destroyedActors.has(actor);
 }
 
-// Throws once the actor is disposed, which happens mid-drag and mid-hit-test.
+// An actor can be disposed mid-drag and mid-hit-test, and GJS answers calls
+// on a disposed actor with garbage instead of throwing.
 export function safeBounds(actor) {
-    try {
-        const [x, y] = actor.get_transformed_position();
-        const [w, h] = actor.get_transformed_size();
-        return [x, y, w, h];
-    } catch {
+    if (isDisposed(actor))
         return null;
-    }
+    const [x, y] = actor.get_transformed_position();
+    const [w, h] = actor.get_transformed_size();
+    return [x, y, w, h];
 }
 
 // The allocation ignores a running slide, so this is where the actor will
@@ -52,7 +53,6 @@ export function stageScaleFactor() {
 }
 
 export function generateBoxStyle(settings, prefix, options = {}) {
-    const includeColors = options.includeColors !== false;
     const extraCss = options.extraCss || '';
     const radiusPrefix = options.radiusPrefix || prefix;
     const colorPrefix = options.colorPrefix || prefix;
@@ -60,37 +60,23 @@ export function generateBoxStyle(settings, prefix, options = {}) {
     // margin: 0.
     const minMargin = options.minMargin || {};
 
-    const radius = settings.get_int(`${radiusPrefix}border-radius`);
+    let css = boxGeometryCss(settings, {spacingPrefix: prefix, radiusPrefix, minMargin});
 
-    const box = mapByKey(['padding', 'margin'], group =>
-        mapByKey(BOX_SIDES, side => settings.get_int(`${prefix}${group}-${side}`)));
-
-    const margin = mapByKey(BOX_SIDES, side =>
-        Math.max(box.margin[side], minMargin[side] || 0));
-
-    let css = `
-        border-radius: ${radius}px;
-        padding: ${box.padding.top}px ${box.padding.right}px ${box.padding.bottom}px ${box.padding.left}px;
-        margin: ${margin.top}px ${margin.right}px ${margin.bottom}px ${margin.left}px;
-    `;
-
-    if (includeColors) {
-        // Not every prefix has both keys, overflow-container has only background.
-        const schema = settings.settings_schema;
-        const bgKey = `${colorPrefix}background-color`;
-        if (schema.has_key(bgKey)) {
-            const bg = accentAwareColor(settings, bgKey, `${colorPrefix}background-use-accent-color`);
-            if (bg)
-                css += `background-color: ${bg};`;
-        }
-        const fgKey = `${colorPrefix}color`;
-        if (schema.has_key(fgKey)) {
-            const col = accentAwareColor(settings, fgKey, `${colorPrefix}use-accent-color`);
-            if (col)
-                css += `color: ${col};`;
-        }
-        css += `border: ${_borderShorthand(settings, colorPrefix)};`;
+    // Not every prefix has both keys, overflow-container has only background.
+    const schema = settings.settings_schema;
+    const bgKey = `${colorPrefix}-background-color`;
+    if (schema.has_key(bgKey)) {
+        const bg = resolveColor(settings, bgKey);
+        if (bg)
+            css += ` background-color: ${bg};`;
     }
+    const fgKey = `${colorPrefix}-color`;
+    if (schema.has_key(fgKey)) {
+        const col = resolveColor(settings, fgKey);
+        if (col)
+            css += ` color: ${col};`;
+    }
+    css += ` border: ${_borderShorthand(settings, colorPrefix)};`;
 
     if (extraCss)
         css += extraCss;
@@ -98,18 +84,12 @@ export function generateBoxStyle(settings, prefix, options = {}) {
     return css;
 }
 
-function mapByKey(keys, valueFn) {
-    return Object.fromEntries(keys.map(key => [key, valueFn(key)]));
-}
-
-// Returning the -st-accent-color keyword instead of a resolved value lets St
-// track the user's system accent for us, so nothing has to re-apply the style
-// when the accent changes.
-function accentAwareColor(settings, colorKey, accentKey) {
-    const schema = settings.settings_schema;
-    if (schema.has_key(accentKey) && settings.get_boolean(accentKey))
-        return ST_ACCENT_COLOR;
-    return settings.get_string(colorKey);
+// Handing St the -st-accent-color keyword instead of a resolved value lets it
+// track the system accent itself, so nothing has to re-apply the style when
+// the accent changes.
+function resolveColor(settings, colorKey) {
+    const value = settings.get_string(colorKey);
+    return usesAccent(value) ? ST_ACCENT_COLOR : value;
 }
 
 export function createPanelMenu(sourceActor, configure = null) {
@@ -121,12 +101,8 @@ export function createPanelMenu(sourceActor, configure = null) {
     return menu;
 }
 
-// An icon inside the overflow popup must not anchor its own menu:
-// intellihide panels like Dash to Panel then slide away mid-menu and take
-// the menu with them. Anchoring to the shell's dummy cursor over the
-// icon's screen rect is what fixes it, confirmed on a live session. Why
-// the two anchors differ is not established (both hang off uiGroup), so
-// don't simplify this back to the actor on the strength of that.
+// Popup icons anchor to the dummy cursor, an intellihide panel (Dash to
+// Panel) otherwise slides away mid-menu and takes the menu with it.
 export function menuAnchorFor(actor) {
     if (Main.panel.contains(actor))
         return actor;
@@ -164,7 +140,7 @@ export function destroyMenuSafely(menu) {
     if (menu.isOpen)
         menu.close(POPUP_ANIMATION_NONE);
 
-    Main.panel.menuManager?.removeMenu(menu);
+    Main.panel.menuManager.removeMenu(menu);
     menu.destroy();
 }
 
@@ -180,8 +156,7 @@ export function placeIndicatorInPanel(indicator, settings) {
     };
     const targetBox = boxes[settings.get_string('tray-position')] ?? Main.panel._rightBox;
 
-    if (targetBox)
-        targetBox.insert_child_at_index(indicator, settings.get_int('tray-order'));
+    targetBox.insert_child_at_index(indicator, settings.get_int('tray-order'));
 }
 
 // A placement pass walks every icon, each real mutation costs a full
@@ -225,40 +200,31 @@ export function computeTrayIconStyle(settings, {withColors = true} = {}) {
 
     let baseStyle;
     if (enableCustom) {
-        const padding = _sidesShorthand(settings, 'icon-padding');
-        const margin = _sidesShorthand(settings, 'icon-margin');
-        const radius = settings.get_int('icon-border-radius');
-        const bg = accentAwareColor(settings, 'icon-background-color', 'icon-background-use-accent-color');
-        const color = withColors ? ` color: ${accentAwareColor(settings, 'icon-color', 'icon-use-accent-color')};` : '';
-        baseStyle = `padding: ${padding}; margin: ${margin}; border-radius: ${radius}px;${color} background-color: ${bg}; border: ${_borderShorthand(settings, 'icon-')}; box-shadow: none;`;
+        const bg = resolveColor(settings, 'icon-background-color');
+        const color = withColors ? ` color: ${resolveColor(settings, 'icon-color')};` : '';
+        baseStyle = `${boxGeometryCss(settings, {spacingPrefix: 'icon'})}${color}` +
+            ` background-color: ${bg}; border: ${_borderShorthand(settings, 'icon')}; box-shadow: none;`;
     } else {
         baseStyle = '';
     }
 
     let hoverStyle = '';
     if (enableCustom) {
-        const hoverBg = accentAwareColor(settings, 'icon-hover-background-color', 'icon-hover-background-use-accent-color');
+        const hoverBg = resolveColor(settings, 'icon-hover-background-color');
         hoverStyle = `${baseStyle} background-color: ${hoverBg};`;
         if (withColors) {
-            const hoverColor = accentAwareColor(settings, 'icon-hover-color', 'icon-hover-use-accent-color');
+            const hoverColor = resolveColor(settings, 'icon-hover-color');
             if (hoverColor)
                 hoverStyle += ` color: ${hoverColor};`;
         }
-        hoverStyle += _hoverBorderCss(settings, 'icon-');
+        hoverStyle += _hoverBorderCss(settings, 'icon');
     }
 
     return {enableCustom, baseStyle, hoverStyle};
 }
 
-function _sidesShorthand(settings, prefix) {
-    return BOX_SIDES.map(side => `${settings.get_int(`${prefix}-${side}`)}px`).join(' ');
-}
-
-// A missing color would leave an unparseable shorthand that St drops, and
-// the theme border would bleed through instead of staying stripped.
 function _borderShorthand(settings, prefix) {
-    const color = accentAwareColor(settings, `${prefix}border-color`, `${prefix}border-use-accent-color`);
-    return color ? `${settings.get_int(`${prefix}border-width`)}px solid ${color}` : '0px';
+    return borderShorthand(settings, prefix, key => resolveColor(settings, key));
 }
 
 export function attachStatusIcon(actor) {
@@ -267,10 +233,8 @@ export function attachStatusIcon(actor) {
         x_align: Clutter.ActorAlign.CENTER,
         y_align: Clutter.ActorAlign.CENTER,
     });
-    // The badge overlays the icon, and St.Bin holds one child, so both sit
-    // in a BinLayout box. The box hugs the icon instead of filling the
-    // panel button, so the badge corners land on the glyph. The label needs
-    // the expand flags, BinLayout only honours align on expanding children.
+    // The box hugs the icon so the badge corners land on the glyph. The label
+    // needs the expand flags, BinLayout only honours align on expanding children.
     const box = new St.Widget({
         layout_manager: new Clutter.BinLayout(),
         x_align: Clutter.ActorAlign.CENTER,
@@ -379,46 +343,36 @@ export function computeToggleStyle(settings) {
         settings.get_boolean('enable-custom-icon-style');
 
     if (inheritIcons) {
-        const inheritedColor = accentAwareColor(settings, 'icon-color', 'icon-use-accent-color') || '#ffffff';
+        const inheritedColor = resolveColor(settings, 'icon-color') || '#ffffff';
         return {
-            baseStyle: _buildInheritedToggleBase(settings),
-            hoverStyle: `background-color: ${accentAwareColor(settings, 'icon-hover-background-color', 'icon-hover-background-use-accent-color')};${
-                _hoverBorderCss(settings, 'icon-')}`,
+            baseStyle: computeTrayIconStyle(settings).baseStyle,
+            hoverStyle: `background-color: ${resolveColor(settings, 'icon-hover-background-color')};${
+                _hoverBorderCss(settings, 'icon')}`,
             iconColor: inheritedColor,
-            iconHoverColor: accentAwareColor(settings, 'icon-hover-color', 'icon-hover-use-accent-color') ||
-                inheritedColor,
+            iconHoverColor: resolveColor(settings, 'icon-hover-color') || inheritedColor,
         };
     }
 
     if (customToggle) {
-        const baseColor = accentAwareColor(settings, 'toggle-icon-color', 'toggle-icon-use-accent-color') || '#ffffff';
+        const baseColor = resolveColor(settings, 'toggle-icon-color') || '#ffffff';
         return {
-            baseStyle: generateBoxStyle(settings, 'toggle-', {
-                radiusPrefix: 'toggle-icon-',
-                colorPrefix: 'toggle-icon-',
-                extraCss: 'box-shadow: none;',
+            baseStyle: generateBoxStyle(settings, 'toggle', {
+                radiusPrefix: 'toggle-icon',
+                colorPrefix: 'toggle-icon',
+                extraCss: ' box-shadow: none;',
             }),
-            hoverStyle: `background-color: ${accentAwareColor(settings, 'toggle-icon-hover-background-color', 'toggle-icon-hover-background-use-accent-color')};${
-                _hoverBorderCss(settings, 'toggle-icon-')}`,
+            hoverStyle: `background-color: ${resolveColor(settings, 'toggle-icon-hover-background-color')};${
+                _hoverBorderCss(settings, 'toggle-icon')}`,
             iconColor: baseColor,
-            iconHoverColor: accentAwareColor(settings, 'toggle-icon-hover-color', 'toggle-icon-hover-use-accent-color') || baseColor,
+            iconHoverColor: resolveColor(settings, 'toggle-icon-hover-color') || baseColor,
         };
     }
 
     return {baseStyle: '', hoverStyle: '', iconColor: '', iconHoverColor: ''};
 }
 
-function _buildInheritedToggleBase(settings) {
-    const padding = _sidesShorthand(settings, 'icon-padding');
-    const margin = _sidesShorthand(settings, 'icon-margin');
-    const radius = settings.get_int('icon-border-radius');
-    const color = accentAwareColor(settings, 'icon-color', 'icon-use-accent-color');
-    const bg = accentAwareColor(settings, 'icon-background-color', 'icon-background-use-accent-color');
-    return `padding: ${padding}; margin: ${margin}; border-radius: ${radius}px; color: ${color}; background-color: ${bg}; border: ${_borderShorthand(settings, 'icon-')}; box-shadow: none;`;
-}
-
 function _hoverBorderCss(settings, prefix) {
-    const color = accentAwareColor(settings, `${prefix}hover-border-color`, `${prefix}hover-border-use-accent-color`);
+    const color = resolveColor(settings, `${prefix}-hover-border-color`);
     return color ? ` border-color: ${color};` : '';
 }
 

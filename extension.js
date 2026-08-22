@@ -13,6 +13,7 @@ import {clearDetachedMenuManager, placeIndicatorInPanel} from './src/shell/utils
 import {clearIconCaches} from './src/shell/utils/icons.js';
 import {enableLauncherEntries, disableLauncherEntries} from './src/shell/utils/launcherEntries.js';
 import {clearItemSplits} from './src/shell/utils/itemSplit.js';
+import {accentValueKeeping} from './src/shared/accentColor.js';
 
 import {PanelIndicator} from './src/shell/panel/panelIndicator.js';
 import {SniWatcher} from './src/shell/sni/sniWatcher.js';
@@ -26,6 +27,8 @@ const AUTO_SYNC_DEBOUNCE_MS = 1000;
 const AUTO_PUSH_DEBOUNCE_MS = 2000;
 
 const PREFS_WM_CLASS = 'org.gnome.Shell.Extensions';
+
+const LEGACY_SCHEMA_ID = 'org.gnome.shell.extensions.bettertrayicons.legacy';
 
 export default class BetterTrayIconsExtension extends Extension {
     enable() {
@@ -43,7 +46,7 @@ export default class BetterTrayIconsExtension extends Extension {
     _realEnable() {
         try {
             this._settings = this.getSettings();
-            _migrateTrayIconPadding(this._settings);
+            _runMigrations(this._settings, this.getSettings(LEGACY_SCHEMA_ID));
 
             this._settingsSignals = [];
 
@@ -129,8 +132,6 @@ export default class BetterTrayIconsExtension extends Extension {
             this._syncCancellable = new Gio.Cancellable();
 
             readFileText(file, this._syncCancellable).then(async text => {
-                if (!this._settings)
-                    return;
                 const data = JSON.parse(text);
 
                 // Skip changes this host wrote itself to avoid sync loops.
@@ -228,24 +229,46 @@ export default class BetterTrayIconsExtension extends Extension {
     }
 }
 
+// Removed keys still hold whatever an older version wrote. The legacy schema
+// sits on the same dconf path, so these can still read them. Both go quiet
+// once they have run.
+function _runMigrations(settings, legacy) {
+    _migrateTrayIconPadding(settings, legacy);
+    _migrateAccentColors(settings, legacy);
+}
+
 // Tray-icon padding moved from 2 non-directional keys to 4 directional ones
-// (2026-07-20). Runs on every enable, not just when prefs opens, so a value
-// someone customized survives even if they never reopen prefs after
-// upgrading. get_user_value returns null while a key sits at its schema
-// default, so this settles into a no-op on every later run once the new
-// keys have moved off it, regardless of whether the old keys are still set.
-function _migrateTrayIconPadding(settings) {
+// in 3.0.0. get_user_value stays null while a key sits at its schema default,
+// so once the new keys move off it this does nothing on any later run.
+function _migrateTrayIconPadding(settings, legacy) {
     const newKeysUntouched = ['icon-padding-top', 'icon-padding-bottom', 'icon-padding-left', 'icon-padding-right']
         .every(key => settings.get_user_value(key) === null);
-    const oldKeysCustomized = settings.get_user_value('icon-padding-horizontal') !== null ||
-        settings.get_user_value('icon-padding-vertical') !== null;
+    const oldKeysCustomized = legacy.get_user_value('icon-padding-horizontal') !== null ||
+        legacy.get_user_value('icon-padding-vertical') !== null;
     if (!newKeysUntouched || !oldKeysCustomized)
         return;
 
-    const horizontal = settings.get_int('icon-padding-horizontal');
-    const vertical = settings.get_int('icon-padding-vertical');
+    const horizontal = legacy.get_int('icon-padding-horizontal');
+    const vertical = legacy.get_int('icon-padding-vertical');
     settings.set_int('icon-padding-left', horizontal);
     settings.set_int('icon-padding-right', horizontal);
     settings.set_int('icon-padding-top', vertical);
     settings.set_int('icon-padding-bottom', vertical);
+}
+
+// Following the system accent used to be a boolean next to every color key.
+// The color value carries it now, and keeps the old color behind it so the
+// switch has something to turn back to. Dropping the boolean stops this from
+// running a second time.
+function _migrateAccentColors(settings, legacy) {
+    for (const accentKey of legacy.settings_schema.list_keys()) {
+        if (!accentKey.endsWith('-use-accent-color') || legacy.get_user_value(accentKey) === null)
+            continue;
+
+        if (legacy.get_boolean(accentKey)) {
+            const colorKey = accentKey.replace(/use-accent-color$/, 'color');
+            settings.set_string(colorKey, accentValueKeeping(settings.get_string(colorKey)));
+        }
+        legacy.reset(accentKey);
+    }
 }

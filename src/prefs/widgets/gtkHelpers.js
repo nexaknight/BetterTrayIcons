@@ -11,6 +11,7 @@ import {buildSymbolicCandidates, orderThemedNames, themedIcon, pathOrThemedIcon,
 import {fileExists} from '../../shared/fetch.js';
 import {connectScoped, ruleDispatcher} from '../../shared/lifecycle.js';
 import {BOX_SIDES, PREVIEW_STOCK_POPUP_CSS} from '../../const.js';
+import {usesAccent} from '../../shared/accentColor.js';
 
 export function createLabel(text, cssClasses = [], options = {}) {
     const label = new Gtk.Label({
@@ -80,11 +81,21 @@ export function createIconButton(iconName, {circular = true, flat = true, extraC
     return createButton({iconName, cssClasses: classes, valign: 'center', ...props});
 }
 
-// A real toggle, unlike createIconButton which only ever builds a plain
-// Gtk.Button: settings.bind needs an 'active' property to bind to.
-export function createLinkToggle(settings, linkKey) {
+// A real toggle, unlike createIconButton which only builds a plain
+// Gtk.Button. settings.bind needs an 'active' property to bind to.
+export function createBoundToggleButton(settings, key, {iconName = null, tooltip = null} = {}) {
     const btn = new Gtk.ToggleButton({css_classes: ['flat'], valign: Gtk.Align.CENTER});
-    settings.bind(linkKey, btn, 'active', Gio.SettingsBindFlags.DEFAULT);
+    if (iconName)
+        btn.icon_name = iconName;
+    if (tooltip)
+        btn.tooltip_text = tooltip;
+
+    settings.bind(key, btn, 'active', Gio.SettingsBindFlags.DEFAULT);
+    return btn;
+}
+
+export function createLinkToggle(settings, linkKey) {
+    const btn = createBoundToggleButton(settings, linkKey);
 
     const sync = () => {
         btn.icon_name = btn.active ? 'bti-link-symbolic' : 'bti-unlink-symbolic';
@@ -112,9 +123,9 @@ const SPACING_LINK_GROUPS = SPACING_KEY_BASES.flatMap(base =>
         return {linkKey: spacingLinkKey(prefix), prefix};
     }));
 
-// The chain works like the constrain toggle in image editors: while a card
+// The chain works like the constrain toggle in image editors. While a card
 // is linked, editing one side writes the same value to the other three, so
-// a uniform spacing needs one edit instead of four. Engaging the chain
+// uniform spacing takes one edit instead of four. Engaging the chain
 // changes nothing by itself, values only converge on the next edit.
 // Wired once per prefs window, the shell only ever reads the real keys.
 export function wireSpacingSync(window, settings) {
@@ -379,15 +390,13 @@ export function createColorSwatch(dialogTitle, {read, write, usingAccent = null}
     return {button, sync};
 }
 
-export function createColorButton(settings, key, dialogTitle = '', {accentKey = null} = {}) {
+export function createColorButton(settings, key, dialogTitle = '') {
     const {button, sync} = createColorSwatch(dialogTitle, {
         read: () => settings.get_string(key),
         write: value => settings.set_string(key, value),
-        usingAccent: accentKey ? () => settings.get_boolean(accentKey) : null,
+        usingAccent: () => usesAccent(settings.get_string(key)),
     });
     connectScoped(button, settings, `changed::${key}`, sync);
-    if (accentKey)
-        connectScoped(button, settings, `changed::${accentKey}`, sync);
     return button;
 }
 
@@ -409,7 +418,7 @@ export function hasThemeIcon(name) {
     return _iconTheme.has_icon(name);
 }
 
-export function applyPathIcon(image, value, settings = null, options = {}) {
+export function applyPathIcon(image, value, settings, options = {}) {
     if (!value) {
         image.clear();
         return;
@@ -443,13 +452,14 @@ export function prefsSymbolicTint(settings) {
         Adw.StyleManager.get_default().get_accent_color_rgba().to_string());
 }
 
-// libadwaita's window_fg_color, measured off a realized widget: the color the
-// tab labels and their icons are drawn in.
+// libadwaita's window_fg_color, measured off a realized widget. It is the
+// color the tab labels and their icons are drawn in.
 const PREFS_FG_DARK = '#ffffff';
 const PREFS_FG_LIGHT = 'rgba(0,0,6,0.8)';
 
-// A widget cannot answer this before it is in a window: an unparented Gtk.Image
-// reports white in either scheme, which would paint light-mode icons invisible.
+// A widget cannot answer this before it is in a window. An unparented
+// Gtk.Image reports white in either scheme, which would paint light-mode
+// icons invisible.
 export function prefsForegroundColor() {
     return Adw.StyleManager.get_default().get_dark() ? PREFS_FG_DARK : PREFS_FG_LIGHT;
 }
@@ -461,12 +471,10 @@ export function themeIconFile(name) {
         return null;
     const paintable = _iconTheme.lookup_icon(
         name, null, THEME_FILE_LOOKUP_PX, 1, Gtk.TextDirection.LTR, 0);
-    return paintable.get_file()?.get_path() ?? null;
+    return paintable.get_file()?.get_path();
 }
 
 function _tintedFor(value, settings, image, {tint = null} = {}) {
-    if (!value || (!settings && !tint))
-        return Promise.resolve(null);
     return tintedSymbolicIcon(value, tint ?? prefsSymbolicTint(settings),
         {size: devicePixelSize(image), lookupThemeFile: themeIconFile});
 }
@@ -478,8 +486,9 @@ export function devicePixelSize(widget, px = null) {
     return size > 0 ? size * widget.get_scale_factor() : 0;
 }
 
-// No themed icon first and a swap when the bytes land: GTK draws nothing at all
-// for some app logos (slack-symbolic and devpod-symbolic in MoreWaita, measured).
+// No themed icon first and a swap when the bytes land. GTK draws nothing at
+// all for some app logos, measured with slack-symbolic and devpod-symbolic
+// in MoreWaita.
 export function applyTintedIcon(image, name, settings, options = {}) {
     if (!name)
         return;
@@ -533,14 +542,8 @@ export function applyResolvedIcon(image, iconResult, useSymbolic = false, iconPa
         return;
     }
 
-    const name = iconResult.value;
-    if (!name) {
-        image.set_from_gicon(themedIcon('image-missing'));
-        return;
-    }
-
-    const candidates = buildSymbolicCandidates(name, useSymbolic);
-    const names = orderThemedNames(candidates, candidates.find(hasThemeIcon) ?? null);
+    const candidates = buildSymbolicCandidates(iconResult.value, useSymbolic);
+    const names = orderThemedNames(candidates, candidates.find(hasThemeIcon));
     image.set_from_gicon(new Gio.ThemedIcon({names, use_default_fallbacks: true}));
 }
 
@@ -551,8 +554,6 @@ export function ensurePrefsCss() {
     if (_prefsCssLoaded)
         return;
     const display = Gdk.Display.get_default();
-    if (!display)
-        return;
     const provider = new Gtk.CssProvider();
     // The thumbnail rule is appended here because it shares its look with the
     // live preview through PREVIEW_STOCK_POPUP_CSS instead of duplicating the values.

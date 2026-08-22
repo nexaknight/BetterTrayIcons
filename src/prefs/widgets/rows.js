@@ -6,16 +6,19 @@ import Gtk from 'gi://Gtk';
 import Adw from 'gi://Adw';
 import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
+import {usesAccent, accentValueKeeping, colorBehindAccent} from '../../shared/accentColor.js';
 import {connectScoped} from '../../shared/lifecycle.js';
 import {resetKeys} from '../../shared/settingsIO.js';
-import {createColorButton, createIconButton, createLinkToggle, attachBadge, createBadge, applyPathIcon, ensurePrefsCss, spacingLinkKey} from './gtkHelpers.js';
+import {createColorButton, createIconButton, createLinkToggle, createBoundToggleButton, attachBadge, createBadge, applyPathIcon, ensurePrefsCss, spacingLinkKey} from './gtkHelpers.js';
 import {createSidebarToggle, popSubpage, pushSubpage, addToast} from './sidebar.js';
-import {openStyleDialog, buildDialogShell, showConfirmationDialog} from '../dialogs/dialogs.js';
+import {buildGroupDialog, buildDialogShell, showConfirmationDialog} from '../dialogs/dialogs.js';
 
 // Keeps the gear column on the actions page flush.
 const ACTION_DROPDOWN_WIDTH_PX = 240;
 
 const BADGE_GAP_PX = 6;
+
+const STYLE_DIALOG_WIDTH_PX = 420;
 
 // The schema itself only floors these radii at 0, this is a UI-only cap.
 const MAX_BORDER_RADIUS_PX = 50;
@@ -84,39 +87,50 @@ export function createResetButton(settings, keys, {window = null, includesSubpag
 }
 
 export function addConfigRows(group, settings, specs) {
-    for (const spec of specs) {
-        const row = createConfigRow(settings, spec);
-        if (row)
-            group.add(row);
-    }
+    for (const spec of specs)
+        group.add(createConfigRow(settings, spec));
+}
+
+// Lives here rather than in dialogs.js because it needs addConfigRows, and
+// dialogs.js importing this module back would close an import cycle.
+function openStyleDialog(parentWindow, settings, {title, description = '', items}) {
+    const {group, present} = buildGroupDialog({
+        title,
+        width: STYLE_DIALOG_WIDTH_PX,
+        groupTitle: title,
+        groupDescription: description,
+    });
+
+    addConfigRows(group, settings, items);
+    present(parentWindow);
 }
 
 function createConfigRow(settings, conf) {
-    if (!conf?.key)
-        return null;
+    const row = CONFIG_ROW_BUILDERS[conf.type](settings, conf);
 
-    switch (conf.type) {
-    case 'combo':
-        return createComboRow(conf.title, conf.subtitle, settings, conf.key, conf.options, conf.values);
-    case 'segmented':
-        return createSegmentedRow(conf.title, conf.subtitle, settings, conf.key, conf.options, conf.values);
-    case 'switch':
-        return createSwitchRow(conf.title, conf.subtitle, settings, conf.key);
-    case 'spin':
-        return createSpinRow(conf.title, settings, conf.key, conf.min, conf.max, conf.step, {subtitle: conf.subtitle});
-    case 'color': {
-        const row = createColorRow(conf.title, settings, conf.key);
-        // A hover color the accent overrides has nothing left to pick.
-        if (conf.hiddenByKey) {
-            settings.bind(conf.hiddenByKey, row, 'visible',
-                Gio.SettingsBindFlags.GET | Gio.SettingsBindFlags.INVERT_BOOLEAN);
-        }
-        return row;
+    if (conf.hiddenWhenAccent) {
+        const key = conf.hiddenWhenAccent;
+        const sync = () => (row.visible = !usesAccent(settings.get_string(key)));
+        sync();
+        connectScoped(row, settings, `changed::${key}`, sync);
     }
-    default:
-        return null;
-    }
+
+    return row;
 }
+
+const CONFIG_ROW_BUILDERS = Object.freeze({
+    combo: (settings, conf) => createComboRow(conf.title, conf.subtitle, settings, conf.key, conf.options, conf.values),
+    segmented: (settings, conf) => createSegmentedRow(conf.title, conf.subtitle, settings, conf.key, conf.options, conf.values,
+        {negate: conf.negate}),
+    switch: (settings, conf) => createSwitchRow(conf.title, conf.subtitle, settings, conf.key),
+    accent: (settings, conf) => createAccentSwitchRow(conf.title, settings, conf.key),
+    // A spec that names no bounds takes the schema's, so the two cannot drift.
+    spin: (settings, conf) => {
+        const {min, max} = conf.min === undefined ? schemaRange(settings, conf.key) : conf;
+        return createSpinRow(conf.title, settings, conf.key, min, max, conf.step, {subtitle: conf.subtitle});
+    },
+    color: (settings, conf) => createColorRow(conf.title, settings, conf.key),
+});
 
 export function createComboRow(title, subtitle, settings, key, displayOptions, valueMap) {
     const dropdown = _createBoundDropdown(settings, key, displayOptions, valueMap, {label: title});
@@ -242,6 +256,14 @@ export function createSpinRow(title, settings, key, min = 0, max = 100, step = 1
     return row;
 }
 
+// For keys the schema already bounds, so a spin row cannot drift from it.
+// A key without a <range> unpacks to an empty pair and the spin row
+// defaults take over.
+function schemaRange(settings, key) {
+    const [, [min, max]] = settings.settings_schema.get_key(key).get_range().recursiveUnpack();
+    return {min, max};
+}
+
 export function createShapeGroup(settings, radiusKey, borderWidthKey) {
     const group = new Adw.PreferencesGroup({title: _('Shape')});
     group.add(createSpinRow(_('Corner Radius (px)'), settings, radiusKey, 0, MAX_BORDER_RADIUS_PX));
@@ -251,7 +273,7 @@ export function createShapeGroup(settings, radiusKey, borderWidthKey) {
 
 // Tab-style buttons for a two-or-three-way choice, where a dropdown would
 // hide the options behind a click.
-export function createSegmentedRow(title, subtitle, settings, key, displayOptions, values) {
+export function createSegmentedRow(title, subtitle, settings, key, displayOptions, values, {negate = null} = {}) {
     const group = new Adw.ToggleGroup({valign: Gtk.Align.CENTER});
     displayOptions.forEach((label, i) => group.add(new Adw.Toggle({label, name: values[i]})));
     group.update_property([Gtk.AccessibleProperty.LABEL], [title]);
@@ -262,16 +284,34 @@ export function createSegmentedRow(title, subtitle, settings, key, displayOption
         setValue: (w, value) => (w.active_name = value),
     });
 
-    return createActionRow(title, subtitle, {suffixWidgets: [group]});
+    const negateBtn = negate ? _createNegateButton(settings, negate, group, displayOptions) : null;
+
+    return createActionRow(title, subtitle, {suffixWidgets: [negateBtn, group].filter(Boolean)});
+}
+
+function _createNegateButton(settings, {key, iconName, tooltip}, group, displayOptions) {
+    const btn = createBoundToggleButton(settings, key, {iconName, tooltip});
+
+    const sync = () => {
+        const negated = settings.get_boolean(key);
+        displayOptions.forEach((label, i) => {
+            group.get_toggle(i).label = negated ? `-${label}` : label;
+        });
+    };
+    connectScoped(group, settings, `changed::${key}`, sync);
+    sync();
+
+    return btn;
 }
 
 export function createColorRow(title, settings, key, options = {}) {
     const row = new Adw.ActionRow({title});
-    const colorButton = createColorButton(settings, key, title, {accentKey: options.accentKey});
+    const colorButton = createColorButton(settings, key, title);
 
-    if (options.accentKey) {
-        settings.bind(options.accentKey, colorButton, 'sensitive',
-            Gio.SettingsBindFlags.GET | Gio.SettingsBindFlags.INVERT_BOOLEAN);
+    if (options.accentAware) {
+        const sync = () => (colorButton.sensitive = !usesAccent(settings.get_string(key)));
+        sync();
+        connectScoped(colorButton, settings, `changed::${key}`, sync);
     }
 
     // Adw rows pack add_suffix() left-to-right, so the paint-bucket goes in
@@ -310,15 +350,13 @@ export function createCustomStyleSwitchGroup(settings, key) {
     return group;
 }
 
-export function createSubpageRow(title, subtitle, window, SubpageClass, settings, {dependencyKey = null, prefixIcon = null} = {}) {
+export function createSubpageRow(title, subtitle, window, SubpageClass, settings, {prefixIcon = null} = {}) {
     const row = createActionRow(title, subtitle, {
         prefixWidget: prefixIcon ? new Gtk.Image({icon_name: prefixIcon}) : null,
         suffixIcon: NEXT_ICON_NAME,
         onActivate: () => pushSubpage(window, new SubpageClass(window, settings)),
     });
 
-    if (dependencyKey)
-        settings.bind(dependencyKey, row, 'sensitive', Gio.SettingsBindFlags.DEFAULT);
     return row;
 }
 
@@ -346,15 +384,17 @@ export function createIconPickerRow(title, settings, key, window, PickerClass, i
     return row;
 }
 
-export function createComplexActionRow(title, subtitle, settings, mainKey, displayOptions, values, window, AdvancedConfigClass, advancedConfigData, {flat = true} = {}) {
-    const gearBtn = createIconButton(GEAR_ICON_NAME, {
+export function createDialogGearButton(window, settings, DialogClass, dialogData, {flat = true, tooltip = _('Configure')} = {}) {
+    return createIconButton(GEAR_ICON_NAME, {
         flat,
-        tooltip_text: _('Configure advanced actions'),
-        callback: () => {
-            const widget = new AdvancedConfigClass(window, settings, advancedConfigData);
-            widget.present(window);
-        },
+        tooltip_text: tooltip,
+        callback: () => new DialogClass(window, settings, dialogData).present(window),
     });
+}
+
+export function createComplexActionRow(title, subtitle, settings, mainKey, displayOptions, values, window, AdvancedConfigClass, advancedConfigData, {flat = true} = {}) {
+    const gearBtn = createDialogGearButton(window, settings, AdvancedConfigClass, advancedConfigData,
+        {flat, tooltip: _('Configure advanced actions')});
 
     const dropdown = _createBoundDropdown(settings, mainKey, displayOptions, values,
         {flat, width: ACTION_DROPDOWN_WIDTH_PX, label: title});
@@ -366,10 +406,7 @@ export function createComplexActionRow(title, subtitle, settings, mainKey, displ
 // afterwards lands right of it. Built by hand to keep the gear left of the
 // control, the way the click rows sit.
 export function createComplexSwitchRow(title, subtitle, settings, key, window, DialogClass, dialogData, {gearFollowsSwitch = true} = {}) {
-    const gearBtn = createIconButton(GEAR_ICON_NAME, {
-        tooltip_text: _('Configure'),
-        callback: () => new DialogClass(window, settings, dialogData).present(window),
-    });
+    const gearBtn = createDialogGearButton(window, settings, DialogClass, dialogData);
     if (gearFollowsSwitch)
         settings.bind(key, gearBtn, 'sensitive', Gio.SettingsBindFlags.GET);
 
@@ -587,23 +624,48 @@ export function createIconColorRows(parent, settings, keyPrefix) {
 }
 
 export function createAccentColorRow(parent, settings, {title, key, hoverKey = null, variantTitle}) {
-    const accentKey = accentKeyFor(key);
-    const items = [{type: 'switch', title: _('Use Accent Color'), key: accentKey}];
+    const items = [{type: 'accent', title: _('Use Accent Color'), key}];
     if (hoverKey) {
-        const hoverAccentKey = accentKeyFor(hoverKey);
         items.push(
-            {type: 'switch', title: _('Use Accent Color on Hover'), key: hoverAccentKey},
-            {type: 'color', title: _('Hover'), key: hoverKey, hiddenByKey: hoverAccentKey});
+            {type: 'accent', title: _('Use Accent Color on Hover'), key: hoverKey},
+            {type: 'color', title: _('Hover'), key: hoverKey, hiddenWhenAccent: hoverKey});
     }
     return createColorRow(title, settings, key, {
         parent,
-        accentKey,
+        accentAware: true,
         variants: {title: variantTitle, items},
     });
 }
 
-function accentKeyFor(colorKey) {
-    return colorKey.replace(/color$/, 'use-accent-color');
+function createAccentSwitchRow(title, settings, colorKey) {
+    const row = new Adw.SwitchRow({title});
+    let syncing = false;
+    const sync = () => {
+        syncing = true;
+        row.active = usesAccent(settings.get_string(colorKey));
+        syncing = false;
+    };
+
+    row.connect('notify::active', () => {
+        if (syncing)
+            return;
+        const current = settings.get_string(colorKey);
+        if (row.active) {
+            settings.set_string(colorKey, accentValueKeeping(current));
+            return;
+        }
+        // Nothing to come back to when the accent was set by hand or by a
+        // migration that had no color to keep.
+        const previous = colorBehindAccent(current);
+        if (previous)
+            settings.set_string(colorKey, previous);
+        else
+            settings.reset(colorKey);
+    });
+
+    sync();
+    connectScoped(row, settings, `changed::${colorKey}`, sync);
+    return row;
 }
 
 // A bare Gtk.DropDown announces no row title to screen readers, so unlike
@@ -618,7 +680,7 @@ function _createBoundDropdown(settings, key, displayOptions, values, {flat = tru
     // The stylesheet has no flat variant for the dropdown node itself,
     // only the internal toggle button picks up button.flat styling.
     if (flat)
-        dropdown.get_first_child()?.add_css_class('flat');
+        dropdown.get_first_child().add_css_class('flat');
 
     if (label)
         dropdown.update_property([Gtk.AccessibleProperty.LABEL], [label]);

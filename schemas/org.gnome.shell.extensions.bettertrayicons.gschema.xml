@@ -156,26 +156,6 @@
             <summary>Background colour for tray icons on hover</summary>
         </key>
 
-        <key name="icon-use-accent-color" type="b">
-            <default>false</default>
-            <summary>Use the system accent colour for the tray icon foreground</summary>
-        </key>
-
-        <key name="icon-hover-use-accent-color" type="b">
-            <default>false</default>
-            <summary>Use the system accent colour for the tray icon foreground on hover</summary>
-        </key>
-
-        <key name="icon-background-use-accent-color" type="b">
-            <default>false</default>
-            <summary>Use the system accent colour for the tray icon background</summary>
-        </key>
-
-        <key name="icon-hover-background-use-accent-color" type="b">
-            <default>false</default>
-            <summary>Use the system accent colour for the tray icon background on hover</summary>
-        </key>
-
         <key name="icon-border-color" type="s">
             <default>'#ffffff'</default>
             <summary>Border colour for tray icons</summary>
@@ -184,16 +164,6 @@
         <key name="icon-hover-border-color" type="s">
             <default>'#ffffff'</default>
             <summary>Border colour for tray icons on hover</summary>
-        </key>
-
-        <key name="icon-border-use-accent-color" type="b">
-            <default>false</default>
-            <summary>Use the system accent colour for the tray icon border</summary>
-        </key>
-
-        <key name="icon-hover-border-use-accent-color" type="b">
-            <default>false</default>
-            <summary>Use the system accent colour for the tray icon border on hover</summary>
         </key>
 
         <key name="icon-border-radius" type="i">
@@ -212,20 +182,6 @@
             <range min="1"/>
             <default>20</default>
             <summary>Tray icon size in pixels</summary>
-        </key>
-
-        <key name="icon-padding-horizontal" type="i">
-            <range min="0"/>
-            <default>5</default>
-            <summary>Deprecated, replaced by icon-padding-{top,bottom,left,right}</summary>
-            <description>Kept only so a value a user set before the 2->4 key split can be migrated once on enable. Not read anywhere else.</description>
-        </key>
-
-        <key name="icon-padding-vertical" type="i">
-            <range min="0"/>
-            <default>5</default>
-            <summary>Deprecated, replaced by icon-padding-{top,bottom,left,right}</summary>
-            <description>Kept only so a value a user set before the 2->4 key split can be migrated once on enable. Not read anywhere else.</description>
         </key>
 
         <key name="icon-padding-top" type="i">
@@ -342,26 +298,6 @@
             <summary>Background colour for the toggle button on hover</summary>
         </key>
 
-        <key name="toggle-icon-use-accent-color" type="b">
-            <default>false</default>
-            <summary>Use the system accent colour for the toggle button foreground</summary>
-        </key>
-
-        <key name="toggle-icon-hover-use-accent-color" type="b">
-            <default>false</default>
-            <summary>Use the system accent colour for the toggle button foreground on hover</summary>
-        </key>
-
-        <key name="toggle-icon-background-use-accent-color" type="b">
-            <default>false</default>
-            <summary>Use the system accent colour for the toggle button background</summary>
-        </key>
-
-        <key name="toggle-icon-hover-background-use-accent-color" type="b">
-            <default>false</default>
-            <summary>Use the system accent colour for the toggle button background on hover</summary>
-        </key>
-
         <key name="toggle-icon-border-color" type="s">
             <default>'#ffffff'</default>
             <summary>Border colour for the toggle button</summary>
@@ -370,16 +306,6 @@
         <key name="toggle-icon-hover-border-color" type="s">
             <default>'#ffffff'</default>
             <summary>Border colour for the toggle button on hover</summary>
-        </key>
-
-        <key name="toggle-icon-border-use-accent-color" type="b">
-            <default>false</default>
-            <summary>Use the system accent colour for the toggle button border</summary>
-        </key>
-
-        <key name="toggle-icon-hover-border-use-accent-color" type="b">
-            <default>false</default>
-            <summary>Use the system accent colour for the toggle button border on hover</summary>
         </key>
 
         <key name="toggle-icon-border-radius" type="i">
@@ -448,19 +374,9 @@
             <summary>Background colour for the overflow popup</summary>
         </key>
 
-        <key name="overflow-container-background-use-accent-color" type="b">
-            <default>false</default>
-            <summary>Use the system accent colour for the overflow popup background</summary>
-        </key>
-
         <key name="overflow-container-border-color" type="s">
             <default>'#ffffff'</default>
             <summary>Border colour for the overflow popup</summary>
-        </key>
-
-        <key name="overflow-container-border-use-accent-color" type="b">
-            <default>false</default>
-            <summary>Use the system accent colour for the overflow popup border</summary>
         </key>
 
         <key name="overflow-container-border-radius" type="i">
@@ -673,4 +589,97 @@
         </key>
 
     </schema>
+
+    <!-- Read once by the migrations in extension.js and then never again.
+         Same dconf path as the schema above, so the values a previous
+         version wrote are still reachable after their keys moved out of
+         it. Drop this block once no supported upgrade path needs it. -->
+    <schema id="org.gnome.shell.extensions.bettertrayicons.legacy" path="/org/gnome/shell/extensions/bettertrayicons/">
+
+        <key name="icon-use-accent-color" type="b">
+            <default>false</default>
+            <summary>Use the system accent colour for the tray icon foreground</summary>
+        </key>
+
+        <key name="icon-hover-use-accent-color" type="b">
+            <default>false</default>
+            <summary>Use the system accent colour for the tray icon foreground on hover</summary>
+        </key>
+
+        <key name="icon-background-use-accent-color" type="b">
+            <default>false</default>
+            <summary>Use the system accent colour for the tray icon background</summary>
+        </key>
+
+        <key name="icon-hover-background-use-accent-color" type="b">
+            <default>false</default>
+            <summary>Use the system accent colour for the tray icon background on hover</summary>
+        </key>
+
+        <key name="icon-border-use-accent-color" type="b">
+            <default>false</default>
+            <summary>Use the system accent colour for the tray icon border</summary>
+        </key>
+
+        <key name="icon-hover-border-use-accent-color" type="b">
+            <default>false</default>
+            <summary>Use the system accent colour for the tray icon border on hover</summary>
+        </key>
+
+        <key name="icon-padding-horizontal" type="i">
+            <range min="0"/>
+            <default>5</default>
+            <summary>Deprecated, replaced by icon-padding-{top,bottom,left,right}</summary>
+            <description>Kept only so a value a user set before the 2->4 key split can be migrated once on enable. Not read anywhere else.</description>
+        </key>
+
+        <key name="icon-padding-vertical" type="i">
+            <range min="0"/>
+            <default>5</default>
+            <summary>Deprecated, replaced by icon-padding-{top,bottom,left,right}</summary>
+            <description>Kept only so a value a user set before the 2->4 key split can be migrated once on enable. Not read anywhere else.</description>
+        </key>
+
+        <key name="toggle-icon-use-accent-color" type="b">
+            <default>false</default>
+            <summary>Use the system accent colour for the toggle button foreground</summary>
+        </key>
+
+        <key name="toggle-icon-hover-use-accent-color" type="b">
+            <default>false</default>
+            <summary>Use the system accent colour for the toggle button foreground on hover</summary>
+        </key>
+
+        <key name="toggle-icon-background-use-accent-color" type="b">
+            <default>false</default>
+            <summary>Use the system accent colour for the toggle button background</summary>
+        </key>
+
+        <key name="toggle-icon-hover-background-use-accent-color" type="b">
+            <default>false</default>
+            <summary>Use the system accent colour for the toggle button background on hover</summary>
+        </key>
+
+        <key name="toggle-icon-border-use-accent-color" type="b">
+            <default>false</default>
+            <summary>Use the system accent colour for the toggle button border</summary>
+        </key>
+
+        <key name="toggle-icon-hover-border-use-accent-color" type="b">
+            <default>false</default>
+            <summary>Use the system accent colour for the toggle button border on hover</summary>
+        </key>
+
+        <key name="overflow-container-background-use-accent-color" type="b">
+            <default>false</default>
+            <summary>Use the system accent colour for the overflow popup background</summary>
+        </key>
+
+        <key name="overflow-container-border-use-accent-color" type="b">
+            <default>false</default>
+            <summary>Use the system accent colour for the overflow popup border</summary>
+        </key>
+
+    </schema>
+
 </schemalist>
