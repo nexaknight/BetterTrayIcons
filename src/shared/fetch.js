@@ -1,4 +1,5 @@
 import Gio from 'gi://Gio';
+import GdkPixbuf from 'gi://GdkPixbuf';
 import GLib from 'gi://GLib';
 
 import {warn} from './logging.js';
@@ -22,6 +23,7 @@ promisify(Gio.File.prototype,
     'delete_async');
 promisify(Gio.FileEnumerator.prototype, 'next_files_async', 'close_async');
 promisify(Gio.OutputStream.prototype, 'splice_async');
+promisify(GdkPixbuf.Pixbuf, 'new_from_stream_async');
 
 export async function fetchJson(url, cancellable = null) {
     const bytes = await fetchBytes(url, cancellable);

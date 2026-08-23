@@ -1,17 +1,23 @@
 import Gio from 'gi://Gio';
+import GdkPixbuf from 'gi://GdkPixbuf';
 import GLib from 'gi://GLib';
 import St from 'gi://St';
 import Clutter from 'gi://Clutter';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
 import {warn} from '../../shared/logging.js';
-import {clearIds, debounceTo, removeTimer} from '../../shared/lifecycle.js';
+import {isCancelledError} from '../../shared/fetch.js';
+import {clearIds, debounceTo, disposeAll, removeTimer} from '../../shared/lifecycle.js';
 import {loadInterfaceXML} from '../utils/dbus.js';
-import {isDisposed, stageScaleFactor} from '../utils/actor.js';
+import {isDisposed, stageScaleFactor, trackDisposal} from '../utils/actor.js';
 
 const GEOMETRY_SETTLE_MS = 50;
 
 const DBUS_MENU_YIELD_EVERY_N_ITEMS = 20;
+
+const MENU_ICON_SIZE = 16;
+
+const ICON_DATA_TYPE = new GLib.VariantType('ay');
 
 // Every icon builds its own client, but the XML read and wrapper generation
 // are identical, so generate the proxy class once per process.
@@ -27,14 +33,13 @@ export class DBusMenuClient {
         this.onCloseMenu = onCloseMenu;
         this._closeTimeoutId = 0;
         this._pendingYieldIds = new Set();
+        this._cancellable = new Gio.Cancellable();
     }
 
     init() {
-        // The path comes from the item's Menu property, so a peer can put
-        // anything there. Measured: the proxy still constructs and its callback
-        // still reports success, it just logs a GLib assertion per signal
-        // subscription and answers nothing afterwards. Failing here instead
-        // sends the caller to the app's own ContextMenu right away.
+        // The path comes from the item, so it can be junk. A junk path still
+        // builds a proxy, it just logs GLib assertions and never answers, so
+        // fail here and let the caller fall back to the app's ContextMenu.
         if (!GLib.Variant.is_object_path(this.objectPath))
             return Promise.reject(new Error(`Invalid menu object path: ${this.objectPath}`));
 
@@ -67,13 +72,13 @@ export class DBusMenuClient {
             return;
 
         const [, layout] = await this.proxy.GetLayoutAsync(0, -1, []);
-
-        if (!layout) {
-            warn(`DBusMenu (${this.busName}): Layout is null or invalid`);
+        if (!this._isLive(gnomeMenu))
             return;
-        }
 
         await this._parseNode(layout, gnomeMenu);
+        if (!this._isLive(gnomeMenu))
+            return;
+
         this._pinMenuWidth(gnomeMenu);
     }
 
@@ -106,11 +111,13 @@ export class DBusMenuClient {
         const label = String(getProp('label', '')).replace(/_/g, '');
         const type = String(getProp('type', 'standard'));
         const enabled = getProp('enabled', true);
-        // Same reason label and type go through String() above, except a
-        // coerced icon name would only resolve to nothing anyway: St.Icon
-        // throws on a non-string, and that throw costs the whole menu.
+        // A non-string icon_name takes the whole shell down and no try/catch
+        // stops it. Coercing is no help, the name would resolve to nothing.
         const rawIconName = getProp('icon-name', null);
         const iconName = typeof rawIconName === 'string' ? rawIconName : null;
+        // Qt apps send raw bytes instead of a name. Kept packed, deep_unpack
+        // would copy the whole image into a JS array first.
+        const iconData = iconName ? null : this._iconDataVariant(props['icon-data']);
         const toggleType = getProp('toggle-type', '');
         const toggleState = getProp('toggle-state', 0);
 
@@ -120,17 +127,14 @@ export class DBusMenuClient {
             item = new PopupMenu.PopupSeparatorMenuItem();
             parent.addMenuItem(item);
         } else {
-            const hasChildren = children && children.length > 0;
+            // The property alone counts, a subtree can still arrive empty here.
+            const isSubmenu = getProp('children-display', '') === 'submenu' || children.length > 0;
 
-            if (hasChildren) {
+            if (isSubmenu) {
                 item = new PopupMenu.PopupSubMenuMenuItem(label);
-
-                // The shell refuses to open an empty submenu, so the items
-                // have to exist before the first click can expand it.
-                await this._parseChildren(children, item.menu);
-
                 item.menu.connect('open-state-changed',
                     (menu, isOpen) => this._onSubMenuToggled(id, menu, isOpen));
+                this._holdOpenLookDuringCollapse(item);
             } else {
                 item = new PopupMenu.PopupMenuItem(label);
 
@@ -138,31 +142,62 @@ export class DBusMenuClient {
                     item.setOrnament(toggleState === 1 ? PopupMenu.Ornament.CHECK : PopupMenu.Ornament.NONE);
             }
 
-            if (iconName && !(item instanceof PopupMenu.PopupSubMenuMenuItem)) {
-                const icon = new St.Icon({
-                    icon_name: iconName,
+            if ((iconName || iconData) && !isSubmenu) {
+                // Tracked because the decode below can outlive a menu rebuild.
+                const icon = trackDisposal(new St.Icon({
                     style_class: 'popup-menu-icon',
-                    icon_size: 16,
-                });
+                    icon_size: MENU_ICON_SIZE,
+                }));
                 item.insert_child_at_index(icon, 1);
+
+                if (iconName)
+                    icon.icon_name = iconName;
+                else
+                    this._applyIconData(icon, iconData);
             }
 
             item.setSensitive(enabled);
 
-            if (enabled && !hasChildren) {
+            if (enabled && !isSubmenu) {
                 item.connect('activate', () => {
                     this._onItemClicked(id, parent);
                 });
             }
 
             parent.addMenuItem(item);
+
+            // The shell won't open an empty submenu, so fill it before the
+            // first click. Parented first, the alive checks go via the top menu.
+            if (isSubmenu) {
+                if (children.length > 0)
+                    await this._parseChildren(children, item.menu);
+                else
+                    await this._loadSubMenu(id, item.menu);
+            }
+        }
+    }
+
+    _iconDataVariant(value) {
+        return value instanceof GLib.Variant && value.is_of_type(ICON_DATA_TYPE) && value.n_children()
+            ? value : null;
+    }
+
+    // Arbitrary image bytes from the app, so decode off the main loop and
+    // leave the icon empty if they turn out to be garbage.
+    async _applyIconData(icon, iconData) {
+        const stream = Gio.MemoryInputStream.new_from_bytes(iconData.get_data_as_bytes());
+
+        try {
+            const pixbuf = await GdkPixbuf.Pixbuf.new_from_stream_async(stream, this._cancellable);
+            if (!isDisposed(icon))
+                icon.gicon = pixbuf;
+        } catch (e) {
+            if (!isCancelledError(e))
+                warn(`DBusMenu icon-data decode failed: ${e.message}`);
         }
     }
 
     async _parseChildren(children, parent) {
-        if (!children || children.length === 0)
-            return;
-
         // Yield to the main loop every N items so a large menu does not
         // freeze the UI while it builds.
         /* eslint-disable no-await-in-loop */
@@ -170,8 +205,20 @@ export class DBusMenuClient {
             await this._parseNode(children[i], parent);
             if (i > 0 && i % DBUS_MENU_YIELD_EVERY_N_ITEMS === 0)
                 await this._yieldToMainLoop();
+            if (!this._isLive(parent))
+                return;
         }
         /* eslint-enable no-await-in-loop */
+    }
+
+    // The shell drops `checked` when the collapse starts, so the item snaps
+    // round while the submenu is still shrinking under it.
+    _holdOpenLookDuringCollapse(item) {
+        item.menu.connect('open-state-changed', (menu, isOpen) => {
+            if (!isOpen)
+                item.add_style_pseudo_class('checked');
+        });
+        item.menu.actor.connect('hide', () => item.remove_style_pseudo_class('checked'));
     }
 
     _onSubMenuToggled(id, submenu, isOpen) {
@@ -190,20 +237,34 @@ export class DBusMenuClient {
         if (!this.proxy)
             return;
 
-        const [needUpdate] = await this.proxy.AboutToShowAsync(id);
-        if (!needUpdate || !this.proxy)
+        await this._loadSubMenu(id, submenu);
+        if (!this._isLive(submenu))
             return;
 
-        const [, layout] = await this.proxy.GetLayoutAsync(id, -1, []);
-        const node = this._unpackNode(layout);
+        this._pinMenuWidth(submenu._getTopMenu());
+    }
 
-        // The menu can be torn down while the calls are in flight.
-        if (!node || !this.proxy || isDisposed(submenu.actor))
+    // AboutToShow's reply is ignored on purpose, Nextcloud answers false
+    // right after filling the subtree.
+    async _loadSubMenu(id, submenu) {
+        try {
+            await this.proxy.AboutToShowAsync(id);
+        } catch { /* optional like the root call, GetLayout still answers */ }
+
+        if (!this.proxy)
+            return;
+
+        const [, [, , children]] = await this.proxy.GetLayoutAsync(id, -1, []);
+        if (!this._isLive(submenu))
             return;
 
         submenu.removeAll();
-        await this._parseChildren(node[2], submenu);
-        this._pinMenuWidth(submenu._getTopMenu());
+        await this._parseChildren(children, submenu);
+    }
+
+    // A call in flight can outlive the whole client, or just the menu.
+    _isLive(menu) {
+        return this.proxy !== null && !isDisposed(menu._getTopMenu().actor);
     }
 
     // Submenus sit collapsed inside the menu box, so opening one would widen
@@ -273,6 +334,7 @@ export class DBusMenuClient {
     }
 
     destroy() {
+        disposeAll(this, 'cancel', '_cancellable');
         clearIds(this, removeTimer, '_closeTimeoutId');
         for (const id of this._pendingYieldIds)
             GLib.source_remove(id);
