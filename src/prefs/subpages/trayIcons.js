@@ -11,6 +11,7 @@ import {
     createCustomStyleSwitchGroup,
     createShapeGroup,
     createSpacingGroup,
+    createColorSetRow,
 } from '../widgets/rows.js';
 import {createPreviewGroup, buildTrayPreview} from '../widgets/preview.js';
 import {spacingLinkKey} from '../widgets/gtkHelpers.js';
@@ -57,6 +58,7 @@ export default class TrayIconsSubpage extends Adw.NavigationPage {
         page.add(createPreviewGroup(this._settings, {
             watch: TRAY_ICON_STYLE_KEYS,
             render: buildTrayPreview,
+            splitKey: 'icon-color-split',
         }));
 
         const groupIcons = new Adw.PreferencesGroup({title: _('Icons')});
@@ -68,6 +70,7 @@ export default class TrayIconsSubpage extends Adw.NavigationPage {
         page.add(createCustomStyleSwitchGroup(this._settings, 'enable-custom-icon-style'));
 
         const groupColor = new Adw.PreferencesGroup({title: _('Colors')});
+        groupColor.add(createColorSetRow(this._settings, 'icon-color-split'));
         createIconColorRows(this._window, this._settings, 'icon-').forEach(r => groupColor.add(r));
         page.add(groupColor);
 

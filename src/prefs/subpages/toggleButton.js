@@ -18,12 +18,14 @@ import {
     createShapeGroup,
     createExpanderSection,
     createDialogGearButton,
+    createColorSetRow,
 } from '../widgets/rows.js';
 import {createPreviewGroup, buildTogglePreview} from '../widgets/preview.js';
 import IconPickerDialog from '../dialogs/iconPicker.js';
 import ConfigDialog from '../dialogs/configDialog.js';
 import {spacingLinkKey} from '../widgets/gtkHelpers.js';
 import {TRAY_ICON_STYLE_KEYS} from './trayIcons.js';
+import {withLightTwins} from '../../shared/colorVariant.js';
 
 export const TOGGLE_STYLE_KEYS = Object.freeze([
     'toggle-position',
@@ -44,20 +46,17 @@ export const TOGGLE_STYLE_KEYS = Object.freeze([
     'toggle-margin-bottom',
     'toggle-margin-left',
     'toggle-margin-right',
-    'toggle-icon-color',
-    'toggle-icon-hover-color',
-    'toggle-icon-background-color',
-    'toggle-icon-hover-background-color',
-    'toggle-icon-border-color',
-    'toggle-icon-hover-border-color',
-    'toggle-icon-use-accent-color',
-    'toggle-icon-hover-use-accent-color',
-    'toggle-icon-background-use-accent-color',
-    'toggle-icon-hover-background-use-accent-color',
-    'toggle-icon-border-use-accent-color',
-    'toggle-icon-hover-border-use-accent-color',
+    ...withLightTwins([
+        'toggle-icon-color',
+        'toggle-icon-hover-color',
+        'toggle-icon-background-color',
+        'toggle-icon-hover-background-color',
+        'toggle-icon-border-color',
+        'toggle-icon-hover-border-color',
+    ]),
     'toggle-icon-border-radius',
     'toggle-icon-border-width',
+    'toggle-icon-color-split',
     'enable-custom-toggle-style',
     'toggle-inherit-icon-style',
     spacingLinkKey('toggle-padding'),
@@ -124,6 +123,7 @@ export default class ToggleButtonSubpage extends Adw.NavigationPage {
         page.add(createPreviewGroup(this._settings, {
             watch: [...TOGGLE_STYLE_KEYS, ...TRAY_ICON_STYLE_KEYS],
             render: buildTogglePreview,
+            splitKey: 'toggle-icon-color-split',
         }));
 
         this._buildIconGroup(page);
@@ -244,6 +244,7 @@ export default class ToggleButtonSubpage extends Adw.NavigationPage {
         page.add(inheritGroup);
 
         const colorsGroup = new Adw.PreferencesGroup({title: _('Colors')});
+        colorsGroup.add(createColorSetRow(this._settings, 'toggle-icon-color-split'));
         createIconColorRows(this._window, this._settings, 'toggle-icon-').forEach(r => colorsGroup.add(r));
         page.add(colorsGroup);
 

@@ -4,9 +4,10 @@ import Adw from 'gi://Adw';
 import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
 import {connectScoped} from '../../shared/lifecycle.js';
-import {ensurePrefsCss, clearChildren} from './gtkHelpers.js';
+import {ensurePrefsCss, clearChildren, editedColorKey, editsLightSet} from './gtkHelpers.js';
 import {boxGeometryCss, borderShorthand} from '../../shared/boxStyle.js';
 import {usesAccent} from '../../shared/accentColor.js';
+import {COLOR_VARIANT_KEY} from '../../shared/colorVariant.js';
 import {
     DEFAULT_PILL_RADIUS_PX, DEFAULT_ICON_PADDING_PX, ICON_MARGIN_PX, ITEM_SPACING_PX,
     PREVIEW_ELEMENT_SHADOW_CSS, PREVIEW_STOCK_POPUP_CSS,
@@ -27,10 +28,19 @@ const PREVIEW_SAMPLE_ICONS = Object.freeze([
 
 let _instanceSeq = 0;
 
+// The default backdrop is dark. Editing the Light set swaps in a light one,
+// so the colors are always seen against their own background.
+const PREVIEW_LIGHT_BACKDROP_CSS =
+    'background-image: linear-gradient(160deg, alpha(@accent_bg_color, 0.30), alpha(white, 0) 55%),' +
+    ' linear-gradient(160deg, #fdfdfe, #c6c6cf);' +
+    ' box-shadow: inset 0 1px 0 alpha(white, 0.8);';
+
+const PREVIEW_STOCK_POPUP_LIGHT_CSS =
+    `background-color: #fafafb; border-radius: 14px; padding: 8px; ${PREVIEW_ELEMENT_SHADOW_CSS}`;
 
 // Rebuilding on every watched change instead of diffing widgets keeps
 // the preview from ever drifting, the cost is a handful of images.
-export function createPreviewGroup(settings, {watch, render}) {
+export function createPreviewGroup(settings, {watch, render, splitKey}) {
     ensurePrefsCss();
     const group = new Adw.PreferencesGroup();
 
@@ -50,6 +60,7 @@ export function createPreviewGroup(settings, {watch, render}) {
 
     // Class names are display-global, every preview instance styles its own.
     const scopeClass = `bti-preview-${_instanceSeq++}`;
+    backdrop.add_css_class(scopeClass);
     const provider = new Gtk.CssProvider();
     const display = Gdk.Display.get_default();
     // Cleanup rides unrealize, not destroy: destroy waits on the GC in GJS
@@ -77,13 +88,17 @@ export function createPreviewGroup(settings, {watch, render}) {
         widget.hexpand = true;
         clearChildren(backdrop);
         backdrop.append(widget);
-        provider.load_from_string(css);
+        const backdropCss = _editsLightFor(settings, splitKey)
+            ? ` .bti-preview-backdrop.${scopeClass} { ${PREVIEW_LIGHT_BACKDROP_CSS} }`
+            : '';
+        provider.load_from_string(css + backdropCss);
     };
 
     // The accent keys resolve through the system accent, which can change
     // while the page is open.
     connectScoped(group, Adw.StyleManager.get_default(), 'notify::accent-color', apply);
-    watch.forEach(key => connectScoped(group, settings, `changed::${key}`, apply));
+    [...watch, COLOR_VARIANT_KEY]
+        .forEach(key => connectScoped(group, settings, `changed::${key}`, apply));
     apply();
 
     return group;
@@ -159,7 +174,7 @@ function _createSampleIcon(iconName, size, scopeClass) {
 // accent turns into a literal color here.
 function _trayIconCss(settings, scopeClass, {hover = false} = {}) {
     if (!settings.get_boolean('enable-custom-icon-style'))
-        return `.${scopeClass}-icon { ${_stockIconStyle()} margin: 0 ${ICON_MARGIN_PX}px; }`;
+        return `.${scopeClass}-icon { ${_stockIconStyle(settings, 'icon-color-split')} margin: 0 ${ICON_MARGIN_PX}px; }`;
     const base = `.${scopeClass}-icon { ${_customIconStyle(settings)} }`;
     return hover
         ? `${base} .${scopeClass}-icon:hover { ${_hoverStyle(settings, 'icon')} }`
@@ -189,11 +204,17 @@ function _toggleCss(settings, scopeClass) {
 
     // Stock mode styles the toggle like a stock tray chip, close enough to
     // the shell theme's panel-button for a preview.
-    return `${sel} { ${_stockIconStyle()} }`;
+    return `${sel} { ${_stockIconStyle(settings, 'toggle-icon-color-split')} }`;
 }
 
-function _stockIconStyle() {
-    return `padding: ${DEFAULT_ICON_PADDING_PX}px; border-radius: ${DEFAULT_PILL_RADIUS_PX}px; color: white;`;
+function _stockIconStyle(settings, splitKey) {
+    const color = _editsLightFor(settings, splitKey) ? '#222226' : 'white';
+    return `padding: ${DEFAULT_ICON_PADDING_PX}px; border-radius: ${DEFAULT_PILL_RADIUS_PX}px; color: ${color};`;
+}
+
+// Split off means one set only, and that one belongs to the dark chrome.
+function _editsLightFor(settings, splitKey) {
+    return settings.get_boolean(splitKey) && editsLightSet(settings);
 }
 
 function _customIconStyle(settings) {
@@ -211,8 +232,10 @@ function _hoverStyle(settings, prefix) {
 }
 
 function _popupCss(settings, scopeClass) {
-    if (!settings.get_boolean('enable-custom-overflow-style'))
-        return `.${scopeClass}-popup { ${PREVIEW_STOCK_POPUP_CSS} }`;
+    if (!settings.get_boolean('enable-custom-overflow-style')) {
+        const stock = _editsLightFor(settings, 'overflow-container-color-split') ? PREVIEW_STOCK_POPUP_LIGHT_CSS : PREVIEW_STOCK_POPUP_CSS;
+        return `.${scopeClass}-popup { ${stock} }`;
+    }
 
     const bg = _resolveColor(settings, 'overflow-container-background-color');
     return `.${scopeClass}-popup { ${boxGeometryCss(settings, {spacingPrefix: 'overflow-container'})}` +
@@ -238,7 +261,7 @@ function _backgroundStyle(bg) {
 }
 
 function _resolveColor(settings, colorKey) {
-    const value = settings.get_string(colorKey);
+    const value = settings.get_string(editedColorKey(settings, colorKey));
     return usesAccent(value)
         ? Adw.StyleManager.get_default().get_accent_color_rgba().to_string()
         : value;

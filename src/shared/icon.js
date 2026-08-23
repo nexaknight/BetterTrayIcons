@@ -4,6 +4,7 @@ import GLib from 'gi://GLib';
 import {warnOnce} from './logging.js';
 import {fileExists, readFileBytes, readFileText, probePaths} from './fetch.js';
 import {usesAccent} from './accentColor.js';
+import {colorKeyFor} from './colorVariant.js';
 
 // symbolic is the freedesktop convention, panel the Ubuntu/ayatana one.
 const MONO_ICON_SUFFIXES = Object.freeze(['-symbolic', '-panel']);
@@ -235,12 +236,12 @@ function _wantsTint(path, text) {
 // The color neutral parts take, matching a normal symbolic tray icon. The
 // accent has to come from the caller, since St resolves it from a theme node
 // and GTK from Adw, and a stale icon-color would win over it otherwise.
-export function symbolicTint(settings, accentColor = null) {
+export function symbolicTint(settings, {accent = null, light = false} = {}) {
     if (!settings.get_boolean('enable-custom-icon-style'))
         return '#ffffff';
-    const value = settings.get_string('icon-color');
-    if (accentColor && usesAccent(value))
-        return accentColor;
+    const value = settings.get_string(colorKeyFor(settings, 'icon-color', light));
+    if (accent && usesAccent(value))
+        return accent;
     return value;
 }
 

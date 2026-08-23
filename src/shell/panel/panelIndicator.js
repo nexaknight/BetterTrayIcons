@@ -7,7 +7,7 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
 import {getAppConfigMap, setAppPriorities, byPriorityThenAppId, publishVisibleOrder, clearVisibleOrder} from '../../shared/appConfig.js';
 import {clearIds, debounceTo, disconnectAll, disconnectSignal, disposeAll, removeTimer} from '../../shared/lifecycle.js';
-import {isDisposed, moveActorToIndex, trackDisposal} from '../utils/actor.js';
+import {connectColorSetChanges, isDisposed, moveActorToIndex, trackDisposal} from '../utils/actor.js';
 import {
     getDraggableFromSource,
     isPointInActor,
@@ -120,6 +120,8 @@ export const PanelIndicator = GObject.registerClass({GTypeName: 'BetterTrayIcons
                 if (STYLE_KEY_PREFIXES.some(prefix => key.startsWith(prefix)))
                     this._updateStyle();
             }));
+
+            this._colorSetWatch = connectColorSetChanges(this._settings, () => this._updateStyle());
 
             this._enableCustomStyle = false;
 
@@ -577,6 +579,7 @@ export const PanelIndicator = GObject.registerClass({GTypeName: 'BetterTrayIcons
             this._teardown();
             clearVisibleOrder();
             disconnectAll(this, this._settings, '_settingsSignals');
+            disposeAll(this, 'disconnect', '_colorSetWatch');
 
             this._menuRemovedForDrag = false;
 

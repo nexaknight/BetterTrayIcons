@@ -6,10 +6,11 @@ import Gtk from 'gi://Gtk';
 import Adw from 'gi://Adw';
 import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
-import {usesAccent, accentValueKeeping, colorBehindAccent} from '../../shared/accentColor.js';
+import {accentValueKeeping, colorBehindAccent} from '../../shared/accentColor.js';
+import {COLOR_VARIANT_KEY} from '../../shared/colorVariant.js';
 import {connectScoped} from '../../shared/lifecycle.js';
 import {resetKeys} from '../../shared/settingsIO.js';
-import {createColorButton, createIconButton, createLinkToggle, createBoundToggleButton, attachBadge, createBadge, applyPathIcon, ensurePrefsCss, spacingLinkKey} from './gtkHelpers.js';
+import {createColorButton, createIconButton, createLinkToggle, createBoundToggleButton, attachBadge, createBadge, applyPathIcon, ensurePrefsCss, spacingLinkKey, editedColorKey, editedColorUsesAccent, watchColorKey} from './gtkHelpers.js';
 import {createSidebarToggle, popSubpage, pushSubpage, addToast} from './sidebar.js';
 import {buildGroupDialog, buildDialogShell, showConfirmationDialog} from '../dialogs/dialogs.js';
 
@@ -110,9 +111,9 @@ function createConfigRow(settings, conf) {
 
     if (conf.hiddenWhenAccent) {
         const key = conf.hiddenWhenAccent;
-        const sync = () => (row.visible = !usesAccent(settings.get_string(key)));
+        const sync = () => (row.visible = !editedColorUsesAccent(settings, key));
         sync();
-        connectScoped(row, settings, `changed::${key}`, sync);
+        watchColorKey(row, settings, key, sync);
     }
 
     const visibleKeys = [conf.visibleByKey ?? []].flat();
@@ -315,9 +316,9 @@ export function createColorRow(title, settings, key, options = {}) {
     const colorButton = createColorButton(settings, key, title);
 
     if (options.accentAware) {
-        const sync = () => (colorButton.sensitive = !usesAccent(settings.get_string(key)));
+        const sync = () => (colorButton.sensitive = !editedColorUsesAccent(settings, key));
         sync();
-        connectScoped(colorButton, settings, `changed::${key}`, sync);
+        watchColorKey(colorButton, settings, key, sync);
     }
 
     // Adw rows pack add_suffix() left-to-right, so the paint-bucket goes in
@@ -621,6 +622,27 @@ function _createSideSpinButton(settings, key, label, accessibleLabel, {min, max,
     return cell;
 }
 
+export function createColorSetRow(settings, splitKey) {
+    const tabs = new Adw.ToggleGroup({valign: Gtk.Align.CENTER});
+    [[_('Dark'), 'dark'], [_('Light'), 'light']].forEach(([label, name]) => tabs.add(new Adw.Toggle({label, name})));
+    tabs.update_property([Gtk.AccessibleProperty.LABEL], [_('Color Set')]);
+    _bindSelectionToSetting(tabs, settings, COLOR_VARIANT_KEY, {
+        signal: 'notify::active-name',
+        getValue: w => w.active_name || null,
+        setValue: (w, value) => (w.active_name = value),
+    });
+
+    const split = new Gtk.Switch({valign: Gtk.Align.CENTER});
+    split.update_property([Gtk.AccessibleProperty.LABEL], [_('Separate colors for the light and dark style.')]);
+    settings.bind(splitKey, split, 'active', Gio.SettingsBindFlags.DEFAULT);
+    settings.bind(splitKey, tabs, 'visible', Gio.SettingsBindFlags.GET);
+
+    const row = createActionRow(_('Color Set'), _('Separate colors for the light and dark style.'),
+        {suffixWidgets: [tabs, split]});
+    row.activatable_widget = split;
+    return row;
+}
+
 export function createIconColorRows(parent, settings, keyPrefix) {
     return [
         {title: _('Icon'),       key: `${keyPrefix}color`,            hoverKey: `${keyPrefix}hover-color`,            variantTitle: _('Icon Color')},
@@ -648,29 +670,30 @@ function createAccentSwitchRow(title, settings, colorKey) {
     let syncing = false;
     const sync = () => {
         syncing = true;
-        row.active = usesAccent(settings.get_string(colorKey));
+        row.active = editedColorUsesAccent(settings, colorKey);
         syncing = false;
     };
 
     row.connect('notify::active', () => {
         if (syncing)
             return;
-        const current = settings.get_string(colorKey);
+        const edited = editedColorKey(settings, colorKey);
+        const current = settings.get_string(edited);
         if (row.active) {
-            settings.set_string(colorKey, accentValueKeeping(current));
+            settings.set_string(edited, accentValueKeeping(current));
             return;
         }
         // Nothing to come back to when the accent was set by hand or by a
         // migration that had no color to keep.
         const previous = colorBehindAccent(current);
         if (previous)
-            settings.set_string(colorKey, previous);
+            settings.set_string(edited, previous);
         else
-            settings.reset(colorKey);
+            settings.reset(edited);
     });
 
     sync();
-    connectScoped(row, settings, `changed::${colorKey}`, sync);
+    watchColorKey(row, settings, colorKey, sync);
     return row;
 }
 

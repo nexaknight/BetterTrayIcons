@@ -10,7 +10,7 @@ import {readFileBytes, fileExists} from '../../shared/fetch.js';
 import {warnOnce} from '../../shared/logging.js';
 import {getItemAddress, refreshPropertyOnProxy, refreshStringOnProxy, getProcessInfo} from './dbus.js';
 import {unreadBadge, unreadTargets} from './launcherEntries.js';
-import {stageScaleFactor} from './actor.js';
+import {sessionUsesLightStyle, stageScaleFactor} from './actor.js';
 import {pickAppId, pickDisplayTitle, legacyAppId, sanitizeAppId} from './appId.js';
 import {resolveItemId} from './itemSplit.js';
 
@@ -438,7 +438,7 @@ async function _tintedThemed(themed, settings, tint) {
 }
 
 function _tinted(path, settings, tint) {
-    return tintedSymbolicIcon(path, tint ?? symbolicTint(settings),
+    return tintedSymbolicIcon(path, tint ?? symbolicTint(settings, {light: sessionUsesLightStyle()}),
         {size: _deviceIconSize(settings)});
 }
 

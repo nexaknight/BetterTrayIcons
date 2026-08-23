@@ -100,6 +100,26 @@
             <summary>Enable custom styling for the toggle button</summary>
         </key>
 
+        <key name="color-variant-editing" type="s">
+            <default>'dark'</default>
+            <summary>Which colour set the preferences edit (dark or light)</summary>
+        </key>
+
+        <key name="icon-color-split" type="b">
+            <default>true</default>
+            <summary>Keep separate light and dark colour sets for tray icons</summary>
+        </key>
+
+        <key name="toggle-icon-color-split" type="b">
+            <default>true</default>
+            <summary>Keep separate light and dark colour sets for the toggle button</summary>
+        </key>
+
+        <key name="overflow-container-color-split" type="b">
+            <default>true</default>
+            <summary>Keep separate light and dark colour sets for the overflow popup</summary>
+        </key>
+
         <key name="toggle-inherit-icon-style" type="b">
             <default>false</default>
             <summary>Toggle button mirrors the tray icon style</summary>
@@ -164,6 +184,37 @@
         <key name="icon-hover-border-color" type="s">
             <default>'#ffffff'</default>
             <summary>Border colour for tray icons on hover</summary>
+        </key>
+
+        <!-- Light twins of the keys above, defaults from gnome-shell-light.css. -->
+        <key name="icon-color-light" type="s">
+            <default>'#222226'</default>
+            <summary>Foreground colour for tray icons in the light style</summary>
+        </key>
+
+        <key name="icon-hover-color-light" type="s">
+            <default>'#222226'</default>
+            <summary>Foreground colour for tray icons on hover in the light style</summary>
+        </key>
+
+        <key name="icon-background-color-light" type="s">
+            <default>'rgba(0,0,0,0)'</default>
+            <summary>Background colour for tray icons in the light style</summary>
+        </key>
+
+        <key name="icon-hover-background-color-light" type="s">
+            <default>'rgba(0, 0, 0, 0.1)'</default>
+            <summary>Background colour for tray icons on hover in the light style</summary>
+        </key>
+
+        <key name="icon-border-color-light" type="s">
+            <default>'#222226'</default>
+            <summary>Border colour for tray icons in the light style</summary>
+        </key>
+
+        <key name="icon-hover-border-color-light" type="s">
+            <default>'#222226'</default>
+            <summary>Border colour for tray icons on hover in the light style</summary>
         </key>
 
         <key name="icon-border-radius" type="i">
@@ -352,6 +403,36 @@
             <summary>Border colour for the toggle button on hover</summary>
         </key>
 
+        <key name="toggle-icon-color-light" type="s">
+            <default>'#222226'</default>
+            <summary>Foreground colour for the toggle button icon in the light style</summary>
+        </key>
+
+        <key name="toggle-icon-hover-color-light" type="s">
+            <default>'#222226'</default>
+            <summary>Foreground colour for the toggle button icon on hover in the light style</summary>
+        </key>
+
+        <key name="toggle-icon-background-color-light" type="s">
+            <default>'rgba(0,0,0,0)'</default>
+            <summary>Background colour for the toggle button in the light style</summary>
+        </key>
+
+        <key name="toggle-icon-hover-background-color-light" type="s">
+            <default>'rgba(0, 0, 0, 0.1)'</default>
+            <summary>Background colour for the toggle button on hover in the light style</summary>
+        </key>
+
+        <key name="toggle-icon-border-color-light" type="s">
+            <default>'#222226'</default>
+            <summary>Border colour for the toggle button in the light style</summary>
+        </key>
+
+        <key name="toggle-icon-hover-border-color-light" type="s">
+            <default>'#222226'</default>
+            <summary>Border colour for the toggle button on hover in the light style</summary>
+        </key>
+
         <key name="toggle-icon-border-radius" type="i">
             <range min="0"/>
             <default>50</default>
@@ -421,6 +502,16 @@
         <key name="overflow-container-border-color" type="s">
             <default>'#ffffff'</default>
             <summary>Border colour for the overflow popup</summary>
+        </key>
+
+        <key name="overflow-container-background-color-light" type="s">
+            <default>'#fafafb'</default>
+            <summary>Background colour for the overflow popup in the light style</summary>
+        </key>
+
+        <key name="overflow-container-border-color-light" type="s">
+            <default>'#e6e6eb'</default>
+            <summary>Border colour for the overflow popup in the light style</summary>
         </key>
 
         <key name="overflow-container-border-radius" type="i">

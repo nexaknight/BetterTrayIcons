@@ -6,6 +6,9 @@ import {safeMapFromParsed, getAppConfigMap, getSyncMeta, mergeAppConfigs, syncMe
 import {readFileBytes, readFileText, probePaths} from './fetch.js';
 import {BADGE_POSITIONS} from '../const.js';
 import {ACCENT_COLOR_VALUE, accentValueKeeping} from './accentColor.js';
+import {LIGHT_SUFFIX} from './colorVariant.js';
+
+const COLOR_KEY_PATTERN = new RegExp(`-color(${LIGHT_SUFFIX})?$`);
 
 // Colors feed inline set_style() strings, filter against CSS injection.
 const COLOR_LITERAL = '#[0-9a-f]{3,8}|rgba?\\(\\s*[\\d.,\\s]+\\s*\\)';
@@ -396,7 +399,7 @@ async function _writeCompressed(path, content) {
 
 
 function _isMalformedColor(key, val) {
-    return key.includes('color') && typeof val === 'string' && !COLOR_PATTERN.test(val);
+    return COLOR_KEY_PATTERN.test(key) && typeof val === 'string' && !COLOR_PATTERN.test(val);
 }
 
 function _collapseHome(value, homeDir) {

@@ -7,19 +7,17 @@ import {configuredIcon} from '../utils/icons.js';
 import {clearIds, disconnectSignal, disconnectAll, disposeAll, removeTimer, ruleDispatcher} from '../../shared/lifecycle.js';
 import {DRAG_SETTING_KEYS, setupIconDragSource, syncDragEnabled} from '../features/dragAndDrop.js';
 import {applyTitle, createTrayActor, syncTooltip} from '../features/tooltip.js';
-import {computeTrayIconStyle, applyPanelClasses, isDisposed, syncHoverStyle} from '../utils/actor.js';
+import {computeTrayIconStyle, applyPanelClasses, connectColorSetChanges, connectSurfaceChanges, isDisposed, surfaceUsesLightStyle, syncHoverStyle} from '../utils/actor.js';
 import {deriveAppMeta} from './wineIdentity.js';
 import {TRAY_STYLE_KEYS} from '../../const.js';
+import {withLightTwins} from '../../shared/colorVariant.js';
 
 // icon-size restyles through its own rule below, listing it here would run
 // _updateStyle twice per change. The foreground color keys are out per the
 // withColors rationale in _updateStyle.
 const XEMBED_EXCLUDED_STYLE_KEYS = new Set([
     'icon-size',
-    'icon-color',
-    'icon-hover-color',
-    'icon-use-accent-color',
-    'icon-hover-use-accent-color',
+    ...withLightTwins(['icon-color', 'icon-hover-color']),
 ]);
 
 const XEMBED_STYLE_KEYS = TRAY_STYLE_KEYS.filter(key => !XEMBED_EXCLUDED_STYLE_KEYS.has(key));
@@ -144,6 +142,8 @@ export class XEmbedTrayIcon {
         ];
 
         this._settingsSignals.push(this._settings.connect('changed', ruleDispatcher(rules)));
+        this._colorSetWatch = connectColorSetChanges(this._settings, () => this._updateStyle());
+        connectSurfaceChanges(this.actor, () => this._updateStyle());
     }
 
     _setupDrag() {
@@ -218,7 +218,8 @@ export class XEmbedTrayIcon {
         if (this._isDestroyed)
             return;
 
-        const {enableCustom, baseStyle, hoverStyle} = computeTrayIconStyle(this._settings, {withColors: false});
+        const {enableCustom, baseStyle, hoverStyle} = computeTrayIconStyle(this._settings,
+            {withColors: false, light: surfaceUsesLightStyle(this.actor, this._settings)});
         applyPanelClasses(this.actor, null, enableCustom);
 
         this.actor._baseStyle = baseStyle;
@@ -244,6 +245,7 @@ export class XEmbedTrayIcon {
         disposeAll(this, 'destroy', '_draggable', '_tooltip');
         clearIds(this, removeTimer, '_pendingClickId');
         disconnectAll(this, this._settings, '_settingsSignals');
+        disposeAll(this, 'disconnect', '_colorSetWatch');
         disconnectAll(this, this.actor, '_actorSignals');
         disconnectSignal(this, this._icon, '_sigIconDestroy');
 

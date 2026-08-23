@@ -2,6 +2,8 @@
 // shared module to own them, and ones outside contributors edit.
 // Everything else sits at the top of the module that uses it.
 
+import {withLightTwins} from './shared/colorVariant.js';
+
 export const ITEM_SPACING_PX = 6;
 
 export const ICON_MARGIN_PX = 1;
@@ -14,6 +16,15 @@ export const DEFAULT_PILL_RADIUS_PX = 50;
 export const TOUCH_BINDING = 'tap';
 
 export const BOX_SIDES = Object.freeze(['top', 'right', 'bottom', 'left']);
+
+const TRAY_COLOR_KEYS = Object.freeze([
+    'icon-color',
+    'icon-hover-color',
+    'icon-background-color',
+    'icon-hover-background-color',
+    'icon-border-color',
+    'icon-hover-border-color',
+]);
 
 // The shell restyles tray icons on these, the prefs reset and preview them.
 export const TRAY_STYLE_KEYS = Object.freeze([
@@ -29,12 +40,8 @@ export const TRAY_STYLE_KEYS = Object.freeze([
     'icon-margin-right',
     'icon-border-radius',
     'icon-border-width',
-    'icon-color',
-    'icon-hover-color',
-    'icon-background-color',
-    'icon-hover-background-color',
-    'icon-border-color',
-    'icon-hover-border-color',
+    'icon-color-split',
+    ...withLightTwins(TRAY_COLOR_KEYS),
 ]);
 
 // The badge_style vocabulary the shell renders and the prefs dialog writes.

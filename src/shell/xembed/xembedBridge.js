@@ -6,10 +6,12 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import {warn, error} from '../../shared/logging.js';
 import {isCancelledError} from '../../shared/fetch.js';
 import {getAppConfigMap} from '../../shared/appConfig.js';
-import {disconnectSignal, disconnectAll} from '../../shared/lifecycle.js';
+import {disconnectSignal, disconnectAll, disposeAll} from '../../shared/lifecycle.js';
 import {forwardDragStateToIndicator} from '../features/dragAndDrop.js';
 import {clearIdentityCaches} from './wineIdentity.js';
 import {XEmbedTrayIcon} from './xembedTrayIcon.js';
+import {connectColorSetChanges, popupUsesLightStyle} from '../utils/actor.js';
+import {colorKeyFor, withLightTwins} from '../../shared/colorVariant.js';
 
 // Matches the shell's .popup-menu-content background.
 const XEMBED_BG_FALLBACK_HEX = '#36363A';
@@ -23,6 +25,7 @@ export class XEmbedTrayBridge {
         this._pendingCreates = new Map();
         this._traySignals = [];
         this._bgSignalIds = [];
+        this._colorSetWatch = null;
         this._enableSignalId = 0;
         this._lastBgCss = null;
     }
@@ -70,11 +73,12 @@ export class XEmbedTrayBridge {
         // bgColor is baked into each XEmbed child at construct time, so the
         // TrayManager has to be rebuilt on a color change.
         this._bgSignalIds = [
-            this._settings.connect('changed::overflow-container-background-color',
-                () => this._rebuildIfBgColorChanged()),
-            this._settings.connect('changed::enable-custom-overflow-style',
-                () => this._rebuildIfBgColorChanged()),
-        ];
+            ...withLightTwins(['overflow-container-background-color']),
+            'enable-custom-overflow-style',
+        ].map(key => this._settings.connect(`changed::${key}`,
+            () => this._rebuildIfBgColorChanged()));
+        this._colorSetWatch = connectColorSetChanges(this._settings,
+            () => this._rebuildIfBgColorChanged());
         this._lastBgCss = this._preferredBgCss();
     }
 
@@ -96,7 +100,8 @@ export class XEmbedTrayBridge {
 
     _preferredBgCss() {
         if (this._settings.get_boolean('enable-custom-overflow-style')) {
-            const css = this._settings.get_string('overflow-container-background-color');
+            const css = this._settings.get_string(colorKeyFor(this._settings,
+                'overflow-container-background-color', popupUsesLightStyle(this._settings)));
             if (css.trim().length > 0)
                 return css;
         }
@@ -114,6 +119,7 @@ export class XEmbedTrayBridge {
         this._pendingCreates.clear();
 
         disconnectAll(this, this._settings, '_bgSignalIds');
+        disposeAll(this, 'disconnect', '_colorSetWatch');
 
         // Disconnect first. Otherwise wrapper teardown below triggers
         // tray-icon-removed events that we'd have to ignore.

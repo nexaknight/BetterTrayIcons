@@ -11,10 +11,12 @@ import {
     createSpacingGroup,
     createCustomStyleSwitchGroup,
     createShapeGroup,
+    createColorSetRow,
 } from '../widgets/rows.js';
 import {createCardButtonGroup, spacingLinkKey} from '../widgets/gtkHelpers.js';
 import {createPreviewGroup, buildLayoutThumbnail, buildOverflowPreview} from '../widgets/preview.js';
 import {TRAY_ICON_STYLE_KEYS} from './trayIcons.js';
+import {withLightTwins} from '../../shared/colorVariant.js';
 
 export const OVERFLOW_STYLE_KEYS = Object.freeze([
     'overflow-layout-mode',
@@ -27,12 +29,10 @@ export const OVERFLOW_STYLE_KEYS = Object.freeze([
     'overflow-container-margin-bottom',
     'overflow-container-margin-left',
     'overflow-container-margin-right',
-    'overflow-container-background-color',
-    'overflow-container-background-use-accent-color',
-    'overflow-container-border-color',
-    'overflow-container-border-use-accent-color',
+    ...withLightTwins(['overflow-container-background-color', 'overflow-container-border-color']),
     'overflow-container-border-radius',
     'overflow-container-border-width',
+    'overflow-container-color-split',
     'enable-custom-overflow-style',
     spacingLinkKey('overflow-container-padding'),
     spacingLinkKey('overflow-container-margin'),
@@ -63,6 +63,7 @@ export default class OverflowMenuSubpage extends Adw.NavigationPage {
         contentPage.add(createPreviewGroup(this._settings, {
             watch: [...OVERFLOW_STYLE_KEYS, ...TRAY_ICON_STYLE_KEYS],
             render: buildOverflowPreview,
+            splitKey: 'overflow-container-color-split',
         }));
 
         contentPage.add(createCardButtonGroup({
@@ -83,6 +84,7 @@ export default class OverflowMenuSubpage extends Adw.NavigationPage {
         contentPage.add(createCustomStyleSwitchGroup(this._settings, 'enable-custom-overflow-style'));
 
         const groupColor = new Adw.PreferencesGroup({title: _('Colors')});
+        groupColor.add(createColorSetRow(this._settings, 'overflow-container-color-split'));
         groupColor.add(createAccentColorRow(this._window, this._settings,
             {title: _('Background'), key: 'overflow-container-background-color', variantTitle: _('Background Color')}));
         groupColor.add(createAccentColorRow(this._window, this._settings,

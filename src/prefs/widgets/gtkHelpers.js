@@ -12,6 +12,7 @@ import {fileExists} from '../../shared/fetch.js';
 import {connectScoped, ruleDispatcher} from '../../shared/lifecycle.js';
 import {BOX_SIDES, PREVIEW_STOCK_POPUP_CSS} from '../../const.js';
 import {usesAccent} from '../../shared/accentColor.js';
+import {COLOR_VARIANT_KEY, colorKeyFor, lightTwin, splitKeyFor} from '../../shared/colorVariant.js';
 
 export function createLabel(text, cssClasses = [], options = {}) {
     const label = new Gtk.Label({
@@ -390,13 +391,30 @@ export function createColorSwatch(dialogTitle, {read, write, usingAccent = null}
     return {button, sync};
 }
 
+export function editedColorKey(settings, key) {
+    return colorKeyFor(settings, key, editsLightSet(settings));
+}
+
+export function editsLightSet(settings) {
+    return settings.get_string(COLOR_VARIANT_KEY) === 'light';
+}
+
+export function editedColorUsesAccent(settings, key) {
+    return usesAccent(settings.get_string(editedColorKey(settings, key)));
+}
+
+export function watchColorKey(owner, settings, key, sync) {
+    [key, lightTwin(key), COLOR_VARIANT_KEY, splitKeyFor(key)]
+        .forEach(watched => connectScoped(owner, settings, `changed::${watched}`, sync));
+}
+
 export function createColorButton(settings, key, dialogTitle = '') {
     const {button, sync} = createColorSwatch(dialogTitle, {
-        read: () => settings.get_string(key),
-        write: value => settings.set_string(key, value),
-        usingAccent: () => usesAccent(settings.get_string(key)),
+        read: () => settings.get_string(editedColorKey(settings, key)),
+        write: value => settings.set_string(editedColorKey(settings, key), value),
+        usingAccent: () => editedColorUsesAccent(settings, key),
     });
-    connectScoped(button, settings, `changed::${key}`, sync);
+    watchColorKey(button, settings, key, sync);
     return button;
 }
 
@@ -448,8 +466,10 @@ export function applyPathIcon(image, value, settings, options = {}) {
 
 // Adw resolves the accent on the prefs side, St does it from a theme node.
 export function prefsSymbolicTint(settings) {
-    return symbolicTint(settings,
-        Adw.StyleManager.get_default().get_accent_color_rgba().to_string());
+    return symbolicTint(settings, {
+        accent: Adw.StyleManager.get_default().get_accent_color_rgba().to_string(),
+        light: editsLightSet(settings),
+    });
 }
 
 // libadwaita's window_fg_color, measured off a realized widget. It is the

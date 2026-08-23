@@ -7,7 +7,7 @@ import {getItemAddress, refreshPropertyOnProxy, refreshStringOnProxy} from '../u
 import {identifyApp, resolveTrayIcon} from '../utils/icons.js';
 import {pickDisplayTitle} from '../utils/appId.js';
 import {forgetItem} from '../utils/itemSplit.js';
-import {attachStatusIcon, isDisposed, trackDisposal, createPanelMenu, menuAnchorFor, menuManagerFor, destroyMenuSafely, refreshTrayStyle, setBadgeContent, setIconContent, syncHoverStyle, POPUP_ANIMATION_NONE} from '../utils/actor.js';
+import {attachStatusIcon, connectColorSetChanges, connectSurfaceChanges, isDisposed, trackDisposal, createPanelMenu, menuAnchorFor, menuManagerFor, destroyMenuSafely, refreshTrayStyle, setBadgeContent, setIconContent, syncHoverStyle, POPUP_ANIMATION_NONE} from '../utils/actor.js';
 import {addUnreadListener, unreadTargets} from '../utils/launcherEntries.js';
 import {DBusMenuClient} from './dbusMenuClient.js';
 import {ClickController} from '../features/clickController.js';
@@ -183,6 +183,16 @@ export class TrayIcon {
             'changed',
             this._guarded(ruleDispatcher(rules))
         );
+
+        this._colorSetWatch = connectColorSetChanges(this._settings,
+            this._guarded(() => this._applyColorSet()));
+    }
+
+    // Symbolic icons carry the tint in their bytes, so a restyle alone
+    // would keep the old color.
+    _applyColorSet() {
+        refreshTrayStyle(this.actor, this._iconActor, this._settings);
+        this._queueUpdate();
     }
 
     _configChanged() {
@@ -244,6 +254,8 @@ export class TrayIcon {
         this._tooltip = tooltip;
 
         this._iconActor = attachStatusIcon(this.actor);
+
+        connectSurfaceChanges(this.actor, this._guarded(() => this._applyColorSet()));
 
         this.actor.connect('notify::hover', this._guarded(() => {
             syncHoverStyle(this.actor);
@@ -564,6 +576,7 @@ export class TrayIcon {
 
         disposeAll(this, 'destroy', '_draggable', '_clickController', '_tooltip');
         disconnectSignal(this, this._settings, '_settingsConnectId');
+        disposeAll(this, 'disconnect', '_colorSetWatch');
         clearIds(this, removeTimer, '_updateDeferId', '_titleDeferId', '_menuDropId');
 
         disconnectAll(this, this._proxy, '_proxySignals', 'disconnectSignal');

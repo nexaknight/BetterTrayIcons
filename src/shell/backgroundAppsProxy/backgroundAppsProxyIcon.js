@@ -6,7 +6,7 @@ import * as Util from 'resource:///org/gnome/shell/misc/util.js';
 import {warn} from '../../shared/logging.js';
 import {configRenderDelta, displayAppName, reseedIfForgotten, unreadBadgeEnabled, updateAppConfig} from '../../shared/appConfig.js';
 import {disconnectAll, disposeAll, ruleDispatcher} from '../../shared/lifecycle.js';
-import {attachStatusIcon, createPanelMenu, destroyMenuSafely, isDisposed, menuAnchorFor, menuManagerFor, refreshTrayStyle, setBadgeContent, setIconContent, syncHoverStyle, trackDisposal, POPUP_ANIMATION_NONE} from '../utils/actor.js';
+import {attachStatusIcon, connectColorSetChanges, connectSurfaceChanges, createPanelMenu, destroyMenuSafely, isDisposed, menuAnchorFor, menuManagerFor, refreshTrayStyle, setBadgeContent, setIconContent, syncHoverStyle, trackDisposal, POPUP_ANIMATION_NONE} from '../utils/actor.js';
 import {configuredIcon, themedIconContent} from '../utils/icons.js';
 import {addUnreadListener, unreadBadge, unreadTargets} from '../utils/launcherEntries.js';
 import {applyTitle, createTrayActor, syncTooltip} from '../features/tooltip.js';
@@ -128,6 +128,12 @@ export class BackgroundAppsProxyIcon {
             {match: key => key === 'icon-size', run: () => this._syncBadge()},
         ];
         this._settingsSignals.push(this._settings.connect('changed', ruleDispatcher(rules)));
+        const applyColorSet = () => {
+            if (!this._isDestroyed)
+                refreshTrayStyle(this.actor, this._iconActor, this._settings);
+        };
+        this._colorSetWatch = connectColorSetChanges(this._settings, applyColorSet);
+        connectSurfaceChanges(this.actor, applyColorSet);
     }
 
     // An app has no SecondaryActivate to answer, so 'secondary' resolves to
@@ -304,6 +310,7 @@ export class BackgroundAppsProxyIcon {
         disposeAll(this, 'destroy', '_draggable', '_tooltip');
         disconnectAll(this, this._settings, '_settingsSignals');
         disconnectAll(this, this.actor, '_actorSignals');
+        disposeAll(this, 'disconnect', '_colorSetWatch');
 
         this._destroyMenu();
 
