@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.1.2](https://github.com/nexaknight/BetterTrayIcons/compare/v3.1.1...v3.1.2) (2026-08-27)
+
+
+### Translations
+
+* Add Simplified Chinese translation ([#59](https://github.com/nexaknight/BetterTrayIcons/issues/59)) ([3ff3e33](https://github.com/nexaknight/BetterTrayIcons/commit/3ff3e33afa7d0a55f235a01467a5e99201117d45)), closes [#58](https://github.com/nexaknight/BetterTrayIcons/issues/58)
+
 ## [3.1.1](https://github.com/nexaknight/BetterTrayIcons/compare/v3.1.0...v3.1.1) (2026-08-19)
 
 
