@@ -1,0 +1,892 @@
+#
+# O2bmm xifangczy@gmail.com 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: BetterTrayIcons\n"
+"Report-Msgid-Bugs-To: https://github.com/nexaknight/BetterTrayIcons/issues\n"
+"POT-Creation-Date: 2026-08-27 04:41+0800\n"
+"PO-Revision-Date: 2026-08-27 04:41+0800\n"
+"Last-Translator: O2bmm\n"
+"Language-Team: Chinese (Simplified)\n"
+"Language: zh_CN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+msgid "Show"
+msgstr "显示"
+
+msgid "Quit"
+msgstr "退出"
+
+msgid "Open Overflow Menu"
+msgstr "打开溢出菜单"
+
+msgid "Open Settings"
+msgstr "打开设置"
+
+msgid "About"
+msgstr "关于"
+
+msgid "Help translate this extension."
+msgstr "帮助翻译此扩展。"
+
+msgid "Translate"
+msgstr "翻译"
+
+msgid "Information"
+msgstr "信息"
+
+msgid "Version"
+msgstr "版本"
+
+msgid "Open on GitHub"
+msgstr "在 GitHub 上打开"
+
+msgid "Source Code"
+msgstr "源代码"
+
+msgid "Changelog"
+msgstr "更新日志"
+
+msgid "Recent releases"
+msgstr "最近的发布版本"
+
+msgid "Sponsor"
+msgstr "赞助"
+
+msgid "Support development."
+msgstr "支持开发。"
+
+msgid "Contributors"
+msgstr "贡献者"
+
+msgid "Legal"
+msgstr "法律信息"
+
+msgid "License"
+msgstr "许可证"
+
+msgid "Provided \"as is\", without warranty. The authors are not liable for damages."
+msgstr "按“原样”提供，不附带任何保证。作者对可能造成的损失概不负责。"
+
+msgid "Powered by"
+msgstr "由以下项目驱动"
+
+msgid "No releases found."
+msgstr "未找到发布版本。"
+
+msgid "Failed to load changelog: "
+msgstr "加载更新日志失败："
+
+msgid "Load older releases"
+msgstr "加载更早的版本"
+
+msgid "Load"
+msgstr "加载"
+
+msgid "Loaded from GitHub"
+msgstr "已从 GitHub 加载"
+
+msgid "Contacts api.github.com on demand."
+msgstr "按需连接 api.github.com。"
+
+msgid "Loading…"
+msgstr "正在加载…"
+
+msgid "No contributors found"
+msgstr "未找到贡献者"
+
+msgid "commits"
+msgstr "次提交"
+
+msgid "Show more"
+msgstr "显示更多"
+
+msgid "Error loading data"
+msgstr "加载数据时出错"
+
+msgid "Actions"
+msgstr "操作"
+
+msgid "Left Click"
+msgstr "左键点击"
+
+msgid "Middle Click"
+msgstr "中键点击"
+
+msgid "Right Click"
+msgstr "右键点击"
+
+msgid "Activate"
+msgstr "激活"
+
+msgid "Open Menu"
+msgstr "打开菜单"
+
+msgid "None"
+msgstr "无"
+
+msgid "Reorder (drag & drop)"
+msgstr "排序（拖放）"
+
+msgid "Toggle Menu"
+msgstr "切换菜单"
+
+msgid "Cycle Icons"
+msgstr "轮换图标"
+
+msgid "Action Menu"
+msgstr "操作菜单"
+
+msgid "Tray Icon Clicks"
+msgstr "托盘图标点击"
+
+msgid "Open the gear for double-click and long-press."
+msgstr "点击齿轮图标可配置双击和长按。"
+
+msgid "Toggle Button Clicks"
+msgstr "切换按钮点击"
+
+msgid "Scroll"
+msgstr "滚动"
+
+msgid "Scroll direction picks which way the icons rotate"
+msgstr "滚动方向决定图标轮换的方向"
+
+msgid "Menu on Hover"
+msgstr "悬停时显示菜单"
+
+msgid "Which menu opens when you hover the toggle button"
+msgstr "悬停在切换按钮上时打开哪个菜单"
+
+msgid "Overflow Popup"
+msgstr "溢出弹出菜单"
+
+msgid "Advanced"
+msgstr "高级"
+
+msgid "Double Click"
+msgstr "双击"
+
+msgid "Long Press"
+msgstr "长按"
+
+msgid "Touch"
+msgstr "触摸"
+
+msgid "Tap"
+msgstr "点按"
+
+msgid "Double Tap"
+msgstr "双点按"
+
+msgid "Long Touch"
+msgstr "长触"
+
+msgid "Tap, double tap and long touch."
+msgstr "点按、双点按和长触。"
+
+msgid "Configure"
+msgstr "配置"
+
+msgid "Appearance"
+msgstr "外观"
+
+msgid "Elements"
+msgstr "元素"
+
+msgid "Tray Icons"
+msgstr "托盘图标"
+
+msgid "Size, padding, colors"
+msgstr "大小、内边距和颜色"
+
+msgid "Toggle Button"
+msgstr "切换按钮"
+
+msgid "Icon, position, colors"
+msgstr "图标、位置和颜色"
+
+msgid "Overflow Menu"
+msgstr "溢出菜单"
+
+msgid "Background, radius, spacing"
+msgstr "背景、圆角和间距"
+
+msgid "Applications"
+msgstr "应用程序"
+
+msgid "Detected Apps"
+msgstr "检测到的应用"
+
+msgid "Settings persist after the app closes."
+msgstr "应用关闭后设置仍会保留。"
+
+msgid "No apps detected"
+msgstr "未检测到应用"
+
+msgid "Run an app with a tray icon to see it here."
+msgstr "运行一个带托盘图标的应用，它就会显示在这里。"
+
+msgid "Proton"
+msgstr "Proton"
+
+msgid "Wine"
+msgstr "Wine"
+
+msgid "Hidden"
+msgstr "隐藏"
+
+msgid "Background App"
+msgstr "后台应用"
+
+msgid "Unknown App"
+msgstr "未知应用"
+
+msgid "ID"
+msgstr "ID"
+
+msgid "Clean Up"
+msgstr "清理"
+
+msgid "Clean Up Legacy IDs"
+msgstr "清理旧版 ID"
+
+msgid "Remove leftovers from earlier versions."
+msgstr "移除早期版本遗留的数据。"
+
+msgid "App forgotten"
+msgstr "已忘记该应用"
+
+msgid "Forget All Apps"
+msgstr "忘记所有应用"
+
+msgid "Reset All Apps"
+msgstr "重置所有应用"
+
+msgid "Forget all apps?"
+msgstr "忘记所有应用？"
+
+msgid "Deletes all stored settings for every detected app. Running apps are re-detected right away."
+msgstr "删除每个已检测应用的全部已保存设置。正在运行的应用会立即被重新检测到。"
+
+msgid "Forget All"
+msgstr "全部忘记"
+
+msgid "All apps forgotten"
+msgstr "已忘记所有应用"
+
+msgid "Reset all apps?"
+msgstr "重置所有应用？"
+
+msgid "Restores name, icon and status icons to defaults for every detected app. Their order is kept."
+msgstr "将每个已检测应用的名称、图标和状态图标恢复为默认值，排列顺序保持不变。"
+
+msgid "Reset All"
+msgstr "全部重置"
+
+msgid "All apps reset"
+msgstr "已重置所有应用"
+
+msgid "General"
+msgstr "通用"
+
+msgid "Behavior"
+msgstr "行为"
+
+msgid "Wine App Icons"
+msgstr "Wine 应用图标"
+
+msgid "Show icons from Wine and Proton apps."
+msgstr "显示来自 Wine 和 Proton 应用的图标。"
+
+msgid "Keep Overflow Menu Open"
+msgstr "保持溢出菜单开启"
+
+msgid "Stays open after icon clicks and context menus alike."
+msgstr "无论是点击图标还是使用右键菜单，菜单都保持开启。"
+
+msgid "Stay Open When a Click Has No Effect"
+msgstr "点击无响应时保持开启"
+
+msgid "Some apps never answer a click."
+msgstr "有些应用从不响应点击。"
+
+msgid "Hide Background Apps"
+msgstr "隐藏后台应用列表"
+
+msgid "Removes GNOME's own list of windowless apps from Quick Settings."
+msgstr "从快速设置中移除 GNOME 自带的无窗口应用列表。"
+
+msgid "Background Apps"
+msgstr "后台应用"
+
+msgid "Create Tray Icons for Background Apps"
+msgstr "为后台应用创建托盘图标"
+
+msgid "Adds a tray icon for windowless background apps that lack one of their own."
+msgstr "为没有自带托盘图标的无窗口后台应用添加一个托盘图标。"
+
+msgid "Show Tooltips"
+msgstr "显示工具提示"
+
+msgid "Show the app title on hover."
+msgstr "悬停时显示应用标题。"
+
+msgid "Tooltips"
+msgstr "工具提示"
+
+msgid "Position"
+msgstr "位置"
+
+msgid "Top"
+msgstr "顶部"
+
+msgid "Bottom"
+msgstr "底部"
+
+msgid "Delay (ms)"
+msgstr "延迟 (ms)"
+
+msgid "Placement"
+msgstr "放置位置"
+
+msgid "Panel Box"
+msgstr "面板区域"
+
+msgid "Which part of the panel holds the icons."
+msgstr "图标位于面板的哪个部分。"
+
+msgid "Left"
+msgstr "左侧"
+
+msgid "Center"
+msgstr "中间"
+
+msgid "Right"
+msgstr "右侧"
+
+msgid "Position in Box"
+msgstr "区域内位置"
+
+msgid "Order within the chosen box."
+msgstr "在所选区域内的排列顺序。"
+
+msgid "Visible Icons"
+msgstr "可见图标数"
+
+msgid "How many icons stay in the panel. Extra icons move to the overflow menu, and 0 moves them all."
+msgstr "面板上保留多少个图标。多余的图标会移入溢出菜单，设为 0 则全部移入。"
+
+msgid "Import"
+msgstr "导入"
+
+msgid "Export"
+msgstr "导出"
+
+msgid "Backup and Restore"
+msgstr "备份与还原"
+
+msgid "Save settings as JSON or load them back."
+msgstr "将设置保存为 JSON 文件或重新载入。"
+
+msgid "Cloud Sync"
+msgstr "云同步"
+
+msgid "Keep settings in sync via a shared file."
+msgstr "通过共享文件保持各设备的设置同步。"
+
+msgid "Danger Zone"
+msgstr "危险区域"
+
+msgid "Reset"
+msgstr "重置"
+
+msgid "Reset all settings?"
+msgstr "重置所有设置？"
+
+msgid "All settings will be restored to defaults and sync backups deleted. This cannot be undone."
+msgstr "所有设置将恢复为默认值，同步备份也会被删除。此操作无法撤销。"
+
+msgid "Factory Reset"
+msgstr "恢复出厂设置"
+
+msgid "Restore defaults and delete sync backups."
+msgstr "恢复默认设置并删除同步备份。"
+
+msgid "Import settings?"
+msgstr "导入设置？"
+
+msgid "Local settings will be overwritten."
+msgstr "本地设置将被覆盖。"
+
+msgid "JSON Files"
+msgstr "JSON 文件"
+
+msgid "Save"
+msgstr "保存"
+
+msgid "Open"
+msgstr "打开"
+
+msgid "Settings reset"
+msgstr "设置已重置"
+
+msgid "App Settings"
+msgstr "应用设置"
+
+msgid "Tray icons are drawn by the app itself via XEmbed, so a custom icon cannot be applied."
+msgstr "托盘图标由应用本身通过 XEmbed 绘制，因此无法替换为自定义图标。"
+
+msgid "Configuration"
+msgstr "配置"
+
+msgid "Name"
+msgstr "名称"
+
+msgid "Reset name"
+msgstr "重置名称"
+
+msgid "Hide Icon"
+msgstr "隐藏图标"
+
+msgid "Don’t show this icon in the tray."
+msgstr "不在托盘中显示此图标。"
+
+msgid "Forget"
+msgstr "忘记"
+
+msgid "Forget this app?"
+msgstr "忘记此应用？"
+
+msgid "Deletes all stored settings for this app."
+msgstr "删除此应用的全部已保存设置。"
+
+msgid "Forget App"
+msgstr "忘记应用"
+
+msgid "Hidden icons have no position."
+msgstr "隐藏的图标没有位置。"
+
+msgid "Position %1 of %2, counted from the left."
+msgstr "从左往右数第 %1 个位置（共 %2 个）。"
+
+msgid "Reset icon"
+msgstr "重置图标"
+
+msgid "Default app icon"
+msgstr "默认应用图标"
+
+msgid "Custom Icon"
+msgstr "自定义图标"
+
+msgid "Status Icons and Badges"
+msgstr "状态图标与角标"
+
+msgid "Unread badge and per-state icons."
+msgstr "未读角标以及针对不同状态的图标。"
+
+msgid "Experimental"
+msgstr "实验性功能"
+
+msgid "Badges"
+msgstr "角标"
+
+msgid "Shows the unread count when the app sends one."
+msgstr "当应用发送未读计数时予以显示。"
+
+msgid "Shows a badge on state changes, with the count when the app sends one."
+msgstr "在状态改变时显示角标；若应用发送了未读计数，则一并显示。"
+
+msgid "Background Color"
+msgstr "背景颜色"
+
+msgid "Text Color"
+msgstr "文字颜色"
+
+msgid "Status icons cannot work here: the app has no tray icon and never reports a status, its icon comes from its desktop entry."
+msgstr "此处无法使用状态图标：该应用既没有托盘图标也不会上报状态，其图标来自其 desktop 条目文件。"
+
+msgid "Define"
+msgstr "设定"
+
+msgid "Resting state updated."
+msgstr "静止状态已更新。"
+
+msgid "Resting State"
+msgstr "静止状态"
+
+msgid "Takes what the app shows right now as its calm look."
+msgstr "以应用当前显示的样子作为其平时静止时的外观。"
+
+msgid "Bottom Right"
+msgstr "右下"
+
+msgid "Bottom Left"
+msgstr "左下"
+
+msgid "Top Right"
+msgstr "右上"
+
+msgid "Top Left"
+msgstr "左上"
+
+msgid "Corner Radius (px)"
+msgstr "圆角半径 (px)"
+
+msgid "0 is square, high is round."
+msgstr "0 为直角，数值越大越圆润。"
+
+msgid "Size"
+msgstr "大小"
+
+msgid "0 uses the automatic size."
+msgstr "设为 0 时使用自动大小。"
+
+msgid "More colors"
+msgstr "更多颜色"
+
+msgid "Use Accent Color"
+msgstr "使用强调色"
+
+msgid "Add a state"
+msgstr "添加状态"
+
+msgid "Status Icons"
+msgstr "状态图标"
+
+msgid "Override the icon for app states like attention or sync."
+msgstr "覆盖应用处于需要关注或正在同步等状态时的图标。"
+
+msgid "State name, e.g. state-error"
+msgstr "状态名称，例如 state-error"
+
+msgid "Remove"
+msgstr "移除"
+
+msgid "Applies only when the app itself reports attention."
+msgstr "仅当应用自身报告需要关注时才会生效。"
+
+msgid "Automatic"
+msgstr "自动"
+
+msgid "Attention"
+msgstr "需要关注"
+
+msgid "Not seen yet"
+msgstr "尚未出现"
+
+msgid "This name is not allowed."
+msgstr "不允许使用该名称。"
+
+msgid "This state already exists."
+msgstr "该状态已存在。"
+
+msgid "Overflow Container"
+msgstr "溢出容器"
+
+msgid "Overflow Layout"
+msgstr "溢出布局"
+
+msgid "Row"
+msgstr "行"
+
+msgid "Grid"
+msgstr "网格"
+
+msgid "Grid Columns"
+msgstr "网格列数"
+
+msgid "Colors"
+msgstr "颜色"
+
+msgid "Background"
+msgstr "背景"
+
+msgid "Border"
+msgstr "边框"
+
+msgid "Border Color"
+msgstr "边框颜色"
+
+msgid "Icon"
+msgstr "图标"
+
+msgid "Size (px)"
+msgstr "大小 (px)"
+
+msgid "Side"
+msgstr "侧边"
+
+msgid "Relative to the tray icons."
+msgstr "相对于托盘图标的位置。"
+
+msgid "Inherit Style from Tray Icons"
+msgstr "继承托盘图标的样式"
+
+msgid "Match the look of tray icons; hides the controls below."
+msgstr "与托盘图标的外观保持一致；同时隐藏下方的相关选项。"
+
+msgid "Icons"
+msgstr "图标"
+
+msgid "Symbolic Icons"
+msgstr "符号图标"
+
+msgid "Use monochrome icons when available."
+msgstr "在可用时使用单色符号图标。"
+
+msgid "Icon Size (px)"
+msgstr "图标大小 (px)"
+
+msgid "Single clicks are briefly delayed while a double-click action is set, so the second click can be detected."
+msgstr "设置了双击动作后，单击会有短暂延迟，以便识别第二次点击。"
+
+msgid "Select Icon"
+msgstr "选择图标"
+
+msgid "Recommended"
+msgstr "推荐"
+
+msgid "All Icons"
+msgstr "所有图标"
+
+msgid "Search icons…"
+msgstr "搜索图标…"
+
+msgid "System Icons"
+msgstr "系统图标"
+
+msgid "Previous"
+msgstr "上一页"
+
+msgid "Next"
+msgstr "下一页"
+
+msgid "Custom"
+msgstr "自定义"
+
+msgid "Type a name or pick an SVG/PNG file."
+msgstr "输入名称，或选择 SVG/PNG 文件。"
+
+msgid "Icon name or path"
+msgstr "图标名称或路径"
+
+msgid "Choose file"
+msgstr "选择文件"
+
+msgid "Apply"
+msgstr "应用"
+
+msgid "No Icons Found"
+msgstr "未找到图标"
+
+msgid "Try a different search term."
+msgstr "请尝试其他搜索关键词。"
+
+msgid "Image Files"
+msgstr "图片文件"
+
+msgid "Select Image"
+msgstr "选择图片"
+
+msgid "Sync File"
+msgstr "同步文件"
+
+msgid "A shared JSON file on Nextcloud, a NAS, or another cloud folder."
+msgstr "位于 Nextcloud、NAS 或其他云文件夹中的共享 JSON 文件。"
+
+msgid "File"
+msgstr "文件"
+
+msgid "File is not valid JSON"
+msgstr "文件不是有效的 JSON"
+
+msgid "Last Sync"
+msgstr "上次同步"
+
+msgid "No file selected"
+msgstr "未选择文件"
+
+msgid "Checking…"
+msgstr "正在检查…"
+
+msgid "File not yet created"
+msgstr "文件尚未创建"
+
+msgid "Unknown"
+msgstr "未知"
+
+msgid "this device"
+msgstr "本设备"
+
+msgid "from"
+msgstr "来自"
+
+msgid "Auto-Sync"
+msgstr "自动同步"
+
+msgid "Enable"
+msgstr "启用"
+
+msgid "Push on change, pull on remote update."
+msgstr "有更改时推送，远程有更新时拉取。"
+
+msgid "Maximum Backups"
+msgstr "最大备份数"
+
+msgid "Set a file path first."
+msgstr "请先设置文件路径。"
+
+msgid "Watching for changes."
+msgstr "正在监视更改。"
+
+msgid "Waiting for the file."
+msgstr "正在等待文件出现。"
+
+msgid "Manual Sync"
+msgstr "手动同步"
+
+msgid "Push to File"
+msgstr "推送到文件"
+
+msgid "Push"
+msgstr "推送"
+
+msgid "Settings pushed"
+msgstr "设置已推送"
+
+msgid "Push failed"
+msgstr "推送失败"
+
+msgid "Pull from File"
+msgstr "从文件拉取"
+
+msgid "Pull"
+msgstr "拉取"
+
+msgid "Pull from file?"
+msgstr "从文件拉取？"
+
+msgid "App settings are merged; other settings are taken from the file."
+msgstr "应用设置将进行合并；其余设置以文件为准。"
+
+msgid "Settings pulled"
+msgstr "设置已拉取"
+
+msgid "Pull failed"
+msgstr "拉取失败"
+
+msgid "Backups"
+msgstr "备份"
+
+msgid "None available"
+msgstr "暂无可用备份"
+
+msgid "available"
+msgstr "个可用"
+
+msgid "Backup"
+msgstr "备份"
+
+msgid "Delete"
+msgstr "删除"
+
+msgid "Delete this backup?"
+msgstr "删除此备份？"
+
+msgid "The backup file will be permanently removed."
+msgstr "备份文件将被永久删除。"
+
+msgid "Backup deleted"
+msgstr "备份已删除"
+
+msgid "Delete failed"
+msgstr "删除失败"
+
+msgid "Restore"
+msgstr "还原"
+
+msgid "Restore this backup?"
+msgstr "还原此备份？"
+
+msgid "Backup restored"
+msgstr "备份已还原"
+
+msgid "Restore failed"
+msgstr "还原失败"
+
+msgid "Cancel"
+msgstr "取消"
+
+msgid "File Chooser"
+msgstr "文件选择器"
+
+msgid "Style"
+msgstr "样式"
+
+msgid "Unlink: edit each side on its own"
+msgstr "取消链接：单独调整每条边"
+
+msgid "Link: editing one side sets all four"
+msgstr "链接：调整一条边即同时应用到四条边"
+
+msgid "Hide Sidebar"
+msgstr "隐藏侧边栏"
+
+msgid "Show Sidebar"
+msgstr "显示侧边栏"
+
+msgid "Settings"
+msgstr "设置"
+
+msgid "Back"
+msgstr "返回"
+
+msgid "Reset these settings?"
+msgstr "重置这些设置？"
+
+msgid "All values of this page, including its dialogs and subpages, will be restored to their defaults."
+msgstr "此页面的全部设置值（包括其中的对话框和子页面）都将恢复为默认值。"
+
+msgid "All values on this page will be restored to their defaults."
+msgstr "此页面上的全部设置值都将恢复为默认值。"
+
+msgid "Shape"
+msgstr "形状"
+
+msgid "Border Width (px)"
+msgstr "边框宽度 (px)"
+
+msgid "Custom Style"
+msgstr "自定义样式"
+
+msgid "Reveal colors, padding and margin controls below."
+msgstr "在下方展开颜色、内边距和外边距等选项。"
+
+msgid "Configure advanced actions"
+msgstr "配置高级动作"
+
+msgid "Spacing"
+msgstr "间距"
+
+msgid "Margin"
+msgstr "外边距"
+
+msgid "Padding"
+msgstr "内边距"
+
+msgid "Icon Color"
+msgstr "图标颜色"
+
+msgid "Use Accent Color on Hover"
+msgstr "悬停时使用强调色"
+
+msgid "Hover"
+msgstr "悬停"
+
+msgid "Live Preview"
+msgstr "实时预览"
