@@ -232,13 +232,6 @@ export function computeTrayIconStyle(settings, {withColors = true} = {}) {
         const color = withColors ? ` color: ${accentAwareColor(settings, 'icon-color', 'icon-use-accent-color')};` : '';
         baseStyle = `padding: ${padding}; margin: ${margin}; border-radius: ${radius}px;${color} background-color: ${bg}; border: ${_borderShorthand(settings, 'icon-')}; box-shadow: none;`;
     } else {
-        // Stock mode hands the actor to the shell theme untouched: the
-        // panel-button class stays on and no inline style is written at all.
-        // St applies inline styles over theme rules even when those carry
-        // !important, so writing padding/border/box-shadow here would kill
-        // the theme's `#panel .panel-button` look and its :hover/:active
-        // fills. Spacing between icons is the theme's business too, exactly
-        // like the shell's own status buttons.
         baseStyle = '';
     }
 
