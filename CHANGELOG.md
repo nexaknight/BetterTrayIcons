@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.1.3](https://github.com/nexaknight/BetterTrayIcons/compare/v3.1.2...v3.1.3) (2026-09-01)
+
+
+### Bug Fixes
+
+* **style:** drop inline styles from tray icons in stock mode ([#61](https://github.com/nexaknight/BetterTrayIcons/issues/61)) ([38a909b](https://github.com/nexaknight/BetterTrayIcons/commit/38a909b1928dacabf9fab014deaecd60da2a9363))
+
 ## [3.1.2](https://github.com/nexaknight/BetterTrayIcons/compare/v3.1.1...v3.1.2) (2026-08-27)
 
 
