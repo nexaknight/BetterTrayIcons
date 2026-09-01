@@ -2,7 +2,7 @@
   "name": "Better Tray Icons",
   "description": "Brings tray icons back to the GNOME panel. Supports the StatusNotifierItem (SNI) and KStatusNotifierItem specs, so apps like Discord, Steam, Telegram, Signal and Nextcloud show up in the panel like they used to.\n\nA configurable number of icons stays inline, the rest are tucked away into an overflow popup behind a toggle button, in row or grid layout.\n\nEvery icon can be renamed, hidden, reordered or swapped out for a custom one on a per-app basis. Left, middle and right click, plus double-click and long-press, are independently bindable. Spacing, padding, radius, hover background and the toggle styling are all up to you.\n\nSettings can be exported, imported and synced across devices through a shared JSON file with automatic backups.\n\nWayland only, X11 sessions are not supported. Conflicts with other tray and AppIndicator extensions, so disable those before enabling this one.",
   "uuid": "BetterTrayIcons@nexaknight.com",
-  "version-name": "3.1.2",
+  "version-name": "3.1.3",
   "shell-version": [
     "49",
     "50"
