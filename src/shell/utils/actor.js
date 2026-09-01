@@ -232,16 +232,13 @@ export function computeTrayIconStyle(settings, {withColors = true} = {}) {
         const color = withColors ? ` color: ${accentAwareColor(settings, 'icon-color', 'icon-use-accent-color')};` : '';
         baseStyle = `padding: ${padding}; margin: ${margin}; border-radius: ${radius}px;${color} background-color: ${bg}; border: ${_borderShorthand(settings, 'icon-')}; box-shadow: none;`;
     } else {
-        // Stock mode ignores the padding/margin settings, both only take over
-        // once there's a custom shape for them to size or space out.
-        baseStyle = `padding: ${DEFAULT_ICON_PADDING_PX}px; margin: 0px ${ICON_MARGIN_PX}px; border-radius: ${DEFAULT_PILL_RADIUS_PX}px; border: 0px; box-shadow: none;`;
+        baseStyle = '';
     }
 
-    const hoverBg = enableCustom
-        ? accentAwareColor(settings, 'icon-hover-background-color', 'icon-hover-background-use-accent-color')
-        : DEFAULT_HOVER_BG_COLOR;
-    let hoverStyle = `${baseStyle} background-color: ${hoverBg};`;
+    let hoverStyle = '';
     if (enableCustom) {
+        const hoverBg = accentAwareColor(settings, 'icon-hover-background-color', 'icon-hover-background-use-accent-color');
+        hoverStyle = `${baseStyle} background-color: ${hoverBg};`;
         if (withColors) {
             const hoverColor = accentAwareColor(settings, 'icon-hover-color', 'icon-hover-use-accent-color');
             if (hoverColor)
