@@ -7,7 +7,7 @@ import {configuredIcon} from '../icons/iconResolver.js';
 import {clearIds, disconnectSignal, disconnectAll, disposeAll, removeTimer, ruleDispatcher} from '../../shared/lifecycle.js';
 import {DRAG_SETTING_KEYS, setupIconDragSource, syncDragEnabled} from '../features/dragAndDrop.js';
 import {applyTitle, createTrayActor, syncTooltip} from '../features/tooltip.js';
-import {applyPanelClasses, computeTrayIconStyle, connectColorSetChanges, surfaceUsesLightStyle, syncHoverStyle} from '../trayStyle.js';
+import {applyPanelClasses, connectColorSetChanges, syncHoverStyle, trayIconStyleFor} from '../trayStyle.js';
 import {connectSurfaceChanges} from '../actorPlacement.js';
 import {isDisposed} from '../disposal.js';
 import {deriveAppMeta} from './wineIdentity.js';
@@ -206,8 +206,7 @@ export class XEmbedTrayIcon {
         if (this._isDestroyed)
             return;
 
-        const {enableCustom, baseStyle, hoverStyle} = computeTrayIconStyle(this._settings,
-            {withColors: false, light: surfaceUsesLightStyle(this.actor, this._settings)});
+        const {enableCustom, baseStyle, hoverStyle} = trayIconStyleFor(this.actor, this._settings, {withColors: false});
         applyPanelClasses(this.actor, null, enableCustom);
 
         this.actor._baseStyle = baseStyle;

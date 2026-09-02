@@ -1,11 +1,22 @@
+import Cogl from 'gi://Cogl';
 import St from 'gi://St';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
+import {DEFAULT_PILL_RADIUS_PX, DEFAULT_ICON_PADDING_PX, ICON_MARGIN_PX} from '../const.js';
 import {usesAccent} from '../shared/accentColor.js';
-import {SPLIT_COLOR_KEYS, colorKeyFor} from '../shared/colorVariant.js';
+import {SPLIT_COLOR_KEYS, colorKeyFor, withLightTwins} from '../shared/colorVariant.js';
 import {boxGeometryCss, borderShorthand} from '../shared/boxStyle.js';
+import {THEME_FOREGROUND, THEME_HOVER_BACKGROUND, backgroundIsLight} from '../shared/colorContrast.js';
 
 const FALLBACK_ICON_COLOR = '#ffffff';
+
+// The theme's stock rules only match under #panel, so popup icons carry the
+// stock look inline. In the panel an inline style would override the theme's
+// own hover and active rules.
+const STOCK_POPUP_ICON_STYLE = `padding: ${DEFAULT_ICON_PADDING_PX}px; margin: 0px ${ICON_MARGIN_PX}px; ` +
+    `border-radius: ${DEFAULT_PILL_RADIUS_PX}px; border: 0px; box-shadow: none;`;
+
+const COGL_CHANNEL_MAX = 255;
 
 export const ST_ACCENT_COLOR = '-st-accent-color';
 
@@ -24,14 +35,14 @@ export function popupUsesLightStyle(settings) {
         : panelUsesLightStyle();
 }
 
-export function surfaceUsesLightStyle(actor, settings) {
-    return Main.panel.contains(actor) ? panelUsesLightStyle() : popupUsesLightStyle(settings);
-}
-
-// These flip which set a surface reads without any color itself changing.
+// The popup background is in here because stock popup icons contrast with it.
 export function connectColorSetChanges(settings, run) {
-    const settingsIds = ['enable-custom-overflow-style', ...SPLIT_COLOR_KEYS]
-        .map(key => settings.connect(`changed::${key}`, run));
+    const keys = [
+        'enable-custom-overflow-style',
+        ...SPLIT_COLOR_KEYS,
+        ...withLightTwins(['overflow-container-background-color']),
+    ];
+    const settingsIds = keys.map(key => settings.connect(`changed::${key}`, run));
     const stId = St.Settings.get().connect('notify::color-scheme', run);
     return {
         disconnect() {
@@ -44,8 +55,7 @@ export function connectColorSetChanges(settings, run) {
 export function refreshTrayStyle(actor, iconActor, settings) {
     iconActor.set_icon_size(settings.get_int('icon-size'));
 
-    const {enableCustom, baseStyle, hoverStyle} = computeTrayIconStyle(settings,
-        {light: surfaceUsesLightStyle(actor, settings)});
+    const {enableCustom, baseStyle, hoverStyle} = trayIconStyleFor(actor, settings);
     applyPanelClasses(actor, iconActor, enableCustom);
 
     actor._baseStyle = baseStyle;
@@ -53,9 +63,16 @@ export function refreshTrayStyle(actor, iconActor, settings) {
     syncHoverStyle(actor);
 }
 
-// XEmbed icons are opaque X11 pixmaps, so `withColors: false` skips the
-// foreground color rules for them.
-export function computeTrayIconStyle(settings, {withColors = true, light = false} = {}) {
+export function trayIconStyleFor(actor, settings, {withColors = true} = {}) {
+    const inPanel = Main.panel.contains(actor);
+    return computeTrayIconStyle(settings, {
+        withColors,
+        light: inPanel ? panelUsesLightStyle() : popupUsesLightStyle(settings),
+        inPanel,
+    });
+}
+
+export function computeTrayIconStyle(settings, {withColors = true, light = false, inPanel = false} = {}) {
     const enableCustom = settings.get_boolean('enable-custom-icon-style');
 
     let baseStyle = '';
@@ -72,9 +89,37 @@ export function computeTrayIconStyle(settings, {withColors = true, light = false
         if (hoverColor)
             hoverStyle += ` color: ${hoverColor};`;
         hoverStyle += _hoverBorderCss(settings, 'icon', light);
+    } else if (!inPanel) {
+        const customPopupIsLight = _customPopupIsLight(settings, light);
+        const onLight = customPopupIsLight ?? light;
+        baseStyle = STOCK_POPUP_ICON_STYLE;
+        if (withColors && customPopupIsLight !== null)
+            baseStyle += ` color: ${onLight ? THEME_FOREGROUND.onLight : THEME_FOREGROUND.onDark};`;
+        hoverStyle = `${baseStyle} background-color: ${
+            onLight ? THEME_HOVER_BACKGROUND.onLight : THEME_HOVER_BACKGROUND.onDark};`;
     }
 
     return {enableCustom, baseStyle, hoverStyle};
+}
+
+// A custom popup paints its own background, so the theme's popup text color
+// no longer contrasts with it. Null leaves a stock popup, and a translucent
+// custom one, to the theme.
+function _customPopupIsLight(settings, light) {
+    if (!settings.get_boolean('enable-custom-overflow-style'))
+        return null;
+    const background = resolveColor(settings, 'overflow-container-background-color', light);
+    if (background === ST_ACCENT_COLOR)
+        return false;
+    const [parsed, color] = Cogl.Color.from_string(background);
+    if (!parsed)
+        return null;
+    return backgroundIsLight({
+        red: color.red / COGL_CHANNEL_MAX,
+        green: color.green / COGL_CHANNEL_MAX,
+        blue: color.blue / COGL_CHANNEL_MAX,
+        alpha: color.alpha / COGL_CHANNEL_MAX,
+    });
 }
 
 export function applyPanelClasses(actor, iconActor, enableCustom) {
