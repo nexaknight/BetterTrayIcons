@@ -514,6 +514,9 @@ msgstr "Beenden"
 msgid "Recent releases"
 msgstr "Neueste Versionen"
 
+msgid "Running in the background"
+msgstr "Läuft im Hintergrund"
+
 msgid "Recommended"
 msgstr "Empfohlen"
 
@@ -904,6 +907,51 @@ msgstr "Ruhezustand festgelegt."
 
 msgid "Takes what the app shows right now as its calm look."
 msgstr "Übernimmt das aktuelle Bild der App als ihren Ruhezustand."
+
+msgid "One icon per overflow menu state."
+msgstr "Ein Icon je Zustand des Overflow-Menüs."
+
+msgid "Menu Closed"
+msgstr "Menü geschlossen"
+
+msgid "Menu Open"
+msgstr "Menü offen"
+
+msgid "Rotate While Open"
+msgstr "Bei offenem Menü drehen"
+
+msgid "Turn the icon instead of swapping it for a second one."
+msgstr "Das Icon drehen, statt es gegen ein zweites zu tauschen."
+
+msgid "Angle"
+msgstr "Winkel"
+
+msgid "Duration (ms)"
+msgstr "Dauer (ms)"
+
+msgid "Animate Rotation"
+msgstr "Rotation animieren"
+
+msgid "Off turns the icon in one jump."
+msgstr "Aus dreht das Icon in einem Sprung."
+
+msgid "Reverse the turning direction"
+msgstr "Drehrichtung umkehren"
+
+msgid "Color Set"
+msgstr "Farbsatz"
+
+msgid "Which system style these colors apply to."
+msgstr "Für welchen Systemstil diese Farben gelten."
+
+msgid "Dark"
+msgstr "Dunkel"
+
+msgid "Light"
+msgstr "Hell"
+
+msgid "Separate colors for the light and dark style."
+msgstr "Getrennte Farben für hellen und dunklen Stil."
 
 msgid "Measure the padding while hovering the preview."
 msgstr "Innenabstand beim Überfahren der Vorschau ausmessen."
