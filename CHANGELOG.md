@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.2.2](https://github.com/nexaknight/BetterTrayIcons/compare/v3.2.1...v3.2.2) (2026-09-02)
+
+
+### Bug Fixes
+
+* **menu:** open dbusmenu submenus at any depth ([381dba2](https://github.com/nexaknight/BetterTrayIcons/commit/381dba24eb23acd5bed736a9784ed68e1d6182e7))
+
 ## [3.2.1](https://github.com/nexaknight/BetterTrayIcons/compare/v3.2.0...v3.2.1) (2026-09-02)
 
 
