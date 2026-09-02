@@ -4,23 +4,26 @@ import GdkPixbuf from 'gi://GdkPixbuf';
 import St from 'gi://St';
 import Shell from 'gi://Shell';
 
-import {resolveIcon, findIconInThemeAsync, buildSymbolicCandidates, orderThemedNames, writeCachedIcon, deleteCachedIcon, tintedSymbolicIcon, symbolicTint, clearTintCache, MONO_ASSET_SUFFIX_RE} from '../../shared/icon.js';
+import {resolveIcon, findIconInThemeAsync, buildSymbolicCandidates, orderThemedNames, writeCachedIcon, deleteCachedIcon, tintedSymbolicIcon, symbolicTint, clearTintCache, MONO_ASSET_SUFFIX_RE} from '../../shared/iconLoading.js';
 import {updateAppConfig, migrateLegacyConfig, claimAppId, getAppConfigMap, getAppConfigValue, setAppConfigValue, findStateIconEntry, recordSeenStateIcons, isVolatileIconName, stateNameOf, unreadBadgeEnabled, ATTENTION_STATE_KEY} from '../../shared/appConfig.js';
-import {readFileBytes, fileExists} from '../../shared/fetch.js';
+import {readFileBytes, fileExists} from '../../shared/asyncIo.js';
 import {warnOnce} from '../../shared/logging.js';
-import {getItemAddress, refreshPropertyOnProxy, refreshStringOnProxy, getProcessInfo} from './dbus.js';
-import {unreadBadge, unreadTargets} from './launcherEntries.js';
-import {sessionUsesLightStyle, stageScaleFactor} from './actor.js';
-import {pickAppId, pickDisplayTitle, legacyAppId, sanitizeAppId} from './appId.js';
-import {resolveItemId} from './itemSplit.js';
+import {getItemAddress, refreshPropertyOnProxy, refreshStringOnProxy} from '../dbusCalls.js';
+import {getProcessInfo} from '../identity/processIdentity.js';
+import {unreadBadge, unreadTargets} from '../features/launcherEntries.js';
+import {sessionUsesLightStyle} from '../trayStyle.js';
+import {stageScaleFactor} from '../actorPlacement.js';
+import {pickAppId, pickDisplayTitle, legacyAppId, sanitizeAppId} from '../identity/appId.js';
+import {resolveItemId} from '../identity/itemSplit.js';
 
 const ICON_CACHE_SNAPSHOT_MS = 2000;
+const ICON_CACHE_SNAPSHOT_US = ICON_CACHE_SNAPSHOT_MS * 1000;
 
-// Hashing, swizzling and PNG-encoding a pixmap all run on the compositor
-// loop, and the cost grows with the area. Nothing in the SNI spec bounds
-// the dimensions, so a client serving a 4096 square would stall the shell
-// for roughly a quarter second on every icon update. The largest icon-size
-// the prefs offer is 128, which needs 256 device pixels at scale 2.
+const FNV_OFFSET_BASIS = 0x811c9dc5;
+const FNV_PRIME = 0x01000193;
+
+// The SNI spec bounds no pixmap size, and hashing plus PNG encoding run on
+// the compositor loop. 128 is the largest icon-size, 256 device pixels at scale 2.
 const MAX_PIXMAP_SIZE_PX = 512;
 
 export async function identifyApp(proxy, busName, settings, onRekey) {
@@ -49,18 +52,16 @@ export async function identifyApp(proxy, busName, settings, onRekey) {
         key: getItemAddress(busName, objectPath),
         pid: processInfo?.pid,
         base,
-        // Only a process-derived key can collide, an id taken from the item
-        // itself already differs per item.
         splittable: base === sanitizeAppId(processName),
         discriminator: rawId ?? objectPath.split('/').pop(),
         rekey: onRekey,
     });
 
-    // Claim before migrating, an app identified earlier must not be able to
-    // carry this id away as its own legacy key.
+    // Claim before migrating, or an app identified earlier carries this id
+    // away as its legacy key.
     claimAppId(appId);
-    // A contained build copies instead of moving, because the key it starts
-    // from is the native build's and that one may register later in the session.
+    // A contained build copies instead of moving, its source key belongs to
+    // the native build and that one may still register later.
     migrateLegacyConfig(settings,
         legacyAppId({...identity, legacyName: processInfo?.legacyName, busName}),
         appId, {copy: !!packaging});
@@ -68,28 +69,20 @@ export async function identifyApp(proxy, busName, settings, onRekey) {
     const seed = {title: displayTitle};
 
     // Never seed the baseline from an attention-state icon, it would invert
-    // hasAlert. The first calm frame sets detected_icon via trayIcon instead.
-    // Volatile counter names identify no state and would churn the blob.
+    // hasAlert. Volatile counter names identify no state and churn the blob.
     if (status !== 'NeedsAttention' && iconName && !isVolatileIconName(iconName))
         seed.detected_icon = iconName;
     if (iconThemePath)
         seed.icon_theme_path = iconThemePath;
 
-    // Persist is_wine so it survives the process exiting.
     if (isWine)
         seed.is_wine = true;
-    // The prefs badge this, so a native and a flatpak build of one app are
-    // told apart by the row rather than by a suffix on the name.
     if (packaging)
         seed.packaging = packaging.kind;
     updateAppConfig(settings, appId, seed);
 
     return {appId, seed, processName, pid: processInfo?.pid};
 }
-
-// Constructing St.IconTheme per resolution would re-read the theme index
-// every time.
-let _sharedIconTheme = null;
 
 export async function resolveTrayIcon(proxy, settings, appId, lastPixmapHash = null, pid = null, tint = null) {
     const [rawStatus, detectedName, overlayName] = await Promise.all([
@@ -103,9 +96,8 @@ export async function resolveTrayIcon(proxy, settings, appId, lastPixmapHash = n
     return {..._applyOverlayEmblem(resolved, overlayName), status};
 }
 
-// The spec calls the overlay "extra state information", and the reference
-// host renders it as an emblem on the main icon, so a custom or mapped icon
-// keeps it too.
+// The spec calls the overlay "extra state information" and the reference host
+// renders it as an emblem, so a custom or mapped icon keeps it too.
 function _applyOverlayEmblem(resolved, overlayName) {
     if (!overlayName || resolved.unchanged || resolved.iconName === 'image-missing')
         return resolved;
@@ -129,33 +121,21 @@ async function _resolveIcon(proxy, settings, appId, lastPixmapHash, status, dete
 
     const customIcon = getAppConfigValue(settings, appId, 'custom_icon', null, configMap);
 
-    // The baseline is the calm-state icon name. A different live name or an
-    // attention status means the app is signaling something a pinned custom
-    // icon must not hide. Volatile names change on every update and carry no
-    // state, comparing them would suppress the custom icon forever.
+    // A live name that differs from the calm-state baseline means the app is
+    // signaling something a pinned custom icon must not hide.
     const baseline = getAppConfigValue(settings, appId, 'detected_icon', null, configMap);
     const hasAlert = status === 'NeedsAttention' ||
         !!(detectedName && baseline && detectedName !== baseline &&
            !isVolatileIconName(detectedName));
 
-    // Every return carries this, the custom-icon ones included: without it
-    // the caller could never seed the baseline for an app it renders a
-    // custom icon for, and its name alerts would stay dead forever.
     const detected = {iconName: detectedName, hasAlert, baselineMissing: !baseline};
 
-    // The count lives on the LauncherEntry channel, SNI itself has none.
-    // Without a count a name alert degrades to a plain dot, and the badge
-    // then IS the cue, so it keeps a custom icon in place where a bare
-    // alert would push it aside.
-    const unreadEnabled = unreadBadgeEnabled(configMap[appId]);
-    // The counter class never trips the name alert: Chromium bumps a volatile
-    // file per change and pixmaps carry no name at all, so the only readable
-    // signal is the image content itself.
-    const counterClass = status !== 'NeedsAttention' &&
+    const isUnreadEnabled = unreadBadgeEnabled(configMap[appId]);
+    const isCounterClass = status !== 'NeedsAttention' &&
         (!detectedName || isVolatileIconName(detectedName));
     let badge = null;
-    let alertCovered = false;
-    if (unreadEnabled) {
+    let isAlertCovered = false;
+    if (isUnreadEnabled) {
         badge = unreadBadge(unreadTargets({
             pid, appId,
             packagingKind: getAppConfigValue(settings, appId, 'packaging', null, configMap),
@@ -163,11 +143,11 @@ async function _resolveIcon(proxy, settings, appId, lastPixmapHash, status, dete
         if (!badge && status !== 'NeedsAttention') {
             if (hasAlert)
                 badge = {text: null};
-            else if (counterClass)
+            else if (isCounterClass)
                 badge = await _contentAlertBadge(proxy, settings, appId, detectedName);
         }
-        alertCovered = badge !== null;
-    } else if (counterClass) {
+        isAlertCovered = badge !== null;
+    } else if (isCounterClass) {
         await _rememberRestingContent(proxy, settings, appId, detectedName);
     }
 
@@ -176,8 +156,8 @@ async function _resolveIcon(proxy, settings, appId, lastPixmapHash, status, dete
         : null;
     if (stateIcons) {
         let mapped = null;
-        // Spec-typical apps keep IconName set while in attention, so a mapping
-        // for the calm name must not shadow what the Attention row promises.
+        // Most apps keep IconName set while in attention, so the calm name's
+        // mapping must not shadow the Attention row.
         if (status === 'NeedsAttention') {
             mapped = findStateIconEntry(stateIcons, stateNameOf(attentionName))?.[1] ??
                 stateIcons[ATTENTION_STATE_KEY];
@@ -187,25 +167,23 @@ async function _resolveIcon(proxy, settings, appId, lastPixmapHash, status, dete
             return {...await _configuredIconAsync(mapped, settings, tint), detected, badge};
     }
 
-    if (customIcon && (!hasAlert || alertCovered))
+    if (customIcon && (!hasAlert || isAlertCovered))
         return {...await _configuredIconAsync(customIcon, settings, tint), detected, badge};
 
-    // Qt serves showMessage's custom icon as an attention pixmap while the
-    // calm IconName stays set. Nulling the name here sends every branch
-    // below to the pixmap, otherwise the attention cue would never show.
+    // Qt serves showMessage's custom icon as an attention pixmap while the calm
+    // IconName stays set, so the name has to yield or the cue never shows.
     const attentionPixmap = status === 'NeedsAttention' && !attentionName
         ? await refreshPropertyOnProxy(proxy, 'AttentionIconPixmap', {cache: false})
         : null;
     const iconName = attentionPixmap?.length ? null : attentionName || detectedName;
-    // Apps also put relative paths here, not just names. Any slash makes it a
-    // path, and a theme lookup can never match one.
+    // Apps also put relative paths here, not just names.
     const isThemeName = !!iconName && !iconName.includes('/');
 
     detected.iconThemePath = await refreshStringOnProxy(proxy, 'IconThemePath');
     const iconThemePath = detected.iconThemePath;
 
-    // Asset names reveal a base the theme may cover, and a themed icon
-    // beats the app's bundled fallback file in both color modes.
+    // A -mono asset name hides a base the theme may carry, and a themed icon
+    // beats the app's bundled file in both color modes.
     if (iconName && MONO_ASSET_SUFFIX_RE.test(iconName)) {
         const themed = _themedIconFromName(iconName, settings, true, appId, configMap);
         if (themed)
@@ -214,22 +192,21 @@ async function _resolveIcon(proxy, settings, appId, lastPixmapHash, status, dete
 
     const fileIconResult = async path => {
         const file = Gio.File.new_for_path(path);
-        _snapshotIconToCache(settings, appId, file, generation).catch(() => { /* best-effort */ });
+        _snapshotIconToCache(settings, appId, file, generation).catch(() => {});
         const tinted = await _tinted(path, settings, tint);
         return {gicon: tinted ?? new Gio.FileIcon({file}), iconName: null, detected, badge};
     };
 
-    if (iconName) {
-        if (iconName.startsWith('/')) {
-            if (await fileExists(iconName))
-                return fileIconResult(iconName);
-        } else if (iconThemePath) {
-            // findIconInThemeAsync only returns a path it has already proven.
-            const resolvedPath = await findIconInThemeAsync(iconName, iconThemePath,
-                {targetSize: _deviceIconSize(settings)});
-            if (resolvedPath)
-                return fileIconResult(resolvedPath);
-        }
+    const isAbsolutePath = !!iconName && iconName.startsWith('/');
+    if (isAbsolutePath && await fileExists(iconName))
+        return fileIconResult(iconName);
+
+    const canSearchAppTheme = !!iconName && !isAbsolutePath && !!iconThemePath;
+    if (canSearchAppTheme) {
+        const resolvedPath = await findIconInThemeAsync(iconName, iconThemePath,
+            {targetSize: _deviceIconSize(settings)});
+        if (resolvedPath)
+            return fileIconResult(resolvedPath);
     }
 
     if (isThemeName) {
@@ -238,8 +215,6 @@ async function _resolveIcon(proxy, settings, appId, lastPixmapHash, status, dete
             return {...await _tintedThemed(themed, settings, tint), detected, badge};
     }
 
-    // Cache the result to disk so the prefs Applications page renders the
-    // same image.
     try {
         let pixmap = attentionPixmap;
         if (!pixmap?.length && status === 'NeedsAttention' && attentionName)
@@ -247,41 +222,31 @@ async function _resolveIcon(proxy, settings, appId, lastPixmapHash, status, dete
         if (!pixmap?.length)
             pixmap = await refreshPropertyOnProxy(proxy, 'IconPixmap', {cache: false});
 
-        if (pixmap && pixmap.length > 0) {
+        const usable = pixmap?.length ? pixmap.filter(_usablePixmapEntry) : [];
+        if (usable.length > 0) {
             const targetSize = _deviceIconSize(settings);
-
-            const usable = pixmap.filter(_usablePixmapEntry);
             usable.sort((a, b) => Math.abs(a[0] - targetSize) - Math.abs(b[0] - targetSize));
 
-            const bestMatch = usable[0];
-            if (bestMatch) {
-                const [width, height, rawData] = bestMatch;
-                const src = _pixmapBytes(rawData);
-                const pixmapHash = src ? _hashPixmap(width, height, src) : null;
+            const [width, height, rawData] = usable[0];
+            const src = _pixmapBytes(rawData);
+            const pixmapHash = src ? _hashPixmap(width, height, src) : null;
 
-                // Animated icons often resend identical frames. Matching the
-                // previous hash skips the swizzle, the PNG encode and the cache
-                // write. Only valid while a cached copy exists, a forgotten
-                // entry could otherwise never rebuild its prefs image.
-                const hasCached = !!getAppConfigValue(settings, appId, 'cached_icon_path', null, configMap);
-                if (pixmapHash !== null && pixmapHash === lastPixmapHash && hasCached)
-                    return {gicon: null, iconName: null, detected, pixmapHash, unchanged: true, badge};
+            // Animated icons resend identical frames, a hash match skips swizzle,
+            // PNG encode and cache write. Only while a cached copy exists, a
+            // forgotten entry could never rebuild its prefs image otherwise.
+            const hasCached = !!getAppConfigValue(settings, appId, 'cached_icon_path', null, configMap);
+            if (pixmapHash !== null && pixmapHash === lastPixmapHash && hasCached)
+                return {gicon: null, iconName: null, detected, pixmapHash, unchanged: true, badge};
 
-                const pngBytes = src ? _pixmapToPng(width, height, src) : null;
-                if (pngBytes) {
-                    if (appId) {
-                        const write = async () => {
-                            if (_stale(generation))
-                                return;
-                            const path = await writeCachedIcon(appId, pngBytes);
-                            if (path && !_stale(generation))
-                                setAppConfigValue(settings, appId, 'cached_icon_path', path);
-                        };
-                        await _throttledSnapshot(appId, generation, write, {force: !hasCached});
-                    }
-                    const gicon = Gio.BytesIcon.new(GLib.Bytes.new(pngBytes));
-                    return {gicon, iconName: null, detected, pixmapHash, badge};
-                }
+            const pngBytes = src ? _pixmapToPng(width, height, src) : null;
+            const canCacheSnapshot = !!pngBytes && !!appId;
+            if (canCacheSnapshot) {
+                await _throttledSnapshot(appId, generation,
+                    () => _writePixmapCache(settings, appId, pngBytes, generation), {force: !hasCached});
+            }
+            if (pngBytes) {
+                const gicon = Gio.BytesIcon.new(GLib.Bytes.new(pngBytes));
+                return {gicon, iconName: null, detected, pixmapHash, badge};
             }
         }
     } catch (e) {
@@ -298,7 +263,7 @@ async function _resolveIcon(proxy, settings, appId, lastPixmapHash, status, dete
     if (appIcon) {
         const file = appIcon.get_file?.();
         if (file)
-            _snapshotIconToCache(settings, appId, file, generation).catch(() => { /* best-effort */ });
+            _snapshotIconToCache(settings, appId, file, generation).catch(() => {});
         return {gicon: appIcon, iconName: null, detected, badge};
     }
 
@@ -307,31 +272,25 @@ async function _resolveIcon(proxy, settings, appId, lastPixmapHash, status, dete
     return {gicon: null, iconName: 'image-missing', detected, badge};
 }
 
-// A dot for apps whose unread cue only exists as different image bytes.
-// Seeding takes whatever is on screen, so an app that boots straight into
-// its unread image reads inverted until the resting state is redefined in
-// the prefs.
+// Seeding takes whatever is on screen, so an app that boots into its unread
+// image reads inverted until the resting state is redefined in the prefs.
 async function _contentAlertBadge(proxy, settings, appId, detectedName) {
     const contentHash = await _liveIconContentHash(proxy, settings, detectedName);
     if (contentHash === null)
         return null;
-    // Read fresh after the await: two resolves can overlap, and one deciding
-    // on a snapshot from before the other's seed would re-seed over it.
+    // Read fresh after the await, two resolves can overlap and one deciding on
+    // a snapshot from before the other's seed would re-seed over it.
     const stored = getAppConfigValue(settings, appId, 'detected_icon_hash');
     const baseline = stored ?? _restingContentHash.get(appId) ?? contentHash;
     if (stored === null) {
-        // Read into baseline above and then dropped, otherwise redefining the
-        // resting state in the prefs would only put this frame back.
         _restingContentHash.delete(appId);
         setAppConfigValue(settings, appId, 'detected_icon_hash', baseline);
     }
     return contentHash === baseline ? null : {text: null};
 }
 
-// Whatever the app showed when it first came up, kept per session so the
-// blob stays untouched while the badge is off. Switching it on later has to
-// reach back to that frame, a chat app sitting on unread would otherwise
-// define its alert as the calm state.
+// Whatever the app showed when it first came up, kept per session so the blob
+// stays untouched while the badge is off.
 const _restingContentHash = new Map();
 
 async function _rememberRestingContent(proxy, settings, appId, detectedName) {
@@ -344,16 +303,9 @@ async function _rememberRestingContent(proxy, settings, appId, detectedName) {
 
 async function _liveIconContentHash(proxy, settings, detectedName) {
     if (detectedName) {
-        let path = null;
-        if (detectedName.startsWith('/')) {
-            path = detectedName;
-        } else {
-            const themePath = await refreshStringOnProxy(proxy, 'IconThemePath');
-            if (themePath) {
-                path = await findIconInThemeAsync(detectedName, themePath,
-                    {targetSize: _deviceIconSize(settings)});
-            }
-        }
+        const path = detectedName.startsWith('/')
+            ? detectedName
+            : await _appThemeIconPath(proxy, settings, detectedName);
         if (!path || !await fileExists(path))
             return null;
         const bytes = await readFileBytes(Gio.File.new_for_path(path));
@@ -368,20 +320,26 @@ async function _liveIconContentHash(proxy, settings, detectedName) {
     return src ? _hashPixmap(usable[0], usable[1], src) : null;
 }
 
-// An app can name an icon that resolves nowhere and ship no pixmap either,
-// which leaves nothing to draw. Its desktop entry still names a real one.
-// Only apps with a window are found, a tray-only daemon is not.
+async function _appThemeIconPath(proxy, settings, iconName) {
+    const themePath = await refreshStringOnProxy(proxy, 'IconThemePath');
+    if (!themePath)
+        return null;
+    return findIconInThemeAsync(iconName, themePath, {targetSize: _deviceIconSize(settings)});
+}
+
+// Only apps with a window are found here, a tray-only daemon is not.
 function _appIcon(pid) {
     if (!pid)
         return null;
     return Shell.WindowTracker.get_default().get_app_from_pid(pid)?.get_icon();
 }
 
-// The panel paints in device pixels, so at scale 2 a 22px variant would beat
-// a 48px one on size distance and then get upscaled.
 function _deviceIconSize(settings) {
     return settings.get_int('icon-size') * stageScaleFactor();
 }
+
+// Constructing St.IconTheme per resolution re-reads the theme index.
+let _sharedIconTheme = null;
 
 function _themedIconFromName(iconName, settings, requireInTheme = true, appId = null, map = null) {
     const useSymbolic = settings.get_boolean('enable-symbolic-icons');
@@ -392,11 +350,10 @@ function _themedIconFromName(iconName, settings, requireInTheme = true, appId = 
     let existing = null;
     let themeFile = null;
     _sharedIconTheme ??= new St.IconTheme();
-    // lookup_icon, not has_icon: St's has_icon only searches the theme index
-    // and answers false for an unthemed icon in /usr/share/pixmaps, which
-    // then loses to an image-missing tail. Gtk's has_icon does see those, so
-    // this is what keeps the prefs and the panel on the same icon.
     const size = _deviceIconSize(settings);
+    // lookup_icon, not has_icon. St's has_icon only searches the theme index
+    // and answers false for an unthemed icon in /usr/share/pixmaps, which
+    // would then fall through to image-missing.
     for (const name of candidates) {
         const info = _sharedIconTheme.lookup_icon(name, size, 0);
         if (!info)
@@ -421,10 +378,8 @@ function _themedIconFromName(iconName, settings, requireInTheme = true, appId = 
     };
 }
 
-// A theme name renders in prefs on its own, and resolveIcon prefers a cached
-// file over the name. A snapshot of the theme file would freeze the icon:
-// symbolic art only recolors when the theme resolves it, and a raster variant
-// gets rescaled.
+// resolveIcon prefers a cached file over a theme name, and a snapshot would
+// freeze the icon, symbolic art only recolors while the theme resolves it.
 function _dropCachedIcon(settings, appId, map) {
     if (!getAppConfigValue(settings, appId, 'cached_icon_path', null, map))
         return;
@@ -442,8 +397,6 @@ function _tinted(path, settings, tint) {
         {size: _deviceIconSize(settings)});
 }
 
-// The icon update runs on the shell's main loop, where a blocking stat stalls
-// the whole desktop rather than one window.
 async function _configuredIconAsync(value, settings, tint = null) {
     const exists = value.startsWith('/') ? await fileExists(value) : null;
     if (exists) {
@@ -455,46 +408,63 @@ async function _configuredIconAsync(value, settings, tint = null) {
 }
 
 export function configuredIcon(value, settings, exists = null) {
-    const res = resolveIcon({custom_icon: value});
+    const resolved = resolveIcon({custom_icon: value});
 
-    if (res.type === 'file') {
-        const file = Gio.File.new_for_path(res.value);
-        // A FileIcon for a missing path paints nothing at all, so the icon would
-        // just vanish from the panel. Prefs show image-missing for the same
-        // config, and both must agree.
+    if (resolved.type === 'file') {
+        const file = Gio.File.new_for_path(resolved.value);
+        // A FileIcon for a missing path paints nothing, the icon would vanish.
         if (exists ?? file.query_exists(null))
             return {gicon: new Gio.FileIcon({file}), iconName: null};
-        warnOnce(`custom-icon:${res.value}`, `Custom icon '${res.value}' does not exist, showing image-missing`);
+        warnOnce(`custom-icon:${resolved.value}`, `Custom icon '${resolved.value}' does not exist, showing image-missing`);
         return {gicon: null, iconName: 'image-missing'};
     }
 
-    // Same fallback chain as the prefs side so both render identically.
-    return themedIconContent(res.value, settings);
+    return themedIconContent(resolved.value, settings);
 }
 
-// Named apart from the prefs-side themedIcon in shared/icon.js, which hands
-// back a bare Gio.ThemedIcon. This one returns what setIconContent takes.
 export function themedIconContent(iconName, settings) {
     return _themedIconFromName(iconName, settings, false);
 }
 
-
-// A resolve already in flight when the extension is disabled runs to completion
-// on its own, so it has to notice and drop out rather than write to disk
-// afterwards or arm a timer nothing is left to cancel.
+// A resolve in flight when the extension is disabled runs to completion, so it
+// has to notice and drop out rather than write to disk or arm a timer after.
 let _generation = 0;
 
-function _stale(generation) {
+function _isStale(generation) {
     return generation !== _generation;
 }
 
-// The cached copy only feeds the prefs page, the panel renders from
-// memory, so disk writes don't have to follow every animation frame.
+// Within a session two resolves for one app can overlap, and the slower one
+// would put its older frame on top.
+const _snapshotSeq = new Map();
+
+// Some apps store their IconThemePath in an ephemeral directory, so copy the
+// bytes into our own cache.
+async function _snapshotIconToCache(settings, appId, file, generation) {
+    if (!appId)
+        return;
+    const seq = (_snapshotSeq.get(appId) ?? 0) + 1;
+    _snapshotSeq.set(appId, seq);
+    await _throttledSnapshot(appId, generation,
+        () => _writeIconSnapshot(settings, appId, file, generation, seq));
+}
+
+async function _throttledSnapshot(appId, generation, writeFn, {force = false} = {}) {
+    if (force || _takeSnapshotSlot(appId)) {
+        _cancelTrailingSnapshot(appId);
+        await writeFn();
+        return;
+    }
+    _scheduleTrailingSnapshot(appId, generation, () => writeFn().catch(() => {}));
+}
+
+// The cached copy only feeds the prefs page, the panel renders from memory, so
+// disk writes don't have to follow every animation frame.
 const _lastSnapshotAt = new Map();
 
-function _shouldSnapshot(appId) {
+function _takeSnapshotSlot(appId) {
     const now = GLib.get_monotonic_time();
-    if (now - (_lastSnapshotAt.get(appId) ?? 0) < ICON_CACHE_SNAPSHOT_MS * 1000)
+    if (now - (_lastSnapshotAt.get(appId) ?? 0) < ICON_CACHE_SNAPSHOT_US)
         return false;
     _lastSnapshotAt.set(appId, now);
     return true;
@@ -505,7 +475,7 @@ function _shouldSnapshot(appId) {
 const _pendingSnapshots = new Map();
 
 function _scheduleTrailingSnapshot(appId, generation, write) {
-    if (_stale(generation))
+    if (_isStale(generation))
         return;
     _cancelTrailingSnapshot(appId);
     _pendingSnapshots.set(appId, GLib.timeout_add(GLib.PRIORITY_DEFAULT, ICON_CACHE_SNAPSHOT_MS, () => {
@@ -518,73 +488,39 @@ function _scheduleTrailingSnapshot(appId, generation, write) {
 
 function _cancelTrailingSnapshot(appId) {
     const id = _pendingSnapshots.get(appId);
-    if (id) {
-        GLib.source_remove(id);
-        _pendingSnapshots.delete(appId);
-    }
-}
-
-// The shell keeps modules loaded across disable/enable, so without this a
-// trailing snapshot would still fire and write to disk seconds after the
-// extension was disabled.
-export function clearIconCaches() {
-    _generation++;
-    for (const id of _pendingSnapshots.values())
-        GLib.source_remove(id);
-    _pendingSnapshots.clear();
-    _lastSnapshotAt.clear();
-    _snapshotSeq.clear();
-    _restingContentHash.clear();
-    _sharedIconTheme = null;
-    clearTintCache();
-}
-
-async function _throttledSnapshot(appId, generation, writeFn, {force = false} = {}) {
-    if (force || _shouldSnapshot(appId)) {
-        _cancelTrailingSnapshot(appId);
-        await writeFn();
+    if (!id)
         return;
-    }
-    _scheduleTrailingSnapshot(appId, generation, () => writeFn().catch(() => { /* best-effort */ }));
-}
-
-// The epoch above only covers disable. Within a session two resolves for one
-// app can overlap, and the slower one would put its older frame over the
-// newer cache copy.
-const _snapshotSeq = new Map();
-
-// Some apps store their IconThemePath in an ephemeral directory, so copy
-// the bytes into our cache.
-async function _snapshotIconToCache(settings, appId, file, generation) {
-    if (!appId)
-        return;
-    const seq = (_snapshotSeq.get(appId) ?? 0) + 1;
-    _snapshotSeq.set(appId, seq);
-    await _throttledSnapshot(appId, generation,
-        () => _writeIconSnapshot(settings, appId, file, generation, seq));
+    GLib.source_remove(id);
+    _pendingSnapshots.delete(appId);
 }
 
 async function _writeIconSnapshot(settings, appId, file, generation, seq) {
-    const overtaken = () => _stale(generation) || seq !== _snapshotSeq.get(appId);
+    const isOvertaken = () => _isStale(generation) || seq !== _snapshotSeq.get(appId);
     try {
-        if (overtaken())
+        if (isOvertaken())
             return;
         const contents = await readFileBytes(file);
-        if (contents.length === 0 || overtaken())
+        if (contents.length === 0 || isOvertaken())
             return;
         const path = await writeCachedIcon(appId, contents);
-        if (!path || overtaken())
+        if (!path || isOvertaken())
             return;
         const existing = getAppConfigValue(settings, appId, 'cached_icon_path');
         if (existing !== path)
             setAppConfigValue(settings, appId, 'cached_icon_path', path);
     } catch (e) {
-        // The panel keeps rendering, only the prefs image goes stale.
         warnOnce(`snapshot:${appId}`, `Icon cache write for '${appId}' failed: ${e.message}`);
     }
 }
 
-// A peer chooses its own dimensions, nothing in the spec bounds them.
+async function _writePixmapCache(settings, appId, pngBytes, generation) {
+    if (_isStale(generation))
+        return;
+    const path = await writeCachedIcon(appId, pngBytes);
+    if (path && !_isStale(generation))
+        setAppConfigValue(settings, appId, 'cached_icon_path', path);
+}
+
 function _usablePixmapEntry(entry) {
     if (!entry || entry.length < 3)
         return false;
@@ -601,22 +537,19 @@ function _pixmapBytes(rawData) {
     return null;
 }
 
-// FNV-1a, cheap enough to run on every frame.
-function _hashBytes(bytes, seed = 0x811c9dc5, length = bytes.length) {
+function _hashBytes(bytes, seed = FNV_OFFSET_BASIS, length = bytes.length) {
     let h = seed;
     for (let i = 0; i < length; i++)
-        h = Math.imul(h ^ bytes[i], 0x01000193);
+        h = Math.imul(h ^ bytes[i], FNV_PRIME);
     return h >>> 0;
 }
 
-// Only over the bytes the declared size covers. MAX_PIXMAP_SIZE_PX bounds the
-// width and height a peer reports, never the length of the array it attaches,
-// so hashing src.length let any process on the session bus stall the compositor
-// with a 1x1 icon carrying a multi-megabyte tail. The bytes past the declared
-// size never reach the image either, _pixmapToPng stops at expectedLen.
+// MAX_PIXMAP_SIZE_PX bounds the declared width and height, not the array a
+// peer attaches, so only the declared bytes count. Any bus client could
+// otherwise stall the compositor with a 1x1 icon carrying a huge tail.
 function _hashPixmap(width, height, src) {
-    let seed = Math.imul(0x811c9dc5 ^ width, 0x01000193);
-    seed = Math.imul(seed ^ height, 0x01000193);
+    let seed = Math.imul(FNV_OFFSET_BASIS ^ width, FNV_PRIME);
+    seed = Math.imul(seed ^ height, FNV_PRIME);
     return _hashBytes(src, seed, Math.min(src.length, width * height * 4));
 }
 
@@ -652,6 +585,18 @@ function _pixmapToPng(width, height, src) {
             return null;
         return pngBuffer;
     } catch {
-        /* malformed pixmap */ return null;
+        return null;
     }
+}
+
+export function clearIconCaches() {
+    _generation++;
+    for (const id of _pendingSnapshots.values())
+        GLib.source_remove(id);
+    _pendingSnapshots.clear();
+    _lastSnapshotAt.clear();
+    _snapshotSeq.clear();
+    _restingContentHash.clear();
+    _sharedIconTheme = null;
+    clearTintCache();
 }

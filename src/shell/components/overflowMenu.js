@@ -2,7 +2,8 @@ import St from 'gi://St';
 import Clutter from 'gi://Clutter';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
-import {generateBoxStyle, createPanelMenu, destroyMenuSafely} from '../utils/actor.js';
+import {generateBoxStyle, popupUsesLightStyle} from '../trayStyle.js';
+import {createPanelMenu, destroyMenuSafely} from '../popupMenus.js';
 import {ITEM_SPACING_PX, ICON_MARGIN_PX, DEFAULT_ICON_PADDING_PX} from '../../const.js';
 
 const OVERFLOW_GRID_MIN_ROW_HEIGHT_PX = 24;
@@ -11,6 +12,15 @@ const OVERFLOW_GRID_MIN_ROW_HEIGHT_PX = 24;
 const OVERFLOW_SCREEN_MARGIN_PX = 64;
 
 const POPUP_UNCLAMP_CSS = 'min-width: 0; min-height: 0;';
+
+// With 0 the BoxPointer wrapper collapses and clips the popup contents.
+const CONTAINER_SIDE_MARGIN_MIN_PX = 1;
+
+// Stock mode pads the sides so icons don't clip at the popup-menu-content
+// frame.
+const CONTAINER_STOCK_SIDE_PADDING_PX = 1;
+
+const FLOW_WIDTH_SLACK_PX = 1;
 
 export class OverflowMenu {
     constructor(settings, toggleButton, onOpenStateChanged) {
@@ -26,16 +36,13 @@ export class OverflowMenu {
             // The theme's .popup-menu rule pins a 15em min-width on the BoxPointer
             // actor. BoxPointer._reposition then centers that wrapper on the toggle
             // and clamps to the work-area, which pushes the popup far left when the
-            // toggle sits in the left panel box. min-width: 0 on both actor and box
-            // lets the wrapper shrink to the container so the arrow lands on the toggle.
+            // toggle sits in the left panel box.
             menu.actor.set_style(POPUP_UNCLAMP_CSS);
 
-            // Without these, menu.box inherits x_expand=true and the popup spans the monitor.
-            if (menu.box) {
-                menu.box.x_expand = false;
-                menu.box.y_expand = false;
-                menu.box.set_style(POPUP_UNCLAMP_CSS);
-            }
+            // Without these, menu.box comes with x_expand=true and the popup spans the monitor.
+            menu.box.x_expand = false;
+            menu.box.y_expand = false;
+            menu.box.set_style(POPUP_UNCLAMP_CSS);
         });
 
         this._menu.connect('open-state-changed', (menu, isOpen) => {
@@ -60,7 +67,7 @@ export class OverflowMenu {
     }
 
     _buildContainer() {
-        // Both modes flow: row mode stays on one line by being handed a width
+        // Both modes flow. Row mode stays on one line by being handed a width
         // that fits, and wraps instead of running off the monitor when it can't.
         this._container = new St.Widget({
             style_class: 'tray-overflow-box',
@@ -71,7 +78,7 @@ export class OverflowMenu {
                 row_spacing: ITEM_SPACING_PX,
                 // updateGeometry pins the box to columns times the WIDEST
                 // child. Equal cells make the layout fill exactly that box,
-                // mixed real widths packed tighter and left the height off.
+                // mixed real widths pack tighter and throw the height off.
                 homogeneous: true,
             }),
             x_expand: false,
@@ -80,47 +87,41 @@ export class OverflowMenu {
             request_mode: Clutter.RequestMode.HEIGHT_FOR_WIDTH,
         });
 
-        if (this._menu.box)
-            this._menu.box.add_child(this._container);
+        this._menu.box.add_child(this._container);
     }
 
     updateGeometry(itemCount) {
         itemCount ??= this._container.get_children().filter(child => child.visible).length;
 
         if (itemCount === 0) {
-            // Keep base style so visuals survive a re-open after empty.
             this._container.set_style(`${this._cachedBaseStyle} width: 0px; height: 0px;`);
             return;
         }
 
         const iconSize = this._settings.get_int('icon-size');
-        // Mirrors computeTrayIconStyle in actor.js so the popup size matches
-        // the rendered icon size: stock mode uses the fixed defaults, custom
-        // mode uses the user's own padding/margin on every side.
+        // Mirrors computeTrayIconStyle in trayStyle.js so the popup size matches
+        // the rendered icon size.
         const enableCustomIcon = this._settings.get_boolean('enable-custom-icon-style');
-        const btnPadH = enableCustomIcon
-            ? this._settings.get_int('icon-padding-left') + this._settings.get_int('icon-padding-right')
-            : DEFAULT_ICON_PADDING_PX * 2;
-        const btnPadV = enableCustomIcon
-            ? this._settings.get_int('icon-padding-top') + this._settings.get_int('icon-padding-bottom')
-            : DEFAULT_ICON_PADDING_PX * 2;
-        const totalItemMarginH = enableCustomIcon
-            ? this._settings.get_int('icon-margin-left') + this._settings.get_int('icon-margin-right')
-            : ICON_MARGIN_PX * 2;
-        const totalItemMarginV = enableCustomIcon
-            ? this._settings.get_int('icon-margin-top') + this._settings.get_int('icon-margin-bottom')
-            : 0;
+        const sideSum = (property, sides, fallback) => enableCustomIcon
+            ? sides.reduce((total, side) =>
+                total + this._settings.get_int(`icon-${property}-${side}`), 0)
+            : fallback;
 
-        // The shell theme adds its own padding to panel-button, so the settings
-        // alone under-measure an item and FlowLayout then fits fewer per row
-        // than the pinned width claims.
+        const horizontalButtonPadding = sideSum('padding', ['left', 'right'], DEFAULT_ICON_PADDING_PX * 2);
+        const verticalButtonPadding = sideSum('padding', ['top', 'bottom'], DEFAULT_ICON_PADDING_PX * 2);
+        const horizontalItemMargin = sideSum('margin', ['left', 'right'], ICON_MARGIN_PX * 2);
+        const verticalItemMargin = sideSum('margin', ['top', 'bottom'], 0);
+
+        // The settings math sums padding and margin only, so a border or a
+        // badge measures wider and FlowLayout then fits fewer per row than the
+        // pinned width claims.
         const shown = this._container.get_children().filter(child => child.visible);
-        const measured = size => shown.length ? Math.max(...shown.map(size)) : 0;
+        const largestOf = measure => Math.max(...shown.map(measure));
 
-        const singleItemWidth = Math.max(iconSize + btnPadH + totalItemMarginH,
-            measured(child => child.get_preferred_width(-1)[1]));
-        const singleItemHeight = Math.max(iconSize + btnPadV + totalItemMarginV,
-            measured(child => child.get_preferred_height(-1)[1]));
+        const singleItemWidth = Math.max(iconSize + horizontalButtonPadding + horizontalItemMargin,
+            largestOf(child => child.get_preferred_width(-1)[1]));
+        const singleItemHeight = Math.max(iconSize + verticalButtonPadding + verticalItemMargin,
+            largestOf(child => child.get_preferred_height(-1)[1]));
 
         const columns = this._columnCount(itemCount, singleItemWidth);
         const rows = Math.ceil(itemCount / columns);
@@ -128,17 +129,14 @@ export class OverflowMenu {
         let finalWidth = columns * singleItemWidth + Math.max(0, columns - 1) * ITEM_SPACING_PX;
         let finalHeight = rows * singleItemHeight + Math.max(0, rows - 1) * ITEM_SPACING_PX;
 
-        finalWidth = Math.ceil(finalWidth) + 1;
+        finalWidth = Math.ceil(finalWidth) + FLOW_WIDTH_SLACK_PX;
         finalHeight = Math.ceil(finalHeight);
 
-        // Default mode floors padding at 1px so icons don't clip at the
-        // popup-menu-content frame.
-        let pLeft, pRight;
+        let paddingLeft = CONTAINER_STOCK_SIDE_PADDING_PX;
+        let paddingRight = CONTAINER_STOCK_SIDE_PADDING_PX;
         if (this._enableCustomStyle) {
-            pLeft = this._settings.get_int('overflow-container-padding-left');
-            pRight = this._settings.get_int('overflow-container-padding-right');
-        } else {
-            pLeft = pRight = 1;
+            paddingLeft = this._settings.get_int('overflow-container-padding-left');
+            paddingRight = this._settings.get_int('overflow-container-padding-right');
         }
 
         // Without max-width FlowLayout reports a one-row natural width and
@@ -146,12 +144,11 @@ export class OverflowMenu {
         const geometryStyle =
             `width: ${finalWidth}px; min-width: ${finalWidth}px; max-width: ${finalWidth}px; ` +
             `height: ${finalHeight}px; min-height: ${finalHeight}px; max-height: ${finalHeight}px; ` +
-            `padding-left: ${pLeft}px; padding-right: ${pRight}px;`;
+            `padding-left: ${paddingLeft}px; padding-right: ${paddingRight}px;`;
         this._container.set_style(`${this._cachedBaseStyle} ${geometryStyle}`);
 
         this._container.queue_relayout();
-        if (this._menu.box)
-            this._menu.box.queue_relayout();
+        this._menu.box.queue_relayout();
     }
 
     // Row mode asks for one line and grid mode for its configured columns,
@@ -173,17 +170,14 @@ export class OverflowMenu {
     applyStyle(enableCustomStyle) {
         this._enableCustomStyle = enableCustomStyle;
         if (this._enableCustomStyle) {
-            if (this._menu.box)
-                this._menu.box.set_style(`${POPUP_UNCLAMP_CSS} background-color: transparent; border: none; box-shadow: none; margin: 0; padding: 0;`);
+            this._menu.box.set_style(`${POPUP_UNCLAMP_CSS} background-color: transparent; border: none; box-shadow: none; margin: 0; padding: 0;`);
 
-            // 1px left/right margin floor: with 0 the BoxPointer wrapper
-            // collapses and the popup contents are clipped or hidden.
-            this._cachedBaseStyle = generateBoxStyle(this._settings, 'overflow-container-', {
-                minMargin: {left: 1, right: 1},
+            this._cachedBaseStyle = generateBoxStyle(this._settings, 'overflow-container', {
+                minMargin: {left: CONTAINER_SIDE_MARGIN_MIN_PX, right: CONTAINER_SIDE_MARGIN_MIN_PX},
+                light: popupUsesLightStyle(this._settings),
             });
         } else {
-            if (this._menu.box)
-                this._menu.box.set_style(POPUP_UNCLAMP_CSS);
+            this._menu.box.set_style(POPUP_UNCLAMP_CSS);
             this._cachedBaseStyle = '';
         }
 
@@ -192,15 +186,12 @@ export class OverflowMenu {
     }
 
     attachToManager() {
-        if (Main.panel.menuManager) {
-            Main.panel.menuManager.addMenu(this._menu);
-            this._attached = true;
-        }
+        Main.panel.menuManager.addMenu(this._menu);
+        this._attached = true;
     }
 
     detachFromManager() {
-        if (Main.panel.menuManager)
-            Main.panel.menuManager.removeMenu(this._menu);
+        Main.panel.menuManager.removeMenu(this._menu);
         this._attached = false;
     }
 

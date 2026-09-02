@@ -5,7 +5,7 @@ export const ACCENT_COLOR_VALUE = 'accent';
 const ACCENT_PREFIX = `${ACCENT_COLOR_VALUE}:`;
 
 export function usesAccent(value) {
-    return value === ACCENT_COLOR_VALUE || `${value}`.startsWith(ACCENT_PREFIX);
+    return value === ACCENT_COLOR_VALUE || value.startsWith(ACCENT_PREFIX);
 }
 
 export function accentValueKeeping(previous) {
@@ -13,5 +13,5 @@ export function accentValueKeeping(previous) {
 }
 
 export function colorBehindAccent(value) {
-    return `${value}`.startsWith(ACCENT_PREFIX) ? value.slice(ACCENT_PREFIX.length) : null;
+    return value.startsWith(ACCENT_PREFIX) ? value.slice(ACCENT_PREFIX.length) : null;
 }

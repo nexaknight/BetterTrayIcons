@@ -6,7 +6,7 @@ import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions
 
 import {getAppConfigs, deleteAppConfig, resetAllAppConfigs, displayAppName} from '../../shared/appConfig.js';
 import {connectScoped, clearIds, debounceTo, removeTimer} from '../../shared/lifecycle.js';
-import {resolveIcon, probeIconPaths, themeProbeKey, tintedSymbolicIconMap} from '../../shared/icon.js';
+import {resolveIcon, probeIconPaths, themeProbeKey, tintedSymbolicIconMap} from '../../shared/iconLoading.js';
 import AppDialog from '../dialogs/appDialog.js';
 import {createButton, createIconButton, createImage, applyResolvedIcon, devicePixelSize, hasThemeIcon, prefsSymbolicTint, themeIconFile} from '../widgets/gtkHelpers.js';
 import {createActionRow, NEXT_ICON_NAME} from '../widgets/rows.js';

@@ -7,8 +7,8 @@ import GdkPixbuf from 'gi://GdkPixbuf';
 import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
 import {error} from '../../shared/logging.js';
-import {buildSymbolicCandidates, orderThemedNames, themedIcon, pathOrThemedIcon, probeIconPaths, tintedSymbolicIcon, symbolicTint} from '../../shared/icon.js';
-import {fileExists} from '../../shared/fetch.js';
+import {buildSymbolicCandidates, orderThemedNames, themedIcon, pathOrThemedIcon, probeIconPaths, tintedSymbolicIcon, symbolicTint} from '../../shared/iconLoading.js';
+import {fileExists} from '../../shared/asyncIo.js';
 import {connectScoped, ruleDispatcher} from '../../shared/lifecycle.js';
 import {BOX_SIDES, PREVIEW_STOCK_POPUP_CSS} from '../../const.js';
 import {usesAccent} from '../../shared/accentColor.js';

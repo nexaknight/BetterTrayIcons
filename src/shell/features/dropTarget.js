@@ -1,26 +1,23 @@
-import {safeBounds, settledBounds} from '../utils/actor.js';
+import {safeBounds, settledBounds} from '../actorPlacement.js';
 
 // GNOME's dnd.js hands drop targets actor._delegate as source, which
-// dragAndDrop.js points at the DraggableTrayIcon wrapper. The fallbacks
-// catch delegates that only carry the _draggableItem back-link.
+// dragAndDrop.js points at the DraggableTrayIcon wrapper.
 export function getDraggableFromSource(source) {
     if (!source)
         return null;
     if (typeof source.appId === 'string')
         return source;
-    if (source._draggableItem)
-        return source._draggableItem;
-    if (source.actor?._draggableItem)
-        return source.actor._draggableItem;
     return null;
 }
 
 export function isPointInActor(x, y, actor) {
-    const b = actor && safeBounds(actor);
-    if (!b)
+    const bounds = safeBounds(actor);
+    if (!bounds)
         return false;
-    const [ax, ay, aw, ah] = b;
-    return x >= ax && x <= ax + aw && y >= ay && y <= ay + ah;
+    const [left, top, width, height] = bounds;
+    const isInsideX = x >= left && x <= left + width;
+    const isInsideY = y >= top && y <= top + height;
+    return isInsideX && isInsideY;
 }
 
 export function slotIndexAt(actors, x, y, dragged = null) {
@@ -63,7 +60,6 @@ function _rowDistance(band, y) {
     return Math.abs(y - band[0].y - band[0].height / 2);
 }
 
-// Cell boundaries sit at the midpoints of the gaps between neighbours.
 function _cellIndexAt(row, x) {
     const cells = [...row].sort((a, b) => a.x - b.x);
     for (let i = 0; i < cells.length - 1; i++) {
@@ -75,9 +71,9 @@ function _cellIndexAt(row, x) {
 }
 
 export function dragStageCoords(dragActor) {
-    const b = safeBounds(dragActor);
-    if (!b)
+    const bounds = safeBounds(dragActor);
+    if (!bounds)
         return global.get_pointer();
-    const [x, y, w, h] = b;
-    return [x + w / 2, y + h / 2];
+    const [x, y, width, height] = bounds;
+    return [x + width / 2, y + height / 2];
 }

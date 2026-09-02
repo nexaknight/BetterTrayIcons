@@ -3,14 +3,13 @@ import GLib from 'gi://GLib';
 import Shell from 'gi://Shell';
 
 import {warn} from '../../shared/logging.js';
-import {fileExists, readFileText, isCancelledError} from '../../shared/fetch.js';
+import {fileExists, readFileText, isCancelledError} from '../../shared/asyncIo.js';
 import {clearIds, disconnectAll, disconnectSignal, disposeAll, removeTimer} from '../../shared/lifecycle.js';
-import {isDisposed} from '../utils/actor.js';
-import {pickAppId} from '../utils/appId.js';
+import {isDisposed} from '../disposal.js';
+import {pickAppId} from '../identity/appId.js';
 import {forwardDragStateToIndicator} from '../features/dragAndDrop.js';
 import {BackgroundAppsProxyIcon, BACKGROUND_PROXY_ID_PREFIX} from './backgroundAppsProxyIcon.js';
 
-// The portal answers under the same string as its bus name and interface.
 const BACKGROUND_MONITOR_NAME = 'org.freedesktop.background.Monitor';
 
 const BACKGROUND_MONITOR_PATH = '/org/freedesktop/background/monitor';
@@ -18,10 +17,9 @@ const BACKGROUND_MONITOR_PATH = '/org/freedesktop/background/monitor';
 // Flatpak writes each running instance's sandbox pid below the user runtime dir.
 const FLATPAK_INSTANCE_DIR = '.flatpak';
 
-// One timer coalesces portal changes and tray-icon changes, so it doubles as
-// the wait before a proxy icon appears. Measured: the flatpak KeePassXC
-// registers its own tray item 1.25 s after launch, and anything near that
-// briefly doubles up on apps that do have an icon.
+// One timer coalesces portal and tray-icon changes, so it doubles as the wait
+// before a proxy icon appears. The flatpak KeePassXC registers its own tray
+// item 1.25 s after launch, and a shorter wait briefly doubles up on it.
 const BACKGROUND_PROXY_DEBOUNCE_MS = 4000;
 
 export class BackgroundAppsProxyWatcher {
@@ -40,12 +38,10 @@ export class BackgroundAppsProxyWatcher {
         this._settingsSignals.push(
             this._settings.connect('changed::enable-background-proxy', () => this._sync()),
             this._settings.connect('changed::hide-background-apps', () => this._sync()),
-            // An SNI icon seeds its app config as it registers, which is the only
-            // notice this bridge gets that an app grew a tray icon of its own.
             this._settings.connect('changed::app-configs', () => this._queueRefresh()));
-        // The mirror image: an app dropping its own tray icon while it keeps
-        // running windowless leaves nothing in the portal list to change, so
-        // the icon leaving the panel is the only cue that it now needs a proxy.
+        // An app that drops its own tray icon but keeps running windowless
+        // changes nothing in the portal list, so the icon leaving the panel is
+        // the only cue that it needs a proxy now.
         this._panelIndicator.setIconsChangedHandler(id => this._onPanelIconRemoved(id));
         this._sync();
     }
@@ -61,11 +57,10 @@ export class BackgroundAppsProxyWatcher {
             this._queueRefresh();
     }
 
-    // Every candidate comes from the same portal list GNOME shows in Quick
-    // Settings, so running while that list is up would show the app twice.
     _sync() {
-        if (this._settings.get_boolean('hide-background-apps') &&
-            this._settings.get_boolean('enable-background-proxy'))
+        const shouldRun = this._settings.get_boolean('hide-background-apps') &&
+            this._settings.get_boolean('enable-background-proxy');
+        if (shouldRun)
             this._start();
         else
             this._stop();
@@ -76,8 +71,6 @@ export class BackgroundAppsProxyWatcher {
             return;
         this._cancellable = new Gio.Cancellable();
 
-        // DO_NOT_AUTO_START, so asking for the list never launches the portal.
-        // The shell's own background apps menu talks to it the same way.
         Gio.DBusProxy.new(Gio.DBus.session, Gio.DBusProxyFlags.DO_NOT_AUTO_START, null,
             BACKGROUND_MONITOR_NAME, BACKGROUND_MONITOR_PATH, BACKGROUND_MONITOR_NAME,
             this._cancellable, (_source, result) => this._onProxyReady(result));
@@ -93,15 +86,10 @@ export class BackgroundAppsProxyWatcher {
             return;
         }
 
-        // A callback overtaken by _stop() never gets here: new_finish rechecks
+        // A callback overtaken by _stop() never gets here, new_finish rechecks
         // the cancellable (GTask check-cancellable) and throws into the catch.
         this._proxy = proxy;
-        // Property reloads after the portal appears arrive here too, so this one
-        // handler also covers a portal that was not running yet.
         this._proxySignalId = proxy.connect('g-properties-changed', () => this._queueRefresh());
-        // The debounce exists for apps that just launched, not for apps the
-        // portal has already listed stably while this bridge was off, so the
-        // very first look after (re)enabling skips the wait.
         this._queueRefresh(true);
     }
 
@@ -115,8 +103,6 @@ export class BackgroundAppsProxyWatcher {
             this._dropIcon(appId);
     }
 
-    // Keeps its deadline once armed: app-configs can churn faster than the
-    // delay, and a resetting debounce would starve the refresh forever.
     _queueRefresh(immediate = false) {
         if (!this._proxy || this._refreshId)
             return;
@@ -138,9 +124,6 @@ export class BackgroundAppsProxyWatcher {
         });
     }
 
-    // Candidates, then the liveness probe, then icons. Building one earlier
-    // would flash a second icon beside an app that turns out to have its own,
-    // or beside one that is already gone.
     async _refresh() {
         const cancellable = this._cancellable;
         const covered = this._coveredAppIds();
@@ -164,12 +147,8 @@ export class BackgroundAppsProxyWatcher {
         }
     }
 
-    // The bridge's own actors stay out, or every proxy icon would read as the
-    // reason for its own removal.
-    // An actor still identifying has no _appId and covers nothing yet. A
-    // portal-listed app can then carry one duplicate icon for a debounce
-    // period, until its identity seed queues the refresh that drops it.
-    // Waiting instead would starve on items that never identify.
+    // This watcher's own actors stay out, or every proxy icon would read as
+    // the reason for its own removal.
     _coveredAppIds() {
         const mine = new Set([...this._icons.values()].map(icon => icon.actor));
         const covered = new Set();
@@ -189,10 +168,7 @@ export class BackgroundAppsProxyWatcher {
         for (const entry of listed) {
             if (!entry.app_id || !entry.instance)
                 continue;
-            // The key an SNI item of the same flatpak would land on, which is
-            // what makes the comparison against live tray icons exact.
             const appId = pickAppId({packaging: {kind: 'flatpak', id: entry.app_id}});
-            // Without a desktop entry there is no icon and no name to render.
             const app = Shell.AppSystem.get_default().lookup_app(`${entry.app_id}.desktop`);
             if (!app)
                 continue;
@@ -230,9 +206,6 @@ export class BackgroundAppsProxyWatcher {
         const icon = new BackgroundAppsProxyIcon(appId, entry, this._settings, {
             onAfterClick: () => this._panelIndicator._handleIconClick(),
             onDragStateChange: forwardDragStateToIndicator(this._panelIndicator),
-            // The portal goes on listing the app it just lost, so without this
-            // the icon the user quit sits there until the portal catches up.
-            // The debounce outlasts the teardown, so the probe sees it gone.
             onQuit: () => this._queueRefresh(),
         });
         this._icons.set(appId, icon);
@@ -247,9 +220,8 @@ export class BackgroundAppsProxyWatcher {
     }
 }
 
-// The portal keeps listing an app long after it dies, measured at 25 s past a
-// flatpak kill, and GNOME shows that ghost too. The instance's own pid file is
-// what still tells the two apart.
+// The portal keeps listing an app for up to 25 s after a flatpak kill, so the
+// instance's own pid file tells the two apart.
 async function _instanceIsRunning(runtimeDir, instance, cancellable) {
     let pid;
     try {

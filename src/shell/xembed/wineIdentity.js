@@ -1,28 +1,18 @@
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 
-import {readDirNames, readFileText, readProcFile, readEnviron, isCancelledError} from '../../shared/fetch.js';
-import {APP_ID_EXE_SUFFIX_RE, sanitizeAppId} from '../utils/appId.js';
-import {WINE_LAUNCHER_BINARIES} from '../utils/dbus.js';
+import {readDirNames, readFileText, readProcFile, readEnviron, isCancelledError} from '../../shared/asyncIo.js';
+import {APP_ID_EXE_SUFFIX_RE, joinSplitId, sanitizeAppId} from '../identity/appId.js';
+import {WINE_LAUNCHER_BINARIES} from '../identity/processIdentity.js';
 
-// wm_class Wine assigns under Steam and umu, used as the Proton indicator.
-// A real appid suffix only repeats what the env walk already yields, and
-// umu stamps the same placeholder on every app, so steam_app_* never
-// identifies an app.
 const STEAM_APP_WMCLASS_RE = /^steam_app_/i;
 
-// Window classes that name the Wine build instead of the app, never usable
-// as app id, the launcher or prefix name wins over them. explorer.exe is
-// here because one explorer process owns every XEmbed tray window in a prefix.
+// Window classes that name the Wine build instead of the app. One explorer
+// process owns every XEmbed tray window in a prefix, so it shares one class.
 const PLACEHOLDER_WMCLASS_RE = /^(steam_app_.*|steam_proton|explorer(\.exe)?)$/i;
 
-// ~/.wine has no app name of its own, but every app in it still needs an
-// identity that isn't the shared placeholder wm_class.
 const DEFAULT_WINE_PREFIX_ID = 'wine-default';
 
-// Placeholder game-id values that identify no game. 'umu-default' is umu's
-// documented fallback, '0' is the SteamGameId Steam stamps on non-Steam
-// shortcuts.
 const GENERIC_UMU_GAME_IDS = new Set(['umu-default', 'default', '0']);
 
 // Per-app env vars launchers stamp on their games, inherited by the
@@ -33,56 +23,46 @@ const WINE_LAUNCHER_ENV_KEYS = Object.freeze(['FAUGUSID', 'HEROIC_APP_NAME', 'GA
 const PROC_WALK_MAX_DEPTH = 5;
 
 export async function deriveAppMeta(rawIcon, cancellable) {
-    const wmClass = _safeProp(rawIcon, 'wm_class');
+    const wmClass = safeProp(rawIcon, 'wm_class');
     const cleanWmClass = wmClass.replace(APP_ID_EXE_SUFFIX_RE, '');
-    const xTitle = _safeProp(rawIcon, 'title');
-    const id = await gatherWineIdentity(rawIcon, cancellable);
+    const xTitle = safeProp(rawIcon, 'title');
+    const identity = await gatherWineIdentity(rawIcon, cancellable);
 
-    const wmGeneric = STEAM_APP_WMCLASS_RE.test(wmClass);
-    const wmPlaceholder = PLACEHOLDER_WMCLASS_RE.test(wmClass);
+    const isSteamWmClass = STEAM_APP_WMCLASS_RE.test(wmClass);
+    const isPlaceholderWmClass = PLACEHOLDER_WMCLASS_RE.test(wmClass);
     const looksLikeExe = APP_ID_EXE_SUFFIX_RE.test(wmClass);
-    const isWine = id.isWine || looksLikeExe;
-    const isProton = id.isProton || wmGeneric;
+    const isWine = identity.isWine || looksLikeExe;
+    const isProton = identity.isProton || isSteamWmClass;
 
-    // No wine variable anywhere in the visible ancestry means Wine ran on its
-    // documented default prefix (measured: a plain-shell wine tree exports
-    // none of them). Without this every such app falls through to the shared
-    // placeholder class and they all collapse onto one entry.
-    if (isWine && !id.prefixId && !id.steamAppId)
-        id.prefixId = DEFAULT_WINE_PREFIX_ID;
+    // A plain-shell wine tree exports no wine variable at all, so an empty
+    // walk still means the default prefix.
+    if (isWine && !identity.prefixId && !identity.steamAppId)
+        identity.prefixId = DEFAULT_WINE_PREFIX_ID;
 
-    // Identifier preference: Steam appid > launcher/prefix name > wm_class >
-    // X11 title. wm_class beats X11 title because it stays stable across
-    // restarts, but a placeholder class naming the Wine build instead of the
-    // app loses to the launcher or prefix name.
+    // wm_class beats the title because it survives restarts, but a
+    // placeholder class loses to the launcher or prefix name.
     let candidate;
-    if (id.steamAppId)
-        candidate = `steam-app-${id.steamAppId}`;
-    // Every app in one prefix shows the same placeholder class, so the prefix
-    // alone would hand them all a single shared config entry.
-    else if (id.prefixId && (wmPlaceholder || !cleanWmClass))
-        candidate = _scopeToPrefix(id.prefixId, xTitle);
+    if (identity.steamAppId)
+        candidate = `steam-app-${identity.steamAppId}`;
+    else if (identity.prefixId && (isPlaceholderWmClass || !cleanWmClass))
+        candidate = joinSplitId(identity.prefixId, xTitle);
     else
         candidate = cleanWmClass || xTitle;
 
-    const wmName = wmPlaceholder ? '' : cleanWmClass;
-    const title = await steamAppNameFromManifest(id.steamAppId, cancellable) ||
-        wmName || id.launcherName || xTitle || id.prefixId || cleanWmClass;
+    const wmName = isPlaceholderWmClass ? '' : cleanWmClass;
+    const title = await steamAppNameFromManifest(identity.steamAppId, cancellable) ||
+        wmName || identity.launcherName || xTitle || identity.prefixId || cleanWmClass;
 
-    // No appId means nothing identified this window. A pid-based one would
-    // change on every launch and leave a dead config entry behind each time,
-    // so the icon renders but stays session-volatile.
     const appId = sanitizeAppId(candidate);
-    return {appId, isWine, isProton, steamAppId: id.steamAppId, title};
+    return {appId, isWine, isProton, title};
 }
 
-// Environ is inherited across fork(), so walking up the parent chain reaches
-// the Proton launcher even when the tray icon was registered by a wineserver
-// helper several levels deep.
+// Environ is inherited across fork(), so the parent chain reaches the Proton
+// launcher even when a wineserver helper registered the icon.
 async function gatherWineIdentity(rawIcon, cancellable) {
     const identity = newIdentity();
 
-    let pid = rawIcon.pid || 0;
+    let pid = rawIcon.pid;
     /* eslint-disable no-await-in-loop */
     for (let depth = 0; depth < PROC_WALK_MAX_DEPTH && pid && pid !== 1; depth++) {
         mergeEnvIdentity(identity, await readEnviron(pid, cancellable));
@@ -100,7 +80,7 @@ async function gatherWineIdentity(rawIcon, cancellable) {
     // Pressure-vessel runs Wine in its own pid namespace, so the pid X11
     // reports doesn't exist on the host and the walk above sees nothing.
     if (!identity.isWine && !identity.steamAppId && !identity.prefixId)
-        await adoptNamespacedIdentity(identity, rawIcon.pid || 0, cancellable);
+        await adoptNamespacedIdentity(identity, rawIcon.pid, cancellable);
 
     return identity;
 }
@@ -142,9 +122,6 @@ async function adoptNamespacedIdentity(identity, nsPid, cancellable) {
             probes.push(probe);
     }
 
-    // The flags survive an ambiguous match, every candidate is a Wine
-    // process, so the icon is one too. Only the app identity needs to
-    // be unique.
     for (const probe of probes) {
         identity.isWine ||= probe.isWine;
         identity.isProton ||= probe.isProton;
@@ -161,14 +138,10 @@ async function adoptNamespacedIdentity(identity, nsPid, cancellable) {
     }
 }
 
-// Icons usually appear in a burst on enable, one /proc sweep serves them
-// all. Pids go stale quickly, so the result never outlives the sweep.
 let _nsPidScan = null;
 
 function hostPidsForNsPid(nsPid) {
     _nsPidScan ??= buildNsPidMap().finally(() => (_nsPidScan = null));
-    // A failed sweep degrades to "no identity" like every other proc read.
-    // Left to propagate, the rejection would take down the whole wrapper.
     return _nsPidScan.then(map => map.get(nsPid) ?? [], () => []);
 }
 
@@ -192,10 +165,8 @@ async function buildNsPidMap() {
     return map;
 }
 
-
-// STEAM_COMPAT_DATA_PATH is set by Proton on every wine/wineserver process.
-// Better than SteamGameId (0 for non-Steam shortcuts) or the generic
-// "steam_app_<id>" wm_class.
+// Proton sets STEAM_COMPAT_DATA_PATH on every wine/wineserver process, while
+// SteamGameId is 0 for non-Steam shortcuts.
 function steamAppIdFromEnviron(env) {
     const compatMatch = env.get('STEAM_COMPAT_DATA_PATH')?.match(/\/compatdata\/(\d+)/);
     if (compatMatch && compatMatch[1] !== '0')
@@ -208,9 +179,6 @@ function steamAppIdFromEnviron(env) {
     return null;
 }
 
-// Wine launchers keep each prefix in its own named directory, so the name
-// is still a solid identity when nothing better exists. Numeric names
-// are compatdata layouts and belong to steamAppIdFromEnviron.
 function prefixIdFromEnviron(env) {
     const launcherName = launcherNameFromEnviron(env);
     if (launcherName)
@@ -237,12 +205,11 @@ function prefixIdFromEnviron(env) {
     return sanitizeAppId(name);
 }
 
-// Not sanitized, the raw value doubles as the display title.
 function launcherNameFromEnviron(env) {
     for (const key of WINE_LAUNCHER_ENV_KEYS) {
         const value = env.get(key)?.trim();
-        // Purely numeric values are store ids (GOG via Heroic), the
-        // prefix directory name makes the better title and id there.
+        // Purely numeric values are store ids (GOG via Heroic), the prefix
+        // directory name makes the better title there.
         if (value && !/^\d+$/.test(value))
             return value;
     }
@@ -252,7 +219,7 @@ function launcherNameFromEnviron(env) {
 async function exeBaseFromCmdline(pid, cancellable) {
     const raw = await readProcFile(pid, 'cmdline', cancellable);
     const first = raw?.split('\0')[0];
-    return first ? (first.split('/').pop() || '').toLowerCase() : null;
+    return first ? first.split('/').pop().toLowerCase() : null;
 }
 
 async function readPpid(pid, cancellable) {
@@ -297,17 +264,12 @@ async function steamAppNameFromManifest(appId, cancellable) {
 
 // The read itself throws for non-UTF-8 bytes, so the property access has to
 // sit inside the try, not its result.
-function _safeProp(obj, prop) {
+function safeProp(obj, prop) {
     try {
         return (obj[prop] ?? '').toString().trim();
     } catch {
         return '';
     }
-}
-
-function _scopeToPrefix(prefixId, xTitle) {
-    const scope = sanitizeAppId(xTitle);
-    return scope ? `${prefixId}@${scope}` : prefixId;
 }
 
 export function clearIdentityCaches() {

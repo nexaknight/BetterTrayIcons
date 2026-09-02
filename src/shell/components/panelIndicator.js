@@ -3,17 +3,18 @@ import St from 'gi://St';
 import Clutter from 'gi://Clutter';
 import GLib from 'gi://GLib';
 import * as DND from 'resource:///org/gnome/shell/ui/dnd.js';
-import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
 import {getAppConfigMap, setAppPriorities, byPriorityThenAppId, publishVisibleOrder, clearVisibleOrder} from '../../shared/appConfig.js';
 import {clearIds, debounceTo, disconnectAll, disconnectSignal, disposeAll, removeTimer} from '../../shared/lifecycle.js';
-import {connectColorSetChanges, isDisposed, moveActorToIndex, trackDisposal} from '../utils/actor.js';
+import {connectColorSetChanges} from '../trayStyle.js';
+import {isDisposed, trackDisposal} from '../disposal.js';
+import {moveActorToIndex} from '../actorPlacement.js';
 import {
     getDraggableFromSource,
     isPointInActor,
     slotIndexAt,
     dragStageCoords,
-} from './dropTarget.js';
+} from '../features/dropTarget.js';
 import {OverflowMenu} from './overflowMenu.js';
 import {ToggleButton} from './toggleButton.js';
 
@@ -22,11 +23,22 @@ const MENU_REGRAB_DELAY_MS = 0;
 const GEOMETRY_SETTLE_MS = 50;
 const DRAG_MOVE_DWELL_MS = 100;
 
-// Without a travel floor, tremor on a cell edge restarts the dwell forever
+// Without a travel floor, tremor on a cell edge restarts the dwell forever.
 const DRAG_RETARGET_TRAVEL_PX = 16;
 
 const DRAG_SLIDE_MS = 200;
 const DRAG_SLIDE_STAGGER_MS = 10;
+
+const LAYOUT_KEYS = Object.freeze([
+    'overflow-layout-mode',
+    'grid-column-limit',
+    'visible-icon-limit',
+    'toggle-position',
+    'enable-wine-support',
+]);
+
+// Inherit mode reads any icon-* key, so match by prefix.
+const STYLE_KEY_PREFIXES = Object.freeze(['toggle-', 'overflow-container-', 'icon-', 'enable-custom-']);
 
 export const PanelIndicator = GObject.registerClass({GTypeName: 'BetterTrayIconsPanelIndicator'},
     class PanelIndicator extends St.BoxLayout {
@@ -51,12 +63,11 @@ export const PanelIndicator = GObject.registerClass({GTypeName: 'BetterTrayIcons
             this._menuRegrabId = 0;
             this._reopenPopupId = 0;
             this._hoverOrderId = 0;
-            this._overflowMenu = null;
 
             this._menuRemovedForDrag = false;
             this._dragGrabActor = null;
             this._dragActive = false;
-            this._layoutAfterDrag = false;
+            this._needsLayoutAfterDrag = false;
             this._dragOrder = null;
             this._dropAccepted = false;
             this._dwellId = 0;
@@ -95,13 +106,6 @@ export const PanelIndicator = GObject.registerClass({GTypeName: 'BetterTrayIcons
             const queueLayout = () => this._queueUpdateLayout();
 
             this._settingsSignals = [];
-            const LAYOUT_KEYS = [
-                'overflow-layout-mode',
-                'grid-column-limit',
-                'visible-icon-limit',
-                'toggle-position',
-                'enable-wine-support',
-            ];
             for (const key of LAYOUT_KEYS)
                 this._settingsSignals.push(this._settings.connect(`changed::${key}`, queueLayout));
 
@@ -114,16 +118,12 @@ export const PanelIndicator = GObject.registerClass({GTypeName: 'BetterTrayIcons
             this._settingsSignals.push(this._settings.connect('changed::toggle-hover-menu',
                 () => this._toggleButton.applyHoverMenuOrder()));
 
-            // Inherit mode reads any icon-* key, so match by prefix.
-            const STYLE_KEY_PREFIXES = ['toggle-', 'overflow-container-', 'icon-', 'enable-custom-'];
             this._settingsSignals.push(this._settings.connect('changed', (_settings, key) => {
                 if (STYLE_KEY_PREFIXES.some(prefix => key.startsWith(prefix)))
                     this._updateStyle();
             }));
 
             this._colorSetWatch = connectColorSetChanges(this._settings, () => this._updateStyle());
-
-            this._enableCustomStyle = false;
 
             this._updateStyle();
             this._queueUpdateLayout();
@@ -150,44 +150,39 @@ export const PanelIndicator = GObject.registerClass({GTypeName: 'BetterTrayIcons
             this._onIconsChanged = callback;
         }
 
-        // The icon already fired its action, this only settles the popup.
         _handleIconClick() {
-            if (this._settings.get_boolean('keep-popup-after-click')) {
-                // The SNI action may shift focus, e.g. raise a window, which
-                // drops Shell's modal grab and closes the popup.
-                clearIds(this, removeTimer, '_reopenPopupId');
-
-                this._reopenPopupId = GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
-                    this._reopenPopupId = 0;
-                    if (!this._overflowMenu.isOpen &&
-                        this._settings.get_boolean('keep-popup-after-click'))
-                        this._overflowMenu.open();
-
-                    return GLib.SOURCE_REMOVE;
-                });
-            } else if (this._overflowMenu.isOpen) {
-                this._overflowMenu.close();
+            if (!this._settings.get_boolean('keep-popup-after-click')) {
+                if (this._overflowMenu.isOpen)
+                    this._overflowMenu.close();
+                return;
             }
+
+            // The SNI action may shift focus, e.g. raise a window, which
+            // drops Shell's modal grab and closes the popup.
+            clearIds(this, removeTimer, '_reopenPopupId');
+
+            this._reopenPopupId = GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
+                this._reopenPopupId = 0;
+                if (!this._overflowMenu.isOpen &&
+                    this._settings.get_boolean('keep-popup-after-click'))
+                    this._overflowMenu.open();
+
+                return GLib.SOURCE_REMOVE;
+            });
         }
 
-        // Reordering invisible icons would write the blob for nothing.
         _cycleIcons(reverse = false) {
-            const allItems = this._collectIconEntries(true);
-            if (allItems.length < 2)
+            const visibleItems = this._liveIconEntries().filter(item =>
+                !item.config?.is_hidden && item.actor.visible && item.actor.get_parent());
+            if (visibleItems.length < 2)
                 return;
 
             if (reverse)
-                allItems.unshift(allItems.pop());
+                visibleItems.unshift(visibleItems.pop());
             else
-                allItems.push(allItems.shift());
+                visibleItems.push(visibleItems.shift());
 
-            setAppPriorities(this._settings, allItems.map(item => item.appId));
-        }
-
-        _collectIconEntries(visibleOnly = false) {
-            return this._liveIconEntries().filter(item =>
-                !item.config?.is_hidden &&
-                (!visibleOnly || (item.actor.visible && item.actor.get_parent())));
+            setAppPriorities(this._settings, visibleItems.map(item => item.appId));
         }
 
         _liveIconEntries() {
@@ -195,7 +190,7 @@ export const PanelIndicator = GObject.registerClass({GTypeName: 'BetterTrayIcons
 
             const items = [];
             for (const [id, actor] of this._icons) {
-                if (!actor || !actor.get_parent || isDisposed(actor)) {
+                if (isDisposed(actor)) {
                     this._icons.delete(id);
                     continue;
                 }
@@ -221,11 +216,11 @@ export const PanelIndicator = GObject.registerClass({GTypeName: 'BetterTrayIcons
             // The drag actor must stay where DND parked it, rerun after
             // the drop.
             if (this._dragActive) {
-                this._layoutAfterDrag = true;
+                this._needsLayoutAfterDrag = true;
                 return;
             }
 
-            const togglePos = this._settings.get_string('toggle-position');
+            const togglePosition = this._settings.get_string('toggle-position');
             const wineEnabled = this._settings.get_boolean('enable-wine-support');
 
             const sortedActors = [];
@@ -263,7 +258,7 @@ export const PanelIndicator = GObject.registerClass({GTypeName: 'BetterTrayIcons
 
             // A remove plus add would unmap the toggle for a moment, and the
             // popup closes as soon as its source actor, the toggle, unmaps.
-            const order = hasOverflow && togglePos === 'left'
+            const order = hasOverflow && togglePosition === 'left'
                 ? [toggleActor, this._visibleBox]
                 : [this._visibleBox, toggleActor];
             order.forEach((child, index) => moveActorToIndex(child, this, index));
@@ -288,8 +283,8 @@ export const PanelIndicator = GObject.registerClass({GTypeName: 'BetterTrayIcons
             for (const [id, actor] of this._icons) {
                 // Keyed by the item because two items can share an appId.
                 const appId = actor._appId;
-                const c = appId && configMap[appId];
-                parts.push(`${id}:${c?.is_hidden ? 1 : 0}:${c?.priority ?? 0}`);
+                const config = appId && configMap[appId];
+                parts.push(`${id}:${config?.is_hidden ? 1 : 0}:${config?.priority ?? 0}`);
             }
             parts.sort();
             return parts.join('|');
@@ -298,63 +293,48 @@ export const PanelIndicator = GObject.registerClass({GTypeName: 'BetterTrayIcons
         _updateStyle() {
             this._toggleButton.updateStyle();
 
-            this._enableCustomStyle = this._settings.get_boolean('enable-custom-overflow-style');
-            this._overflowMenu.applyStyle(this._enableCustomStyle);
+            this._overflowMenu.applyStyle(this._settings.get_boolean('enable-custom-overflow-style'));
             // applyStyle measures the children before a shrink has relaid
             // them out, so the old width wins the max. Measure again settled.
             debounceTo(this, '_settleTimeoutId', GEOMETRY_SETTLE_MS, () => this._overflowMenu.updateGeometry());
         }
 
         // Close before detaching, removeMenu on an open menu only drops the
-        // grab and the next emit would pop a modal that is already gone. The
-        // reopen then runs without a manager grab, so DND keeps its own.
+        // grab and the next emit would pop a modal that is already gone.
+        // The reopen then runs without a manager grab, so DND keeps its own.
         _onAnyDragBegin() {
             this._dragActive = true;
             this._dropAccepted = false;
-            // The whole arrangement, the neighbours move between the
-            // containers too and a cancel writes nothing that would restore them.
             this._dragOrder = this._iconsInVisualOrder().map(entry => entry.actor);
             this._claimDragGrab();
 
             if (!this._toggleButton.actor.visible)
                 return;
 
-            if (Main.panel.menuManager && !this._menuRemovedForDrag) {
-                if (this._overflowMenu.isOpen) {
-                    try {
-                        this._overflowMenu.close();
-                    } catch { /* menu already closed */ }
-                }
+            if (!this._menuRemovedForDrag) {
+                if (this._overflowMenu.isOpen)
+                    this._overflowMenu.close();
                 this._menuRemovedForDrag = true;
-                try {
-                    this._overflowMenu.detachFromManager();
-                } catch { /* not in manager */ }
+                this._overflowMenu.detachFromManager();
             }
 
-            if (!this._overflowMenu.isOpen) {
-                try {
-                    this._overflowMenu.open();
-                } catch { /* menu disposed mid-drag */ }
-            }
+            if (!this._overflowMenu.isOpen)
+                this._overflowMenu.open();
         }
 
-        // DND grabs a bare actor in uiGroup, auto-hiding panels like Dash
-        // to Panel see no grab of their own and hide mid-drag. _sourceActor
-        // links the grab back to us in the panel.
+        // DND grabs a bare actor in uiGroup, auto-hiding panels like
+        // Dash to Panel see no grab of their own and hide mid-drag.
+        // _sourceActor links the grab back to us in the panel.
         _claimDragGrab() {
             const grabActor = global.stage.get_grab_actor();
-            if (!grabActor || grabActor._sourceActor)
-                return;
             grabActor._sourceActor = this;
             this._dragGrabActor = grabActor;
         }
 
-        // The grab actor is shared by every drag, the tag must come off.
         _releaseDragGrab() {
             if (!this._dragGrabActor)
                 return;
-            if (this._dragGrabActor._sourceActor === this)
-                this._dragGrabActor._sourceActor = null;
+            this._dragGrabActor._sourceActor = null;
             this._dragGrabActor = null;
         }
 
@@ -369,8 +349,8 @@ export const PanelIndicator = GObject.registerClass({GTypeName: 'BetterTrayIcons
                 this._restoreDragOrder();
             this._dragOrder = null;
             this._dropAccepted = false;
-            if (this._layoutAfterDrag) {
-                this._layoutAfterDrag = false;
+            if (this._needsLayoutAfterDrag) {
+                this._needsLayoutAfterDrag = false;
                 this._queueUpdateLayout();
             }
 
@@ -379,9 +359,8 @@ export const PanelIndicator = GObject.registerClass({GTypeName: 'BetterTrayIcons
             this._menuRemovedForDrag = false;
             this._toggleButton.applyHoverMenuOrder();
 
-            // A reorder fires no app action, keep-popup-after-click has no
-            // say here. DND pops its own grab right after this handler, so
-            // the regrab waits a turn.
+            // DND pops its own grab right after this handler, so the regrab
+            // waits a turn.
             debounceTo(this, '_menuRegrabId', MENU_REGRAB_DELAY_MS, () => {
                 this._overflowMenu.attachToManager();
                 // Reorder before the grab comes back, the hover switch picks
@@ -398,21 +377,29 @@ export const PanelIndicator = GObject.registerClass({GTypeName: 'BetterTrayIcons
             if (!actor)
                 return DND.DragMotionResult.NO_DROP;
 
-            const [sx, sy] = dragStageCoords(dragActor);
+            const [stageX, stageY] = dragStageCoords(dragActor);
             const current = this._iconsInVisualOrder().map(entry => entry.actor);
-            const target = this._dropSlotAt(actor, current, sx, sy);
+            const target = this._dropSlotAt(actor, current, stageX, stageY);
             const order = current.slice();
             order.splice(order.indexOf(actor), 1);
             order.splice(target, 0, actor);
 
             if (sameOrder(order, current)) {
                 this._cancelPreview();
-            } else if (!this._pendingOrder || (!sameOrder(order, this._pendingOrder) &&
-                Math.hypot(sx - this._pendingAnchor[0], sy - this._pendingAnchor[1]) >= DRAG_RETARGET_TRAVEL_PX)) {
-                this._pendingOrder = order;
-                this._pendingAnchor = [sx, sy];
-                debounceTo(this, '_dwellId', DRAG_MOVE_DWELL_MS, () => this._commitPreview());
+                return DND.DragMotionResult.MOVE_DROP;
             }
+
+            if (this._pendingOrder) {
+                const [anchorX, anchorY] = this._pendingAnchor;
+                const isSameTarget = sameOrder(order, this._pendingOrder);
+                const travelPx = Math.hypot(stageX - anchorX, stageY - anchorY);
+                if (isSameTarget || travelPx < DRAG_RETARGET_TRAVEL_PX)
+                    return DND.DragMotionResult.MOVE_DROP;
+            }
+
+            this._pendingOrder = order;
+            this._pendingAnchor = [stageX, stageY];
+            debounceTo(this, '_dwellId', DRAG_MOVE_DWELL_MS, () => this._commitPreview());
             return DND.DragMotionResult.MOVE_DROP;
         }
 
@@ -420,17 +407,15 @@ export const PanelIndicator = GObject.registerClass({GTypeName: 'BetterTrayIcons
             this._applyPending(true);
         }
 
-        // Applies the newest target right away, so the write matches the
-        // release position.
         _flushPreview() {
             this._applyPending(false);
         }
 
-        _applyPending(slide) {
+        _applyPending(shouldSlide) {
             const order = this._pendingOrder;
             this._cancelPreview();
             if (order && this._dragActive)
-                this._placeIntoContainers(order, slide);
+                this._placeIntoContainers(order, shouldSlide);
         }
 
         _cancelPreview() {
@@ -462,8 +447,6 @@ export const PanelIndicator = GObject.registerClass({GTypeName: 'BetterTrayIcons
             return true;
         }
 
-        // Over the popup the slot starts behind the inline icons, otherwise
-        // the split would pull the drop straight back into the panel.
         _dropSlotAt(dragged, current, x, y) {
             const overflow = this._overflowMenu.container;
             if (this._overflowMenu.isOpen && isPointInActor(x, y, overflow)) {
@@ -478,16 +461,13 @@ export const PanelIndicator = GObject.registerClass({GTypeName: 'BetterTrayIcons
             return Math.min(total, this._settings.get_int('visible-icon-limit'));
         }
 
-        // The one rule that decides panel versus popup, with a second rule
-        // a drop into the popup would come straight back inline.
-        _placeIntoContainers(actors, slide = false) {
+        _placeIntoContainers(actors, shouldSlide = false) {
             const visibleCount = this._visibleCountFor(actors.length);
-            let staggered = 0;
             actors.forEach((actor, index) => {
-                const inline = index < visibleCount;
-                const parent = inline ? this._visibleBox : this._overflowMenu.container;
-                if (slide) {
-                    this._slideFromCurrent(actor, staggered++ * DRAG_SLIDE_STAGGER_MS);
+                const isInline = index < visibleCount;
+                const parent = isInline ? this._visibleBox : this._overflowMenu.container;
+                if (shouldSlide) {
+                    this._slideFromCurrent(actor, index * DRAG_SLIDE_STAGGER_MS);
                 } else {
                     // A reparent kills a running slide mid-value, the icon
                     // would stay stuck at the leftover offset.
@@ -496,13 +476,12 @@ export const PanelIndicator = GObject.registerClass({GTypeName: 'BetterTrayIcons
                     actor.set_translation(0, 0, 0);
                 }
                 moveActorToIndex(actor, parent,
-                    inline ? index : index - visibleCount);
+                    isInline ? index : index - visibleCount);
             });
         }
 
-        // The tree commits at once, the icon paints at its old spot via a
-        // translation easing to zero. Translations never fight a layout
-        // pass, and stage deltas let icons glide across the containers.
+        // Translations never fight a layout pass, and stage deltas let icons
+        // glide across the containers.
         _slideFromCurrent(actor, delay) {
             // A never-allocated actor has no old spot to slide from, its
             // box is garbage.
@@ -543,14 +522,12 @@ export const PanelIndicator = GObject.registerClass({GTypeName: 'BetterTrayIcons
             this._slideWatches.clear();
         }
 
-        // Reads back the order the user sees. Unidentified icons stay in so
-        // a preview or a cancel can place them, only the write drops them.
         _iconsInVisualOrder() {
             const entries = [];
             for (const container of [this._visibleBox, this._overflowMenu.container]) {
                 for (const actor of container.get_children()) {
                     if (actor.visible)
-                        entries.push({appId: actor._appId ?? null, actor});
+                        entries.push({appId: actor._appId, actor});
                 }
             }
             return entries;
@@ -564,8 +541,7 @@ export const PanelIndicator = GObject.registerClass({GTypeName: 'BetterTrayIcons
         }
 
         // destroy() and the destroy signal both land here, either can come
-        // first. Two separate lists drifted apart before and left timers
-        // running past disable().
+        // first.
         _teardown() {
             disconnectSignal(this, this, '_destroyHandlerId');
             clearIds(this, removeTimer,
@@ -588,7 +564,6 @@ export const PanelIndicator = GObject.registerClass({GTypeName: 'BetterTrayIcons
                 '_visibleBox',
                 '_toggleButton'
             );
-            clearIds(this, removeTimer, '_hoverOrderId');
 
             this._icons.clear();
             super.destroy();

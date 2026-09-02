@@ -1,7 +1,7 @@
 extension.js
 prefs.js
 src/shell/backgroundAppsProxy/backgroundAppsProxyIcon.js
-src/shell/panel/toggleButton.js
+src/shell/components/toggleButton.js
 src/prefs/pages/about.js
 src/prefs/pages/action.js
 src/prefs/pages/appearance.js

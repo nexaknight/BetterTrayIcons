@@ -3,14 +3,14 @@ import Gio from 'gi://Gio';
 import Shell from 'gi://Shell';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
-import {warn, error} from '../../shared/logging.js';
-import {isCancelledError} from '../../shared/fetch.js';
+import {warn} from '../../shared/logging.js';
+import {isCancelledError} from '../../shared/asyncIo.js';
 import {getAppConfigMap} from '../../shared/appConfig.js';
 import {disconnectSignal, disconnectAll, disposeAll} from '../../shared/lifecycle.js';
 import {forwardDragStateToIndicator} from '../features/dragAndDrop.js';
 import {clearIdentityCaches} from './wineIdentity.js';
 import {XEmbedTrayIcon} from './xembedTrayIcon.js';
-import {connectColorSetChanges, popupUsesLightStyle} from '../utils/actor.js';
+import {connectColorSetChanges, popupUsesLightStyle} from '../trayStyle.js';
 import {colorKeyFor, withLightTwins} from '../../shared/colorVariant.js';
 
 // Matches the shell's .popup-menu-content background.
@@ -37,29 +37,21 @@ export class XEmbedTrayBridge {
     }
 
     // Toggling the setting only flips wrapper visibility. unmanage_screen()
-    // would force every Wine client to drop its tray icon, and most Wine
-    // builds don't re-register on the MANAGER ClientMessage when reclaimed.
+    // makes every Wine client drop its tray icon and most builds never
+    // re-register on the MANAGER ClientMessage.
     _sync() {
         const enabled = this._settings.get_boolean('enable-wine-support');
         if (enabled && !this._tray)
             this._start();
-        // Respect is_hidden here too, the layout pass corrects it only
-        // after its debounce and user-hidden icons would flash visible.
+        // Respect is_hidden here too, the layout pass corrects it only after
+        // its debounce and user-hidden icons would flash visible.
         const configMap = getAppConfigMap(this._settings);
         for (const wrapper of this._wrappers.values())
             wrapper.actor.visible = enabled && !configMap[wrapper.appId]?.is_hidden;
     }
 
     _start() {
-        if (this._tray)
-            return;
-
-        try {
-            this._tray = new Shell.TrayManager({bgColor: this._resolveBgColor()});
-        } catch (e) {
-            error('XEmbedTrayBridge: failed to construct Shell.TrayManager', e);
-            return;
-        }
+        this._tray = new Shell.TrayManager({bgColor: this._resolveBgColor()});
 
         this._traySignals.push(this._tray.connect('tray-icon-added',
             (_t, icon) => this._onIconAdded(icon)));
@@ -95,7 +87,7 @@ export class XEmbedTrayBridge {
 
     _resolveBgColor() {
         const css = this._preferredBgCss();
-        return parseCssColor(css) ?? getFallbackBgColor();
+        return parseCssColor(css) ?? parseCssColor(XEMBED_BG_FALLBACK_HEX);
     }
 
     _preferredBgCss() {
@@ -112,8 +104,8 @@ export class XEmbedTrayBridge {
         if (!this._tray)
             return;
 
-        // Abort any in-flight wrapper creations so their awaits short-circuit
-        // before they try to touch torn-down state.
+        // Cancel in-flight creations so their awaits short-circuit before
+        // they touch torn-down state.
         for (const cancellable of this._pendingCreates.values())
             cancellable.cancel();
         this._pendingCreates.clear();
@@ -134,9 +126,6 @@ export class XEmbedTrayBridge {
     }
 
     async _onIconAdded(rawIcon) {
-        if (!rawIcon || this._wrappers.has(rawIcon) || this._pendingCreates.has(rawIcon))
-            return;
-
         const cancellable = new Gio.Cancellable();
         this._pendingCreates.set(rawIcon, cancellable);
 
@@ -158,9 +147,8 @@ export class XEmbedTrayBridge {
             this._pendingCreates.delete(rawIcon);
         }
 
-        // Bridge state may have changed during async meta resolution: the bridge
-        // could have been stopped, or a removed→added cycle could have raced past us.
-        if (cancellable.is_cancelled() || !this._tray || this._wrappers.has(rawIcon)) {
+        // Stopped while the meta resolution was in flight.
+        if (cancellable.is_cancelled()) {
             wrapper.destroy();
             return;
         }
@@ -195,12 +183,4 @@ export class XEmbedTrayBridge {
 function parseCssColor(css) {
     const [ok, parsed] = Cogl.color_from_string(css);
     return ok ? parsed : null;
-}
-
-let _bgFallbackColor;
-
-function getFallbackBgColor() {
-    if (_bgFallbackColor === undefined)
-        _bgFallbackColor = parseCssColor(XEMBED_BG_FALLBACK_HEX);
-    return _bgFallbackColor;
 }

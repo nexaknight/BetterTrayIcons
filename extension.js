@@ -5,17 +5,18 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 
 import {error, warn, clearWarnedOnce} from './src/shared/logging.js';
-import {readFileText, isCancelledError} from './src/shared/fetch.js';
+import {readFileText, isCancelledError} from './src/shared/asyncIo.js';
 import {importSettingsFromJSON, probeImportIconPaths, saveSettingsToFile, isOwnSyncSource} from './src/shared/settingsIO.js';
 import {clearIds, debounceTo, disconnectSignal, disconnectAll, disposeAll, removeTimer} from './src/shared/lifecycle.js';
 import {clearSeenCache, userConfigSignature} from './src/shared/appConfig.js';
-import {clearDetachedMenuManager, placeIndicatorInPanel} from './src/shell/utils/actor.js';
-import {clearIconCaches} from './src/shell/utils/icons.js';
-import {enableLauncherEntries, disableLauncherEntries} from './src/shell/utils/launcherEntries.js';
-import {clearItemSplits} from './src/shell/utils/itemSplit.js';
+import {clearDetachedMenuManager} from './src/shell/popupMenus.js';
+import {placeIndicatorInPanel} from './src/shell/actorPlacement.js';
+import {clearIconCaches} from './src/shell/icons/iconResolver.js';
+import {enableLauncherEntries, disableLauncherEntries} from './src/shell/features/launcherEntries.js';
+import {clearItemSplits} from './src/shell/identity/itemSplit.js';
 import {accentValueKeeping} from './src/shared/accentColor.js';
 
-import {PanelIndicator} from './src/shell/panel/panelIndicator.js';
+import {PanelIndicator} from './src/shell/components/panelIndicator.js';
 import {SniWatcher} from './src/shell/sni/sniWatcher.js';
 import {XEmbedTrayBridge} from './src/shell/xembed/xembedBridge.js';
 import {BackgroundApps} from './src/shell/features/backgroundApps.js';
@@ -66,18 +67,15 @@ export default class BetterTrayIconsExtension extends Extension {
 
             enableLauncherEntries();
 
-            this._manager = new SniWatcher(this.dir, this._indicator, this._settings);
-            this._manager.enable();
+            this._sniWatcher = new SniWatcher(this.dir, this._indicator, this._settings);
+            this._sniWatcher.enable();
 
-            // The bridge gates itself on `enable-wine-support`.
             this._xembedBridge = new XEmbedTrayBridge(this._settings, this._indicator);
             this._xembedBridge.enable();
 
             this._backgroundApps = new BackgroundApps(this._settings);
             this._backgroundApps.enable();
 
-            // The watcher gates itself on `hide-background-apps` plus
-            // `enable-background-proxy`.
             this._backgroundAppsProxyWatcher = new BackgroundAppsProxyWatcher(this._settings, this._indicator);
             this._backgroundAppsProxyWatcher.enable();
         } catch (e) {
@@ -126,8 +124,6 @@ export default class BetterTrayIconsExtension extends Extension {
 
     _queueSyncImport(file) {
         debounceTo(this, '_syncDebounceId', AUTO_SYNC_DEBOUNCE_MS, () => {
-            // Cancellable lets disable() abort the read before it touches
-            // a nulled `this._settings`.
             disposeAll(this, 'cancel', '_syncCancellable');
             this._syncCancellable = new Gio.Cancellable();
 
@@ -145,18 +141,15 @@ export default class BetterTrayIconsExtension extends Extension {
                     return;
 
                 // The flag covers import echoes delivered inside apply().
-                // A time window instead would also swallow whatever the
-                // user changed while it was open.
-                this._importing = true;
+                this._isImporting = true;
                 try {
                     importSettingsFromJSON(this._settings, data, iconPaths, {merge: true});
                 } finally {
-                    this._importing = false;
+                    this._isImporting = false;
                 }
-                // Measured in the live shell the change echo can also land
-                // after the flag drops. Re-stamp by hand, or the next
-                // app-configs write counts the imported changes as the
-                // user's and pushes a file we just read.
+                // The change echo can land after the flag drops. Re-stamp by
+                // hand, or the next app-configs write counts the imported
+                // changes as the user's and pushes a file we just read.
                 this._lastUserConfig = userConfigSignature(this._settings);
             }).catch(e => {
                 if (!isCancelledError(e))
@@ -177,7 +170,7 @@ export default class BetterTrayIconsExtension extends Extension {
         this._autoPushSignalId = this._settings.connect('changed', (_s, key) => {
             if (key === 'sync-file-path' || key === 'enable-auto-sync')
                 return;
-            if (this._importing)
+            if (this._isImporting)
                 return;
             // The sync metadata moves in lockstep with app-configs, so a
             // metadata-only write (a tombstone pruned on migration) must not
@@ -217,7 +210,7 @@ export default class BetterTrayIconsExtension extends Extension {
         disconnectSignal(this, this._fileMonitor, '_fileMonitorSignalId');
 
         disposeAll(this, 'cancel', '_fileMonitor', '_syncCancellable');
-        disposeAll(this, 'disable', '_backgroundAppsProxyWatcher', '_backgroundApps', '_xembedBridge', '_manager');
+        disposeAll(this, 'disable', '_backgroundAppsProxyWatcher', '_backgroundApps', '_xembedBridge', '_sniWatcher');
         disposeAll(this, 'destroy', '_indicator');
         disableLauncherEntries();
         clearDetachedMenuManager();
@@ -230,16 +223,12 @@ export default class BetterTrayIconsExtension extends Extension {
 }
 
 // Removed keys still hold whatever an older version wrote. The legacy schema
-// sits on the same dconf path, so these can still read them. Both go quiet
-// once they have run.
+// sits on the same dconf path, so these can still read them.
 function _runMigrations(settings, legacy) {
     _migrateTrayIconPadding(settings, legacy);
     _migrateAccentColors(settings, legacy);
 }
 
-// Tray-icon padding moved from 2 non-directional keys to 4 directional ones
-// in 3.0.0. get_user_value stays null while a key sits at its schema default,
-// so once the new keys move off it this does nothing on any later run.
 function _migrateTrayIconPadding(settings, legacy) {
     const newKeysUntouched = ['icon-padding-top', 'icon-padding-bottom', 'icon-padding-left', 'icon-padding-right']
         .every(key => settings.get_user_value(key) === null);
@@ -256,10 +245,6 @@ function _migrateTrayIconPadding(settings, legacy) {
     settings.set_int('icon-padding-bottom', vertical);
 }
 
-// Following the system accent used to be a boolean next to every color key.
-// The color value carries it now, and keeps the old color behind it so the
-// switch has something to turn back to. Dropping the boolean stops this from
-// running a second time.
 function _migrateAccentColors(settings, legacy) {
     for (const accentKey of legacy.settings_schema.list_keys()) {
         if (!accentKey.endsWith('-use-accent-color') || legacy.get_user_value(accentKey) === null)

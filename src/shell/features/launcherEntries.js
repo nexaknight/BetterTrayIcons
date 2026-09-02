@@ -2,12 +2,9 @@ import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import Shell from 'gi://Shell';
 
-import {callDBusDaemon} from './dbus.js';
+import {callDBusDaemon} from '../dbusCalls.js';
 
-// SNI has no unread-count property, apps bake the number into their icon
-// pixmap. The count itself is broadcast on the Unity LauncherEntry
-// interface (Telegram emits it directly, Electron apps via setBadgeCount),
-// so one bus-wide subscription is the only way to render it as a badge.
+// SNI has no unread-count property, apps bake the number into their icon pixmap.
 const LAUNCHER_ENTRY_IFACE = 'com.canonical.Unity.LauncherEntry';
 
 const APP_URI_PREFIX = 'application://';
@@ -20,14 +17,10 @@ const _pidTarget = pid => `${PID_TARGET_PREFIX}${pid}`;
 // A second digit no longer fits the badge at panel icon sizes.
 const UNREAD_BADGE_MAX = 9;
 
-// Launchers and apps disagree on desktop-id casing (our appIds are
-// lowercased, the LauncherEntry uri carries the app's own), so every key
-// in these maps is stored and compared lowercase.
-// target -> {count, visible, sender}
+// Launchers and apps disagree on desktop-id casing, so every desktop-id key
+// here is stored and compared lowercase.
 const _entries = new Map();
-// sender unique name -> {watchId, pid, targets: Set<target>}
 const _senders = new Map();
-// target -> Set<callback>
 const _listeners = new Map();
 
 let _subscriptionId = 0;
@@ -54,14 +47,14 @@ export function disableLauncherEntries() {
 }
 
 export function unreadBadge(targets) {
-    const count = unreadCountFor(targets);
+    const count = _unreadCountFor(targets);
     if (count === null)
         return null;
     return {text: count > UNREAD_BADGE_MAX ? `${UNREAD_BADGE_MAX}+` : String(count)};
 }
 
-function unreadCountFor(targets) {
-    for (const target of targets ?? []) {
+function _unreadCountFor(targets) {
+    for (const target of targets) {
         const entry = _entries.get(target);
         if (entry && entry.visible && entry.count > 0)
             return entry.count;
@@ -69,35 +62,42 @@ function unreadCountFor(targets) {
     return null;
 }
 
-// The desktop id needs a mapped window and a tray-parked chat app has none.
-// Outside a flatpak, whose appId already carries the id, the emitting process
-// closes that gap.
+// The desktop id needs a mapped window and a tray-parked chat app has none, so
+// outside a flatpak the emitting process closes that gap.
 export function unreadTargets({pid = null, appId = null, packagingKind = null} = {}) {
     const out = new Set();
     if (pid)
         out.add(_pidTarget(pid));
-    const tracked = pid
-        ? Shell.WindowTracker.get_default().get_app_from_pid(pid)?.get_id() ?? null
-        : null;
+    const tracked = _appFromPid(pid)?.get_id();
     if (tracked)
         out.add(tracked.toLowerCase());
-    if (packagingKind === 'flatpak' && appId?.startsWith(FLATPAK_APP_ID_PREFIX))
-        out.add(`${appId.slice(FLATPAK_APP_ID_PREFIX.length)}.desktop`);
+    const desktopId = _flatpakDesktopId(appId, packagingKind);
+    if (desktopId)
+        out.add(desktopId);
     return [...out];
 }
 
+function _appFromPid(pid) {
+    return pid ? Shell.WindowTracker.get_default().get_app_from_pid(pid) : null;
+}
+
+function _flatpakDesktopId(appId, packagingKind) {
+    return packagingKind === 'flatpak' && appId?.startsWith(FLATPAK_APP_ID_PREFIX)
+        ? `${appId.slice(FLATPAK_APP_ID_PREFIX.length)}.desktop`
+        : null;
+}
+
 export function addUnreadListener(targets, callback) {
-    const keys = (targets ?? []).filter(target => target);
-    if (keys.length === 0)
+    if (targets.length === 0)
         return null;
-    for (const key of keys) {
+    for (const key of targets) {
         let set = _listeners.get(key);
         if (!set)
             _listeners.set(key, set = new Set());
         set.add(callback);
     }
     return () => {
-        for (const key of keys) {
+        for (const key of targets) {
             const set = _listeners.get(key);
             set?.delete(callback);
             if (set?.size === 0)
@@ -109,21 +109,19 @@ export function addUnreadListener(targets, callback) {
 function _onUpdate(sender, params) {
     // The subscription matches on name alone, so a peer can serve any
     // signature and its values are its own to choose.
-    const unpacked = params.deep_unpack();
-    if (!Array.isArray(unpacked))
+    const [appUri, props] = params.deep_unpack();
+    if (typeof appUri !== 'string' || !appUri.startsWith(APP_URI_PREFIX))
         return;
-    const [appUri, props] = unpacked;
-    if (typeof appUri !== 'string' || !appUri.startsWith(APP_URI_PREFIX) ||
-        !props || typeof props !== 'object')
+    if (!props || typeof props !== 'object')
         return;
     const desktopId = appUri.slice(APP_URI_PREFIX.length).toLowerCase();
 
     const entry = _entries.get(desktopId) ?? {count: 0, visible: false};
     const prevCount = entry.count;
     const prevVisible = entry.visible;
-    if ('count' in props)
+    if (props['count'] instanceof GLib.Variant)
         entry.count = Number(props['count'].deep_unpack());
-    if ('count-visible' in props)
+    if (props['count-visible'] instanceof GLib.Variant)
         entry.visible = !!props['count-visible'].deep_unpack();
     // Latest emitter owns the entry, so an old instance dying right after a
     // restart cannot wipe what the new one just published.
@@ -141,7 +139,7 @@ function _onUpdate(sender, params) {
 }
 
 // A killed app never retracts its entry, so the count would stick on the
-// badge forever. Watching the emitting connection drops it with the app.
+// badge forever.
 function _watchSender(sender, desktopId) {
     let record = _senders.get(sender);
     if (!record) {
@@ -155,9 +153,8 @@ function _watchSender(sender, desktopId) {
     return record;
 }
 
-// The bus answers with the pid only after a round trip, so the first
-// emission of a freshly seen sender still has to reach its listeners once
-// the answer lands.
+// The bus answers with the pid only after a round trip, so the first emission
+// of a freshly seen sender has to reach its listeners once the answer lands.
 async function _lookupSenderPid(sender, record) {
     let pid = null;
     try {

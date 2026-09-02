@@ -1,4 +1,3 @@
-
 const LOG_PREFIX = '[BetterTrayIcons] ';
 
 const _warnedKeys = new Set();
@@ -7,8 +6,6 @@ export function warn(msg) {
     console.warn(`${LOG_PREFIX}${msg}`);
 }
 
-// For failures that repeat with every icon update or blob parse. The first
-// line is the diagnostic, repeats would only flood the journal.
 export function warnOnce(key, msg) {
     if (_warnedKeys.has(key))
         return;

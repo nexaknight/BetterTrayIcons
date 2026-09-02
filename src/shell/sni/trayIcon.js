@@ -3,12 +3,16 @@ import GLib from 'gi://GLib';
 import {warn, warnOnce} from '../../shared/logging.js';
 import {configRenderDelta, getAppConfigMap, getAppConfigValue, setAppConfigValue, updateAppConfig, reseedIfForgotten, formatAppName, isVolatileIconName, unreadBadgeEnabled} from '../../shared/appConfig.js';
 import {clearIds, debounceTo, disconnectSignal, disconnectAll, disposeAll, removeTimer, ruleDispatcher} from '../../shared/lifecycle.js';
-import {getItemAddress, refreshPropertyOnProxy, refreshStringOnProxy} from '../utils/dbus.js';
-import {identifyApp, resolveTrayIcon} from '../utils/icons.js';
-import {pickDisplayTitle} from '../utils/appId.js';
-import {forgetItem} from '../utils/itemSplit.js';
-import {attachStatusIcon, connectColorSetChanges, connectSurfaceChanges, isDisposed, trackDisposal, createPanelMenu, menuAnchorFor, menuManagerFor, destroyMenuSafely, refreshTrayStyle, setBadgeContent, setIconContent, syncHoverStyle, POPUP_ANIMATION_NONE} from '../utils/actor.js';
-import {addUnreadListener, unreadTargets} from '../utils/launcherEntries.js';
+import {getItemAddress, refreshPropertyOnProxy, refreshStringOnProxy} from '../dbusCalls.js';
+import {identifyApp, resolveTrayIcon} from '../icons/iconResolver.js';
+import {pickDisplayTitle} from '../identity/appId.js';
+import {forgetItem} from '../identity/itemSplit.js';
+import {attachStatusIcon, setBadgeContent, setIconContent} from '../icons/iconContent.js';
+import {connectColorSetChanges, refreshTrayStyle, syncHoverStyle} from '../trayStyle.js';
+import {connectSurfaceChanges} from '../actorPlacement.js';
+import {isDisposed, trackDisposal} from '../disposal.js';
+import {createPanelMenu, menuAnchorFor, menuManagerFor, destroyMenuSafely, POPUP_ANIMATION_NONE} from '../popupMenus.js';
+import {addUnreadListener, unreadTargets} from '../features/launcherEntries.js';
 import {DBusMenuClient} from './dbusMenuClient.js';
 import {ClickController} from '../features/clickController.js';
 import {DRAG_SETTING_KEYS, setupIconDragSource, syncDragEnabled} from '../features/dragAndDrop.js';
@@ -34,7 +38,6 @@ const ICON_RESOLVE_KEYS = Object.freeze([
     'enable-symbolic-icons',
     'icon-color',
     'enable-custom-icon-style',
-    'icon-use-accent-color',
 ]);
 
 export class TrayIcon {
@@ -86,10 +89,12 @@ export class TrayIcon {
         try {
             const identity = await identifyApp(this._proxy, this.busName, this._settings,
                 appId => this._rekey(appId));
-            if (this._isDestroyed)
+            if (this._isDestroyed) {
+                forgetItem(this.id);
                 return;
+            }
 
-            // A sibling can prove the split while this call is still settling,
+            // A sibling can trigger the split while this call is still settling,
             // and its rekey already holds the id this item ends up on.
             this.appId ??= identity.appId;
             this._identitySeed = identity.seed;
@@ -103,8 +108,7 @@ export class TrayIcon {
             if (getAppConfigValue(this._settings, this.appId, 'is_background_proxy') === true)
                 setAppConfigValue(this._settings, this.appId, 'is_background_proxy', null);
 
-            if (this._draggable)
-                this._draggable._appId = this.appId;
+            this._draggable._appId = this.appId;
 
             // Prime the signature so the change handler compares against
             // the state this first render is about to use.
@@ -124,8 +128,8 @@ export class TrayIcon {
         }
     }
 
-    // Only the id moves: the carry-over write that follows arrives as an
-    // app-configs change, and the rule for that key re-renders.
+    // Only the id moves, the carry-over write that follows arrives as an
+    // app-configs change and the rule for that key re-renders.
     _rekey(appId) {
         this.appId = appId;
         if (this.actor)
@@ -188,8 +192,6 @@ export class TrayIcon {
             this._guarded(() => this._applyColorSet()));
     }
 
-    // Symbolic icons carry the tint in their bytes, so a restyle alone
-    // would keep the old color.
     _applyColorSet() {
         refreshTrayStyle(this.actor, this._iconActor, this._settings);
         this._queueUpdate();
@@ -203,7 +205,6 @@ export class TrayIcon {
         return changed;
     }
 
-    // For signals whose source can outlive `this`.
     _guarded(fn) {
         return (...args) => {
             if (!this._isDestroyed)
@@ -234,8 +235,6 @@ export class TrayIcon {
         });
     }
 
-    // Chatty apps rewrite their title per progress tick, one refresh per
-    // burst is enough for the tooltip and the prefs list.
     _queueTitleUpdate() {
         if (this._isDestroyed || this._titleDeferId)
             return;
@@ -249,7 +248,7 @@ export class TrayIcon {
     }
 
     _createUI() {
-        const {actor, tooltip} = createTrayActor(`TrayIcon ${this.id}`, this._settings);
+        const {actor, tooltip} = createTrayActor(this._settings);
         this.actor = actor;
         this._tooltip = tooltip;
 
@@ -281,7 +280,7 @@ export class TrayIcon {
             {propagateEvent: true}
         );
 
-        this._draggable?.setClickController(this._clickController);
+        this._draggable.setClickController(this._clickController);
 
         refreshTrayStyle(this.actor, this._iconActor, this._settings);
     }
@@ -289,7 +288,7 @@ export class TrayIcon {
     _executeAction(action) {
         // 'drag-drop' is a config marker, not a click action. The drag starts
         // on mouse motion, so there's nothing to fire on long-press release.
-        if (this._isDestroyed || !action || action === 'nothing' || action === 'drag-drop')
+        if (this._isDestroyed || action === 'nothing' || action === 'drag-drop')
             return;
 
         switch (action) {
@@ -324,22 +323,21 @@ export class TrayIcon {
         });
     }
 
-    // Runs for an unidentified item too: it has no stored config, but the
+    // Runs for an unidentified item too, it has no stored config but the
     // Passive rule still decides whether it shows.
     _applyStoredConfig() {
-        const hidden = getAppConfigValue(this._settings, this.appId, 'is_hidden', false);
-        this.actor.visible = !hidden && !this.actor._isPassive;
+        const isHidden = getAppConfigValue(this._settings, this.appId, 'is_hidden', false);
+        this.actor.visible = !isHidden && !this.actor._isPassive;
     }
 
     async _updateIcon() {
         if (this._isDestroyed)
             return;
 
-        // _queueUpdate only guards against a second timer, not against a second
-        // run: the proxy roundtrips inside resolveTrayIcon take as long as the
-        // peer needs, so a slow run can still be in flight when the next one
-        // starts. Whoever returns last used to win, which parks the icon on a
-        // stale status or pixmap until something else triggers an update.
+        // _queueUpdate only guards against a second timer, not a second run.
+        // The proxy roundtrips inside resolveTrayIcon take as long as the peer
+        // needs, so without a generation the slower answer wins and parks the
+        // icon on a stale status or pixmap.
         const generation = ++this._updateGen;
 
         const {gicon, iconName, detected, status, pixmapHash, unchanged, badge} = await resolveTrayIcon(
@@ -354,13 +352,13 @@ export class TrayIcon {
         if (this._isDestroyed || generation !== this._updateGen)
             return;
 
-        this._pixmapHash = pixmapHash ?? null;
+        this._pixmapHash = pixmapHash;
 
         const entry = this.appId ? getAppConfigMap(this._settings)[this.appId] : null;
         this._syncUnreadListener(entry);
 
-        // The spec calls Passive an idle status visualizations are likely to
-        // hide, and apps like KDE Connect park there instead of unregistering.
+        // The spec calls Passive an idle status that visualizations are likely
+        // to hide, and apps like KDE Connect park there instead of unregistering.
         const wasPassive = this.actor._isPassive;
         this.actor._isPassive = status === 'Passive';
         if (wasPassive !== this.actor._isPassive)
@@ -368,16 +366,16 @@ export class TrayIcon {
 
         if (!unchanged)
             setIconContent(this._iconActor, gicon, iconName || 'image-missing');
-        // Also on unchanged frames: a count change reuses the cached pixmap.
+        // Also on unchanged frames, a count change reuses the cached pixmap.
         setBadgeContent(this.actor, this._settings, badge,
-            badge ? entry?.badge_style ?? null : null);
+            badge ? entry?.badge_style : null);
 
         // Alert names are not the calm baseline and volatile names would
         // rewrite the blob per frame. A missing baseline is seeded even during
         // an alert, apps booting in attention state would never get one.
-        if (this.appId && detected.iconName &&
-            (!detected.hasAlert || detected.baselineMissing) &&
-            !isVolatileIconName(detected.iconName)) {
+        const isCalmOrFirstSeed = !detected.hasAlert || detected.baselineMissing;
+        const isStableName = !!detected.iconName && !isVolatileIconName(detected.iconName);
+        if (this.appId && isCalmOrFirstSeed && isStableName) {
             const updateData = {detected_icon: detected.iconName};
             if (detected.iconThemePath)
                 updateData.icon_theme_path = detected.iconThemePath;
@@ -396,9 +394,7 @@ export class TrayIcon {
     }
 
     // Registered only while the badge is on, an idle listener would turn
-    // every LauncherEntry emission into a full resolve. An item still
-    // waiting for its pid registers nothing and gets another try on the
-    // next resolve.
+    // every LauncherEntry emission into a full resolve.
     _syncUnreadListener(entry) {
         if (!unreadBadgeEnabled(entry)) {
             this._unreadUnsub?.();
@@ -408,7 +404,7 @@ export class TrayIcon {
         this._unreadUnsub ??= addUnreadListener(unreadTargets({
             pid: this._pid,
             appId: this.appId,
-            packagingKind: entry?.packaging ?? null,
+            packagingKind: entry?.packaging,
         }), this._guarded(() => this._queueUpdate()));
     }
 
@@ -416,13 +412,11 @@ export class TrayIcon {
         if (this._isDestroyed)
             return;
 
-        // A NewTitle burst overlaps roundtrips, and the slower answer would
-        // land its older title last.
-        const gen = ++this._titleGen;
+        const generation = ++this._titleGen;
         let title = getAppConfigValue(this._settings, this.appId, 'custom_title');
         if (!title) {
             const raw = await refreshStringOnProxy(this._proxy, 'Title');
-            if (this._isDestroyed || gen !== this._titleGen)
+            if (this._isDestroyed || generation !== this._titleGen)
                 return;
 
             // A rename can land while the proxy roundtrip is in flight.
@@ -448,8 +442,6 @@ export class TrayIcon {
         const path = await refreshPropertyOnProxy(this._proxy, 'Menu');
         if (this._isDestroyed)
             return;
-        // The cached client is bound to the old path, drop it so the next
-        // open rebuilds against the new one.
         if (this._menuClient && path !== this._menuPath)
             disposeAll(this, 'destroy', '_menuClient');
         this._menuPath = path;
@@ -485,9 +477,8 @@ export class TrayIcon {
         } catch (e) {
             warn(`Failed to open context menu for ${this.id}: ${e.message}`);
             this._disposeMenu();
-            // An app can advertise a menu path and still serve a menu we cannot
-            // build. Without this the right-click did nothing at all, forever,
-            // while the app's own ContextMenu was there the whole time.
+            // An app can advertise a menu path and still serve a menu we
+            // cannot build, its own ContextMenu still works.
             this._fallbackToRemoteContextMenu();
         } finally {
             this._isMenuLoading = false;
@@ -529,7 +520,7 @@ export class TrayIcon {
 
         // Hide Top Bar only stays put while Main.panel.menuManager.activeMenu
         // is set, held either by this menu or by the open popup underneath.
-        menuManagerFor(this.actor, this._settings)?.addMenu(this._menu);
+        menuManagerFor(this.actor, this._settings).addMenu(this._menu);
 
         this._menu.connect('open-state-changed', (menu, isOpen) => {
             if (isOpen)
@@ -537,9 +528,9 @@ export class TrayIcon {
 
             this._lastCloseTime = GLib.get_monotonic_time();
 
-            // A closed menu stays registered and still answers the manager's
-            // hover switch, which reopens this stale copy instead of rebuilding
-            // it. The drop waits a turn because the menu is mid-emission here.
+            // A closed menu stays registered and still answers the manager's hover
+            // switch, which reopens this stale copy instead of rebuilding it.
+            // The drop waits a turn because the menu is mid-emission here.
             debounceTo(this, '_menuDropId', MENU_DROP_DELAY_MS, () => {
                 if (this._menu === menu)
                     this._disposeMenu();
@@ -553,9 +544,8 @@ export class TrayIcon {
     }
 
     _presentMenu() {
-        // isEmpty, not length: PopupMenu has no length, so this guard used to
-        // compare undefined to 0 and never fired. An app serving an empty menu
-        // got a blank popup instead of its own ContextMenu.
+        // An app serving an empty menu would get a blank popup
+        // instead of its own ContextMenu.
         if (this._menu.isEmpty()) {
             this._disposeMenu();
             this._fallbackToRemoteContextMenu();

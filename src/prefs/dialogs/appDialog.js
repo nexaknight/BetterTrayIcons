@@ -4,7 +4,7 @@ import Gtk from 'gi://Gtk';
 import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
 import {setAppConfigValue, deleteAppConfig, displayAppName, formatAppName, orderedAppIds, readVisibleOrder, setAppPriorities, getAppConfigMap} from '../../shared/appConfig.js';
-import {resolveIcon, themeProbeKey} from '../../shared/icon.js';
+import {resolveIcon, themeProbeKey} from '../../shared/iconLoading.js';
 import {clearIds, connectScoped, debounceTo, removeTimer} from '../../shared/lifecycle.js';
 import {createButton, createIconButton, createImage, applyIconPreview, hasThemeIcon} from '../widgets/gtkHelpers.js';
 import {createActionRow, buildPrefsWidget, NEXT_ICON_NAME} from '../widgets/rows.js';

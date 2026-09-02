@@ -4,7 +4,7 @@ import GLib from 'gi://GLib';
 import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
 import {error} from '../../shared/logging.js';
-import {readFileText, fileExists, isCancelledError} from '../../shared/fetch.js';
+import {readFileText, fileExists, isCancelledError} from '../../shared/asyncIo.js';
 import {saveSettingsToFile, loadSettingsFromFile, deleteBackup, listBackups, isOwnSyncSource} from '../../shared/settingsIO.js';
 import {clearIds, connectScoped, debounceTo, removeTimer} from '../../shared/lifecycle.js';
 import {createButton, createIconButton, createImage} from '../widgets/gtkHelpers.js';

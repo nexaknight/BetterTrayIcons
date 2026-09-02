@@ -3,7 +3,7 @@ import GLib from 'gi://GLib';
 
 import {warn, warnOnce, error} from './logging.js';
 import {safeMapFromParsed, getAppConfigMap, getSyncMeta, mergeAppConfigs, syncMetaForReplace} from './appConfig.js';
-import {readFileBytes, readFileText, probePaths} from './fetch.js';
+import {readFileBytes, readFileText, probePaths} from './asyncIo.js';
 import {BADGE_POSITIONS} from '../const.js';
 import {ACCENT_COLOR_VALUE, accentValueKeeping} from './accentColor.js';
 import {LIGHT_SUFFIX} from './colorVariant.js';
@@ -22,7 +22,7 @@ const IMPORT_EXCLUDED_KEYS = new Set(['sync-file-path', 'enable-auto-sync']);
 const ACCENT_KEY_SUFFIX = 'use-accent-color';
 
 // Await this before importSettingsFromJSON, which has to stay synchronous so
-// the shell's _importing flag spans exactly its own writes.
+// the shell's _isImporting flag spans exactly its own writes.
 export function probeImportIconPaths(data, cancellable = null) {
     const homeDir = GLib.get_home_dir();
     const paths = new Set();
@@ -36,15 +36,16 @@ export function probeImportIconPaths(data, cancellable = null) {
     };
 
     const configs = data?.['app-configs'];
-    if (configs && typeof configs === 'object') {
-        for (const conf of Object.values(configs)) {
-            if (!conf || typeof conf !== 'object')
-                continue;
-            const states = conf.state_icons;
-            if (states && typeof states === 'object' && !Array.isArray(states))
-                Object.values(states).forEach(collect);
-            collect(conf.custom_icon);
-        }
+    const configValues = configs && typeof configs === 'object' ? Object.values(configs) : [];
+
+    for (const config of configValues) {
+        if (!config || typeof config !== 'object')
+            continue;
+        const states = config.state_icons;
+        const isStateMap = _isPlainObject(states);
+        if (isStateMap)
+            Object.values(states).forEach(collect);
+        collect(config.custom_icon);
     }
 
     return probePaths(paths, cancellable);
@@ -54,15 +55,11 @@ export function importSettingsFromJSON(settings, data, iconPaths, {merge = false
     if (!data || typeof data !== 'object')
         return;
 
-    // A scratch instance in delay mode turns the import into one dconf
-    // transaction instead of a write plus signal fan-out per key.
     const batch = new Gio.Settings({settings_schema: settings.settings_schema});
     batch.delay();
 
     const keys = batch.list_keys();
     const homeDir = GLib.get_home_dir();
-    // Written once after the loop, when the file carried app-configs, so the
-    // local sync metadata matches whatever landed.
     let syncMeta;
     const legacyAccentColorKeys = [];
 
@@ -78,37 +75,34 @@ export function importSettingsFromJSON(settings, data, iconPaths, {merge = false
         if (!keys.includes(key) || IMPORT_EXCLUDED_KEYS.has(key) || key === 'app-config-sync-meta')
             return;
 
-        let val = data[key];
+        let value = data[key];
 
-        if (_isMalformedColor(key, val)) {
-            warn(`Import: Skipping malformed color for '${key}': ${val}`);
+        if (_isMalformedColor(key, value)) {
+            warn(`Import: Skipping malformed color for '${key}': ${value}`);
             return;
         }
 
-        if (typeof val === 'string')
-            val = _expandHome(val, homeDir);
+        if (typeof value === 'string')
+            value = _expandHome(value, homeDir);
 
-        // app-configs is stored as a JSON string in GSettings, so re-encode it.
-        // A pull merges per app so no host loses an entry, a restore or plain
-        // import replaces, both reconciling the sync metadata alongside.
-        if (key === 'app-configs' && typeof val === 'object') {
-            const incoming = safeMapFromParsed(val, (appId, conf) =>
-                _sanitizeAppConfigForImport(appId, conf, homeDir, iconPaths));
+        if (key === 'app-configs' && typeof value === 'object') {
+            const incoming = safeMapFromParsed(value, (appId, config) =>
+                _sanitizeAppConfigForImport(appId, config, homeDir, iconPaths));
             const fallbackTs = Number.isFinite(data._meta?.timestamp) ? data._meta.timestamp : Date.now();
             if (merge) {
                 const merged = mergeAppConfigs(getAppConfigMap(settings), getSyncMeta(settings),
                     incoming, data._app_config_meta, fallbackTs);
-                val = JSON.stringify(merged.map);
+                value = JSON.stringify(merged.map);
                 syncMeta = merged.meta;
             } else {
-                val = JSON.stringify(incoming);
+                value = JSON.stringify(incoming);
                 syncMeta = syncMetaForReplace(incoming, data._app_config_meta, fallbackTs);
             }
         }
 
         const typeString = batch.get_value(key).get_type_string();
         try {
-            batch.set_value(key, GLib.Variant.new(typeString, val));
+            batch.set_value(key, GLib.Variant.new(typeString, value));
         } catch (e) {
             warn(`Failed to import key '${key}': ${e.message}`);
         }
@@ -124,8 +118,7 @@ export function importSettingsFromJSON(settings, data, iconPaths, {merge = false
     batch.apply();
 }
 
-// Same scratch-instance transaction as the import above. delay() on the
-// shared instance would leave it delayed for good.
+// delay() on the shared instance would leave it delayed for good.
 export function resetKeys(settings, keys) {
     const batch = new Gio.Settings({settings_schema: settings.settings_schema});
     batch.delay();
@@ -133,18 +126,16 @@ export function resetKeys(settings, keys) {
     batch.apply();
 }
 
-// Backup names no longer collide, but the main file is still last-writer-wins,
-// and two saves started in one order can finish in the other. Queueing them
-// keeps the file holding what the last caller asked for.
-let _pendingSave = Promise.resolve();
-
 export function isOwnSyncSource(meta) {
     return meta?.source === GLib.get_host_name();
 }
 
+// The main file is last-writer-wins, and two saves started in one order can
+// finish in the other.
+let _pendingSave = Promise.resolve();
+
 export function saveSettingsToFile(settings, path) {
     const done = _pendingSave.then(() => _writeSettingsFile(settings, path));
-    // Only the queue tail swallows, the caller still gets the rejection.
     _pendingSave = done.catch(() => {});
     return done;
 }
@@ -177,9 +168,6 @@ async function _readSettingsFile(path) {
     return JSON.parse(jsonString);
 }
 
-// Old versions wrote the backups uncompressed, hence the optional `.gz`.
-// One directory enumeration instead of stat-probing every candidate slot,
-// which hurts on network mounts.
 export async function listBackups(path) {
     const file = Gio.File.new_for_path(path);
     const parent = file.get_parent();
@@ -210,17 +198,10 @@ export async function listBackups(path) {
             });
         }
     } catch (e) {
-        // With no listing the retention cannot prune either, so say why.
         warnOnce(`backups:${path}`, `Cannot list backups next to '${path}': ${e.message}`);
         return [];
     }
 
-    // Newest first, by mtime rather than by the number in the name. The number
-    // is a timestamp for anything this version wrote, but the releases before
-    // it counted slots, and a rename carries the mtime over, so both orders
-    // come out right and the two kinds can sit in one directory. The index is
-    // the position in that order, so it stays 1..N with no gaps even after a
-    // concurrent write dropped one.
     backups.sort(_byNewestFirst);
     backups.forEach((b, i) => {
         b.index = i + 1;
@@ -228,9 +209,9 @@ export async function listBackups(path) {
     return backups;
 }
 
-// The usec attribute has to be asked for, and without it a whole burst of saves
-// lands in one second and ties. The number in the name breaks that tie: this
-// version writes a microsecond timestamp there, so higher is newer.
+// The usec attribute has to be asked for, and without it a whole burst of
+// saves lands in one second and ties. The number in the name breaks that tie,
+// this version writes a microsecond timestamp there so higher is newer.
 function _byNewestFirst(a, b) {
     if (!a.mtime || !b.mtime)
         return (b.mtime ? 1 : 0) - (a.mtime ? 1 : 0);
@@ -239,13 +220,13 @@ function _byNewestFirst(a, b) {
 
 export async function deleteBackups(path) {
     const backups = await listBackups(path);
-    await Promise.all([_deleteAsync(path), ...backups.map(b => _deleteAsync(b.path))]);
+    await Promise.all([deleteBackup(path), ...backups.map(b => deleteBackup(b.path))]);
 }
 
-// Deriving the path from the position would address a different file as
-// soon as another writer added or pruned one.
-export function deleteBackup(backupPath) {
-    return _deleteAsync(backupPath);
+export async function deleteBackup(path) {
+    try {
+        await Gio.File.new_for_path(path).delete_async(GLib.PRIORITY_DEFAULT, null);
+    } catch { /* gone or never existed */ }
 }
 
 async function _writeSettingsFile(settings, path) {
@@ -261,10 +242,6 @@ async function _writeSettingsFile(settings, path) {
     await _writeBackup(path, settings.get_int('max-backups'));
     const encoded = new TextEncoder().encode(JSON.stringify(data, null, 2));
 
-    // The sync file often lives on a network mount, so every write here
-    // is async to keep the calling main loop responsive.
-    // A .gz path reads back through the gunzip branch, so it has to be
-    // written compressed or the next pull throws on it.
     if (path.endsWith('.gz'))
         await _writeCompressed(path, encoded);
     else
@@ -276,8 +253,6 @@ function _writeBytes(path, bytes) {
         new GLib.Bytes(bytes), null, false, Gio.FileCreateFlags.REPLACE_DESTINATION, null);
 }
 
-// _meta carries the writing host and a timestamp, so it differs on every
-// export and would never match.
 async function _fileAlreadyHolds(path, data) {
     try {
         const {_meta: unusedOnDisk, ...onDisk} = await _readSettingsFile(path);
@@ -288,8 +263,6 @@ async function _fileAlreadyHolds(path, data) {
     }
 }
 
-// A merge builds the map in its own key order, so compare by content, not byte
-// layout, or two hosts would keep reordering the file back and forth.
 function _stableStringify(value) {
     if (value === null || typeof value !== 'object')
         return JSON.stringify(value);
@@ -311,33 +284,23 @@ function _exportSettingsToJSON(settings) {
     };
 
     keys.forEach(key => {
-        // Emitted parsed as _app_config_meta below so a pull can read the stamps.
         if (key === 'app-config-sync-meta')
             return;
 
-        const val = settings.get_value(key);
-        let nativeVal = val.deep_unpack();
+        const variant = settings.get_value(key);
+        let value = variant.deep_unpack();
 
-        if (key === 'app-configs' && typeof nativeVal === 'string') {
+        if (key === 'app-configs' && typeof value === 'string') {
             try {
-                nativeVal = JSON.parse(nativeVal);
-
-                Object.keys(nativeVal).forEach(appId => {
-                    const conf = nativeVal[appId];
-                    if (conf.custom_icon && typeof conf.custom_icon === 'string' && conf.custom_icon.startsWith(homeDir))
-                        conf.custom_icon = _collapseHome(conf.custom_icon, homeDir);
-                    for (const [state, icon] of Object.entries(conf.state_icons ?? {})) {
-                        if (typeof icon === 'string' && icon.startsWith(homeDir))
-                            conf.state_icons[state] = _collapseHome(icon, homeDir);
-                    }
-                });
+                value = JSON.parse(value);
+                Object.values(value).forEach(config => _collapseIconPaths(config, homeDir));
             } catch { /* keep raw string */ }
         }
 
-        if (typeof nativeVal === 'string' && nativeVal.startsWith(homeDir))
-            nativeVal = _collapseHome(nativeVal, homeDir);
+        if (typeof value === 'string' && value.startsWith(homeDir))
+            value = _collapseHome(value, homeDir);
 
-        exportData[key] = nativeVal;
+        exportData[key] = value;
     });
 
     exportData['_app_config_meta'] = getSyncMeta(settings);
@@ -345,17 +308,24 @@ function _exportSettingsToJSON(settings) {
     return exportData;
 }
 
+function _collapseIconPaths(config, homeDir) {
+    if (typeof config.custom_icon === 'string' && config.custom_icon.startsWith(homeDir))
+        config.custom_icon = _collapseHome(config.custom_icon, homeDir);
+
+    for (const [state, icon] of Object.entries(config.state_icons ?? {})) {
+        if (typeof icon === 'string' && icon.startsWith(homeDir))
+            config.state_icons[state] = _collapseHome(icon, homeDir);
+    }
+}
+
 // Every backup gets its own name instead of shifting slots. Shell and prefs
-// can write at the same time, and interleaved shifts lost whole generations
-// Distinct names cannot collide, so no lock, which network mounts
-// would not honor reliably anyway.
+// can write at the same time, and interleaved shifts lost whole generations.
 async function _writeBackup(path, maxBackups) {
     const mainFile = Gio.File.new_for_path(path);
     let content;
     try {
         content = await readFileBytes(mainFile);
     } catch (e) {
-        // A missing main file just means there's nothing to back up yet.
         if (!e.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.NOT_FOUND))
             error(`Backup read failed: ${e.message}`, e);
         return;
@@ -363,8 +333,8 @@ async function _writeBackup(path, maxBackups) {
 
     try {
         const backupPath = `${path}.${GLib.get_real_time()}.gz`;
-        // A .gz main file is already compressed. Recompressing would nest two
-        // gzip layers, and the restore path unwraps only one.
+        // Recompressing would nest two gzip layers, and the restore path
+        // unwraps only one.
         if (path.endsWith('.gz'))
             await _writeBytes(backupPath, content);
         else
@@ -375,7 +345,7 @@ async function _writeBackup(path, maxBackups) {
     }
 
     const backups = await listBackups(path);
-    await Promise.all(backups.slice(maxBackups).map(b => _deleteAsync(b.path)));
+    await Promise.all(backups.slice(maxBackups).map(b => deleteBackup(b.path)));
 }
 
 async function _writeCompressed(path, content) {
@@ -397,9 +367,12 @@ async function _writeCompressed(path, content) {
     );
 }
 
+function _isPlainObject(value) {
+    return !!value && typeof value === 'object' && !Array.isArray(value);
+}
 
-function _isMalformedColor(key, val) {
-    return COLOR_KEY_PATTERN.test(key) && typeof val === 'string' && !COLOR_PATTERN.test(val);
+function _isMalformedColor(key, value) {
+    return COLOR_KEY_PATTERN.test(key) && typeof value === 'string' && !COLOR_PATTERN.test(value);
 }
 
 function _collapseHome(value, homeDir) {
@@ -410,61 +383,58 @@ function _expandHome(value, homeDir) {
     return value.includes('$HOME') ? value.split('$HOME').join(homeDir) : value;
 }
 
-// An unprobed path is left alone rather than dropped.
 function _isMissingIcon(path, iconPaths) {
     return path.startsWith('/') && iconPaths.get(path) === false;
 }
 
-function _sanitizeAppConfigForImport(appId, appConf, homeDir, iconPaths) {
-    if (!appConf || typeof appConf !== 'object' || Array.isArray(appConf))
+function _sanitizeAppConfigForImport(appId, appConfig, homeDir, iconPaths) {
+    if (!_isPlainObject(appConfig))
         return null;
 
-    // A string here would have Object.entries walk its characters and the
-    // loop below assign to a read-only index.
-    if (appConf.state_icons && (typeof appConf.state_icons !== 'object' || Array.isArray(appConf.state_icons)))
-        delete appConf.state_icons;
+    if (appConfig.state_icons && !_isPlainObject(appConfig.state_icons))
+        delete appConfig.state_icons;
 
-    for (const [state, icon] of Object.entries(appConf.state_icons ?? {})) {
+    for (const [state, icon] of Object.entries(appConfig.state_icons ?? {})) {
         if (typeof icon !== 'string')
             continue;
         const resolved = _expandHome(icon, homeDir);
-        appConf.state_icons[state] = resolved;
+        appConfig.state_icons[state] = resolved;
         if (_isMissingIcon(resolved, iconPaths)) {
             warn(`Import: Dropping state ${state} of ${appId}, icon not found: ${resolved}`);
-            delete appConf.state_icons[state];
+            delete appConfig.state_icons[state];
         }
     }
 
-    _sanitizeBadgeFields(appConf);
+    _sanitizeBadgeFields(appConfig);
 
     // A non-string here reaches resolveIcon, which calls startsWith on it and
     // takes the whole tray item setup down with a TypeError.
-    if (typeof appConf.custom_icon !== 'string') {
-        delete appConf.custom_icon;
-        return appConf;
+    if (typeof appConfig.custom_icon !== 'string') {
+        delete appConfig.custom_icon;
+        return appConfig;
     }
 
-    appConf.custom_icon = _expandHome(appConf.custom_icon, homeDir);
+    appConfig.custom_icon = _expandHome(appConfig.custom_icon, homeDir);
 
-    // Only the icon is unusable. Returning null here would drop the whole
-    // entry, and the next auto-push would spread that loss to every host.
-    if (_isMissingIcon(appConf.custom_icon, iconPaths)) {
-        warn(`Import: Dropping custom icon of ${appId}, not found: ${appConf.custom_icon}`);
-        delete appConf.custom_icon;
+    // Returning null here would drop the whole entry, and the next auto-push
+    // would spread that loss to every host.
+    if (_isMissingIcon(appConfig.custom_icon, iconPaths)) {
+        warn(`Import: Dropping custom icon of ${appId}, not found: ${appConfig.custom_icon}`);
+        delete appConfig.custom_icon;
     }
 
-    return appConf;
+    return appConfig;
 }
 
 // The dialog mutates badge_style in place and the shell splices its colors
 // into inline St css, so a synced blob must not deliver other shapes.
-function _sanitizeBadgeFields(appConf) {
-    if (appConf.unread_badge !== true)
-        delete appConf.unread_badge;
+function _sanitizeBadgeFields(appConfig) {
+    if (appConfig.unread_badge !== true)
+        delete appConfig.unread_badge;
 
-    const style = appConf.badge_style;
-    if (!style || typeof style !== 'object' || Array.isArray(style)) {
-        delete appConf.badge_style;
+    const style = appConfig.badge_style;
+    if (!_isPlainObject(style)) {
+        delete appConfig.badge_style;
         return;
     }
     if (!BADGE_POSITIONS.includes(style.position))
@@ -482,11 +452,6 @@ function _sanitizeBadgeFields(appConf) {
             delete style[field];
     }
     if (Object.keys(style).length === 0)
-        delete appConf.badge_style;
+        delete appConfig.badge_style;
 }
 
-async function _deleteAsync(path) {
-    try {
-        await Gio.File.new_for_path(path).delete_async(GLib.PRIORITY_DEFAULT, null);
-    } catch { /* gone or never existed */ }
-}

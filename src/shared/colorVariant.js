@@ -24,7 +24,6 @@ export function splitKeyFor(colorKey) {
     return SPLIT_KEY_BY_PREFIX.find(([prefix]) => colorKey.startsWith(prefix))[1];
 }
 
-// Split off means one set only, so both styles read the plain keys.
 export function colorKeyFor(settings, key, light) {
     return light && settings.get_boolean(splitKeyFor(key)) ? lightTwin(key) : key;
 }

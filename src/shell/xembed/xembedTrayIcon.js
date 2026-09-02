@@ -3,18 +3,19 @@ import GLib from 'gi://GLib';
 import St from 'gi://St';
 
 import {displayAppName, getAppConfigMap, getAppConfigValue, updateAppConfig, reseedIfForgotten} from '../../shared/appConfig.js';
-import {configuredIcon} from '../utils/icons.js';
+import {configuredIcon} from '../icons/iconResolver.js';
 import {clearIds, disconnectSignal, disconnectAll, disposeAll, removeTimer, ruleDispatcher} from '../../shared/lifecycle.js';
 import {DRAG_SETTING_KEYS, setupIconDragSource, syncDragEnabled} from '../features/dragAndDrop.js';
 import {applyTitle, createTrayActor, syncTooltip} from '../features/tooltip.js';
-import {computeTrayIconStyle, applyPanelClasses, connectColorSetChanges, connectSurfaceChanges, isDisposed, surfaceUsesLightStyle, syncHoverStyle} from '../utils/actor.js';
+import {applyPanelClasses, computeTrayIconStyle, connectColorSetChanges, surfaceUsesLightStyle, syncHoverStyle} from '../trayStyle.js';
+import {connectSurfaceChanges} from '../actorPlacement.js';
+import {isDisposed} from '../disposal.js';
 import {deriveAppMeta} from './wineIdentity.js';
 import {TRAY_STYLE_KEYS} from '../../const.js';
 import {withLightTwins} from '../../shared/colorVariant.js';
 
 // icon-size restyles through its own rule below, listing it here would run
-// _updateStyle twice per change. The foreground color keys are out per the
-// withColors rationale in _updateStyle.
+// _updateStyle twice per change.
 const XEMBED_EXCLUDED_STYLE_KEYS = new Set([
     'icon-size',
     ...withLightTwins(['icon-color', 'icon-hover-color']),
@@ -22,13 +23,11 @@ const XEMBED_EXCLUDED_STYLE_KEYS = new Set([
 
 const XEMBED_STYLE_KEYS = TRAY_STYLE_KEYS.filter(key => !XEMBED_EXCLUDED_STYLE_KEYS.has(key));
 
-// Distinguishes wrappers whose appId and pid both collide: one explorer.exe
-// owns every tray window of a prefix, so two apps there look identical.
+const RIGHT_MOUSE_BUTTON = 3;
+
 let _wrapperSerial = 0;
 
 export class XEmbedTrayIcon {
-    // Meta resolution awaits async /proc and Steam manifest reads, so the
-    // constructor stays synchronous.
     static async create(rawIcon, settings, onDestroy, onAfterClick, onDragStateChange = null, cancellable = null) {
         const meta = await deriveAppMeta(rawIcon, cancellable);
         return new XEmbedTrayIcon(rawIcon, meta, settings, onDestroy, onAfterClick, onDragStateChange);
@@ -47,15 +46,11 @@ export class XEmbedTrayIcon {
         this._draggable = null;
         this._tooltip = null;
 
-        // Null when nothing identified the window, which leaves the icon
-        // rendering but unconfigurable.
         this.appId = meta.appId;
         this._metaTitle = meta.title;
-        // pid separates instances across prefixes, the serial separates apps
-        // within one prefix.
-        this.id = `xembed:${this.appId ?? 'unknown'}:${rawIcon.pid || 0}:${++_wrapperSerial}`;
+        this.id = `xembed:${this.appId ?? 'unknown'}:${rawIcon.pid}:${++_wrapperSerial}`;
 
-        const {actor, tooltip} = createTrayActor(`XEmbedTrayIcon ${this.id}`, this._settings);
+        const {actor, tooltip} = createTrayActor(this._settings);
         this.actor = actor;
         this._tooltip = tooltip;
         this.actor._appId = this.appId;
@@ -86,8 +81,6 @@ export class XEmbedTrayIcon {
     }
 
     _connectSignals() {
-        // XEmbed icons own their click semantics, so bypass ClickController
-        // and forward directly through Shell.TrayIcon.click().
         this._actorSignals.push(
             this.actor.connect('button-press-event', () => {
                 this.actor.add_style_pseudo_class('active');
@@ -95,7 +88,7 @@ export class XEmbedTrayIcon {
             }),
             this.actor.connect('button-release-event', (_a, event) => {
                 this.actor.remove_style_pseudo_class('active');
-                const isRightClick = event.get_button() === 3;
+                const isRightClick = event.get_button() === RIGHT_MOUSE_BUTTON;
                 this._forwardClick(event, isRightClick);
                 this._onAfterClick();
                 return Clutter.EVENT_PROPAGATE;
@@ -156,9 +149,9 @@ export class XEmbedTrayIcon {
         });
     }
 
-    // Right click goes through GLib.idle_add so Mutter has released its
-    // implicit grabs before Wine raises its context menu. This only
-    // mitigates the click-race on X11, not the XWayland XGrabPointer issue.
+    // Right click waits for an idle so Mutter has released its implicit grabs
+    // before Wine raises its context menu. That covers the click race on X11,
+    // not the XWayland XGrabPointer issue.
     _forwardClick(event, isRightClick) {
         if (!isRightClick) {
             this._icon.click(event);
@@ -186,13 +179,10 @@ export class XEmbedTrayIcon {
             this._customIcon.icon_size = size;
     }
 
-    // SNI icons swap their custom icon inside resolveTrayIcon, an XEmbed
-    // window paints itself, so cover it with a St.Icon instead. The window
-    // stays allocated at opacity 0 to keep click forwarding and the app's
-    // idea of an embedded icon alive.
+    // An XEmbed window paints itself, so a custom icon has to cover it. The
+    // window stays allocated at opacity 0 to keep click forwarding and the
+    // app's idea of an embedded icon alive.
     _applyCustomIcon() {
-        if (this._isDestroyed)
-            return;
         const value = getAppConfigValue(this._settings, this.appId, 'custom_icon');
         if (value === this._customIconValue)
             return;
@@ -212,8 +202,6 @@ export class XEmbedTrayIcon {
         this._iconBox.add_child(this._customIcon);
     }
 
-    // Background-color only shows through the padding, which forms the hover
-    // halo: the embedded X11 window paints over the rest.
     _updateStyle() {
         if (this._isDestroyed)
             return;
@@ -227,11 +215,7 @@ export class XEmbedTrayIcon {
         syncHoverStyle(this.actor);
     }
 
-    // XEmbed has no tooltip protocol and Wine leaves the icon window's
-    // WM_NAME empty, so the tooltip falls back to the resolved app name.
     _updateTitle() {
-        if (this._isDestroyed)
-            return;
         const config = getAppConfigMap(this._settings)[this.appId] ?? {};
         const title = displayAppName(config, this.appId || this._metaTitle);
         applyTitle(this.actor, this._tooltip, this._settings, title);

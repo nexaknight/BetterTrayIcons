@@ -6,9 +6,13 @@ import * as Util from 'resource:///org/gnome/shell/misc/util.js';
 import {warn} from '../../shared/logging.js';
 import {configRenderDelta, displayAppName, reseedIfForgotten, unreadBadgeEnabled, updateAppConfig} from '../../shared/appConfig.js';
 import {disconnectAll, disposeAll, ruleDispatcher} from '../../shared/lifecycle.js';
-import {attachStatusIcon, connectColorSetChanges, connectSurfaceChanges, createPanelMenu, destroyMenuSafely, isDisposed, menuAnchorFor, menuManagerFor, refreshTrayStyle, setBadgeContent, setIconContent, syncHoverStyle, trackDisposal, POPUP_ANIMATION_NONE} from '../utils/actor.js';
-import {configuredIcon, themedIconContent} from '../utils/icons.js';
-import {addUnreadListener, unreadBadge, unreadTargets} from '../utils/launcherEntries.js';
+import {attachStatusIcon, setBadgeContent, setIconContent} from '../icons/iconContent.js';
+import {connectColorSetChanges, refreshTrayStyle, syncHoverStyle} from '../trayStyle.js';
+import {connectSurfaceChanges} from '../actorPlacement.js';
+import {isDisposed, trackDisposal} from '../disposal.js';
+import {createPanelMenu, destroyMenuSafely, menuAnchorFor, menuManagerFor, POPUP_ANIMATION_NONE} from '../popupMenus.js';
+import {configuredIcon, themedIconContent} from '../icons/iconResolver.js';
+import {addUnreadListener, unreadBadge, unreadTargets} from '../features/launcherEntries.js';
 import {applyTitle, createTrayActor, syncTooltip} from '../features/tooltip.js';
 import {DRAG_SETTING_KEYS, setupIconDragSource, syncDragEnabled} from '../features/dragAndDrop.js';
 import {ClickController} from '../features/clickController.js';
@@ -21,6 +25,8 @@ const FLATPAK_KILL_ARGV = Object.freeze(['flatpak', 'kill']);
 const QUIT_ACTION_RE = /^quit$/i;
 
 const NEW_WINDOW_ACTION = 'new-window';
+
+const QUIT_GACTION = 'quit';
 
 export class BackgroundAppsProxyIcon {
     constructor(appId, entry, settings, {onAfterClick, onDragStateChange, onQuit}) {
@@ -43,7 +49,7 @@ export class BackgroundAppsProxyIcon {
         this.appId = appId;
         this.id = `${BACKGROUND_PROXY_ID_PREFIX}${appId}`;
 
-        const {actor, tooltip} = createTrayActor(this.id, settings);
+        const {actor, tooltip} = createTrayActor(settings);
         this.actor = actor;
         this._tooltip = tooltip;
         this.actor._appId = appId;
@@ -64,11 +70,10 @@ export class BackgroundAppsProxyIcon {
             onForwardedDragStateChange: onDragStateChange,
         });
 
-        // The panel hides and orders every registered actor from its app-configs
-        // entry, so hiding and reordering only reach this icon once the entry
-        // exists. detected_icon and packaging are what let the prefs page
-        // render the icon and the badge, it cannot reach Shell.AppSystem, and
-        // the portal only ever lists flatpak instances.
+        // The panel hides and orders actors from their app-configs entry, so
+        // those only reach this icon once the entry exists. The prefs process
+        // cannot reach Shell.AppSystem, so detected_icon and packaging are what
+        // let it render the icon and the badge.
         this._identitySeed = {
             title: this._app.get_name(),
             is_background_proxy: true,
@@ -94,8 +99,7 @@ export class BackgroundAppsProxyIcon {
                 syncTooltip(this.actor, this._tooltip, this._settings);
             }));
 
-        // A proxy is a tray icon to the user, so it answers to the same
-        // bindings, double click and long press included.
+        // A proxy is a tray icon to the user, so it answers the same bindings.
         this._clickController = new ClickController(
             this.actor,
             this._settings,
@@ -166,10 +170,6 @@ export class BackgroundAppsProxyIcon {
         this._menu.open(POPUP_ANIMATION_NONE);
     }
 
-    // Quitting kills a running backup or sync with no confirmation and no undo,
-    // so it sits behind a labelled item rather than a bare middle click that
-    // says nothing about what it does. GNOME's own background apps list puts it
-    // behind a labelled button for the same reason.
     _createMenu() {
         const menu = createPanelMenu(menuAnchorFor(this.actor));
         trackDisposal(menu.actor);
@@ -237,7 +237,7 @@ export class BackgroundAppsProxyIcon {
         }
 
         try {
-            await this._app.activate_action('quit', null, 0, -1, null);
+            await this._app.activate_action(QUIT_GACTION, null, 0, -1, null);
             return true;
         } catch {
             try {
@@ -262,8 +262,7 @@ export class BackgroundAppsProxyIcon {
         this._syncBadge();
     }
 
-    // Only the LauncherEntry count, there is no state or icon signal a dot
-    // could follow here.
+    // Only the LauncherEntry count, no state or icon signal here feeds a dot.
     _syncBadge() {
         const badge = unreadBadgeEnabled(this._config)
             ? unreadBadge(this._unreadTargets)
@@ -291,9 +290,8 @@ export class BackgroundAppsProxyIcon {
             : {gicon: this._app.get_icon(), iconName: null};
     }
 
-    // One source with the prefs row, which renders the same config fields.
-    // The portal message is runtime state, not a name, and showing it here
-    // made the tooltip disagree with the row.
+    // The portal message is runtime state, not a name, so the tooltip stays on
+    // the config name the prefs row renders.
     _updateTitle() {
         applyTitle(this.actor, this._tooltip, this._settings,
             displayAppName(this._config, this._app.get_name()));

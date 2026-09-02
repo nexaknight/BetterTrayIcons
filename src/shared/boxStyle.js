@@ -1,12 +1,11 @@
-import {BOX_SIDES} from '../const.js';
+// Both processes build the same box from the same keys, the shell into an inline
+// St style and prefs into a GTK sheet. Only the color lookup differs, so that
+// arrives as a callback.
 
-// Both processes render the same box from the same keys, the shell into an
-// inline St style and prefs into a GTK sheet. Only the color lookup differs,
-// so that arrives as a callback and everything else lives here. What a caller
-// does with the 0px border below differs too: the shell writes it out to strip
-// the theme border, the preview drops the declaration instead.
+// Order matters, a padding or margin shorthand reads the sides in this order.
+export const BOX_SIDES = Object.freeze(['top', 'right', 'bottom', 'left']);
 
-export function sidesShorthand(settings, keyPrefix, minPerSide = {}) {
+function sidesShorthand(settings, keyPrefix, minPerSide = {}) {
     return BOX_SIDES
         .map(side => Math.max(settings.get_int(`${keyPrefix}-${side}`), minPerSide[side] || 0))
         .map(px => `${px}px`)

@@ -5,8 +5,13 @@ import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 import {gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
 
 import {disposeAll} from '../../shared/lifecycle.js';
-import {isDisposed, trackDisposal, computeToggleStyle, createPanelMenu, destroyMenuSafely, applyPanelClasses} from '../utils/actor.js';
+import {isDisposed, trackDisposal} from '../disposal.js';
+import {computeToggleStyle, applyPanelClasses} from '../trayStyle.js';
+import {createPanelMenu, destroyMenuSafely} from '../popupMenus.js';
 import {ClickController} from '../features/clickController.js';
+
+const HOVER_MENU_ACTION = 'action-menu';
+const SCROLL_ACTION_CYCLE = 'cycle';
 
 export class ToggleButton {
     constructor(settings, {openPreferences, cycleIcons}) {
@@ -39,7 +44,6 @@ export class ToggleButton {
         this.actor.connect('scroll-event', (_actor, event) => this._onScroll(event));
         trackDisposal(this.actor);
 
-        // Clicks on the toggle must not reach the panel.
         this._clickController = new ClickController(
             this.actor,
             this._settings,
@@ -49,14 +53,13 @@ export class ToggleButton {
         );
     }
 
-    // The popup anchors to .actor and can only exist after this constructor.
     setOverflowMenu(overflowMenu) {
         this._overflowMenu = overflowMenu;
     }
 
     updateStyle() {
-        const customToggle = this._settings.get_boolean('enable-custom-toggle-style');
-        applyPanelClasses(this.actor, this._icon, customToggle);
+        const isCustomToggleStyleOn = this._settings.get_boolean('enable-custom-toggle-style');
+        applyPanelClasses(this.actor, this._icon, isCustomToggleStyleOn);
 
         const style = computeToggleStyle(this._settings);
         this._baseStyle = style.baseStyle;
@@ -78,63 +81,20 @@ export class ToggleButton {
 
         this._applyIconState(isMenuOpen);
 
-        if (this._baseStyle) {
-            if (isActive) {
-                this.actor.set_style(`${this._baseStyle} ${this._hoverStyle}`);
-                if (this._iconHoverColor)
-                    this._icon.set_style(`color: ${this._iconHoverColor};`);
-            } else {
-                this.actor.set_style(this._baseStyle);
-                if (this._iconColor)
-                    this._icon.set_style(`color: ${this._iconColor};`);
-            }
-        } else if (isMenuOpen) {
-            this.actor.add_style_pseudo_class('active');
-        } else {
-            this.actor.remove_style_pseudo_class('active');
+        if (!this._baseStyle) {
+            if (isMenuOpen)
+                this.actor.add_style_pseudo_class('active');
+            else
+                this.actor.remove_style_pseudo_class('active');
+            return;
         }
+
+        this.actor.set_style(isActive
+            ? `${this._baseStyle} ${this._hoverStyle}`
+            : this._baseStyle);
+        this._icon.set_style(`color: ${isActive ? this._iconHoverColor : this._iconColor};`);
     }
 
-    // force is for the drag-end re-attach, the popup is open but not
-    // grabbed yet and waiting for a close would let the hover switch pick
-    // the wrong menu.
-    applyHoverMenuOrder(force = false) {
-        const manager = Main.panel.menuManager;
-        if (!manager || !this._overflowMenu.isAttached)
-            return;
-
-        // The hover switch only picks menus already in the manager, so the
-        // lazy action menu has to exist first.
-        this._ensureActionMenu();
-
-        // removeMenu on an open menu drops its modal grab.
-        if (this._actionMenu.isOpen)
-            return;
-        if (this._overflowMenu.isOpen) {
-            if (force && this._settings.get_string('toggle-hover-menu') !== 'action-menu') {
-                manager.removeMenu(this._actionMenu);
-                manager.addMenu(this._actionMenu);
-            }
-            return;
-        }
-
-        // Both menus share the toggle as source actor, the manager opens
-        // the first match, so the order picks the hover menu.
-        const actionFirst = this._settings.get_string('toggle-hover-menu') === 'action-menu';
-
-        manager.removeMenu(this._actionMenu);
-        this._overflowMenu.detachFromManager();
-
-        if (actionFirst) {
-            manager.addMenu(this._actionMenu);
-            this._overflowMenu.attachToManager();
-        } else {
-            this._overflowMenu.attachToManager();
-            manager.addMenu(this._actionMenu);
-        }
-    }
-
-    // The open menu either swaps the icon or turns it, never both.
     _applyIconState(isMenuOpen) {
         const rotate = this._settings.get_boolean('toggle-icon-rotate');
         const iconName = this._iconNameFor(isMenuOpen && !rotate
@@ -156,7 +116,7 @@ export class ToggleButton {
         }
 
         // The shell zeroes every animation while it renders without hardware
-        // acceleration, which is every VM. The switch above decides this one.
+        // acceleration.
         this._icon.ease({
             rotation_angle_z: angle,
             duration: this._settings.get_int('toggle-icon-rotate-duration'),
@@ -171,17 +131,54 @@ export class ToggleButton {
         return this._settings.get_boolean('toggle-icon-rotate-reverse') ? -degrees : degrees;
     }
 
-    // An imported blob can hold an empty string, the schema default is the
-    // one place that knows the real fallback.
     _iconNameFor(key) {
         return this._settings.get_string(key) ||
             this._settings.get_default_value(key).unpack();
     }
 
+    // force is for the drag-end re-attach, the popup is open but not
+    // grabbed yet and waiting for a close would let the hover switch pick
+    // the wrong menu.
+    applyHoverMenuOrder(force = false) {
+        if (!this._overflowMenu.isAttached)
+            return;
+
+        // The hover switch only picks menus already in the manager, so the
+        // lazy action menu has to exist first.
+        this._ensureActionMenu();
+
+        const manager = Main.panel.menuManager;
+        const shouldActionGoFirst = this._settings.get_string('toggle-hover-menu') === HOVER_MENU_ACTION;
+
+        // removeMenu on an open menu drops its modal grab.
+        if (this._actionMenu.isOpen)
+            return;
+        if (this._overflowMenu.isOpen) {
+            if (force && !shouldActionGoFirst) {
+                manager.removeMenu(this._actionMenu);
+                manager.addMenu(this._actionMenu);
+            }
+            return;
+        }
+
+        // Both menus share the toggle as source actor, the manager opens
+        // the first match, so the order picks the hover menu.
+        manager.removeMenu(this._actionMenu);
+        this._overflowMenu.detachFromManager();
+
+        if (shouldActionGoFirst) {
+            manager.addMenu(this._actionMenu);
+            this._overflowMenu.attachToManager();
+        } else {
+            this._overflowMenu.attachToManager();
+            manager.addMenu(this._actionMenu);
+        }
+    }
+
     // SMOOTH carries fractional deltas, rotating per delta would spin the
     // order.
     _onScroll(event) {
-        if (this._settings.get_string('toggle-action-scroll') !== 'cycle')
+        if (this._settings.get_string('toggle-action-scroll') !== SCROLL_ACTION_CYCLE)
             return Clutter.EVENT_PROPAGATE;
 
         switch (event.get_scroll_direction()) {
@@ -220,8 +217,7 @@ export class ToggleButton {
 
         this._actionMenu = createPanelMenu(this.actor);
 
-        if (Main.panel.menuManager)
-            Main.panel.menuManager.addMenu(this._actionMenu);
+        Main.panel.menuManager.addMenu(this._actionMenu);
 
         this._actionMenuOverflowItem = new PopupMenu.PopupMenuItem(_('Open Overflow Menu'));
         this._actionMenuOverflowItem.connect('activate', () => {

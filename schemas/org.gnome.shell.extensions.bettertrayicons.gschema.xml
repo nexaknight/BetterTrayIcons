@@ -33,7 +33,6 @@
             </description>
         </key>
 
-        <!-- Behaviour -->
         <key name="keep-popup-after-click" type="b">
             <default>false</default>
             <summary>Keep the overflow menu open after clicking an icon</summary>
@@ -84,7 +83,6 @@
             <summary>Tooltip placement relative to the icon (top or bottom)</summary>
         </key>
 
-        <!-- Styling Switches -->
         <key name="enable-custom-overflow-style" type="b">
             <default>false</default>
             <summary>Enable custom styling for the overflow container</summary>
@@ -155,7 +153,6 @@
             <summary>Link the four overflow popup margin sides so editing one sets all</summary>
         </key>
 
-        <!-- Tray Icon Styling -->
         <key name="icon-color" type="s">
             <default>'#ffffff'</default>
             <summary>Foreground colour for tray icons</summary>

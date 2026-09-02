@@ -7,7 +7,7 @@ import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions
 
 import {error} from '../../shared/logging.js';
 import {disconnectAll} from '../../shared/lifecycle.js';
-import {fetchJson, fetchBytes, isCancelledError} from '../../shared/fetch.js';
+import {fetchJson, fetchBytes, isCancelledError} from '../../shared/asyncIo.js';
 import {createLabel, createBox, createPicture, createImage, createAvatar, createCard, createCardRow, createTextureFromBytes, createButton} from '../widgets/gtkHelpers.js';
 import {createActionRow} from '../widgets/rows.js';
 import {bindLogoToTheme} from '../widgets/theme.js';

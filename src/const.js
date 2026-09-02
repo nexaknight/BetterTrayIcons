@@ -15,7 +15,19 @@ export const DEFAULT_PILL_RADIUS_PX = 50;
 // Touch has no buttons, so it binds under its own name next to left/middle/right.
 export const TOUCH_BINDING = 'tap';
 
+// Spinner bounds the schema does not carry. It names a minimum and no maximum,
+// so a spinner sized off the schema alone would offer a two billion pixel icon.
+export const ICON_SIZE_RANGE_PX = Object.freeze({min: 16, max: 128, step: 2});
+
+export const BORDER_RADIUS_MAX_PX = 50;
+
+export const BORDER_WIDTH_MAX_PX = 20;
+
 export const BOX_SIDES = Object.freeze(['top', 'right', 'bottom', 'left']);
+
+export const PREVIEW_ELEMENT_SHADOW_CSS = 'box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);';
+export const PREVIEW_STOCK_POPUP_CSS =
+    `background-color: rgba(48, 48, 48, 1); border-radius: 14px; padding: 8px; ${PREVIEW_ELEMENT_SHADOW_CSS}`;
 
 const TRAY_COLOR_KEYS = Object.freeze([
     'icon-color',
@@ -26,7 +38,6 @@ const TRAY_COLOR_KEYS = Object.freeze([
     'icon-hover-border-color',
 ]);
 
-// The shell restyles tray icons on these, the prefs reset and preview them.
 export const TRAY_STYLE_KEYS = Object.freeze([
     'enable-custom-icon-style',
     'icon-size',
@@ -44,24 +55,15 @@ export const TRAY_STYLE_KEYS = Object.freeze([
     ...withLightTwins(TRAY_COLOR_KEYS),
 ]);
 
-// The badge_style vocabulary the shell renders and the prefs dialog writes.
-// The first position is the default, and each name encodes its corner as
-// vertical-horizontal, which is what the shell derives its alignment from.
+// Values for badge_style.position. The first one is the default, and each name
+// encodes its corner as vertical-horizontal, which is what the shell derives
+// its alignment from.
 export const BADGE_POSITIONS = Object.freeze(['bottom-right', 'bottom-left', 'top-right', 'top-left']);
 // GNOME's destructive red, so the badge reads as an alert in any theme.
 export const BADGE_DEFAULT_COLOR = '#e01b24';
 export const BADGE_DEFAULT_TEXT_COLOR = '#ffffff';
 
-// Conceptually these belong to the live-preview system in prefs/widgets/
-// preview.js, which is their only real reader. They sit here instead because
-// gtkHelpers.js also needs PREVIEW_STOCK_POPUP_CSS (for the static layout
-// thumbnails' matching backdrop) and importing it from preview.js would
-// create an import cycle between the two.
-export const PREVIEW_ELEMENT_SHADOW_CSS = 'box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);';
-export const PREVIEW_STOCK_POPUP_CSS =
-    `background-color: rgba(48, 48, 48, 1); border-radius: 14px; padding: 8px; ${PREVIEW_ELEMENT_SHADOW_CSS}`;
-
-// See CONTRIBUTING.md and the wiki for the opt-out procedure.
+// CONTRIBUTING.md has the opt-out procedure.
 export const CONTRIBUTORS_OPTOUT = new Set([
     'github-actions[bot]',
     'dependabot[bot]',

@@ -2,21 +2,18 @@ import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 
 import {warnOnce} from './logging.js';
-import {fileExists, readFileBytes, readFileText, probePaths} from './fetch.js';
+import {fileExists, readFileBytes, readFileText, probePaths} from './asyncIo.js';
 import {usesAccent} from './accentColor.js';
 import {colorKeyFor} from './colorVariant.js';
 
 // symbolic is the freedesktop convention, panel the Ubuntu/ayatana one.
 const MONO_ICON_SUFFIXES = Object.freeze(['-symbolic', '-panel']);
-const MONO_VARIANTS = MONO_ICON_SUFFIXES.map(s => s.slice(1)).join('|');
+const MONO_VARIANT_PATTERN = MONO_ICON_SUFFIXES.map(s => s.slice(1)).join('|');
 
-// Bare "mono" marks monochrome assets without being a theme variant
-// suffix, so it isn't in the list above.
-const MONO_ICON_NAME_RE = new RegExp(`[-_](${MONO_VARIANTS}|mono)$`, 'i');
+const MONO_ICON_NAME_RE = new RegExp(`[-_](${MONO_VARIANT_PATTERN}|mono)$`, 'i');
 
-// Fallback-asset names like steam_tray_mono, from apps without theme
-// integration. Stripping them reveals the base name a theme can cover,
-// while -symbolic and -panel names are deliberate choices and stay as is.
+// Fallback-asset names like steam_tray_mono come from apps without theme
+// integration, stripping them reveals a base name a theme can cover.
 export const MONO_ASSET_SUFFIX_RE = /([-_]tray)?[-_]mono$/i;
 
 const ICON_CACHE_SUBDIR = 'bettertrayicons/icons';
@@ -34,9 +31,8 @@ const ICON_THEME_TREE_MAX_DEPTH = 4;
 // too, or the last match falls back onto the revision.
 const ICON_THEME_SIZE_RE = /\/(\d+)(?:x\d+)?(?:@\d+x?)?(?=\/)/g;
 
-// Feed the result to resolveIcon and applyResolvedIcon so neither stats while
-// a widget is being built. Theme lookups ride in the same map under
-// themeProbeKey, false in there means probed and missed.
+// Prefetched so no widget build stats. Theme lookups ride in the same map
+// under themeProbeKey, false in there means probed and missed.
 export async function probeIconPaths(configs, cancellable = null) {
     const paths = new Set();
     const themed = new Map();
@@ -59,7 +55,6 @@ export async function probeIconPaths(configs, cancellable = null) {
     return map;
 }
 
-// Null when resolveIcon could never reach the theme walk for this config.
 export function themeProbeKey(config) {
     const name = config.detected_icon;
     if (config.custom_icon || !name || name.startsWith('/') || !config.icon_theme_path)
@@ -67,7 +62,6 @@ export function themeProbeKey(config) {
     return `${config.icon_theme_path}\0${name}`;
 }
 
-// Only the prefs side has an icon theme at hand to answer `hasThemeIcon`.
 export function resolveIcon(config, hasThemeIcon = null, cachedPathExists = null, themeHit = null) {
     if (config.custom_icon) {
         if (config.custom_icon.startsWith('/'))
@@ -78,15 +72,11 @@ export function resolveIcon(config, hasThemeIcon = null, cachedPathExists = null
 
     const iconName = config.detected_icon;
 
-    // A resolvable name beats any cached copy. The theme recolors it for
-    // light and dark and renders it at the exact size, a snapshot does
-    // neither. Also repairs entries an older version polluted with a copy
-    // of the theme file.
+    // A resolvable name beats any cached copy. The theme recolors it for light
+    // and dark and renders it at the exact size, a snapshot does neither.
     if (iconName && !iconName.startsWith('/') && hasThemeIcon?.(iconName))
         return {type: 'name', value: iconName};
 
-    // Without this check, a stale cached path would show as image-missing
-    // instead of falling back to the themed name below.
     if (config.cached_icon_path) {
         const exists = cachedPathExists ??
             Gio.File.new_for_path(config.cached_icon_path).query_exists(null);
@@ -94,17 +84,16 @@ export function resolveIcon(config, hasThemeIcon = null, cachedPathExists = null
             return {type: 'file', value: config.cached_icon_path};
     }
 
-    if (iconName) {
-        if (iconName.startsWith('/'))
-            return {type: 'file', value: iconName};
+    if (!iconName)
+        return {type: 'name', value: 'image-missing'};
 
-        if (config.icon_theme_path && themeHit)
-            return {type: 'file', value: themeHit};
+    if (iconName.startsWith('/'))
+        return {type: 'file', value: iconName};
 
-        return {type: 'name', value: iconName};
-    }
+    if (config.icon_theme_path && themeHit)
+        return {type: 'file', value: themeHit};
 
-    return {type: 'name', value: 'image-missing'};
+    return {type: 'name', value: iconName};
 }
 
 export async function findIconInThemeAsync(iconName, themePath, {targetSize = 0, cancellable = null} = {}) {
@@ -117,12 +106,10 @@ export async function findIconInThemeAsync(iconName, themePath, {targetSize = 0,
     return _findIconInThemeTree(Gio.File.new_for_path(themePath), wanted, targetSize, cancellable);
 }
 
-// A bare name can also be a file with its extension already attached, so
-// both spellings are probed, flat first and then the theme tree.
 function _candidatePaths(iconName, themePath) {
     const candidates = [iconName, ...ICON_FILE_EXTENSIONS.map(ext => `${iconName}${ext}`)];
     const cleanPath = themePath.endsWith('/') ? themePath : `${themePath}/`;
-    return {wanted: new Set(candidates), paths: candidates.map(cand => `${cleanPath}${cand}`)};
+    return {wanted: new Set(candidates), paths: candidates.map(candidate => `${cleanPath}${candidate}`)};
 }
 
 async function _findIconInThemeTree(dir, wanted, targetSize, cancellable) {
@@ -149,8 +136,7 @@ async function _findIconInThemeTree(dir, wanted, targetSize, cancellable) {
                 continue;
             const score = _sizeDistance(child.get_path(), targetSize);
             // A tree whose paths carry no size segment scores every file
-            // Infinity, and Infinity < Infinity kept none of them, so a
-            // matching file sitting right there resolved to nothing.
+            // Infinity, and Infinity < Infinity would keep none of them.
             if (best === null || score < bestScore) {
                 bestScore = score;
                 best = child.get_path();
@@ -162,20 +148,20 @@ async function _findIconInThemeTree(dir, wanted, targetSize, cancellable) {
     return best;
 }
 
-// Scalable art fits every slot, so it wins unless a raster variant matches
-// the requested size exactly.
+// An SVG scales to any size, so it ranks below an exact raster match at 0 and
+// above an off-by-one. Without a target size every candidate ties.
+const SVG_SIZE_SCORE = 0.5;
+const NO_TARGET_SIZE_SCORE = 1;
+
 function _sizeDistance(path, targetSize) {
     if (path.endsWith('.svg'))
-        return 0.5;
+        return SVG_SIZE_SCORE;
     if (!targetSize)
-        return 1;
+        return NO_TARGET_SIZE_SCORE;
     const sizes = [...path.matchAll(ICON_THEME_SIZE_RE)];
     return sizes.length ? Math.abs(Number(sizes.at(-1)[1]) - targetSize) : Infinity;
 }
 
-// For the prefs side only. GTK falls back to image-missing on its own, and
-// spelling it out here would bury a name it could still resolve (see
-// orderThemedNames). St needs the opposite, which orderThemedNames handles.
 export function themedIcon(name) {
     return new Gio.ThemedIcon({name});
 }
@@ -198,23 +184,22 @@ const DECLARED_COLOR_RE = /(?:fill|stroke|stop-color|color)\s*[:=]\s*["']?\s*(#[
 
 // KDE paints an ordinary icon part with the text class and keeps the semantic
 // ones (PositiveText, NegativeText) for status, so only the text one may take
-// the tint. Papirus files a brand color under it, which is why it is checked
-// before being repainted.
+// the tint. Papirus files a brand color under it, so it gets checked first.
 const COLOR_SCHEME_PREFIX = 'ColorScheme-';
 const COLOR_SCHEME_TEXT_CLASS = `${COLOR_SCHEME_PREFIX}Text`;
 const COLOR_SCHEME_TEXT_RE = new RegExp(
     `\\.${COLOR_SCHEME_TEXT_CLASS}\\s*\\{[^}]*?color\\s*:\\s*(#[0-9a-f]{3,8}|rgba?\\([^)]*\\))`, 'i');
 
-// Only parts naming no color take the tint. Without the inherit rule the
-// children of a `<g fill>` group lose theirs.
+// Only parts naming no color take the tint, and without the inherit rule the
+// children of a `<g fill>` group lose their own.
 const _tintColoredCss = (color, neutralText) =>
     `svg{color:${color}}*:not([fill]){fill:${color}}[fill] *{fill:inherit}${neutralText
         ? `.${COLOR_SCHEME_TEXT_CLASS},.foreground,.foreground-fill{color:${color};fill:${color}}`
         : ''}`;
 
-// Nothing chromatic to protect, so the tint wins everywhere. fill="none" is
-// spared because forcing a fill onto a stroke-drawn outline paints it as a
-// solid blob, and the stroke takes the tint as well, which neither toolkit does.
+// fill="none" is spared because forcing a fill onto a stroke-drawn outline
+// paints it as a solid blob. The stroke takes the tint too, which neither
+// toolkit does.
 const _tintMonoCss = color =>
     `*{fill:${color}!important;color:${color}}` +
     '[fill="none"]{fill:none!important}' +
@@ -222,10 +207,10 @@ const _tintMonoCss = color =>
 
 // Both toolkits classify by file name alone (st-icon-theme.c
 // icon_uri_is_symbolic), so a mono icon under a plain name renders black.
-// Matching none of the three leaves the icon's own paint alone, which is what
-// keeps grayscale logos intact.
-const MONO_NAME_RE = new RegExp(`-(${MONO_VARIANTS})\\.svg$`, 'i');
-const MONO_DIR_RE = new RegExp(`/(${MONO_VARIANTS})/`);
+// Matching none of the three leaves the icon's own paint alone, which keeps
+// grayscale logos intact.
+const MONO_NAME_RE = new RegExp(`-(${MONO_VARIANT_PATTERN})\\.svg$`, 'i');
+const MONO_DIR_RE = new RegExp(`/(${MONO_VARIANT_PATTERN})/`);
 const MONO_CLASS_RE = new RegExp(
     `currentColor|${COLOR_SCHEME_PREFIX}|class\\s*=\\s*["'](?:fg|foreground|success|warning|error)`, 'i');
 
@@ -233,32 +218,28 @@ function _wantsTint(path, text) {
     return MONO_NAME_RE.test(path) || MONO_DIR_RE.test(path) || MONO_CLASS_RE.test(text);
 }
 
-// The color neutral parts take, matching a normal symbolic tray icon. The
-// accent has to come from the caller, since St resolves it from a theme node
-// and GTK from Adw, and a stale icon-color would win over it otherwise.
+const DEFAULT_TINT_COLOR = '#ffffff';
+
+// The accent has to come from the caller, St resolves it from a theme node and
+// GTK from Adw, and a stale icon-color would win over it otherwise.
 export function symbolicTint(settings, {accent = null, light = false} = {}) {
     if (!settings.get_boolean('enable-custom-icon-style'))
-        return '#ffffff';
+        return DEFAULT_TINT_COLOR;
     const value = settings.get_string(colorKeyFor(settings, 'icon-color', light));
     if (accent && usesAccent(value))
         return accent;
     return value;
 }
 
-// Tinted bytes live only in memory, so the panel never writes to the SSD.
-// Dropping the whole map on overflow costs one cheap rebuild instead of LRU
-// bookkeeping, and a failed read is kept as null so no render retries it.
 const TINT_CACHE_MAX = 128;
 const _tintCache = new Map();
 
-// A themed NAME carries no bytes, so the caller hands in its own toolkit's
-// lookup. size is in DEVICE pixels, 0 leaves the file's own size alone.
+// size is in DEVICE pixels, 0 leaves the file's own size alone.
 export async function tintedSymbolicIcon(value, tint, {size = 0, lookupThemeFile = null, cancellable = null} = {}) {
     const path = typeof value === 'string' && value.startsWith('/')
         ? value
         : lookupThemeFile?.(value);
     const color = _cssColor(tint);
-    // Only an SVG has somewhere to put a stylesheet.
     if (!color || !path?.toLowerCase().endsWith('.svg'))
         return null;
 
@@ -301,16 +282,14 @@ async function _tintedIcon(path, color, size, cancellable) {
     }
 }
 
-// GTK also drops fill-rule cutouts on such a file, so a ring arrives as a solid
-// disc. A gicon without a filename escapes both pipelines, and the rule goes
-// last to outrank a stylesheet the icon carries itself.
+// GTK drops fill-rule cutouts on a name-classified symbolic file, so a ring
+// arrives as a solid disc. A gicon without a filename escapes both pipelines,
+// and the style goes last to outrank one the icon carries itself.
 function _tintedSvg(text, color, size) {
     const chroma = _declaresChroma(text);
     const css = chroma
-        ? _tintColoredCss(color, _neutralTextClass(text))
+        ? _tintColoredCss(color, _isNeutralTextClass(text))
         : _tintMonoCss(color);
-    // The rewrite runs on the source rather than through CSS because no selector
-    // can ask what color a declaration carries.
     const body = chroma ? _retintNeutrals(text, color) : text;
     const end = body.lastIndexOf('</svg');
     if (end < 0)
@@ -355,8 +334,8 @@ function _sizedSvg(text, px) {
             return text;
         open = addAttr(open, ` viewBox="0 0 ${w} ${h}"`);
     }
-    for (const [name, present] of [['width', width], ['height', height]]) {
-        open = present === null
+    for (const [name, declared] of [['width', width], ['height', height]]) {
+        open = declared === null
             ? addAttr(open, ` ${name}="${px}"`)
             : open.replace(attrRe(name), ` ${name}="${px}"`);
     }
@@ -373,7 +352,7 @@ function _declaresChroma(text) {
     return false;
 }
 
-function _neutralTextClass(text) {
+function _isNeutralTextClass(text) {
     const declared = text.match(COLOR_SCHEME_TEXT_RE);
     return !declared || !_isChromatic(_parseRgb(declared[1]));
 }
@@ -387,9 +366,8 @@ function _isChromatic(rgb) {
     return max > 0 && (max - min) / max >= TINT_SAT_THRESHOLD;
 }
 
-// An unreadable value is refused, librsvg would render it black. Alpha is kept
-// because libadwaita's own text color carries one and the icon has to match
-// what sits next to it.
+// An unreadable value is refused, librsvg would render it black. Alpha stays
+// because libadwaita's own text color carries one.
 function _cssColor(tint) {
     const rgb = _parseRgb(tint);
     if (!rgb)
@@ -400,8 +378,8 @@ function _cssColor(tint) {
         : `#${[r, g, b].map(v => v.toString(16).padStart(2, '0')).join('')}`;
 }
 
-// The forms a color reaches us in: #rgb and #rrggbb from gsettings, the same
-// with a trailing alpha from St's to_string, and rgb()/rgba() from GTK.
+// Colors reach us as #rgb and #rrggbb from gsettings, the same with a trailing
+// alpha from St's to_string, and rgb()/rgba() from GTK.
 function _parseRgb(color) {
     const hex = color.trim().match(/^#([0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i);
     if (hex) {
@@ -420,8 +398,8 @@ function _parseRgb(color) {
 // GTK and St walk a multi-name icon differently (gtkicontheme.c themes-first,
 // st-icon-theme.c names-first). A name we know resolves goes first, that wins
 // under both. image-missing sits last because St paints nothing otherwise,
-// but under GTK it would bury names further down the theme chain. With no
-// theme answer yet the render-time lookup decides, without a pinned fallback.
+// under GTK it would bury names further down the theme chain, and with no
+// theme answer yet it is left out so the render-time lookup decides.
 export function orderThemedNames(candidates, existing, themeKnown = true) {
     if (existing)
         return [existing, ...candidates.filter(n => n !== existing)];
@@ -451,13 +429,12 @@ export async function writeCachedIcon(appId, pngBytes) {
     const file = Gio.File.new_for_path(path);
 
     try {
-        if (file.query_exists(null)) {
+        if (await fileExists(path)) {
             const existing = await readFileBytes(file);
-            if (existing.length === pngBytes.length && _bytesEqual(existing, pngBytes))
+            if (_bytesEqual(existing, pngBytes))
                 return path;
         }
 
-        // Async so a frame's cache write never blocks the compositor.
         await file.replace_contents_async(
             GLib.Bytes.new(pngBytes),
             null,
@@ -472,7 +449,6 @@ export async function writeCachedIcon(appId, pngBytes) {
     }
 }
 
-// The file can vanish between the exists check and the delete.
 export function deleteCachedIcon(appId) {
     const path = _cachedIconPath(appId);
     if (!path)
@@ -510,6 +486,8 @@ function _ensureCacheDir() {
 }
 
 function _bytesEqual(a, b) {
+    if (a.length !== b.length)
+        return false;
     for (let i = 0; i < a.length; i++) {
         if (a[i] !== b[i])
             return false;

@@ -4,14 +4,7 @@ import GLib from 'gi://GLib';
 
 import {warn} from './logging.js';
 
-// The one _promisify block for the whole extension. It patches shared
-// prototypes, so every module in both processes gets them by importing
-// from here, which they all do already.
 const promisify = (proto, ...methods) => methods.forEach(m => Gio._promisify(proto, m));
-
-// Cancellation is teardown, not a failure, so callers either swallow or
-// rethrow it while every other error stays an error.
-export const isCancelledError = e => !!e?.matches?.(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED);
 
 promisify(Gio.File.prototype,
     'load_contents_async',
@@ -24,6 +17,8 @@ promisify(Gio.File.prototype,
 promisify(Gio.FileEnumerator.prototype, 'next_files_async', 'close_async');
 promisify(Gio.OutputStream.prototype, 'splice_async');
 promisify(GdkPixbuf.Pixbuf, 'new_from_stream_async');
+
+export const isCancelledError = e => !!e?.matches?.(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED);
 
 export async function fetchJson(url, cancellable = null) {
     const bytes = await fetchBytes(url, cancellable);
@@ -48,8 +43,6 @@ export async function probePaths(paths, cancellable = null) {
     return new Map(probed);
 }
 
-// A user-chosen path can sit on a network mount, where query_exists blocks
-// the calling main loop for a round trip.
 export async function fileExists(path, cancellable = null) {
     try {
         await Gio.File.new_for_path(path).query_info_async(
@@ -100,8 +93,6 @@ export async function readDirNames(file, cancellable = null) {
     return names;
 }
 
-// A dead or unreadable /proc entry is normal, the process may exit mid-read.
-// Cancellation is not, so it still propagates.
 export async function readProcFile(pid, name, cancellable = null) {
     if (!pid)
         return null;
@@ -120,9 +111,9 @@ export async function readEnviron(pid, cancellable = null) {
         return new Map();
     const map = new Map();
     for (const entry of raw.split('\0')) {
-        const idx = entry.indexOf('=');
-        if (idx > 0)
-            map.set(entry.slice(0, idx), entry.slice(idx + 1));
+        const separatorIndex = entry.indexOf('=');
+        if (separatorIndex > 0)
+            map.set(entry.slice(0, separatorIndex), entry.slice(separatorIndex + 1));
     }
     return map;
 }

@@ -2,8 +2,7 @@ import GLib from 'gi://GLib';
 import Clutter from 'gi://Clutter';
 
 import {clearIds, disconnectAll, removeTimer} from '../../shared/lifecycle.js';
-import {warnOnce} from '../../shared/logging.js';
-import {isDisposed} from '../utils/actor.js';
+import {isDisposed} from '../disposal.js';
 import {TOUCH_BINDING} from '../../const.js';
 
 const LONG_PRESS_TIMEOUT_MS = 600;
@@ -13,13 +12,19 @@ const DOUBLE_CLICK_MAX_DELAY_MS = 250;
 // Matches GTK's default drag threshold.
 const DND_DRAG_THRESHOLD_PX = 8;
 
+const MIDDLE_MOUSE_BUTTON = 2;
+
+const RIGHT_MOUSE_BUTTON = 3;
+
 export class ClickController {
     constructor(actor, settings, keyPrefix, onAction, options = {}) {
         this._actor = actor;
         this._settings = settings;
         this._prefix = keyPrefix;
         this._onAction = onAction;
-        this._propagate = options.propagateEvent === true;
+        this._eventResult = options.propagateEvent === true
+            ? Clutter.EVENT_PROPAGATE
+            : Clutter.EVENT_STOP;
 
         this._state = {
             longPressId: 0,
@@ -51,7 +56,7 @@ export class ClickController {
     }
 
     // Clutter emulates no pointer for touch, so a tap reaches none of the
-    // handlers above. Touch has no buttons either, hence its own binding.
+    // handlers above.
     _onTouch(actor, event) {
         switch (event.type()) {
         case Clutter.EventType.TOUCH_BEGIN:
@@ -77,10 +82,13 @@ export class ClickController {
         this._state.pressStartY = y;
         this._state.buttonDown = true;
 
+        const isRepeatOfLastBinding = this._state.lastClickTime > 0 &&
+            binding === this._state.lastBinding;
+        const isInsideDoubleWindow =
+            (eventTime - this._state.lastClickTime) < doubleClickTime;
+
         // Alternating buttons within the window is two singles, not a double.
-        if (this._state.lastClickTime > 0 &&
-            (eventTime - this._state.lastClickTime) < doubleClickTime &&
-            binding === this._state.lastBinding)
+        if (isRepeatOfLastBinding && isInsideDoubleWindow)
             this._state.clickCount = 2;
         else
             this._state.clickCount = 1;
@@ -101,7 +109,7 @@ export class ClickController {
             });
         }
 
-        return this._propagate ? Clutter.EVENT_PROPAGATE : Clutter.EVENT_STOP;
+        return this._eventResult;
     }
 
     _onMotion(actor, event) {
@@ -129,7 +137,9 @@ export class ClickController {
 
         const [x, y] = event.get_coords();
         const [success, localX, localY] = actor.transform_stage_point(x, y);
-        const isInside = success && localX >= 0 && localX < actor.width && localY >= 0 && localY < actor.height;
+        const isInsideWidth = localX >= 0 && localX < actor.width;
+        const isInsideHeight = localY >= 0 && localY < actor.height;
+        const isInside = success && isInsideWidth && isInsideHeight;
 
         const count = this._state.clickCount;
 
@@ -138,12 +148,12 @@ export class ClickController {
         if (this._state.isLongPress) {
             this._state.isLongPress = false;
             this._state.clickCount = 0;
-            return this._propagate ? Clutter.EVENT_PROPAGATE : Clutter.EVENT_STOP;
+            return this._eventResult;
         }
 
         if (!isInside) {
             this._state.clickCount = 0;
-            return this._propagate ? Clutter.EVENT_PROPAGATE : Clutter.EVENT_STOP;
+            return this._eventResult;
         }
 
         if (count === 1)
@@ -153,7 +163,7 @@ export class ClickController {
         else
             this._state.clickCount = 0;
 
-        return this._propagate ? Clutter.EVENT_PROPAGATE : Clutter.EVENT_STOP;
+        return this._eventResult;
     }
 
     _onSingleClickRelease(binding) {
@@ -190,8 +200,8 @@ export class ClickController {
         this._state.lastClickTime = 0;
     }
 
-    // Capped: the system value is tuned for opening files, and waiting that
-    // long before firing a single click makes the tray feel unresponsive.
+    // The system value is tuned for opening files, waiting that long before
+    // a single click fires makes the tray feel unresponsive.
     _getDoubleClickTime() {
         return Math.min(
             _gestureSetting('double_click_time', DOUBLE_CLICK_MAX_DELAY_MS),
@@ -230,23 +240,14 @@ export class ClickController {
 }
 
 function _bindingOf(button) {
-    if (button === 2)
+    if (button === MIDDLE_MOUSE_BUTTON)
         return 'middle';
-    if (button === 3)
+    if (button === RIGHT_MOUSE_BUTTON)
         return 'right';
     return 'left';
 }
 
-// These thresholds track the user's accessibility settings, so reading them
-// beats a literal. Clutter.Settings.get_default() has been deprecated since
-// mutter 47, so a removal has to degrade to the fallback rather than throw
-// into a click handler.
 function _gestureSetting(property, fallback) {
-    try {
-        const value = Clutter.Settings.get_default()?.[property];
-        return typeof value === 'number' && value > 0 ? value : fallback;
-    } catch {
-        warnOnce(`gesture:${property}`, `Clutter.Settings is gone, using the built-in ${property} fallback`);
-        return fallback;
-    }
+    const value = Clutter.Settings.get_default()[property];
+    return typeof value === 'number' && value > 0 ? value : fallback;
 }
