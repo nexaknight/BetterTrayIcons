@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: BetterTrayIcons\n"
 "Report-Msgid-Bugs-To: https://github.com/nexaknight/BetterTrayIcons/issues\n"
 "POT-Creation-Date: 2026-08-19 05:59+0800\n"
-"PO-Revision-Date: 2026-08-19 16:19+0800\n"
+"PO-Revision-Date: 2026-09-02 17:02+0800\n"
 "Last-Translator: Igor Zhitov <agent19872@icloud.com>\n"
 "Language-Team: Russian\n"
 "Language: ru\n"
@@ -380,7 +380,7 @@ msgid "Panel Box"
 msgstr "Область панели"
 
 msgid "Which part of the panel holds the icons."
-msgstr "Часть панели, в которой размещаются значки."
+msgstr "Определяет, в какой части панели будут размещаться значки."
 
 msgid "Left"
 msgstr "Слева"
@@ -577,7 +577,7 @@ msgid "Top Left"
 msgstr "Сверху слева"
 
 msgid "Corner Radius (px)"
-msgstr "Радиус углов (px)"
+msgstr "Радиус скругления (px)"
 
 msgid "0 is square, high is round."
 msgstr "0 — квадратная форма, максимальное значение — круглая."
@@ -946,3 +946,69 @@ msgstr "При наведении"
 
 msgid "Live Preview"
 msgstr "Предпросмотр"
+
+msgid "Angle"
+msgstr "Угол"
+
+msgid "Animate Rotation"
+msgstr "Анимировать вращение"
+
+msgid "Border width"
+msgstr "Ширина рамки"
+
+msgid "Color Set"
+msgstr "Набор цветов"
+
+msgid "Corner radius"
+msgstr "Радиус скругления"
+
+msgid "Dark"
+msgstr "Тёмный"
+
+msgid "Duration (ms)"
+msgstr "Длительность (мс)"
+
+msgid "Icon size"
+msgstr "Размер значка"
+
+msgid "Light"
+msgstr "Светлый"
+
+msgid "Measure the margin while hovering the preview."
+msgstr "Измерять внешний отступ при наведении на предпросмотр."
+
+msgid "Measure the padding while hovering the preview."
+msgstr "Измерять внутренний отступ при наведении на предпросмотр."
+
+msgid "Menu Closed"
+msgstr "Меню закрыто"
+
+msgid "Menu Open"
+msgstr "Меню открыто"
+
+msgid "Off turns the icon in one jump."
+msgstr "При отключённой анимации значок поворачивается одним рывком."
+
+msgid "One icon per overflow menu state."
+msgstr "По одному значку на каждое состояние меню скрытых значков."
+
+msgid "Preview"
+msgstr "Предпросмотр"
+
+msgid "Reverse the turning direction"
+msgstr "Изменить направление вращения"
+
+msgid "Rotate While Open"
+msgstr "Вращать при открытом меню"
+
+msgid "Running in the background"
+msgstr "Работает в фоновом режиме"
+
+msgid "Separate colors for the light and dark style."
+msgstr "Отдельные цвета для светлого и тёмного оформления."
+
+msgid "Tray icons"
+msgstr "Значки трея"
+
+msgid "Turn the icon instead of swapping it for a second one."
+msgstr "Поворачивать значок вместо замены его вторым значком."
