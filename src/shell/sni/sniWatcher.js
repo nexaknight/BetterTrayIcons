@@ -3,7 +3,7 @@ import GLib from 'gi://GLib';
 
 import {warn, error} from '../../shared/logging.js';
 import {clearIds, disposeAll, removeTimer} from '../../shared/lifecycle.js';
-import {loadInterfaceXML, getItemAddress, callDBusDaemon} from '../dbusCalls.js';
+import {getItemAddress, callDBusDaemon} from '../dbusCalls.js';
 import {TrayIcon} from './trayIcon.js';
 import {forwardDragStateToIndicator} from '../features/dragAndDrop.js';
 
@@ -16,8 +16,8 @@ const FREEDESKTOP_WATCHER_BUS_NAME = 'org.freedesktop.StatusNotifierWatcher';
 const DEFAULT_ITEM_OBJECT_PATH = '/StatusNotifierItem';
 
 export class SniWatcher {
-    constructor(extensionDir, indicator, settings) {
-        this._extensionDir = extensionDir;
+    constructor(interfaces, indicator, settings) {
+        this._interfaces = interfaces;
         this._indicator = indicator;
         this._settings = settings;
 
@@ -34,19 +34,13 @@ export class SniWatcher {
         this._scanTimeoutId = 0;
         this._hasScanned = false;
 
-        try {
-            const itemXml = loadInterfaceXML(this._extensionDir, 'StatusNotifierItem.xml');
-            this._itemProxyClass = Gio.DBusProxy.makeProxyWrapper(itemXml);
-        } catch (e) {
-            error('SniWatcher: Failed to load StatusNotifierItem.xml', e);
-        }
+        this._itemProxyClass = Gio.DBusProxy.makeProxyWrapper(this._interfaces.item);
     }
 
     enable() {
         this._disabled = false;
         try {
-            const xmlContent = loadInterfaceXML(this._extensionDir, 'StatusNotifierWatcher.xml');
-            const nodeInfo = Gio.DBusNodeInfo.new_for_xml(xmlContent);
+            const nodeInfo = Gio.DBusNodeInfo.new_for_xml(this._interfaces.watcher);
             const interfaceInfo = nodeInfo.lookup_interface('org.kde.StatusNotifierWatcher');
 
             this._dbusImpl = Gio.DBusExportedObject.wrapJSObject(interfaceInfo, this);
@@ -216,7 +210,7 @@ export class SniWatcher {
                 }
 
                 const item = new TrayIcon(
-                    this._extensionDir,
+                    this._interfaces.menu,
                     busName,
                     objectPath,
                     this._settings,

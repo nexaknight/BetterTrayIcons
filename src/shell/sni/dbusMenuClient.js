@@ -8,7 +8,6 @@ import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 import {warn} from '../../shared/logging.js';
 import {isCancelledError} from '../../shared/asyncIo.js';
 import {clearIds, debounceTo, disposeAll, removeTimer} from '../../shared/lifecycle.js';
-import {loadInterfaceXML} from '../dbusCalls.js';
 import {isDisposed, trackDisposal} from '../disposal.js';
 import {stageScaleFactor} from '../actorPlacement.js';
 
@@ -24,15 +23,14 @@ const ICON_INDEX_AFTER_ORNAMENT = 1;
 
 const ICON_DATA_TYPE = new GLib.VariantType('ay');
 
-// Every icon builds its own client, but the XML read and the wrapper
-// generation are identical for all of them.
+// Every icon builds its own client, the proxy wrapper is the same for all.
 let _MenuProxyClass = null;
 
 export class DBusMenuClient {
-    constructor(busName, objectPath, extensionDir, settings, onCloseMenu) {
+    constructor(busName, objectPath, interfaceXml, settings, onCloseMenu) {
         this._busName = busName;
         this._objectPath = objectPath;
-        this._extensionDir = extensionDir;
+        this._interfaceXml = interfaceXml;
         this._settings = settings;
         this._proxy = null;
         this._onCloseMenu = onCloseMenu;
@@ -48,8 +46,7 @@ export class DBusMenuClient {
         if (!GLib.Variant.is_object_path(this._objectPath))
             return Promise.reject(new Error(`Invalid menu object path: ${this._objectPath}`));
 
-        _MenuProxyClass ??= Gio.DBusProxy.makeProxyWrapper(
-            loadInterfaceXML(this._extensionDir, 'DBusMenu.xml'));
+        _MenuProxyClass ??= Gio.DBusProxy.makeProxyWrapper(this._interfaceXml);
 
         return new Promise((resolve, reject) => {
             this._proxy = new _MenuProxyClass(

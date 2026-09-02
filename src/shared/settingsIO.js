@@ -5,7 +5,7 @@ import {warn, warnOnce, error} from './logging.js';
 import {safeMapFromParsed, getAppConfigMap, getSyncMeta, mergeAppConfigs, syncMetaForReplace} from './appConfig.js';
 import {readFileBytes, readFileText, probePaths} from './asyncIo.js';
 import {BADGE_POSITIONS} from '../const.js';
-import {ACCENT_COLOR_VALUE, accentValueKeeping} from './accentColor.js';
+import {ACCENT_COLOR_VALUE} from './accentColor.js';
 import {LIGHT_SUFFIX} from './colorVariant.js';
 
 const COLOR_KEY_PATTERN = new RegExp(`-color(${LIGHT_SUFFIX})?$`);
@@ -18,8 +18,6 @@ const COLOR_PATTERN = new RegExp(
 // A pull must not rewire the sync it arrived through. Importing another
 // host's file path or auto switch retargets or severs the link.
 const IMPORT_EXCLUDED_KEYS = new Set(['sync-file-path', 'enable-auto-sync']);
-
-const ACCENT_KEY_SUFFIX = 'use-accent-color';
 
 // Await this before importSettingsFromJSON, which has to stay synchronous so
 // the shell's _isImporting flag spans exactly its own writes.
@@ -61,15 +59,8 @@ export function importSettingsFromJSON(settings, data, iconPaths, {merge = false
     const keys = batch.list_keys();
     const homeDir = GLib.get_home_dir();
     let syncMeta;
-    const legacyAccentColorKeys = [];
 
     Object.keys(data).forEach(key => {
-        if (key.endsWith(ACCENT_KEY_SUFFIX)) {
-            if (data[key] === true)
-                legacyAccentColorKeys.push(`${key.slice(0, -ACCENT_KEY_SUFFIX.length)}color`);
-            return;
-        }
-
         // The sync metadata travels as _app_config_meta and is applied together
         // with app-configs below, never set from a raw key.
         if (!keys.includes(key) || IMPORT_EXCLUDED_KEYS.has(key) || key === 'app-config-sync-meta')
@@ -107,10 +98,6 @@ export function importSettingsFromJSON(settings, data, iconPaths, {merge = false
             warn(`Failed to import key '${key}': ${e.message}`);
         }
     });
-
-    legacyAccentColorKeys
-        .filter(colorKey => keys.includes(colorKey))
-        .forEach(colorKey => batch.set_string(colorKey, accentValueKeeping(batch.get_string(colorKey))));
 
     if (syncMeta && keys.includes('app-config-sync-meta'))
         batch.set_string('app-config-sync-meta', JSON.stringify(syncMeta));

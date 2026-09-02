@@ -3,6 +3,7 @@ import Gio from 'gi://Gio';
 
 import {warnOnce} from './logging.js';
 import {deleteCachedIcon} from './iconLoading.js';
+import {readFileBytes} from './asyncIo.js';
 
 // Gaps of 10 leave room for manual reorder edits between drags.
 const PRIORITY_STEP = 10;
@@ -444,14 +445,13 @@ export function byPriorityThenAppId(a, b) {
 }
 
 // The config blob lists closed and uninstalled apps, so numbering from it
-// would not match the panel. The runtime dir is tmpfs, so the sync read can't
-// stall.
+// would not match the panel.
 const VISIBLE_ORDER_PATH = GLib.build_filenamev(
     [GLib.get_user_runtime_dir(), 'bettertrayicons', 'visible-order.json']);
 
-export function readVisibleOrder() {
+export async function readVisibleOrder() {
     try {
-        const [, bytes] = GLib.file_get_contents(VISIBLE_ORDER_PATH);
+        const bytes = await readFileBytes(Gio.File.new_for_path(VISIBLE_ORDER_PATH));
         const ids = JSON.parse(new TextDecoder().decode(bytes));
         return Array.isArray(ids) && ids.length ? ids : null;
     } catch {

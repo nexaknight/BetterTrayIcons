@@ -1,6 +1,8 @@
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 
+import {readFileText} from '../shared/asyncIo.js';
+
 // Separates the bus name from the object path in a tray item's address, D-Bus
 // allows it in neither half. Kept apart from APP_ID_SPLIT_SEPARATOR because
 // this one is a wire format other processes read.
@@ -10,17 +12,17 @@ export function getItemAddress(busName, objectPath) {
     return `${busName}${SNI_ITEM_ADDRESS_SEPARATOR}${objectPath}`;
 }
 
-export function loadInterfaceXML(extensionDir, fileName) {
-    const interfaceFile = extensionDir.get_child('interfaces').get_child(fileName);
+const INTERFACE_FILES = Object.freeze({
+    item: 'StatusNotifierItem.xml',
+    watcher: 'StatusNotifierWatcher.xml',
+    menu: 'DBusMenu.xml',
+});
 
-    if (!interfaceFile.query_exists(null))
-        throw new Error(`Interface file missing at ${interfaceFile.get_path()}`);
-
-    // One-shot init read of a bundled XML file, never re-read at runtime.
-    // Sync here so Gio.DBusProxy construction stays synchronous, otherwise
-    // every caller would have to thread async chains through proxy creation.
-    const [, contents] = interfaceFile.load_contents(null);
-    return new TextDecoder('utf-8').decode(contents);
+export async function loadInterfaces(extensionDir) {
+    const dir = extensionDir.get_child('interfaces');
+    const entries = await Promise.all(Object.entries(INTERFACE_FILES).map(
+        async ([key, name]) => [key, await readFileText(dir.get_child(name))]));
+    return Object.fromEntries(entries);
 }
 
 // A peer can put any D-Bus type behind a property the spec declares as 's', so

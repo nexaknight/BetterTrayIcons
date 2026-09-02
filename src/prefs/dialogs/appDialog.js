@@ -167,10 +167,10 @@ export default class AppDialog extends Adw.Dialog {
             adjustment: new Gtk.Adjustment({lower: 1, upper: 1, step_increment: 1, value: 1}),
         });
 
-        this._positionRow.connect('notify::value', () => {
+        this._positionRow.connect('notify::value', async () => {
             if (this._suppressPositionNotify)
                 return;
-            const order = this._positionOrder();
+            const order = await this._positionOrder();
             const from = order.indexOf(this._appId);
             const to = this._positionRow.value - 1;
             if (from === -1 || from === to)
@@ -186,12 +186,12 @@ export default class AppDialog extends Adw.Dialog {
 
     // The config also holds closed and uninstalled apps, so its numbers drift
     // from what the panel shows.
-    _positionOrder() {
-        return readVisibleOrder() ?? orderedAppIds(this._settings);
+    async _positionOrder() {
+        return await readVisibleOrder() ?? orderedAppIds(this._settings);
     }
 
-    _syncPositionRow() {
-        const order = this._positionOrder();
+    async _syncPositionRow() {
+        const order = await this._positionOrder();
         const index = order.indexOf(this._appId);
         const isAbsent = index === -1;
 

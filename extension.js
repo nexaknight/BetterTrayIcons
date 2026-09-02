@@ -14,7 +14,6 @@ import {placeIndicatorInPanel, TrayButton} from './src/shell/components/trayButt
 import {clearIconCaches} from './src/shell/icons/iconResolver.js';
 import {enableLauncherEntries, disableLauncherEntries} from './src/shell/features/launcherEntries.js';
 import {clearItemSplits} from './src/shell/identity/itemSplit.js';
-import {accentValueKeeping} from './src/shared/accentColor.js';
 
 import {ApiHub} from './src/shell/api/apiHub.js';
 import {PanelGuest} from './src/shell/api/panelGuest.js';
@@ -23,6 +22,7 @@ import {SniWatcher} from './src/shell/sni/sniWatcher.js';
 import {XEmbedTrayBridge} from './src/shell/xembed/xembedBridge.js';
 import {BackgroundApps} from './src/shell/features/backgroundApps.js';
 import {BackgroundAppsProxyWatcher} from './src/shell/backgroundAppsProxy/backgroundAppsProxyWatcher.js';
+import {loadInterfaces} from './src/shell/dbusCalls.js';
 
 // Prevents reading a sync file mid-write.
 const AUTO_SYNC_DEBOUNCE_MS = 1000;
@@ -30,8 +30,6 @@ const AUTO_SYNC_DEBOUNCE_MS = 1000;
 const AUTO_PUSH_DEBOUNCE_MS = 2000;
 
 const PREFS_WM_CLASS = 'org.gnome.Shell.Extensions';
-
-const LEGACY_SCHEMA_ID = 'org.gnome.shell.extensions.bettertrayicons.legacy';
 
 export default class BetterTrayIconsExtension extends Extension {
     enable() {
@@ -55,10 +53,13 @@ export default class BetterTrayIconsExtension extends Extension {
         });
     }
 
-    _realEnable() {
+    async _realEnable() {
         try {
+            const interfaces = await loadInterfaces(this.dir);
+            if (!this.api)
+                return;
+
             this._settings = this.getSettings();
-            _runMigrations(this._settings, this.getSettings(LEGACY_SCHEMA_ID));
 
             this._settingsSignals = [];
 
@@ -79,7 +80,7 @@ export default class BetterTrayIconsExtension extends Extension {
 
             enableLauncherEntries();
 
-            this._sniWatcher = new SniWatcher(this.dir, this._indicator, this._settings);
+            this._sniWatcher = new SniWatcher(interfaces, this._indicator, this._settings);
             this._sniWatcher.enable();
 
             this._xembedBridge = new XEmbedTrayBridge(this._settings, this._indicator);
@@ -242,41 +243,5 @@ export default class BetterTrayIconsExtension extends Extension {
         clearItemSplits();
         clearWarnedOnce();
         this._settings = null;
-    }
-}
-
-// Removed keys still hold whatever an older version wrote. The legacy schema
-// sits on the same dconf path, so these can still read them.
-function _runMigrations(settings, legacy) {
-    _migrateTrayIconPadding(settings, legacy);
-    _migrateAccentColors(settings, legacy);
-}
-
-function _migrateTrayIconPadding(settings, legacy) {
-    const newKeysUntouched = ['icon-padding-top', 'icon-padding-bottom', 'icon-padding-left', 'icon-padding-right']
-        .every(key => settings.get_user_value(key) === null);
-    const oldKeysCustomized = legacy.get_user_value('icon-padding-horizontal') !== null ||
-        legacy.get_user_value('icon-padding-vertical') !== null;
-    if (!newKeysUntouched || !oldKeysCustomized)
-        return;
-
-    const horizontal = legacy.get_int('icon-padding-horizontal');
-    const vertical = legacy.get_int('icon-padding-vertical');
-    settings.set_int('icon-padding-left', horizontal);
-    settings.set_int('icon-padding-right', horizontal);
-    settings.set_int('icon-padding-top', vertical);
-    settings.set_int('icon-padding-bottom', vertical);
-}
-
-function _migrateAccentColors(settings, legacy) {
-    for (const accentKey of legacy.settings_schema.list_keys()) {
-        if (!accentKey.endsWith('-use-accent-color') || legacy.get_user_value(accentKey) === null)
-            continue;
-
-        if (legacy.get_boolean(accentKey)) {
-            const colorKey = accentKey.replace(/use-accent-color$/, 'color');
-            settings.set_string(colorKey, accentValueKeeping(settings.get_string(colorKey)));
-        }
-        legacy.reset(accentKey);
     }
 }

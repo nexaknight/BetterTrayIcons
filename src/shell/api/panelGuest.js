@@ -1,4 +1,4 @@
-import {Extension, gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
+import {gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
 import {API_MARKER, API_VERSION, BETTER_PANEL_UUID} from '../../shared/api/ids.js';
@@ -41,7 +41,7 @@ export class PanelGuest {
     }
 
     _joinPanel() {
-        const api = Extension.lookupByUUID(BETTER_PANEL_UUID)?.api;
+        const api = Main.extensionManager.lookup(BETTER_PANEL_UUID)?.stateObj?.api;
         if (api?.marker !== API_MARKER || api.version < API_VERSION)
             return;
 
@@ -67,7 +67,7 @@ export class PanelGuest {
 
     disable() {
         disconnectSignal(this, Main.extensionManager, '_stateChangedId');
-        if (this._appletId && Extension.lookupByUUID(BETTER_PANEL_UUID)?.api === this._api) {
+        if (this._appletId && Main.extensionManager.lookup(BETTER_PANEL_UUID)?.stateObj?.api === this._api) {
             try {
                 this._api.unregisterApplet(this._appletId);
             } catch (e) {

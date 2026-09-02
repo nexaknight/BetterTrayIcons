@@ -41,8 +41,8 @@ const ICON_RESOLVE_KEYS = Object.freeze([
 ]);
 
 export class TrayIcon {
-    constructor(extensionDir, busName, objectPath, settings, proxy, onReady, onDestroy, onCloseMenu, onDragStateChange = null) {
-        this._extensionDir = extensionDir;
+    constructor(menuInterfaceXml, busName, objectPath, settings, proxy, onReady, onDestroy, onCloseMenu, onDragStateChange = null) {
+        this._menuInterfaceXml = menuInterfaceXml;
         this.busName = busName;
         this._objectPath = objectPath;
         this._settings = settings;
@@ -514,7 +514,7 @@ export class TrayIcon {
         this._menuClient = new DBusMenuClient(
             this.busName,
             this._menuPath,
-            this._extensionDir,
+            this._menuInterfaceXml,
             this._settings,
             this._onCloseMenu
         );
