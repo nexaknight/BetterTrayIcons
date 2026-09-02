@@ -12,7 +12,7 @@ import {connectColorSetChanges, refreshTrayStyle, syncHoverStyle} from '../trayS
 import {connectSurfaceChanges} from '../actorPlacement.js';
 import {isDisposed, trackDisposal} from '../disposal.js';
 import {createPanelMenu, menuAnchorFor, menuManagerFor, destroyMenuSafely, POPUP_ANIMATION_NONE} from '../popupMenus.js';
-import {addUnreadListener, unreadTargets} from '../features/launcherEntries.js';
+import {addUnreadListener, raiseApp, runningApp, unreadTargets} from '../features/launcherEntries.js';
 import {DBusMenuClient} from './dbusMenuClient.js';
 import {ClickController} from '../features/clickController.js';
 import {DRAG_SETTING_KEYS, setupIconDragSource, syncDragEnabled} from '../features/dragAndDrop.js';
@@ -293,7 +293,7 @@ export class TrayIcon {
 
         switch (action) {
         case 'activate':
-            this._fireAndClose('ActivateRemote');
+            this._activate();
             break;
         case 'secondary':
             this._fireAndClose('SecondaryActivateRemote');
@@ -306,6 +306,22 @@ export class TrayIcon {
             this._contextMenu();
             break;
         }
+    }
+
+    // Activate on an item whose window sits on another workspace did nothing
+    // visible, so raise through the shell instead.
+    _activate() {
+        const app = runningApp({
+            pid: this._pid,
+            appId: this.appId,
+            packagingKind: getAppConfigValue(this._settings, this.appId, 'packaging'),
+        });
+        if (!app) {
+            this._fireAndClose('ActivateRemote');
+            return;
+        }
+        this._onCloseMenu();
+        raiseApp(app);
     }
 
     // Items without Activate answer UnknownMethod, the click did nothing

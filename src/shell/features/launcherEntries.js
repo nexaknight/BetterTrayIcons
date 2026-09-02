@@ -77,6 +77,25 @@ export function unreadTargets({pid = null, appId = null, packagingKind = null} =
     return [...out];
 }
 
+export function runningApp({pid = null, appId = null, packagingKind = null} = {}) {
+    const app = _appFromPid(pid) ?? _runningByDesktopId(_flatpakDesktopId(appId, packagingKind));
+    return app?.get_n_windows() ? app : null;
+}
+
+function _runningByDesktopId(desktopId) {
+    if (!desktopId)
+        return null;
+    const wanted = desktopId.toLowerCase();
+    return Shell.AppSystem.get_default().get_running()
+        .find(app => app.get_id().toLowerCase() === wanted);
+}
+
+// Called from a debounce timeout, so the click's own time is gone and a zero
+// timestamp makes activate do nothing.
+export function raiseApp(app) {
+    app.activate_full(-1, global.display.get_current_time_roundtrip());
+}
+
 function _appFromPid(pid) {
     return pid ? Shell.WindowTracker.get_default().get_app_from_pid(pid) : null;
 }
