@@ -1,0 +1,4 @@
+<!-- Derived from Lucide "square-square" (stroke outlined to fill). ISC - Copyright (c) 2026 Lucide Icons and Contributors -->
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" version="1.1">
+	<path fill-rule="evenodd" d="M 5 2 H 19 A 3 3 0 0 1 22 5 V 19 A 3 3 0 0 1 19 22 H 5 A 3 3 0 0 1 2 19 V 5 A 3 3 0 0 1 5 2 Z M 5 4 H 19 A 1 1 0 0 1 20 5 V 19 A 1 1 0 0 1 19 20 H 5 A 1 1 0 0 1 4 19 V 5 A 1 1 0 0 1 5 4 Z M 9 7 H 15 A 2 2 0 0 1 17 9 V 15 A 2 2 0 0 1 15 17 H 9 A 2 2 0 0 1 7 15 V 9 A 2 2 0 0 1 9 7 Z M 9 9 H 15 V 15 H 9 Z" stroke="none" fill="#000"/>
+</svg>

@@ -4,17 +4,17 @@ import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions
 
 import {error} from '../../shared/logging.js';
 import {saveSettingsToFile, loadSettingsFromFile, deleteBackups, resetKeys} from '../../shared/settingsIO.js';
-import {createButton, createIconButton, createFileFilter} from '../widgets/gtkHelpers.js';
-import {createSwitchRow, createSpinRow, createSegmentedRow, createActionRow, createComplexSwitchRow, createResetButton} from '../widgets/rows.js';
-import {addToast} from '../widgets/sidebar.js';
-import {showConfirmationDialog, openFileChooser} from '../dialogs/dialogs.js';
-import {openSyncDialog} from '../dialogs/syncDialog.js';
+import {createButton, createIconButton} from '../components/button.js';
+import {createFileFilter, showConfirmationDialog, openFileChooser} from '../components/dialog.js';
+import {createSwitchRow, createActionRow, createComplexSwitchRow} from '../components/row.js';
+import {createResetButton} from '../components/page.js';
+import {addToast} from '../components/sidebar.js';
+import {openSyncDialog} from './syncDialog.js';
 import ConfigDialog from '../dialogs/configDialog.js';
 
 // The header reset covers only this page, unlike the factory reset below
-// it. The sync wiring (sync-file-path, enable-auto-sync, max-backups)
-// survives, same as on import: resetting it would silently detach a
-// running sync.
+// it. The sync wiring (sync-file-path, enable-auto-sync) survives, same as
+// on import, since resetting it would silently detach a running sync.
 const GENERAL_RESET_KEYS = Object.freeze([
     'enable-wine-support',
     'keep-popup-after-click',
@@ -24,9 +24,6 @@ const GENERAL_RESET_KEYS = Object.freeze([
     'enable-tooltips',
     'tooltip-position',
     'tooltip-delay',
-    'tray-position',
-    'tray-order',
-    'visible-icon-limit',
 ]);
 
 export class GeneralPage extends Adw.PreferencesPage {
@@ -45,14 +42,17 @@ export class GeneralPage extends Adw.PreferencesPage {
         this._headerActions = null;
 
         this._createBehaviorGroup();
-        this._createPlacementGroup();
         this._createAdvancedGroup();
         this._createDangerZoneGroup();
     }
 
     get headerActions() {
-        this._headerActions ??= createResetButton(this._settings, GENERAL_RESET_KEYS,
-            {window: this._window, includesSubpages: true});
+        this._headerActions ??= createResetButton({
+            settings: this._settings,
+            keys: GENERAL_RESET_KEYS,
+            window: this._window,
+            includesSubpages: true,
+        });
         return this._headerActions;
     }
 
@@ -60,23 +60,23 @@ export class GeneralPage extends Adw.PreferencesPage {
         const group = new Adw.PreferencesGroup({title: _('Behavior')});
         this.add(group);
 
-        group.add(createSwitchRow(
-            _('Wine App Icons'),
-            _('Show icons from Wine and Proton apps.'),
-            this._settings,
-            'enable-wine-support'
-        ));
+        group.add(createSwitchRow({
+            title: _('Wine App Icons'),
+            subtitle: _('Show icons from Wine and Proton apps.'),
+            settings: this._settings,
+            key: 'enable-wine-support',
+        }));
 
         // The dialog's toggle matters exactly while this switch is off, so
         // the gear must stay reachable either way.
-        group.add(createComplexSwitchRow(
-            _('Keep Overflow Menu Open'),
-            _('Stays open after icon clicks and context menus alike.'),
-            this._settings,
-            'keep-popup-after-click',
-            this._window,
-            ConfigDialog,
-            {
+        group.add(createComplexSwitchRow({
+            title: _('Keep Overflow Menu Open'),
+            subtitle: _('Stays open after icon clicks and context menus alike.'),
+            settings: this._settings,
+            key: 'keep-popup-after-click',
+            window: this._window,
+            DialogClass: ConfigDialog,
+            dialogData: {
                 pageTitle: _('Overflow Menu'),
                 groups: [{
                     configs: [{
@@ -87,17 +87,17 @@ export class GeneralPage extends Adw.PreferencesPage {
                     }],
                 }],
             },
-            {gearFollowsSwitch: false}
-        ));
+            gearFollowsSwitch: false,
+        }));
 
-        group.add(createComplexSwitchRow(
-            _('Hide Background Apps'),
-            _("Removes GNOME's own list of windowless apps from Quick Settings."),
-            this._settings,
-            'hide-background-apps',
-            this._window,
-            ConfigDialog,
-            {
+        group.add(createComplexSwitchRow({
+            title: _('Hide Background Apps'),
+            subtitle: _("Removes GNOME's own list of windowless apps from Quick Settings."),
+            settings: this._settings,
+            key: 'hide-background-apps',
+            window: this._window,
+            DialogClass: ConfigDialog,
+            dialogData: {
                 pageTitle: _('Background Apps'),
                 groups: [{
                     configs: [{
@@ -107,17 +107,17 @@ export class GeneralPage extends Adw.PreferencesPage {
                         key: 'enable-background-proxy',
                     }],
                 }],
-            }
-        ));
+            },
+        }));
 
-        group.add(createComplexSwitchRow(
-            _('Show Tooltips'),
-            _('Show the app title on hover.'),
-            this._settings,
-            'enable-tooltips',
-            this._window,
-            ConfigDialog,
-            {
+        group.add(createComplexSwitchRow({
+            title: _('Show Tooltips'),
+            subtitle: _('Show the app title on hover.'),
+            settings: this._settings,
+            key: 'enable-tooltips',
+            window: this._window,
+            DialogClass: ConfigDialog,
+            dialogData: {
                 pageTitle: _('Tooltips'),
                 groups: [{
                     configs: [
@@ -136,38 +136,8 @@ export class GeneralPage extends Adw.PreferencesPage {
                         },
                     ],
                 }],
-            }
-        ));
-    }
-
-    _createPlacementGroup() {
-        const group = new Adw.PreferencesGroup({title: _('Placement')});
-        this.add(group);
-
-        group.add(createSegmentedRow(
-            _('Panel Box'),
-            _('Which part of the panel holds the icons.'),
-            this._settings,
-            'tray-position',
-            [_('Left'), _('Center'), _('Right')],
-            ['left', 'center', 'right']
-        ));
-
-        group.add(createSpinRow(
-            _('Position in Box'),
-            this._settings,
-            'tray-order',
-            0, 20, 1,
-            {subtitle: _('Order within the chosen box.')}
-        ));
-
-        group.add(createSpinRow(
-            _('Visible Icons'),
-            this._settings,
-            'visible-icon-limit',
-            0, 20, 1,
-            {subtitle: _('How many icons stay in the panel. Extra icons move to the overflow menu, and 0 moves them all.')}
-        ));
+            },
+        }));
     }
 
     _createAdvancedGroup() {
@@ -176,22 +146,26 @@ export class GeneralPage extends Adw.PreferencesPage {
         });
         this.add(group);
 
-        const importBtn = createIconButton('bti-import-symbolic', {
-            tooltip_text: _('Import'),
-            callback: () => this._handleImport(),
+        const importButton = createIconButton('bti-import-symbolic', {
+            tooltip: _('Import'),
+            onClick: () => this._handleImport(),
         });
-        const exportBtn = createIconButton('bti-export-symbolic', {
-            tooltip_text: _('Export'),
-            callback: () => this._handleExport(),
+        const exportButton = createIconButton('bti-export-symbolic', {
+            tooltip: _('Export'),
+            onClick: () => this._handleExport(),
         });
-        group.add(createActionRow(_('Backup and Restore'), _('Save settings as JSON or load them back.'), {
-            suffixWidgets: [importBtn, exportBtn],
+        group.add(createActionRow({
+            title: _('Backup and Restore'),
+            subtitle: _('Save settings as JSON or load them back.'),
+            suffixWidgets: [importButton, exportButton],
         }));
-        group.add(createActionRow(_('Cloud Sync'), _('Keep settings in sync via a shared file.'), {
+        group.add(createActionRow({
+            title: _('Cloud Sync'),
+            subtitle: _('Keep settings in sync via a shared file.'),
             headerSuffix: createIconButton('bti-sync-symbolic', {
                 flat: false,
-                tooltip_text: _('Configure'),
-                callback: () => this._openSyncDialog(),
+                tooltip: _('Configure'),
+                onClick: () => this._openSyncDialog(),
             }),
         }));
     }
@@ -200,25 +174,26 @@ export class GeneralPage extends Adw.PreferencesPage {
         const group = new Adw.PreferencesGroup({title: _('Danger Zone')});
         this.add(group);
 
-        const resetBtn = createButton({
+        const resetButton = createButton({
             label: _('Reset'),
             cssClasses: ['destructive-action'],
             valign: 'center',
         });
 
-        resetBtn.connect('clicked', () => {
-            showConfirmationDialog(
-                this.get_root(),
-                _('Reset all settings?'),
-                _('All settings will be restored to defaults and sync backups deleted. This cannot be undone.'),
-                () => this._performFactoryReset(),
-                _('Reset'),
-                true
-            );
+        resetButton.connect('clicked', () => {
+            showConfirmationDialog(this.get_root(), {
+                title: _('Reset all settings?'),
+                message: _('All settings will be restored to defaults and sync backups deleted. This cannot be undone.'),
+                confirmLabel: _('Reset'),
+                destructive: true,
+                onConfirm: () => this._performFactoryReset(),
+            });
         });
 
-        group.add(createActionRow(_('Factory Reset'), _('Restore defaults and delete sync backups.'), {
-            suffixWidgets: [resetBtn],
+        group.add(createActionRow({
+            title: _('Factory Reset'),
+            subtitle: _('Restore defaults and delete sync backups.'),
+            suffixWidgets: [resetButton],
         }));
     }
 
@@ -228,14 +203,13 @@ export class GeneralPage extends Adw.PreferencesPage {
 
     _handleImport() {
         this._openJsonFileChooser(path => {
-            showConfirmationDialog(
-                this.get_root(),
-                _('Import settings?'),
-                _('Local settings will be overwritten.'),
-                () => this._handleLoad(path),
-                _('Import'),
-                true
-            );
+            showConfirmationDialog(this.get_root(), {
+                title: _('Import settings?'),
+                message: _('Local settings will be overwritten.'),
+                confirmLabel: _('Import'),
+                destructive: true,
+                onConfirm: () => this._handleLoad(path),
+            });
         }, false);
     }
 
@@ -259,18 +233,18 @@ export class GeneralPage extends Adw.PreferencesPage {
         openSyncDialog(
             this.get_root(),
             this._settings,
-            (callback, saveMode) => this._openJsonFileChooser(callback, saveMode)
+            (callback, isSaveMode) => this._openJsonFileChooser(callback, isSaveMode)
         );
     }
 
-    _openJsonFileChooser(callback, saveMode) {
+    _openJsonFileChooser(callback, isSaveMode) {
         const filter = createFileFilter(_('JSON Files'), ['*.json']);
 
         openFileChooser(this.get_root(), {
-            title: saveMode ? _('Export') : _('Import'),
-            action: saveMode ? 'save' : 'open',
-            acceptLabel: saveMode ? _('Save') : _('Open'),
-            currentName: saveMode ? 'bettertrayicons-settings.json' : null,
+            title: isSaveMode ? _('Export') : _('Import'),
+            action: isSaveMode ? 'save' : 'open',
+            acceptLabel: isSaveMode ? _('Save') : _('Open'),
+            currentName: isSaveMode ? 'bettertrayicons-settings.json' : null,
             filters: [filter],
         }, callback);
     }

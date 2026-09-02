@@ -340,8 +340,8 @@ msgstr "Rechtliches"
 msgid "License"
 msgstr "Lizenz"
 
-msgid "Live Preview"
-msgstr "Live-Vorschau"
+msgid "Preview"
+msgstr "Vorschau"
 
 msgid "Load"
 msgstr "Laden"
@@ -370,7 +370,7 @@ msgstr "Manueller Sync"
 msgid "Margin"
 msgstr "Außenabstand"
 
-msgid "Match the look of tray icons; hides the controls below."
+msgid "Match the look of tray icons. Hides the controls below."
 msgstr "Übernimmt das Aussehen der Tray-Icons. Blendet die Optionen darunter aus."
 
 msgid "Stays open after icon clicks and context menus alike."
@@ -904,3 +904,9 @@ msgstr "Ruhezustand festgelegt."
 
 msgid "Takes what the app shows right now as its calm look."
 msgstr "Übernimmt das aktuelle Bild der App als ihren Ruhezustand."
+
+msgid "Measure the padding while hovering the preview."
+msgstr "Innenabstand beim Überfahren der Vorschau ausmessen."
+
+msgid "Measure the margin while hovering the preview."
+msgstr "Außenabstand beim Überfahren der Vorschau ausmessen."

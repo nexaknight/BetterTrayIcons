@@ -5,26 +5,16 @@ import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions
 
 import {connectScoped} from '../../shared/lifecycle.js';
 
-import {
-    createSpinRow,
-    createSegmentedRow,
-    createIconPickerRow,
-    createSwitchRow,
-    buildPrefsWidget,
-    bindGroupsVisible,
-    createIconColorRows,
-    createSpacingGroup,
-    createCustomStyleSwitchGroup,
-    createShapeGroup,
-    createExpanderSection,
-    createDialogGearButton,
-    createColorSetRow,
-} from '../widgets/rows.js';
-import {createPreviewGroup, buildTogglePreview} from '../widgets/preview.js';
-import IconPickerDialog from '../dialogs/iconPicker.js';
+import {createSpinRow, createSegmentedRow, createIconPickerRow, createSwitchRow, bindGroupsVisible, createIconColorRows, createExpanderSection, createColorSetRow} from '../components/row.js';
+import {buildPrefsWidget} from '../components/page.js';
+import {createSpacingGroup, createCustomStyleSwitchGroup, createShapeGroup} from '../components/group.js';
+import {createDialogGearButton} from '../components/button.js';
+import {createPreviewGroup} from '../components/preview.js';
+import {buildTogglePreview} from '../components/scenes/toggleScene.js';
+import IconPickerDialog from '../components/picker.js';
 import ConfigDialog from '../dialogs/configDialog.js';
-import {spacingLinkKey} from '../widgets/gtkHelpers.js';
-import {TRAY_ICON_STYLE_KEYS} from './trayIcons.js';
+import {spacingLinkKey} from '../components/spacing.js';
+import {TRAY_ICON_STYLE_KEYS} from './trayIconsSubpage.js';
 import {withLightTwins} from '../../shared/colorVariant.js';
 
 export const TOGGLE_STYLE_KEYS = Object.freeze([
@@ -62,6 +52,9 @@ export const TOGGLE_STYLE_KEYS = Object.freeze([
     spacingLinkKey('toggle-padding'),
     spacingLinkKey('toggle-margin'),
 ]);
+
+const TOGGLE_ICON_SIZE_MIN_PX = 8;
+const TOGGLE_ICON_SIZE_MAX_PX = 64;
 
 const ROTATE_TIMING_STEP_MS = 50;
 
@@ -120,7 +113,8 @@ export default class ToggleButtonSubpage extends Adw.NavigationPage {
             {window: this._window});
 
         // Inherit mode paints with the tray icon keys, so those repaint too.
-        page.add(createPreviewGroup(this._settings, {
+        page.add(createPreviewGroup({
+            settings: this._settings,
             watch: [...TOGGLE_STYLE_KEYS, ...TRAY_ICON_STYLE_KEYS],
             render: buildTogglePreview,
             splitKey: 'toggle-icon-color-split',
@@ -128,7 +122,10 @@ export default class ToggleButtonSubpage extends Adw.NavigationPage {
 
         this._buildIconGroup(page);
         this._buildPositionGroup(page);
-        this._buildCustomStyleSwitch(page);
+        page.add(createCustomStyleSwitchGroup({
+            settings: this._settings,
+            key: 'enable-custom-toggle-style',
+        }));
         this._buildStyleGroups(page);
     }
 
@@ -139,8 +136,12 @@ export default class ToggleButtonSubpage extends Adw.NavigationPage {
         const {expander, setRows} = createExpanderSection({
             title: _('Icon'),
             subtitle: _('One icon per overflow menu state.'),
-            headerSuffix: createDialogGearButton(this._window, this._settings,
-                ConfigDialog, this._iconDialogData()),
+            headerSuffix: createDialogGearButton({
+                window: this._window,
+                settings: this._settings,
+                DialogClass: ConfigDialog,
+                dialogData: this._iconDialogData(),
+            }),
         });
 
         const openRow = this._createIconRow(_('Menu Open'), 'toggle-icon-active-name');
@@ -150,19 +151,25 @@ export default class ToggleButtonSubpage extends Adw.NavigationPage {
         setRows([this._createIconRow(_('Menu Closed'), 'toggle-icon-name'), openRow]);
         group.add(expander);
 
-        group.add(createSpinRow(_('Size (px)'), this._settings, 'toggle-icon-size', 8, 64));
+        group.add(createSpinRow({
+            title: _('Size (px)'),
+            settings: this._settings,
+            key: 'toggle-icon-size',
+            min: TOGGLE_ICON_SIZE_MIN_PX,
+            max: TOGGLE_ICON_SIZE_MAX_PX,
+        }));
     }
 
     _createIconRow(title, key) {
-        return createIconPickerRow(
+        return createIconPickerRow({
             title,
-            this._settings,
+            settings: this._settings,
             key,
-            this._window,
-            IconPickerDialog,
-            RECOMMENDED_TOGGLE_ICONS,
-            {showCustom: false}
-        );
+            window: this._window,
+            PickerClass: IconPickerDialog,
+            icons: RECOMMENDED_TOGGLE_ICONS,
+            showCustom: false,
+        });
     }
 
     _iconDialogData() {
@@ -219,42 +226,46 @@ export default class ToggleButtonSubpage extends Adw.NavigationPage {
         const group = new Adw.PreferencesGroup({title: _('Position')});
         page.add(group);
 
-        group.add(createSegmentedRow(
-            _('Side'),
-            _('Relative to the tray icons.'),
-            this._settings,
-            'toggle-position',
-            [_('Left'), _('Right')],
-            ['left', 'right']
-        ));
-    }
-
-    _buildCustomStyleSwitch(page) {
-        page.add(createCustomStyleSwitchGroup(this._settings, 'enable-custom-toggle-style'));
+        group.add(createSegmentedRow({
+            title: _('Side'),
+            subtitle: _('Relative to the tray icons.'),
+            settings: this._settings,
+            key: 'toggle-position',
+            options: [_('Left'), _('Right')],
+            values: ['left', 'right'],
+        }));
     }
 
     _buildStyleGroups(page) {
         const inheritGroup = new Adw.PreferencesGroup();
-        inheritGroup.add(createSwitchRow(
-            _('Inherit Style from Tray Icons'),
-            _('Match the look of tray icons; hides the controls below.'),
-            this._settings,
-            'toggle-inherit-icon-style'
-        ));
+        inheritGroup.add(createSwitchRow({
+            title: _('Inherit Style from Tray Icons'),
+            subtitle: _('Match the look of tray icons. Hides the controls below.'),
+            settings: this._settings,
+            key: 'toggle-inherit-icon-style',
+        }));
         page.add(inheritGroup);
 
         const colorsGroup = new Adw.PreferencesGroup({title: _('Colors')});
-        colorsGroup.add(createColorSetRow(this._settings, 'toggle-icon-color-split'));
-        createIconColorRows(this._window, this._settings, 'toggle-icon-').forEach(r => colorsGroup.add(r));
+        colorsGroup.add(createColorSetRow({
+            settings: this._settings,
+            splitKey: 'toggle-icon-color-split',
+        }));
+        createIconColorRows({parent: this._window, settings: this._settings, keyPrefix: 'toggle-icon-'})
+            .forEach(row => colorsGroup.add(row));
         page.add(colorsGroup);
 
-        const spacingGroup = createSpacingGroup(this._settings, 'toggle');
+        const spacingGroup = createSpacingGroup({settings: this._settings, keyBase: 'toggle'});
         page.add(spacingGroup);
 
-        const shapeGroup = createShapeGroup(this._settings, 'toggle-icon-border-radius', 'toggle-icon-border-width');
+        const shapeGroup = createShapeGroup({
+            settings: this._settings,
+            radiusKey: 'toggle-icon-border-radius',
+            borderWidthKey: 'toggle-icon-border-width',
+        });
         page.add(shapeGroup);
 
-        const customOn = () => this._settings.get_boolean('enable-custom-toggle-style');
+        const isCustomStyleOn = () => this._settings.get_boolean('enable-custom-toggle-style');
         const canInherit = () => this._settings.get_boolean('enable-custom-icon-style');
 
         // Tray icons on the default style have nothing to hand down. Leaving
@@ -267,11 +278,11 @@ export default class ToggleButtonSubpage extends Adw.NavigationPage {
         dropInheritWithoutSource();
 
         bindGroupsVisible(this, this._settings, [inheritGroup],
-            () => customOn() && canInherit(),
+            () => isCustomStyleOn() && canInherit(),
             'enable-custom-toggle-style', 'enable-custom-icon-style');
         bindGroupsVisible(this, this._settings,
             [colorsGroup, spacingGroup, shapeGroup],
-            () => customOn() && !this._settings.get_boolean('toggle-inherit-icon-style'),
+            () => isCustomStyleOn() && !this._settings.get_boolean('toggle-inherit-icon-style'),
             'enable-custom-toggle-style', 'toggle-inherit-icon-style');
     }
 }

@@ -8,12 +8,9 @@ import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions
 const PREFS_SIDEBAR_BREAKPOINT = 'max-width: 700sp';
 const SIDEBAR_HEADER_ICON_PX = 40;
 
-
-// The shell each window got from setSidebarWindow, so the helpers below can
-// route to its navigation view and toast overlay without mutating the window.
 const _shells = new WeakMap();
 
-export function setSidebarWindow(window, pages, iconPath) {
+export function setPrefsWindow(window, {pages, iconPath}) {
     // The prefs service checks visible_page after fillPreferencesWindow and
     // throws "Extension did not provide any UI" when the stock view is empty
     // (extensionPrefsDialog.js), so it gets a stub page it can see.
@@ -41,9 +38,6 @@ export function setSidebarWindow(window, pages, iconPath) {
     });
     pages.forEach(page => list.append(_createSidebarRow(page)));
 
-    // No header bar: its fixed min-height and own inset fought the brand
-    // box's margins, leaving the icon out of step with the row icons below
-    // it. A plain box lets the brand's own margins be the only ones in play.
     const sidebarBox = new Gtk.Box({orientation: Gtk.Orientation.VERTICAL});
     sidebarBox.append(new Gtk.ScrolledWindow({
         child: list,
@@ -64,19 +58,15 @@ export function setSidebarWindow(window, pages, iconPath) {
         if (!row)
             return;
         const page = pages[row.get_index()];
-        // Mapping the overlay re-emits the current selection. Without this
-        // guard the echo closed the sidebar in the same dispatch it opened
-        // in (measured: show-sidebar flipped true->false instantly).
+        // Mapping the overlay re-emits the current selection, and that echo
+        // closed the sidebar in the same dispatch it opened in. Only the
+        // row-activated handler below may touch show-sidebar.
         if (stack.get_visible_child() === page)
             return;
-        // A subpage left open while switching sections would keep covering
-        // the freshly selected page.
         navView.pop_to_page(rootPage);
         stack.set_visible_child(page);
         rootPage.set_title(page.title);
     });
-    // Activation instead of selection, so only a real click or Enter
-    // closes the overlay, never the mapping echo above.
     list.connect('row-activated', () => {
         navView.pop_to_page(rootPage);
         if (splitView.collapsed)
@@ -85,8 +75,7 @@ export function setSidebarWindow(window, pages, iconPath) {
     list.select_row(list.get_row_at_index(0));
 
     // Collapsing auto-hides the sidebar and un-collapsing brings it back
-    // whatever the toggle did in between, no extra setter needed
-    // (AdwOverlaySplitView:pin-sidebar docs).
+    // whatever the toggle did in between (AdwOverlaySplitView:pin-sidebar docs).
     const breakpoint = new Adw.Breakpoint({
         condition: Adw.BreakpointCondition.parse(PREFS_SIDEBAR_BREAKPOINT),
     });
@@ -95,9 +84,6 @@ export function setSidebarWindow(window, pages, iconPath) {
 
     contentHeader.pack_start(_createSidebarToggle(splitView));
 
-    // Some pages need controls that only make sense while they're the one
-    // showing (e.g. Applications' bulk actions), so a page contributes its
-    // own optional widget instead of every page sharing one fixed header.
     pages.forEach(page => {
         if (page.headerActions)
             contentHeader.pack_end(page.headerActions);
@@ -130,27 +116,27 @@ export function addToast(window, toast) {
     _shells.get(window).overlay.add_toast(toast);
 }
 
-// Subpages build their own header bars and cover the root one, so each
-// fetches its own toggle instead of sharing the root header's.
+// Every surface that covers the root header bar, a subpage or the collapsed
+// sidebar itself, needs a toggle of its own.
 export function createSidebarToggle(window) {
     return _createSidebarToggle(_shells.get(window).splitView);
 }
 
 function _createSidebarToggle(splitView) {
-    const btn = new Gtk.ToggleButton({css_classes: ['flat']});
-    splitView.bind_property('show-sidebar', btn, 'active',
+    const button = new Gtk.ToggleButton({css_classes: ['flat']});
+    splitView.bind_property('show-sidebar', button, 'active',
         GObject.BindingFlags.BIDIRECTIONAL | GObject.BindingFlags.SYNC_CREATE);
     // Expanded, the sidebar is a fixed pane and the button has no job.
-    splitView.bind_property('collapsed', btn, 'visible', GObject.BindingFlags.SYNC_CREATE);
+    splitView.bind_property('collapsed', button, 'visible', GObject.BindingFlags.SYNC_CREATE);
 
     const sync = () => {
-        btn.icon_name = btn.active ? 'bti-sidebar-hide-symbolic' : 'bti-sidebar-show-symbolic';
-        btn.tooltip_text = btn.active ? _('Hide Sidebar') : _('Show Sidebar');
+        button.icon_name = button.active ? 'bti-sidebar-hide-symbolic' : 'bti-sidebar-show-symbolic';
+        button.tooltip_text = button.active ? _('Hide Sidebar') : _('Show Sidebar');
     };
-    btn.connect('notify::active', sync);
+    button.connect('notify::active', sync);
     sync();
 
-    return btn;
+    return button;
 }
 
 function _createSidebarHeader(title, iconPath, splitView) {
@@ -162,20 +148,17 @@ function _createSidebarHeader(title, iconPath, splitView) {
         margin_end: 12,
     });
     try {
-        // Scaled at load and shown in a picture: a Gtk.Image would shrink
-        // the texture back to icon size, and a picture fed the raw file
-        // would request its full size and inflate the header bar.
+        // A Gtk.Image would shrink the texture back to icon size, and a picture
+        // fed the raw file would inflate the header bar.
         const pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
             iconPath, SIDEBAR_HEADER_ICON_PX, SIDEBAR_HEADER_ICON_PX, true);
         box.append(new Gtk.Picture({paintable: Gdk.Texture.new_for_pixbuf(pixbuf)}));
-    } catch { /* the text still names the sidebar */ }
+    } catch { /* The text still names the sidebar */ }
     const labels = new Gtk.Box({orientation: Gtk.Orientation.VERTICAL, valign: Gtk.Align.CENTER});
     labels.append(new Gtk.Label({label: title, halign: Gtk.Align.START, css_classes: ['heading']}));
     labels.append(new Gtk.Label({label: _('Settings'), halign: Gtk.Align.START, css_classes: ['caption', 'dim-label']}));
     box.append(labels);
 
-    // In the collapsed overlay the sidebar covers the header toggle, so it
-    // carries its own way to close.
     const collapse = _createSidebarToggle(splitView);
     collapse.hexpand = true;
     collapse.halign = Gtk.Align.END;

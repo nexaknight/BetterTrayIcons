@@ -357,7 +357,7 @@ msgstr "Sincronizzazione manuale"
 msgid "Margin"
 msgstr "Margine"
 
-msgid "Match the look of tray icons; hides the controls below."
+msgid "Match the look of tray icons. Hides the controls below."
 msgstr "Riprende l'aspetto delle icone del tray; nasconde i controlli sottostanti."
 
 msgid "Stays open after icon clicks and context menus alike."

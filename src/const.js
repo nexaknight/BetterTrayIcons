@@ -25,12 +25,6 @@ export const BORDER_RADIUS_MAX_PX = 50;
 
 export const BORDER_WIDTH_MAX_PX = 20;
 
-export const BOX_SIDES = Object.freeze(['top', 'right', 'bottom', 'left']);
-
-export const PREVIEW_ELEMENT_SHADOW_CSS = 'box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);';
-export const PREVIEW_STOCK_POPUP_CSS =
-    `background-color: rgba(48, 48, 48, 1); border-radius: 14px; padding: 8px; ${PREVIEW_ELEMENT_SHADOW_CSS}`;
-
 const TRAY_COLOR_KEYS = Object.freeze([
     'icon-color',
     'icon-hover-color',

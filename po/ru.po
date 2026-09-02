@@ -673,7 +673,7 @@ msgstr "Относительно значков трея."
 msgid "Inherit Style from Tray Icons"
 msgstr "Наследовать стиль значков трея"
 
-msgid "Match the look of tray icons; hides the controls below."
+msgid "Match the look of tray icons. Hides the controls below."
 msgstr "Использует внешний вид значков трея и скрывает настройки ниже."
 
 msgid "Icons"

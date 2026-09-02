@@ -3,8 +3,9 @@ import GObject from 'gi://GObject';
 import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
 import {connectScoped} from '../../shared/lifecycle.js';
-import {buildPrefsWidget, addConfigRows} from '../widgets/rows.js';
-import {createCappedBanner, dialogSizeProps, pinDialogWidth} from './dialogs.js';
+import {buildPrefsWidget} from '../components/page.js';
+import {addConfigRows} from '../components/row.js';
+import {createCappedBanner, pinDialogWidth} from '../components/dialog.js';
 
 const CONFIG_DIALOG_WIDTH_PX = 500;
 
@@ -13,42 +14,40 @@ export default class ConfigDialog extends Adw.Dialog {
         GObject.registerClass({GTypeName: 'BetterTrayIconsConfigDialog'}, this);
     }
 
-    _init(parentWindow, settings, data) {
+    _init(_parentWindow, settings, data) {
         super._init({
-            ...dialogSizeProps(),
-            title: data.pageTitle || _('Configuration'),
+            follows_content_size: true,
+            title: data.pageTitle,
         });
 
         this._settings = settings;
         this._data = data;
 
         this._buildUI();
+        pinDialogWidth(this, CONFIG_DIALOG_WIDTH_PX);
     }
 
     _buildUI() {
         const contentPage = buildPrefsWidget(this, this._settings,
-            this._configs().map(c => c.key).filter(Boolean));
+            this._configs().map(c => c.key));
 
-        (this._data.groups ?? []).forEach(({title, configs}) => {
+        this._data.groups.forEach(({title, configs}) => {
             const group = new Adw.PreferencesGroup({title: title ?? ''});
             contentPage.add(group);
             addConfigRows(group, this._settings, configs);
         });
 
-        // Before the width wrap, afterwards the dialog child is no longer
-        // the toolbar view this banner hooks into.
         this._addDoubleClickBanner(this.get_child());
-        pinDialogWidth(this, CONFIG_DIALOG_WIDTH_PX);
     }
 
     _configs() {
-        return (this._data.groups ?? []).flatMap(g => g.configs ?? []);
+        return this._data.groups.flatMap(g => g.configs);
     }
 
     _addDoubleClickBanner(toolbarView) {
         const doubleKeys = this._configs()
             .map(c => c.key)
-            .filter(key => key?.endsWith('-double'));
+            .filter(key => key.endsWith('-double'));
         if (doubleKeys.length === 0)
             return;
 

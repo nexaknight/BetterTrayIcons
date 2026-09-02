@@ -2,8 +2,10 @@ import Adw from 'gi://Adw';
 import GObject from 'gi://GObject';
 import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
-import {createComplexActionRow, createComboRow, createActionRow, createResetButton, GEAR_ICON_NAME} from '../widgets/rows.js';
-import {createIconButton} from '../widgets/gtkHelpers.js';
+import {createComplexActionRow, createComboRow, createActionRow} from '../components/row.js';
+import {createResetButton} from '../components/page.js';
+import {GEAR_ICON_NAME} from '../components/icon.js';
+import {createIconButton} from '../components/button.js';
 import ConfigDialog from '../dialogs/configDialog.js';
 import {TOUCH_BINDING} from '../../const.js';
 
@@ -32,28 +34,32 @@ export class ActionPage extends Adw.PreferencesPage {
             {label: _('Right Click'),  suffix: 'right'},
         ];
 
-        this.actionOptions = [_('Activate'), _('Open Menu'), _('None')];
-        this.actionValues = ['activate', 'menu', 'nothing'];
+        this._actionOptions = [_('Activate'), _('Open Menu'), _('None')];
+        this._actionValues = ['activate', 'menu', 'nothing'];
 
-        this.trayLongOptions = [_('Activate'), _('Open Menu'), _('Reorder (drag & drop)'), _('None')];
-        this.trayLongValues = ['activate', 'menu', 'drag-drop', 'nothing'];
+        this._trayLongOptions = [_('Activate'), _('Open Menu'), _('Reorder (drag & drop)'), _('None')];
+        this._trayLongValues = ['activate', 'menu', 'drag-drop', 'nothing'];
 
-        this.toggleOptions = [
+        this._toggleOptions = [
             _('Toggle Menu'),
             _('Cycle Icons'),
             _('Action Menu'),
             _('Open Settings'),
             _('None'),
         ];
-        this.toggleValues = ['toggle', 'cycle', 'action-menu', 'prefs', 'nothing'];
+        this._toggleValues = ['toggle', 'cycle', 'action-menu', 'prefs', 'nothing'];
 
         this._createTrayClickGroup();
         this._createToggleClickGroup();
     }
 
     get headerActions() {
-        this._headerActions ??= createResetButton(this._settings, this._actionKeys(),
-            {window: this._window, includesSubpages: true});
+        this._headerActions ??= createResetButton({
+            settings: this._settings,
+            keys: this._actionKeys(),
+            window: this._window,
+            includesSubpages: true,
+        });
         return this._headerActions;
     }
 
@@ -74,10 +80,10 @@ export class ActionPage extends Adw.PreferencesPage {
 
         this._addClickRows(group, {
             keyPrefix: 'tray-action',
-            options: this.actionOptions,
-            values: this.actionValues,
-            longOptions: this.trayLongOptions,
-            longValues: this.trayLongValues,
+            options: this._actionOptions,
+            values: this._actionValues,
+            longOptions: this._trayLongOptions,
+            longValues: this._trayLongValues,
         });
     }
 
@@ -87,29 +93,29 @@ export class ActionPage extends Adw.PreferencesPage {
 
         this._addClickRows(group, {
             keyPrefix: 'toggle-action',
-            options: this.toggleOptions,
-            values: this.toggleValues,
-            longOptions: this.toggleOptions,
-            longValues: this.toggleValues,
+            options: this._toggleOptions,
+            values: this._toggleValues,
+            longOptions: this._toggleOptions,
+            longValues: this._toggleValues,
         });
 
-        group.add(createComboRow(
-            _('Scroll'),
-            _('Scroll direction picks which way the icons rotate'),
-            this._settings,
-            'toggle-action-scroll',
-            [_('Cycle Icons'), _('None')],
-            ['cycle', 'nothing']
-        ));
+        group.add(createComboRow({
+            title: _('Scroll'),
+            subtitle: _('Scroll direction picks which way the icons rotate'),
+            settings: this._settings,
+            key: 'toggle-action-scroll',
+            options: [_('Cycle Icons'), _('None')],
+            values: ['cycle', 'nothing'],
+        }));
 
-        group.add(createComboRow(
-            _('Menu on Hover'),
-            _('Which menu opens when you hover the toggle button'),
-            this._settings,
-            'toggle-hover-menu',
-            [_('Overflow Popup'), _('Action Menu')],
-            ['overflow', 'action-menu']
-        ));
+        group.add(createComboRow({
+            title: _('Menu on Hover'),
+            subtitle: _('Which menu opens when you hover the toggle button'),
+            settings: this._settings,
+            key: 'toggle-hover-menu',
+            options: [_('Overflow Popup'), _('Action Menu')],
+            values: ['overflow', 'action-menu'],
+        }));
     }
 
     _addClickRows(group, {keyPrefix, options, values, longOptions, longValues}) {
@@ -123,11 +129,16 @@ export class ActionPage extends Adw.PreferencesPage {
                 ],
             }];
 
-            group.add(createComplexActionRow(
-                label, null, this._settings, key,
-                options, values, this._window, ConfigDialog,
-                {pageTitle: label, groups}
-            ));
+            group.add(createComplexActionRow({
+                title: label,
+                settings: this._settings,
+                key,
+                options,
+                values,
+                window: this._window,
+                DialogClass: ConfigDialog,
+                dialogData: {pageTitle: label, groups},
+            }));
         });
 
         group.add(this._createTouchRow(keyPrefix, {options, values, longOptions, longValues}));
@@ -147,10 +158,12 @@ export class ActionPage extends Adw.PreferencesPage {
             }],
         }).present(this._window);
 
-        return createActionRow(_('Touch'), _('Tap, double tap and long touch.'), {
+        return createActionRow({
+            title: _('Touch'),
+            subtitle: _('Tap, double tap and long touch.'),
             suffixWidgets: [createIconButton(GEAR_ICON_NAME, {
-                tooltip_text: _('Configure'),
-                callback: openDialog,
+                tooltip: _('Configure'),
+                onClick: openDialog,
             })],
             onActivate: openDialog,
         });

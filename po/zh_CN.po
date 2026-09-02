@@ -627,7 +627,7 @@ msgstr "相对于托盘图标的位置。"
 msgid "Inherit Style from Tray Icons"
 msgstr "继承托盘图标的样式"
 
-msgid "Match the look of tray icons; hides the controls below."
+msgid "Match the look of tray icons. Hides the controls below."
 msgstr "与托盘图标的外观保持一致；同时隐藏下方的相关选项。"
 
 msgid "Icons"

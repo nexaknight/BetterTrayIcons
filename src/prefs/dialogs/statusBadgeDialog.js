@@ -6,15 +6,21 @@ import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions
 import {setAppConfigValue, mutateAppConfig, getAppConfigMap, findStateIconEntry, sameStateKey, ATTENTION_STATE_KEY, RESERVED_OBJECT_KEYS} from '../../shared/appConfig.js';
 import {resolveIcon} from '../../shared/iconLoading.js';
 import {connectScoped} from '../../shared/lifecycle.js';
-import {createButton, createColorSwatch, createIconButton, createImage, applyIconPreview, attachBadge} from '../widgets/gtkHelpers.js';
-import {createActionRow, createExpanderSection, NEXT_ICON_NAME} from '../widgets/rows.js';
-import IconPickerDialog from './iconPicker.js';
-import {buildDialogShell, dialogSizeProps, pinDialogWidth, buildGroupDialog} from './dialogs.js';
+import {attachBadge} from '../components/badge.js';
+import {createButton, createIconButton} from '../components/button.js';
+import {createImage} from '../components/image.js';
+import {createCappedBanner, buildDialogShell, pinDialogWidth, buildGroupDialog} from '../components/dialog.js';
+import {createColorSwatch} from '../components/color.js';
+import {applyIconPreview, NEXT_ICON_NAME} from '../components/icon.js';
+import {createActionRow, createExpanderSection} from '../components/row.js';
+import IconPickerDialog from '../components/picker.js';
 import {BADGE_POSITIONS, BADGE_DEFAULT_COLOR, BADGE_DEFAULT_TEXT_COLOR} from '../../const.js';
 
 const STATUS_BADGE_DIALOG_WIDTH_PX = 480;
 
 const ACCENT_DIALOG_WIDTH_PX = 360;
+
+const ICON_PREVIEW_SIZE_PX = 24;
 
 const BADGE_MAX_SIZE_PX = 48;
 // The shell clamps a dot's radius to half its size, more would be unreachable.
@@ -27,7 +33,7 @@ export default class StatusBadgeDialog extends Adw.Dialog {
 
     _init(settings, appId, appData) {
         super._init({
-            ...dialogSizeProps(),
+            follows_content_size: true,
             title: _('Status Icons and Badges'),
         });
 
@@ -37,17 +43,17 @@ export default class StatusBadgeDialog extends Adw.Dialog {
         this._suppressUnreadNotify = false;
 
         this._buildUI();
+        pinDialogWidth(this, STATUS_BADGE_DIALOG_WIDTH_PX);
 
         connectScoped(this, this._settings, 'changed::app-configs',
             () => this._refreshFromBlob(), 'closed');
     }
 
     _buildUI() {
-        // Own overlay: a toast on the window would sit under this dialog.
+        // Own overlay, a toast on the window would sit under this dialog.
         const {toolbarView, page, toast} = buildDialogShell({toast: true});
         this.set_child(toolbarView);
         this._toastOverlay = toast;
-        pinDialogWidth(this, STATUS_BADGE_DIALOG_WIDTH_PX);
 
         const switchGroup = new Adw.PreferencesGroup();
         page.add(switchGroup);
@@ -62,7 +68,7 @@ export default class StatusBadgeDialog extends Adw.Dialog {
                 : _('Shows a badge on state changes, with the count when the app sends one.'),
             active: this._data.unread_badge === true,
         });
-        attachBadge(unreadRow, _('Experimental'));
+        attachBadge(unreadRow, {text: _('Experimental')});
         unreadRow.connect('notify::active', () => {
             if (this._suppressUnreadNotify)
                 return;
@@ -73,8 +79,6 @@ export default class StatusBadgeDialog extends Adw.Dialog {
         this._unreadRow = unreadRow;
         switchGroup.add(unreadRow);
 
-        // Badge on shows the look, badge off shows the per-state list, so the
-        // dialog only ever exposes one of the two at a time.
         this._styleGroup = new Adw.PreferencesGroup();
         page.add(this._styleGroup);
         this._styleGroup.add(this._buildRestingRow());
@@ -87,10 +91,9 @@ export default class StatusBadgeDialog extends Adw.Dialog {
         this._stateGroup = null;
         if (isProxy) {
             const noticeGroup = new Adw.PreferencesGroup();
-            noticeGroup.add(new Adw.Banner({
-                title: _('Status icons cannot work here: the app has no tray icon and never reports a status, its icon comes from its desktop entry.'),
-                revealed: true,
-            }));
+            noticeGroup.add(createCappedBanner(
+                _('Status icons cannot work here: the app has no tray icon and never reports a status, its icon comes from its desktop entry.'),
+                {revealed: true}));
             page.add(noticeGroup);
         } else {
             this._stateGroup = new Adw.PreferencesGroup();
@@ -101,10 +104,10 @@ export default class StatusBadgeDialog extends Adw.Dialog {
         this._syncSections(this._data.unread_badge === true);
     }
 
-    _syncSections(badgeOn) {
-        this._styleGroup.visible = badgeOn;
+    _syncSections(isBadgeOn) {
+        this._styleGroup.visible = isBadgeOn;
         if (this._stateGroup)
-            this._stateGroup.visible = !badgeOn;
+            this._stateGroup.visible = !isBadgeOn;
     }
 
     _badgeStyle() {
@@ -116,7 +119,7 @@ export default class StatusBadgeDialog extends Adw.Dialog {
     _setBadgeStyleField(field, value) {
         mutateAppConfig(this._settings, this._appId, entry => {
             const style = entry.badge_style ?? (entry.badge_style = {});
-            if (value === null || value === undefined)
+            if (value === null)
                 delete style[field];
             else
                 style[field] = value;
@@ -131,7 +134,7 @@ export default class StatusBadgeDialog extends Adw.Dialog {
     _buildRestingRow() {
         const button = createButton({
             label: _('Define'),
-            callback: () => {
+            onClick: () => {
                 mutateAppConfig(this._settings, this._appId, entry => {
                     delete entry.detected_icon;
                     delete entry.detected_icon_hash;
@@ -139,9 +142,11 @@ export default class StatusBadgeDialog extends Adw.Dialog {
                 this._toast(_('Resting state updated.'));
             },
         });
-        return createActionRow(_('Resting State'),
-            _('Takes what the app shows right now as its calm look.'),
-            {suffixWidgets: [button]});
+        return createActionRow({
+            title: _('Resting State'),
+            subtitle: _('Takes what the app shows right now as its calm look.'),
+            suffixWidgets: [button],
+        });
     }
 
     _buildPositionRow() {
@@ -149,13 +154,13 @@ export default class StatusBadgeDialog extends Adw.Dialog {
         const dropdown = new Gtk.DropDown({
             model: Gtk.StringList.new(labels),
             valign: Gtk.Align.CENTER,
-            selected: Math.max(0, BADGE_POSITIONS.indexOf(this._badgeStyle().position ?? BADGE_POSITIONS[0])),
+            selected: Math.max(0, BADGE_POSITIONS.indexOf(this._badgeStyle().position)),
         });
         dropdown.connect('notify::selected', () => {
             const value = BADGE_POSITIONS[dropdown.selected];
             this._setBadgeStyleField('position', value === BADGE_POSITIONS[0] ? null : value);
         });
-        return createActionRow(_('Position'), null, {suffixWidgets: [dropdown]});
+        return createActionRow({title: _('Position'), suffixWidgets: [dropdown]});
     }
 
     _buildRadiusRow() {
@@ -189,11 +194,12 @@ export default class StatusBadgeDialog extends Adw.Dialog {
         return row;
     }
 
-    // Mirrors the popup Background color row, hand-wired because badge_style is a
-    // per-app blob field, not a GSettings key the createColorRow factory can bind.
+    // Hand-wired because badge_style is a per-app blob field, not a GSettings
+    // key that createColorSwatch can bind.
     _buildColorRow(title, colorField, accentField, fallback) {
         const usingAccent = () => this._badgeStyle()[accentField] === true;
-        const {button, sync} = createColorSwatch(title, {
+        const {button, sync} = createColorSwatch({
+            title,
             read: () => this._badgeStyle()[colorField] || fallback,
             write: value => this._setBadgeStyleField(colorField, value),
             usingAccent,
@@ -205,11 +211,10 @@ export default class StatusBadgeDialog extends Adw.Dialog {
         syncAll();
 
         const bucket = createIconButton('bti-color-symbolic', {
-            tooltip_text: _('More colors'),
-            callback: () => this._openAccentDialog(title, accentField, syncAll),
+            tooltip: _('More colors'),
+            onClick: () => this._openAccentDialog(title, accentField, syncAll),
         });
-        // The paint-bucket goes in first so it lands left of the swatch.
-        return createActionRow(title, null, {suffixWidgets: [bucket, button]});
+        return createActionRow({title, suffixWidgets: [bucket, button]});
     }
 
     _openAccentDialog(title, accentField, onChange) {
@@ -231,16 +236,16 @@ export default class StatusBadgeDialog extends Adw.Dialog {
     }
 
     _buildStateIconsExpander() {
-        const addBtn = createIconButton('bti-add-symbolic', {
-            tooltip_text: _('Add a state'),
-            callback: () => this._showAddStateEntry(),
+        const addButton = createIconButton('bti-add-symbolic', {
+            tooltip: _('Add a state'),
+            onClick: () => this._showAddStateEntry(),
         });
 
         this._stateSection = createExpanderSection({
             title: _('Status Icons'),
             subtitle: _('Override the icon for app states like attention or sync.'),
-            headerSuffix: addBtn,
-            experimental: true,
+            headerSuffix: addButton,
+            badge: {text: _('Experimental')},
         });
         this._addStateEntryRow = null;
         this._rebuildStateRows();
@@ -297,11 +302,11 @@ export default class StatusBadgeDialog extends Adw.Dialog {
 
     _buildStateRow(stateKey) {
         const isAttention = stateKey === ATTENTION_STATE_KEY;
-        const mapped = findStateIconEntry(this._data.state_icons, stateKey)?.[1] ?? null;
-        const observed = isAttention ||
+        const mapped = findStateIconEntry(this._data.state_icons, stateKey)?.[1];
+        const isObserved = isAttention ||
             this._seenIcons().some(s => sameStateKey(s, stateKey));
 
-        const preview = createImage({pixel_size: 24});
+        const preview = createImage({pixel_size: ICON_PREVIEW_SIZE_PX});
         const previewValue = mapped ?? (isAttention ? null : stateKey);
         applyIconPreview(preview, previewValue ? resolveIcon({custom_icon: previewValue}) : null, this._settings);
 
@@ -310,38 +315,43 @@ export default class StatusBadgeDialog extends Adw.Dialog {
             // Observed states keep their row through seen_icons. Manual
             // entries would lose theirs, so a reset only nulls their icon.
             suffixWidgets.push(createIconButton('bti-reset-symbolic', {
-                tooltip_text: _('Reset icon'),
-                callback: () => observed
-                    ? this._removeStateIcon(stateKey)
-                    : this._setStateIcon(stateKey, null),
+                tooltip: _('Reset icon'),
+                onClick: () => {
+                    if (isObserved)
+                        this._removeStateIcon(stateKey);
+                    else
+                        this._setStateIcon(stateKey, null);
+                },
             }));
         }
-        if (!observed) {
+        if (!isObserved) {
             suffixWidgets.push(createIconButton('bti-trash-symbolic', {
                 extraClasses: ['destructive-action'],
-                tooltip_text: _('Remove'),
-                callback: () => this._removeStateIcon(stateKey),
+                tooltip: _('Remove'),
+                onClick: () => this._removeStateIcon(stateKey),
             }));
         }
 
         const fallbackSubtitle = isAttention
             ? _('Applies only when the app itself reports attention.')
             : _('Automatic');
-        const row = createActionRow(isAttention ? _('Attention') : stateKey, mapped ?? fallbackSubtitle, {
+        const row = createActionRow({
+            title: isAttention ? _('Attention') : stateKey,
+            subtitle: mapped ?? fallbackSubtitle,
             prefixWidget: preview,
             suffixWidgets,
             suffixIcon: NEXT_ICON_NAME,
             onActivate: () => this._openStatePicker(stateKey),
             // A configured state is known even if its name fell out of the
-            // seen window, so don't badge it as unseen
-            badge: !observed && !mapped ? {text: _('Not seen yet')} : null,
+            // seen window, so don't badge it as unseen.
+            badge: !isObserved && !mapped ? {text: _('Not seen yet')} : null,
         });
 
         return row;
     }
 
     _openStatePicker(stateKey) {
-        const current = findStateIconEntry(this._data.state_icons, stateKey)?.[1] ?? null;
+        const current = findStateIconEntry(this._data.state_icons, stateKey)?.[1];
         const fallback = stateKey === ATTENTION_STATE_KEY ? null : stateKey;
 
         const picker = new IconPickerDialog(
@@ -400,18 +410,18 @@ export default class StatusBadgeDialog extends Adw.Dialog {
 
         // A sync pull can flip the badge under the open dialog, and the
         // switch decides which section the next toggle writes from.
-        const badgeOn = this._data.unread_badge === true;
-        if (this._unreadRow.active !== badgeOn) {
+        const isBadgeOn = this._data.unread_badge === true;
+        if (this._unreadRow.active !== isBadgeOn) {
             this._suppressUnreadNotify = true;
-            this._unreadRow.active = badgeOn;
+            this._unreadRow.active = isBadgeOn;
             this._suppressUnreadNotify = false;
-            this._syncSections(badgeOn);
+            this._syncSections(isBadgeOn);
         }
     }
 
     _stateRowSignature() {
         return JSON.stringify([this._listStateNames(), this._data.detected_icon,
-            this._data.state_icons ?? null, this._seenIcons()]);
+            this._data.state_icons, this._seenIcons()]);
     }
 
     _seenIcons() {

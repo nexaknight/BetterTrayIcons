@@ -103,6 +103,16 @@
             <summary>Which colour set the preferences edit (dark or light)</summary>
         </key>
 
+        <key name="preview-show-padding" type="b">
+            <default>false</default>
+            <summary>Measure the padding in the live preview on hover</summary>
+        </key>
+
+        <key name="preview-show-margin" type="b">
+            <default>false</default>
+            <summary>Measure the margin in the live preview on hover</summary>
+        </key>
+
         <key name="icon-color-split" type="b">
             <default>true</default>
             <summary>Keep separate light and dark colour sets for tray icons</summary>

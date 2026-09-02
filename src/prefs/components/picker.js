@@ -5,15 +5,27 @@ import GObject from 'gi://GObject';
 import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
 import {clearIds, connectScoped, debounceTo, removeTimer} from '../../shared/lifecycle.js';
-import {createBox, createButton, createIconButton, createImage, createLabel, createFileFilter, applyPathIcon, applyTintedIcon, clearChildren, prefsForegroundColor} from '../widgets/gtkHelpers.js';
-import {openFileChooser} from './dialogs.js';
-import {NEXT_ICON_NAME} from '../widgets/rows.js';
+import {clearChildren, createBox, createLabel} from './text.js';
+import {createButton, createIconButton} from './button.js';
+import {createFileFilter, openFileChooser} from './dialog.js';
+import {createImage} from './image.js';
+import {applyPathIcon, applyTintedIcon, prefsForegroundColor, NEXT_ICON_NAME} from './icon.js';
 
-// Slower to allow multi-digit input.
+// Long enough to type a second digit.
 const PAGE_JUMP_DEBOUNCE_MS = 500;
 const ITEMS_PER_PAGE = 32;
 
-// The configured panel color can be anything and would vanish against the dialog.
+const DIALOG_CONTENT_WIDTH_PX = 720;
+const DIALOG_CONTENT_HEIGHT_PX = 720;
+const GRID_BUTTON_HEIGHT_PX = 56;
+const GRID_ICON_SIZE_PX = 32;
+const PREVIEW_ICON_SIZE_PX = 64;
+
+const GRID_COLUMNS = 8;
+
+const ALL_ICONS_PAGE_NAME = 'all';
+
+// The configured panel color can be anything and would vanish in here.
 const pickerIconStyle = () => ({tint: prefsForegroundColor()});
 
 export default class IconPickerDialog extends Adw.PreferencesDialog {
@@ -21,11 +33,11 @@ export default class IconPickerDialog extends Adw.PreferencesDialog {
         GObject.registerClass({GTypeName: 'BetterTrayIconsIconPickerWidget'}, this);
     }
 
-    _init(settings, settingsKey, iconList, onSelectCallback = null, initialIcon = null, options = {}) {
+    _init(settings, settingsKey, iconList, onSelectCallback, initialIcon, options = {}) {
         super._init({
             title: _('Select Icon'),
-            content_width: 720,
-            content_height: 720,
+            content_width: DIALOG_CONTENT_WIDTH_PX,
+            content_height: DIALOG_CONTENT_HEIGHT_PX,
         });
 
         this._settings = settings;
@@ -41,27 +53,25 @@ export default class IconPickerDialog extends Adw.PreferencesDialog {
         this._allSystemIcons = [];
         this._currentFilteredList = [];
         this._currentPage = 0;
-        this._itemsPerPage = ITEMS_PER_PAGE;
         this._inputTimeoutId = 0;
 
-        // Both grids can show the current icon, so a click has to clear the
-        // other grid's highlight too.
-        this._activeGridBtns = new Set();
+        // Both grids can show the current icon, so a click clears the other's highlight.
+        this._activeGridButtons = new Set();
 
         this._buildUI();
     }
 
     _buildUI() {
         if (this._iconList.length > 0) {
-            const pageRec = new Adw.PreferencesPage({
+            const recommendedPage = new Adw.PreferencesPage({
                 title: _('Recommended'),
                 icon_name: 'bti-star-symbolic',
                 name: 'recommended',
             });
             this._recommendedGroup = new Adw.PreferencesGroup();
-            pageRec.add(this._recommendedGroup);
+            recommendedPage.add(this._recommendedGroup);
             this._fillRecommendedGrid();
-            this.add(pageRec);
+            this.add(recommendedPage);
         }
 
         this._allSystemIcons = _getSystemIcons();
@@ -81,19 +91,20 @@ export default class IconPickerDialog extends Adw.PreferencesDialog {
     _fillRecommendedGrid() {
         if (this._recommendedGrid)
             this._recommendedGroup.remove(this._recommendedGrid);
-        this._recommendedGrid = this._createGrid(this._iconList);
+        this._recommendedGrid = createBox({halign: 'fill'});
+        this._recommendedGrid.append(this._createGridWidget(this._iconList));
         this._recommendedGroup.add(this._recommendedGrid);
     }
 
     _buildAllIconsPage() {
-        const pageAll = new Adw.PreferencesPage({
+        const allIconsPage = new Adw.PreferencesPage({
             title: _('All Icons'),
             icon_name: 'bti-grid-symbolic',
-            name: 'all',
+            name: ALL_ICONS_PAGE_NAME,
         });
 
-        const groupSearch = new Adw.PreferencesGroup();
-        pageAll.add(groupSearch);
+        const searchGroup = new Adw.PreferencesGroup();
+        allIconsPage.add(searchGroup);
 
         const searchEntry = new Gtk.SearchEntry({
             placeholder_text: _('Search icons…'),
@@ -101,16 +112,16 @@ export default class IconPickerDialog extends Adw.PreferencesDialog {
             margin_top: 12, margin_bottom: 0,
             margin_start: 12, margin_end: 12,
         });
-        groupSearch.add(searchEntry);
+        searchGroup.add(searchEntry);
 
         this._resultsGroup = new Adw.PreferencesGroup({title: _('System Icons')});
-        pageAll.add(this._resultsGroup);
+        allIconsPage.add(this._resultsGroup);
 
         this._allIconsGridContainer = createBox({halign: 'fill'});
         this._resultsGroup.add(this._allIconsGridContainer);
 
         this._paginationGroup = new Adw.PreferencesGroup();
-        pageAll.add(this._paginationGroup);
+        allIconsPage.add(this._paginationGroup);
 
         const paginationBox = createBox({
             orientation: 'horizontal', halign: 'center', spacing: 12,
@@ -118,7 +129,7 @@ export default class IconPickerDialog extends Adw.PreferencesDialog {
         });
         this._paginationGroup.add(paginationBox);
 
-        this._prevPageBtn = createIconButton('bti-previous-symbolic', {tooltip_text: _('Previous')});
+        this._previousPageButton = createIconButton('bti-previous-symbolic', {tooltip: _('Previous')});
 
         this._pageEntry = new Gtk.Entry({
             width_chars: 4,
@@ -130,31 +141,31 @@ export default class IconPickerDialog extends Adw.PreferencesDialog {
 
         this._totalPageLabel = createLabel('/ 1', ['dim-label']);
 
-        this._nextPageBtn = createIconButton(NEXT_ICON_NAME, {tooltip_text: _('Next')});
+        this._nextPageButton = createIconButton(NEXT_ICON_NAME, {tooltip: _('Next')});
 
-        paginationBox.append(this._prevPageBtn);
+        paginationBox.append(this._previousPageButton);
         paginationBox.append(this._pageEntry);
         paginationBox.append(this._totalPageLabel);
-        paginationBox.append(this._nextPageBtn);
+        paginationBox.append(this._nextPageButton);
 
         this._setupPaginationEvents(searchEntry);
         this._renderAllIconsPage();
-        this.add(pageAll);
+        this.add(allIconsPage);
     }
 
     _buildCustomPage() {
-        const pageCustom = new Adw.PreferencesPage({
+        const customPage = new Adw.PreferencesPage({
             title: _('Custom'),
             icon_name: 'bti-properties-symbolic',
             name: 'custom',
         });
-        const groupCustom = new Adw.PreferencesGroup({
+        const customGroup = new Adw.PreferencesGroup({
             title: _('Custom Icon'),
             description: _('Type a name or pick an SVG/PNG file.'),
         });
-        pageCustom.add(groupCustom);
+        customPage.add(customGroup);
 
-        const previewImg = createImage({pixel_size: 64, halign: 'center', margin_top: 16});
+        const previewImage = createImage({pixel_size: PREVIEW_ICON_SIZE_PX, halign: 'center', margin_top: 16});
 
         const entry = new Gtk.Entry({
             placeholder_text: _('Icon name or path'),
@@ -164,7 +175,7 @@ export default class IconPickerDialog extends Adw.PreferencesDialog {
         });
 
         this._updateCustomPreview = () =>
-            applyPathIcon(previewImg, entry.text.trim(), this._settings, pickerIconStyle());
+            applyPathIcon(previewImage, entry.text.trim(), this._settings, pickerIconStyle());
         entry.connect('changed', this._updateCustomPreview);
         this._updateCustomPreview();
 
@@ -187,52 +198,49 @@ export default class IconPickerDialog extends Adw.PreferencesDialog {
             margin_start: 12, margin_end: 12,
         });
 
-        const fileBtn = createIconButton('bti-folder-symbolic', {
+        const fileButton = createIconButton('bti-folder-symbolic', {
             flat: false,
             circular: false,
-            tooltip_text: _('Choose file'),
+            tooltip: _('Choose file'),
         });
-        fileBtn.connect('clicked', () => this._openFileChooser(entry));
+        fileButton.connect('clicked', () => this._openFileChooser(entry));
 
-        const applyBtn = createIconButton('bti-select-symbolic', {
+        const applyButton = createIconButton('bti-select-symbolic', {
             flat: false,
             extraClasses: ['suggested-action'],
-            tooltip_text: _('Apply'),
+            tooltip: _('Apply'),
         });
-        applyBtn.connect('clicked', finishSelection);
+        applyButton.connect('clicked', finishSelection);
 
         customBox.append(entry);
-        customBox.append(fileBtn);
-        customBox.append(applyBtn);
+        customBox.append(fileButton);
+        customBox.append(applyButton);
 
         const wrapper = createBox();
-        wrapper.append(previewImg);
+        wrapper.append(previewImage);
         wrapper.append(customBox);
-        groupCustom.add(wrapper);
+        customGroup.add(wrapper);
 
-        this.add(pageCustom);
+        this.add(customPage);
     }
 
     _setInitialTab() {
         this.connect('notify::visible-page-name', () => this._showPageWithCurrentIcon());
 
         if (this._currentIcon && !this._iconList.includes(this._currentIcon))
-            this.set_visible_page_name('all');
+            this.set_visible_page_name(ALL_ICONS_PAGE_NAME);
 
-        // Without a recommended list the dialog already sits on 'all', so no
-        // notify fires.
+        // With no recommended list the dialog already sits on 'all', so no notify fires.
         this._showPageWithCurrentIcon();
     }
 
-    // _currentFilteredList, not _allSystemIcons, so the page is right while a
-    // search filter is active.
     _showPageWithCurrentIcon() {
-        if (this.visible_page_name !== 'all' || !this._currentIcon)
+        if (this.visible_page_name !== ALL_ICONS_PAGE_NAME || !this._currentIcon)
             return;
         const index = this._currentFilteredList.indexOf(this._currentIcon);
         if (index === -1)
             return;
-        const page = Math.floor(index / this._itemsPerPage);
+        const page = Math.floor(index / ITEMS_PER_PAGE);
         if (page === this._currentPage)
             return;
         this._currentPage = page;
@@ -247,30 +255,26 @@ export default class IconPickerDialog extends Adw.PreferencesDialog {
     }
 
     _setupPaginationEvents(searchEntry) {
-        this._prevPageBtn.connect('clicked', () => {
-            if (this._currentPage > 0) {
-                this._currentPage--;
-                this._renderAllIconsPage();
-            }
+        this._previousPageButton.connect('clicked', () => {
+            if (this._currentPage === 0)
+                return;
+            this._currentPage--;
+            this._renderAllIconsPage();
         });
 
-        this._nextPageBtn.connect('clicked', () => {
-            const totalPages = Math.ceil(this._currentFilteredList.length / this._itemsPerPage);
-            if (this._currentPage < totalPages - 1) {
-                this._currentPage++;
-                this._renderAllIconsPage();
-            }
+        this._nextPageButton.connect('clicked', () => {
+            const totalPages = Math.ceil(this._currentFilteredList.length / ITEMS_PER_PAGE);
+            if (this._currentPage >= totalPages - 1)
+                return;
+            this._currentPage++;
+            this._renderAllIconsPage();
         });
 
         searchEntry.connect('search-changed', entry => {
-            const lower = entry.text.toLowerCase();
-            if (lower.length === 0) {
-                this._currentFilteredList = this._allSystemIcons;
-            } else {
-                this._currentFilteredList = this._allSystemIcons.filter(name =>
-                    name.toLowerCase().includes(lower)
-                );
-            }
+            const query = entry.text.toLowerCase();
+            this._currentFilteredList = query
+                ? this._allSystemIcons.filter(name => name.toLowerCase().includes(query))
+                : this._allSystemIcons;
             this._currentPage = 0;
             this._renderAllIconsPage();
         });
@@ -284,25 +288,27 @@ export default class IconPickerDialog extends Adw.PreferencesDialog {
     }
 
     _jumpToPage(inputEntry) {
-        const val = parseInt(inputEntry.text);
-        const totalPages = Math.ceil(this._currentFilteredList.length / this._itemsPerPage) || 1;
+        const requestedPage = parseInt(inputEntry.text);
+        const totalPages = Math.ceil(this._currentFilteredList.length / ITEMS_PER_PAGE) || 1;
+        const isInRange = requestedPage >= 1 && requestedPage <= totalPages;
+        if (isNaN(requestedPage) || !isInRange)
+            return;
 
-        // _updatePaginationUI sets the entry text via set_text, which fires 'changed'.
-        // Skip those redundant re-renders.
-        if (!isNaN(val) && val >= 1 && val <= totalPages && val - 1 !== this._currentPage) {
-            this._currentPage = val - 1;
-            this._renderAllIconsPage();
-        }
+        // _updatePaginationUI writes the entry text itself, which fires 'changed' again.
+        if (requestedPage - 1 === this._currentPage)
+            return;
+
+        this._currentPage = requestedPage - 1;
+        this._renderAllIconsPage();
     }
 
     _renderAllIconsPage() {
         clearChildren(this._allIconsGridContainer);
 
-        // Buttons from discarded page renders would otherwise pile up
-        // and get restyled on every click.
-        for (const btn of this._activeGridBtns) {
-            if (!btn.get_root())
-                this._activeGridBtns.delete(btn);
+        // Buttons from old page renders would pile up and get restyled on every click.
+        for (const button of this._activeGridButtons) {
+            if (!button.get_root())
+                this._activeGridButtons.delete(button);
         }
 
         if (this._currentFilteredList.length === 0) {
@@ -321,8 +327,8 @@ export default class IconPickerDialog extends Adw.PreferencesDialog {
         this._resultsGroup.title = _('System Icons');
         this._paginationGroup.visible = true;
 
-        const start = this._currentPage * this._itemsPerPage;
-        const end = start + this._itemsPerPage;
+        const start = this._currentPage * ITEMS_PER_PAGE;
+        const end = start + ITEMS_PER_PAGE;
         const pageItems = this._currentFilteredList.slice(start, end);
 
         const grid = this._createGridWidget(pageItems);
@@ -333,14 +339,14 @@ export default class IconPickerDialog extends Adw.PreferencesDialog {
 
     _updatePaginationUI() {
         const totalItems = this._currentFilteredList.length;
-        const totalPages = Math.ceil(totalItems / this._itemsPerPage) || 1;
+        const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE) || 1;
 
-        _setVisibleButton(this._prevPageBtn, this._currentPage > 0);
-        _setVisibleButton(this._nextPageBtn, this._currentPage < totalPages - 1);
+        _setButtonAvailable(this._previousPageButton, this._currentPage > 0);
+        _setButtonAvailable(this._nextPageButton, this._currentPage < totalPages - 1);
 
-        const pageStr = (this._currentPage + 1).toString();
-        if (this._pageEntry.text !== pageStr && !this._pageEntry.has_focus)
-            this._pageEntry.set_text(pageStr);
+        const pageText = (this._currentPage + 1).toString();
+        if (this._pageEntry.text !== pageText && !this._pageEntry.has_focus)
+            this._pageEntry.set_text(pageText);
 
         this._totalPageLabel.set_label(`/ ${totalPages}`);
     }
@@ -353,31 +359,30 @@ export default class IconPickerDialog extends Adw.PreferencesDialog {
             margin_start: 8, margin_end: 8,
         });
 
-        const COLUMNS = 8;
         const style = pickerIconStyle();
 
         iconList.forEach((iconName, index) => {
             const isCurrent = this._currentIcon === iconName;
-            const btn = createButton({
+            const button = createButton({
                 valign: 'fill',
-                height_request: 56,
+                height_request: GRID_BUTTON_HEIGHT_PX,
                 hexpand: true,
                 tooltip_text: iconName,
                 cssClasses: isCurrent ? ['suggested-action', 'circular'] : ['flat', 'circular'],
             });
 
-            const img = createImage({pixel_size: 32});
-            applyTintedIcon(img, iconName, this._settings, style);
-            btn.set_child(img);
+            const image = createImage({pixel_size: GRID_ICON_SIZE_PX});
+            applyTintedIcon(image, iconName, this._settings, style);
+            button.set_child(image);
 
             if (isCurrent)
-                this._activeGridBtns.add(btn);
+                this._activeGridButtons.add(button);
 
-            btn.connect('clicked', () => {
-                this._activeGridBtns.forEach(b => b.set_css_classes(['flat', 'circular']));
-                this._activeGridBtns.clear();
-                btn.set_css_classes(['suggested-action', 'circular']);
-                this._activeGridBtns.add(btn);
+            button.connect('clicked', () => {
+                this._activeGridButtons.forEach(b => b.set_css_classes(['flat', 'circular']));
+                this._activeGridButtons.clear();
+                button.set_css_classes(['suggested-action', 'circular']);
+                this._activeGridButtons.add(button);
                 this._currentIcon = iconName;
 
                 if (this._onSelectCallback)
@@ -388,19 +393,12 @@ export default class IconPickerDialog extends Adw.PreferencesDialog {
                 this.close();
             });
 
-            const col = index % COLUMNS;
-            const row = Math.floor(index / COLUMNS);
-            grid.attach(btn, col, row, 1, 1);
+            const col = index % GRID_COLUMNS;
+            const row = Math.floor(index / GRID_COLUMNS);
+            grid.attach(button, col, row, 1, 1);
         });
 
         return grid;
-    }
-
-    _createGrid(iconList) {
-        const grid = this._createGridWidget(iconList);
-        const wrapper = createBox({halign: 'fill'});
-        wrapper.append(grid);
-        return wrapper;
     }
 
     _openFileChooser(entryWidget) {
@@ -417,13 +415,11 @@ export default class IconPickerDialog extends Adw.PreferencesDialog {
     }
 }
 
-function _setVisibleButton(btn, on) {
-    btn.set_opacity(on ? 1 : 0);
-    btn.set_sensitive(on);
+function _setButtonAvailable(button, isAvailable) {
+    button.set_opacity(isAvailable ? 1 : 0);
+    button.set_sensitive(isAvailable);
 }
 
-// Enumerating and lookup-validating every symbolic icon is expensive, so it
-// runs once per process, not per picker open.
 let _systemIconsCache = null;
 let _themeWatchConnected = false;
 
@@ -440,15 +436,7 @@ function _getSystemIcons() {
     const filtered = iconTheme.get_icon_names().filter(name => {
         if (!name.endsWith('-symbolic'))
             return false;
-        if (name.includes('night') || name.includes('rtl') || name.startsWith('adw-'))
-            return false;
-
-        // Icons from unrelated installed themes appear in get_icon_names()
-        // without a real backing file in the shell's icon lookup path.
-        const paintable = iconTheme.lookup_icon(
-            name, null, 16, 1, Gtk.TextDirection.LTR, 0
-        );
-        return paintable.get_file() !== null;
+        return !name.includes('night') && !name.includes('rtl') && !name.startsWith('adw-');
     });
 
     _systemIconsCache = [...new Set(filtered)].sort();

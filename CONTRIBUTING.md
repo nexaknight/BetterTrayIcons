@@ -119,7 +119,7 @@ src/
     ├── pages/            # top-level prefs pages (general, appearance, actions, applications, about)
     ├── subpages/         # drill-down pages (overflow menu, toggle button, tray icons)
     ├── dialogs/          # dialogs (app editor, sync, icon picker, config)
-    └── widgets/          # widget factories (rows, sidebar, previews, gtk helpers)
+    └── components/       # reusable prefs components (rows, cards, sidebar, previews)
 ```
 
 Branching workflow:
@@ -195,7 +195,7 @@ Shell-side code also has to follow the [GNOME review guidelines](https://gjs.gui
 
 A few rules the linter and the GNOME guidelines don't explicitly cover:
 
-- Use existing helpers in `src/shared/` and `src/prefs/widgets/` before introducing new abstractions.
+- Use existing helpers in `src/shared/` and `src/prefs/components/` before introducing new abstractions.
 - No runtime dependencies on external libraries. Only the dev dependencies for linting and JSDoc are allowed.
 - Keep new user-facing strings translatable.
 

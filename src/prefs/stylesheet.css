@@ -1,5 +1,4 @@
-/* Static styles for the custom prefs widgets, loaded once by ensurePrefsCss.
-   The .bti-thumbnail-popup rule is appended there. */
+/* Loaded once by ensurePrefsCss. */
 
 .bti-badge {
     padding: 1px 8px;
@@ -16,24 +15,106 @@
 }
 
 .bti-choice-card {
-    padding: 14px;
+    padding: 0;
+    min-height: 0;
+    border-radius: 14px;
+    border: 1.5px solid alpha(currentColor, 0.11);
+    background-color: @card_bg_color;
+    background-image: none;
 }
 
+.bti-choice-card:hover {
+    border-color: alpha(currentColor, 0.22);
+}
+
+/* Picking recolours the border the card already wears. A thicker one here would
+   shove the scene inside it over by a pixel on every pick. */
 .bti-choice-card:checked {
-    box-shadow: inset 0 0 0 2px @accent_bg_color;
-    background-color: alpha(@accent_bg_color, 0.08);
+    border-color: @accent_bg_color;
 }
 
-.bti-preview-card {
-    padding: 14px;
+/* The ground every scene stands on, the picker cards included. Scenes paint in
+   white, so this stays dark under a light theme too. */
+.bti-preview-backdrop,
+.bti-card-stage {
+    background-image: linear-gradient(160deg, alpha(@accent_bg_color, 0.22), alpha(black, 0) 55%),
+                      linear-gradient(160deg, #30303a, #1d1d24);
+    box-shadow: inset 0 1px 0 alpha(white, 0.07);
 }
 
 .bti-preview-backdrop {
-    background-image: linear-gradient(160deg, alpha(@accent_bg_color, 0.22), alpha(black, 0) 55%),
-                      linear-gradient(160deg, #30303a, #1d1d24);
     border-radius: 12px;
-    padding: 28px;
-    box-shadow: inset 0 1px 0 alpha(white, 0.07);
+}
+
+.bti-preview-backdrop.light {
+    background-image: linear-gradient(160deg, alpha(@accent_bg_color, 0.30), alpha(white, 0) 55%),
+                      linear-gradient(160deg, #fdfdfe, #c6c6cf);
+    box-shadow: inset 0 1px 0 alpha(white, 0.8);
+}
+
+/* The stock overflow popup as the shell paints it. A custom-styled popup
+   gets a scoped rule from the scene instead and never carries this class. */
+.bti-stock-popup,
+.bti-thumbnail-popup {
+    background-color: rgba(48, 48, 48, 1);
+    border-radius: 14px;
+    padding: 8px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+.bti-stock-popup.light {
+    background-color: #fafafb;
+}
+
+.bti-thumbnail-popup {
+    color: white;
+}
+
+.bti-card-stage {
+    border-radius: 13px 13px 0 0;
+    padding: 12px;
+    color: white;
+}
+
+.bti-card-stage.bleed {
+    padding: 0;
+}
+
+.bti-card-footer {
+    padding: 12px 14px;
+}
+
+/* Darker than the stage on purpose, the picture is a lit desktop with the
+   shell's bar over it. */
+.bti-scene-bar {
+    padding: 0 10px;
+    border-radius: 13px 13px 0 0;
+    background: #23252f;
+    border-top: 1px solid alpha(currentColor, 0.08);
+    border-bottom: 1px solid alpha(currentColor, 0.08);
+}
+
+.bti-scene-pill {
+    border-radius: 2px;
+    background: alpha(currentColor, 0.55);
+}
+
+.bti-scene-dot {
+    border-radius: 99px;
+    background: @accent_bg_color;
+}
+
+.bti-scene-toggle {
+    border-radius: 99px;
+    border: 1px solid @accent_bg_color;
+}
+
+.bti-guide-toggle.padding:checked {
+    color: @accent_color;
+}
+
+.bti-guide-toggle.margin:checked {
+    color: #ff7800;
 }
 
 .bti-spacing-card {
