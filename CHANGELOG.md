@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.2.1](https://github.com/nexaknight/BetterTrayIcons/compare/v3.2.0...v3.2.1) (2026-09-02)
+
+
+### Bug Fixes
+
+* read interface xml asynchronously and drop the legacy migrations ([c4b0667](https://github.com/nexaknight/BetterTrayIcons/commit/c4b06679d205b65550533c242f2c4bdf8d228cc1))
+
 ## [3.2.0](https://github.com/nexaknight/BetterTrayIcons/compare/v3.1.3...v3.2.0) (2026-09-02)
 
 
