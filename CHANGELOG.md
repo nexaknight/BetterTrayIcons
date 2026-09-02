@@ -1,5 +1,30 @@
 # Changelog
 
+## [3.2.0](https://github.com/nexaknight/BetterTrayIcons/compare/v3.1.3...v3.2.0) (2026-09-02)
+
+
+### Features
+
+* **api:** join Better Panel as a tray applet ([7c52b37](https://github.com/nexaknight/BetterTrayIcons/commit/7c52b37475a69f2618110f97fb369c946475804c))
+* **appearance:** separate light and dark color sets per surface ([5a20448](https://github.com/nexaknight/BetterTrayIcons/commit/5a20448d502c3b60d4c650a13f16bb16cb04256a)), closes [#56](https://github.com/nexaknight/BetterTrayIcons/issues/56)
+* **prefs:** placement cards and a preview stage with measuring guides ([b1f0257](https://github.com/nexaknight/BetterTrayIcons/commit/b1f02577753e1711add7b6365a97fc60e7594348))
+* **proxy:** desktop actions, status line and quit for background apps ([a7c817f](https://github.com/nexaknight/BetterTrayIcons/commit/a7c817f9f7828152b03fb48878ec6d9d7c4a9645)), closes [#55](https://github.com/nexaknight/BetterTrayIcons/issues/55)
+* **toggle:** rotate or swap the icon while the popup is open ([8a532df](https://github.com/nexaknight/BetterTrayIcons/commit/8a532df4249b06c28aadd71cdfdfa6e0ca07de4f)), closes [#54](https://github.com/nexaknight/BetterTrayIcons/issues/54)
+
+
+### Bug Fixes
+
+* **menu:** close the gap over a bottom bar ([0b0495f](https://github.com/nexaknight/BetterTrayIcons/commit/0b0495f264e58c2e815b9cc397b8796cc74bbe0f))
+* **menu:** render icon-data, lazy submenus and the collapse look ([696d415](https://github.com/nexaknight/BetterTrayIcons/commit/696d415dca38cc1003a2295f41e6c0d3c27de6cf))
+* **sni:** raise the app's window on activate, across workspaces ([2be7ae6](https://github.com/nexaknight/BetterTrayIcons/commit/2be7ae6d2590a6e34a98207879ae37c2b2325763))
+* **style:** keep stock icons styled and readable inside the popup ([5570c59](https://github.com/nexaknight/BetterTrayIcons/commit/5570c594c4ec4f8cf38d69aa15f75cebe673409a))
+* **toggle:** keep the open menu first for the hover switch ([a1076e6](https://github.com/nexaknight/BetterTrayIcons/commit/a1076e6cb8301cece97732c393dee070dee100fe))
+
+
+### Translations
+
+* **de:** translate the toggle icon, color set and proxy strings ([2742168](https://github.com/nexaknight/BetterTrayIcons/commit/2742168e7838fddfcd854e23262e55acd284a7c5))
+
 ## [3.1.3](https://github.com/nexaknight/BetterTrayIcons/compare/v3.1.2...v3.1.3) (2026-09-01)
 
 
