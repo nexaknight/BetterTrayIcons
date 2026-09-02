@@ -31,7 +31,6 @@ jobs:
           # the original CI checkout so they need to be pulled fresh
           git fetch --tags --force
 
-          # Look for a release tag pointing at this commit (vX.Y.Z format)
           tag=$(git tag --points-at "$sha" | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -1)
 
           if [[ -n "$tag" ]]; then

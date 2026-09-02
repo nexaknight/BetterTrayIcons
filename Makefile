@@ -1,12 +1,3 @@
-# Makefile for BetterTrayIcons
-#
-# Common targets:
-#   make install   build the extension and install it locally
-#   make pack      build the EGO-compatible ZIP only
-#   make test      run lint, schema and translation checks
-#   make clean     remove generated files
-#   make uninstall remove the locally installed extension
-
 UUID := BetterTrayIcons@nexaknight.com
 ZIP := $(UUID).shell-extension.zip
 INSTALL_DIR := $(HOME)/.local/share/gnome-shell/extensions/$(UUID)
@@ -23,7 +14,6 @@ help:
 	@echo "  make clean      Remove generated files"
 	@echo "  make uninstall  Remove the locally installed extension"
 
-
 pack:
 	gnome-extensions pack \
 		--podir=po \
@@ -33,24 +23,20 @@ pack:
 		--extra-source=assets \
 		--force
 
-# Install the extension locally for the current user
 install: pack
 	gnome-extensions install $(ZIP) --force
 	@echo ""
 	@echo "Extension installed. Log out and back in, then enable with:"
 	@echo "  gnome-extensions enable $(UUID)"
 
-# Run all pre-commit checks
 test:
 	npm ci
 	npm test
 
-# Remove the locally installed extension
 uninstall:
 	gnome-extensions uninstall $(UUID) || true
 	rm -rf $(INSTALL_DIR)
 
-# Remove generated files
 clean:
 	rm -f $(ZIP)
 	rm -f schemas/gschemas.compiled

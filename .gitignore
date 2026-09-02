@@ -5,3 +5,4 @@ schemas/gschemas.compiled
 .DS_Store
 *.swp
 *.swo
+.fallowrc.json

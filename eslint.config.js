@@ -12,7 +12,7 @@ export default defineConfig([
                 properties: 'never',
             }],
             'consistent-return': 'error',
-            'eqeqeq': ['error', 'smart'],
+            eqeqeq: ['error', 'smart'],
             'key-spacing': ['error', {
                 mode: 'minimum',
                 beforeColon: false,

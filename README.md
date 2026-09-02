@@ -19,7 +19,7 @@
 <p align="center">
   <a href="https://extensions.gnome.org/extension/9975/better-tray-icons/"><img alt="Get it on GNOME Extensions" src="https://img.shields.io/badge/GNOME%20Extensions-install-4A86CF?style=flat-square&logo=gnome&logoColor=white"></a>
   <a href="https://github.com/nexaknight/BetterTrayIcons/stargazers"><img alt="Stars" src="https://img.shields.io/github/stars/nexaknight/BetterTrayIcons?style=flat-square&color=8E44AD"></a>
-  <img alt="GNOME Shell" src="https://img.shields.io/badge/GNOME%20Shell-49%2F50-333333?style=flat-square">
+  <img alt="GNOME Shell" src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fnexaknight%2FBetterTrayIcons%2Fmain%2Fmetadata.json&query=%24%5B%22shell-version%22%5D&label=GNOME%20Shell&color=333333&style=flat-square">
   <img alt="Session" src="https://img.shields.io/badge/session-Wayland-2ECC71?style=flat-square">
   <a href="LICENSE"><img alt="License: GPL-3.0" src="https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square"></a>
 </p>
@@ -152,6 +152,7 @@ This extension could be even better with your help. The [Contributing guide](CON
       <ul>
         <li><a href="https://github.com/ubuntu/gnome-shell-extension-appindicator">AppIndicator/KStatusNotifierItem support for GNOME Shell</a></li>
         <li><a href="https://github.com/MartinPL/Tray-Icons-Reloaded">Tray Icons: Reloaded</a> by MartinPL</li>
+        <li><a href="https://github.com/cassidyjames/background-app-icons">Background App Icons</a> by cassidyjames, for the background app menu</li>
       </ul>
     </td>
     <td valign="top" width="50%">
