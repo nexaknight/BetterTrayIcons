@@ -62,7 +62,6 @@ export const PanelIndicator = GObject.registerClass({GTypeName: 'BetterTrayIcons
             this._settleTimeoutId = 0;
             this._menuRegrabId = 0;
             this._reopenPopupId = 0;
-            this._hoverOrderId = 0;
 
             this._menuRemovedForDrag = false;
             this._dragGrabActor = null;
@@ -94,12 +93,8 @@ export const PanelIndicator = GObject.registerClass({GTypeName: 'BetterTrayIcons
             trackDisposal(this);
             trackDisposal(this._visibleBox);
 
-            this._overflowMenu = new OverflowMenu(this._settings, this._toggleButton.actor, isOpen => {
-                this._toggleButton.updateState();
-
-                if (!isOpen)
-                    debounceTo(this, '_hoverOrderId', 0, () => this._toggleButton.applyHoverMenuOrder());
-            });
+            this._overflowMenu = new OverflowMenu(this._settings, this._toggleButton.actor,
+                isOpen => this._toggleButton.onMenuOpenStateChanged(isOpen));
             this._overflowMenu.container._delegate = this;
             this._toggleButton.setOverflowMenu(this._overflowMenu);
 
@@ -365,7 +360,7 @@ export const PanelIndicator = GObject.registerClass({GTypeName: 'BetterTrayIcons
                 this._overflowMenu.attachToManager();
                 // Reorder before the grab comes back, the hover switch picks
                 // the first match even while the popup is open.
-                this._toggleButton.applyHoverMenuOrder(true);
+                this._toggleButton.applyHoverMenuOrder();
                 this._overflowMenu.restoreManagerGrab();
             });
         }
@@ -545,7 +540,7 @@ export const PanelIndicator = GObject.registerClass({GTypeName: 'BetterTrayIcons
         _teardown() {
             disconnectSignal(this, this, '_destroyHandlerId');
             clearIds(this, removeTimer,
-                '_layoutUpdateId', '_settleTimeoutId', '_menuRegrabId', '_reopenPopupId', '_hoverOrderId');
+                '_layoutUpdateId', '_settleTimeoutId', '_menuRegrabId', '_reopenPopupId');
             this._releaseDragGrab();
             this._cancelPreview();
             this._sweepSlideWatches();

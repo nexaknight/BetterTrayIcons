@@ -4,7 +4,7 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 import {gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
 
-import {disposeAll} from '../../shared/lifecycle.js';
+import {clearIds, debounceTo, disposeAll, removeTimer} from '../../shared/lifecycle.js';
 import {isDisposed, trackDisposal} from '../disposal.js';
 import {computeToggleStyle, applyPanelClasses} from '../trayStyle.js';
 import {createPanelMenu, destroyMenuSafely} from '../popupMenus.js';
@@ -21,6 +21,7 @@ export class ToggleButton {
         this._overflowMenu = null;
         this._actionMenu = null;
         this._actionMenuOverflowItem = null;
+        this._hoverOrderId = 0;
 
         this._icon = new St.Icon({
             icon_name: this._settings.get_string('toggle-icon-name'),
@@ -136,33 +137,39 @@ export class ToggleButton {
             this._settings.get_default_value(key).unpack();
     }
 
-    // force is for the drag-end re-attach, the popup is open but not
-    // grabbed yet and waiting for a close would let the hover switch pick
-    // the wrong menu.
-    applyHoverMenuOrder(force = false) {
+    // Both menus share the toggle as source actor and the manager opens the
+    // first match, so the order picks the hover menu. An open menu has to
+    // come first too, otherwise hovering the toggle switches to its sibling.
+    applyHoverMenuOrder() {
         if (!this._overflowMenu.isAttached)
             return;
 
-        // The hover switch only picks menus already in the manager, so the
-        // lazy action menu has to exist first.
         this._ensureActionMenu();
 
         const manager = Main.panel.menuManager;
-        const shouldActionGoFirst = this._settings.get_string('toggle-hover-menu') === HOVER_MENU_ACTION;
+        const isActionOpen = this._actionMenu.isOpen;
+        const isOverflowOpen = this._overflowMenu.isOpen;
 
-        // removeMenu on an open menu drops its modal grab.
-        if (this._actionMenu.isOpen)
+        // removeMenu on an open menu drops its modal grab, only the closed
+        // one moves. Both open is the handover between them, the close that
+        // follows sorts it out.
+        if (isActionOpen && isOverflowOpen)
             return;
-        if (this._overflowMenu.isOpen) {
-            if (force && !shouldActionGoFirst) {
-                manager.removeMenu(this._actionMenu);
-                manager.addMenu(this._actionMenu);
-            }
+
+        if (isActionOpen) {
+            this._overflowMenu.detachFromManager();
+            this._overflowMenu.attachToManager();
             return;
         }
 
-        // Both menus share the toggle as source actor, the manager opens
-        // the first match, so the order picks the hover menu.
+        if (isOverflowOpen) {
+            manager.removeMenu(this._actionMenu);
+            manager.addMenu(this._actionMenu);
+            return;
+        }
+
+        const shouldActionGoFirst = this._settings.get_string('toggle-hover-menu') === HOVER_MENU_ACTION;
+
         manager.removeMenu(this._actionMenu);
         this._overflowMenu.detachFromManager();
 
@@ -173,6 +180,20 @@ export class ToggleButton {
             this._overflowMenu.attachToManager();
             manager.addMenu(this._actionMenu);
         }
+    }
+
+    // The popup and the action menu land here alike.
+    onMenuOpenStateChanged(isOpen) {
+        this.updateState();
+
+        if (isOpen) {
+            this.applyHoverMenuOrder();
+            return;
+        }
+
+        // The manager's own handler runs after this one and pops the grab of
+        // the menu that just closed, a removeMenu here would pop it first.
+        debounceTo(this, '_hoverOrderId', 0, () => this.applyHoverMenuOrder());
     }
 
     // SMOOTH carries fractional deltas, rotating per delta would spin the
@@ -216,6 +237,8 @@ export class ToggleButton {
             return;
 
         this._actionMenu = createPanelMenu(this.actor);
+        this._actionMenu.connect('open-state-changed',
+            (_menu, isOpen) => this.onMenuOpenStateChanged(isOpen));
 
         Main.panel.menuManager.addMenu(this._actionMenu);
 
@@ -236,6 +259,7 @@ export class ToggleButton {
     }
 
     destroy() {
+        clearIds(this, removeTimer, '_hoverOrderId');
         destroyMenuSafely(this._actionMenu);
         this._actionMenu = null;
 
