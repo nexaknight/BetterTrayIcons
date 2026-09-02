@@ -65,6 +65,13 @@ export class DBusMenuClient {
     }
 
     async buildMenu(gnomeMenu) {
+        // The shell keeps one open submenu per menu, so opening a nested
+        // one would fold its parent. Only siblings fold each other here.
+        gnomeMenu._setOpenedSubMenu = submenu => {
+            if (submenu)
+                closeSubMenusIn(submenu._parent, true, submenu);
+        };
+
         // Apps that fill the root only on demand answer the first GetLayout
         // with no children, and a childless root reads as "no menu at all".
         try {
@@ -238,10 +245,14 @@ export class DBusMenuClient {
     _onSubMenuToggled(id, submenu, isOpen) {
         this._sendEvent(id, isOpen ? 'opened' : 'closed');
 
-        if (isOpen) {
-            this._refreshSubMenu(id, submenu)
-                .catch(err => warn(`DBusMenu Refresh Error: ${err.message}`));
+        if (!isOpen) {
+            // The shell folds only this level, open children keep their state
+            closeSubMenusIn(submenu, false);
+            return;
         }
+
+        this._refreshSubMenu(id, submenu)
+            .catch(err => warn(`DBusMenu Refresh Error: ${err.message}`));
     }
 
     // Apps with dynamic menus fill a subtree server-side only on
@@ -324,5 +335,12 @@ export class DBusMenuClient {
         this._pendingYieldIds.clear();
         this._proxy = null;
         this._onCloseMenu = null;
+    }
+}
+
+function closeSubMenusIn(menu, animate, keepOpen = null) {
+    for (const item of menu._getMenuItems()) {
+        if (item.menu && item.menu !== keepOpen)
+            item.menu.close(animate);
     }
 }
