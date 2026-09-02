@@ -1,5 +1,4 @@
 import St from 'gi://St';
-import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
 import {isDisposed} from './disposal.js';
 
@@ -39,21 +38,6 @@ export function moveActorToIndex(actor, parent, index) {
     if (parent.get_children().indexOf(actor) === index)
         return;
     parent.set_child_at_index(actor, index);
-}
-
-export function placeIndicatorInPanel(indicator, settings) {
-    const currentParent = indicator.get_parent();
-    if (currentParent)
-        currentParent.remove_child(indicator);
-
-    const boxes = {
-        left: Main.panel._leftBox,
-        center: Main.panel._centerBox,
-        right: Main.panel._rightBox,
-    };
-    const targetBox = boxes[settings.get_string('tray-position')] ?? Main.panel._rightBox;
-
-    targetBox.insert_child_at_index(indicator, settings.get_int('tray-order'));
 }
 
 export function connectSurfaceChanges(actor, run) {

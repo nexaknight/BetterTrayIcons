@@ -1,7 +1,9 @@
 extension.js
 prefs.js
+src/shell/api/panelGuest.js
 src/shell/backgroundAppsProxy/backgroundAppsProxyIcon.js
 src/shell/components/toggleButton.js
+src/shell/components/trayButton.js
 src/prefs/pages/about.js
 src/prefs/pages/action.js
 src/prefs/pages/appearance.js

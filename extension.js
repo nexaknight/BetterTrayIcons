@@ -10,12 +10,14 @@ import {importSettingsFromJSON, probeImportIconPaths, saveSettingsToFile, isOwnS
 import {clearIds, debounceTo, disconnectSignal, disconnectAll, disposeAll, removeTimer} from './src/shared/lifecycle.js';
 import {clearSeenCache, userConfigSignature} from './src/shared/appConfig.js';
 import {clearDetachedMenuManager} from './src/shell/popupMenus.js';
-import {placeIndicatorInPanel} from './src/shell/actorPlacement.js';
+import {placeIndicatorInPanel, TrayButton} from './src/shell/components/trayButton.js';
 import {clearIconCaches} from './src/shell/icons/iconResolver.js';
 import {enableLauncherEntries, disableLauncherEntries} from './src/shell/features/launcherEntries.js';
 import {clearItemSplits} from './src/shell/identity/itemSplit.js';
 import {accentValueKeeping} from './src/shared/accentColor.js';
 
+import {ApiHub} from './src/shell/api/apiHub.js';
+import {PanelGuest} from './src/shell/api/panelGuest.js';
 import {PanelIndicator} from './src/shell/components/panelIndicator.js';
 import {SniWatcher} from './src/shell/sni/sniWatcher.js';
 import {XEmbedTrayBridge} from './src/shell/xembed/xembedBridge.js';
@@ -33,7 +35,16 @@ const LEGACY_SCHEMA_ID = 'org.gnome.shell.extensions.bettertrayicons.legacy';
 
 export default class BetterTrayIconsExtension extends Extension {
     enable() {
+        // Up before the deferred setup below. A peer that looks the moment the
+        // shell reports us active would find no api and never knock again.
+        this.api = new ApiHub(this, () => this._indicator);
+
         this.initTranslations();
+
+        // After the domain is bound, the title thunk runs the moment the peer
+        // takes the registration.
+        this._panelGuest = new PanelGuest();
+        this._panelGuest.enable(this);
 
         // Defer one mainloop iteration so a conflicting tray extension's
         // teardown can release the SNI name and X11 tray selection first.
@@ -59,10 +70,11 @@ export default class BetterTrayIconsExtension extends Extension {
             });
 
             this._indicator = new PanelIndicator(this._settings, () => this.openPreferences());
-            placeIndicatorInPanel(this._indicator, this._settings);
+            this._trayButton = new TrayButton(this._indicator);
+            placeIndicatorInPanel(this._trayButton, this._settings);
 
             this._connectSettings(['tray-order', 'tray-position'], () => {
-                placeIndicatorInPanel(this._indicator, this._settings);
+                placeIndicatorInPanel(this._trayButton, this._settings);
             });
 
             enableLauncherEntries();
@@ -204,6 +216,14 @@ export default class BetterTrayIconsExtension extends Extension {
     }
 
     disable() {
+        // Modules survive a disable, so a peer holding this would keep getting
+        // a destroyed actor.
+        this.api?.destroy();
+        this.api = null;
+
+        this._panelGuest?.disable();
+        this._panelGuest = null;
+
         clearIds(this, removeTimer, '_enableTimeoutId', '_syncDebounceId', '_autoPushDebounceId');
         disconnectSignal(this, this._settings, '_autoPushSignalId');
         disconnectAll(this, this._settings, '_settingsSignals');
@@ -211,7 +231,10 @@ export default class BetterTrayIconsExtension extends Extension {
 
         disposeAll(this, 'cancel', '_fileMonitor', '_syncCancellable');
         disposeAll(this, 'disable', '_backgroundAppsProxyWatcher', '_backgroundApps', '_xembedBridge', '_sniWatcher');
-        disposeAll(this, 'destroy', '_indicator');
+        // The indicator first, a parent destroying its children never reaches its
+        // own destroy() override. The button then takes itself out of
+        // Main.panel.statusArea through the destroy handler the panel put on it.
+        disposeAll(this, 'destroy', '_indicator', '_trayButton');
         disableLauncherEntries();
         clearDetachedMenuManager();
         clearIconCaches();
