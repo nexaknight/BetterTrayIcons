@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.2.4](https://github.com/nexaknight/BetterTrayIcons/compare/v3.2.3...v3.2.4) (2026-09-04)
+
+
+### Bug Fixes
+
+* **menu:** pop a submenu out beside its item when it has no room ([e9ff943](https://github.com/nexaknight/BetterTrayIcons/commit/e9ff943b76dc1fd3fbe8668b3b6073ea62ecc40c))
+
 ## [3.2.3](https://github.com/nexaknight/BetterTrayIcons/compare/v3.2.2...v3.2.3) (2026-09-03)
 
 
