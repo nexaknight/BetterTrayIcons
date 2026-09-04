@@ -3,6 +3,7 @@ import GdkPixbuf from 'gi://GdkPixbuf';
 import GLib from 'gi://GLib';
 import St from 'gi://St';
 import Clutter from 'gi://Clutter';
+import * as BoxPointer from 'resource:///org/gnome/shell/ui/boxpointer.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
 import {warn} from '../../shared/logging.js';
@@ -10,6 +11,7 @@ import {isCancelledError} from '../../shared/asyncIo.js';
 import {clearIds, debounceTo, disposeAll, removeTimer} from '../../shared/lifecycle.js';
 import {isDisposed, trackDisposal} from '../disposal.js';
 import {stageScaleFactor} from '../actorPlacement.js';
+import {closeMenuChain, FlyoutMenu, submenuFitsInline} from '../popupMenus.js';
 
 const GEOMETRY_SETTLE_MS = 50;
 
@@ -35,7 +37,8 @@ export class DBusMenuClient {
         this._proxy = null;
         this._onCloseMenu = onCloseMenu;
         this._closeTimeoutId = 0;
-        this._pendingYieldIds = new Set();
+        this._idleIds = new Set();
+        this._flyouts = new Set();
         this._cancellable = new Gio.Cancellable();
     }
 
@@ -66,11 +69,9 @@ export class DBusMenuClient {
 
     async buildMenu(gnomeMenu) {
         // The shell keeps one open submenu per menu, so opening a nested
-        // one would fold its parent. Only siblings fold each other here.
-        gnomeMenu._setOpenedSubMenu = submenu => {
-            if (submenu)
-                closeSubMenusIn(submenu._parent, true, submenu);
-        };
+        // one would fold its parent.
+        gnomeMenu._setOpenedSubMenu = foldSiblingsOnly;
+        this._bindFlyoutOwner(gnomeMenu);
 
         // Apps that fill the root only on demand answer the first GetLayout
         // with no children, and a childless root reads as "no menu at all".
@@ -142,6 +143,7 @@ export class DBusMenuClient {
         let item;
         if (isSubmenu) {
             item = new PopupMenu.PopupSubMenuMenuItem(label);
+            item.setSubmenuShown = shown => this._showSubMenu(item, id, shown);
             item.menu.connect('open-state-changed',
                 (menu, isOpen) => this._onSubMenuToggled(id, menu, isOpen));
             this._holdOpenLookDuringCollapse(item);
@@ -224,11 +226,11 @@ export class DBusMenuClient {
     _yieldToMainLoop() {
         return new Promise(resolve => {
             const id = GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
-                this._pendingYieldIds.delete(id);
+                this._idleIds.delete(id);
                 resolve();
                 return GLib.SOURCE_REMOVE;
             });
-            this._pendingYieldIds.add(id);
+            this._idleIds.add(id);
         });
     }
 
@@ -287,6 +289,95 @@ export class DBusMenuClient {
         await this._parseChildren(children, submenu);
     }
 
+    _showSubMenu(item, id, shown) {
+        const flyout = this._flyoutOf(item);
+        if (flyout) {
+            flyout.close(BoxPointer.PopupAnimation.FULL);
+            return;
+        }
+        if (!shown) {
+            item.menu.close(BoxPointer.PopupAnimation.FULL);
+            return;
+        }
+
+        this._closeFlyoutsUnder(item._getTopMenu());
+        if (submenuFitsInline(item.menu)) {
+            item.menu.open(BoxPointer.PopupAnimation.FULL);
+            return;
+        }
+        this._openFlyout(item, id)
+            .catch(err => warn(`DBusMenu Flyout Error: ${err.message}`));
+    }
+
+    _flyoutOf(item) {
+        for (const flyout of this._flyouts) {
+            if (flyout.sourceActor === item)
+                return flyout;
+        }
+        return null;
+    }
+
+    async _openFlyout(item, id) {
+        const flyout = new FlyoutMenu(item);
+        trackDisposal(flyout.actor);
+        flyout._setOpenedSubMenu = foldSiblingsOnly;
+        this._bindFlyoutOwner(flyout);
+        flyout.connect('open-state-changed', (menu, isOpen) => {
+            if (isOpen)
+                return;
+            this._sendEvent(id, 'closed');
+            this._dropFlyout(menu);
+        });
+        this._flyouts.add(flyout);
+
+        await this._loadSubMenu(id, flyout);
+        if (!this._isLive(flyout))
+            return;
+        // The tray menu can close while we wait for the layout
+        if (!flyout.ownerMenu.isOpen) {
+            this._dropFlyout(flyout);
+            return;
+        }
+
+        this._pinMenuWidth(flyout);
+        flyout.open(BoxPointer.PopupAnimation.FULL);
+        this._sendEvent(id, 'opened');
+    }
+
+    // A turn later the items the flyouts hang off are already gone
+    _bindFlyoutOwner(menu) {
+        menu.connect('open-state-changed', (owner, isOpen) => {
+            if (!isOpen)
+                this._closeFlyoutsUnder(owner);
+        });
+        menu.connect('destroy', () => {
+            for (const flyout of this._flyoutsUnder(menu)) {
+                this._flyouts.delete(flyout);
+                flyout.destroy();
+            }
+        });
+    }
+
+    _closeFlyoutsUnder(menu) {
+        for (const flyout of this._flyoutsUnder(menu))
+            flyout.close(BoxPointer.PopupAnimation.NONE);
+    }
+
+    _flyoutsUnder(menu) {
+        return Array.from(this._flyouts).filter(flyout => flyout.ownerMenu === menu);
+    }
+
+    // Still mid-emission when the flyout reports closed
+    _dropFlyout(flyout) {
+        const id = GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
+            this._idleIds.delete(id);
+            if (this._flyouts.delete(flyout))
+                flyout.destroy();
+            return GLib.SOURCE_REMOVE;
+        });
+        this._idleIds.add(id);
+    }
+
     _isLive(menu) {
         return this._proxy !== null && !isDisposed(menu._getTopMenu().actor);
     }
@@ -311,7 +402,7 @@ export class DBusMenuClient {
     _onItemClicked(id, parentMenu) {
         this._sendEvent(id, 'clicked');
 
-        parentMenu._getTopMenu().close();
+        closeMenuChain(parentMenu._getTopMenu());
 
         const shouldKeepPopup = this._settings.get_boolean('keep-popup-after-click');
         if (!shouldKeepPopup && this._onCloseMenu)
@@ -330,12 +421,20 @@ export class DBusMenuClient {
     destroy() {
         disposeAll(this, 'cancel', '_cancellable');
         clearIds(this, removeTimer, '_closeTimeoutId');
-        for (const id of this._pendingYieldIds)
+        for (const id of this._idleIds)
             GLib.source_remove(id);
-        this._pendingYieldIds.clear();
+        this._idleIds.clear();
+        for (const flyout of this._flyouts)
+            flyout.destroy();
+        this._flyouts.clear();
         this._proxy = null;
         this._onCloseMenu = null;
     }
+}
+
+function foldSiblingsOnly(submenu) {
+    if (submenu)
+        closeSubMenusIn(submenu._parent, true, submenu);
 }
 
 function closeSubMenusIn(menu, animate, keepOpen = null) {
