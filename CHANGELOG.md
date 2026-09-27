@@ -1,5 +1,14 @@
 # Changelog
 
+## [3.3.0](https://github.com/nexaknight/BetterTrayIcons/compare/v3.2.4...v3.3.0) (2026-09-27)
+
+
+### Features
+
+* **api:** place applets from other extensions in the tray ([0a1d2bd](https://github.com/nexaknight/BetterTrayIcons/commit/0a1d2bdf8b6bc21cfc4556c35f9da6b01136fb34))
+* pass scroll to the app, fix menu contrast, flyout and toggle ([fe7febe](https://github.com/nexaknight/BetterTrayIcons/commit/fe7febe88d4f024fb23db6c8ac1e357b45dc0f2a)), closes [#71](https://github.com/nexaknight/BetterTrayIcons/issues/71)
+* support gnome shell 51 ([0a93036](https://github.com/nexaknight/BetterTrayIcons/commit/0a930362e50b7085cd23f99aa80f4a5fb3a582f0))
+
 ## [3.2.4](https://github.com/nexaknight/BetterTrayIcons/compare/v3.2.3...v3.2.4) (2026-09-04)
 
 
