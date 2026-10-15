@@ -7,6 +7,8 @@ import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions
 
 const PREFS_SIDEBAR_BREAKPOINT = 'max-width: 700sp';
 const SIDEBAR_HEADER_ICON_PX = 40;
+const SIDEBAR_HEADER_MARGIN_TOP_PX = 18;
+const SIDEBAR_HEADER_UNDER_BAR_MARGIN_TOP_PX = 6;
 
 const _shells = new WeakMap();
 
@@ -46,13 +48,33 @@ export function setPrefsWindow(window, {pages, iconPath}) {
     }));
 
     const sidebarToolbar = new Adw.ToolbarView();
+    const sidebarHeaderBar = _createSidebarHeaderBar(sidebarBox);
+    sidebarToolbar.add_top_bar(sidebarHeaderBar);
     sidebarToolbar.set_content(sidebarBox);
 
     const splitView = new Adw.OverlaySplitView({
         sidebar: sidebarToolbar,
         content: navView,
     });
-    sidebarBox.prepend(_createSidebarHeader(window.get_title(), iconPath, splitView));
+    const sidebarHeader = _createSidebarHeader(window.get_title(), iconPath);
+    sidebarBox.prepend(sidebarHeader);
+
+    const collapse = _createSidebarToggle(splitView);
+    collapse.hexpand = true;
+    collapse.halign = Gtk.Align.END;
+    collapse.valign = Gtk.Align.CENTER;
+    const placeCollapse = () => {
+        collapse.unparent();
+        if (sidebarHeaderBar.visible) {
+            sidebarHeaderBar.pack_end(collapse);
+            sidebarHeader.margin_top = SIDEBAR_HEADER_UNDER_BAR_MARGIN_TOP_PX;
+        } else {
+            sidebarHeader.append(collapse);
+            sidebarHeader.margin_top = SIDEBAR_HEADER_MARGIN_TOP_PX;
+        }
+    };
+    sidebarHeaderBar.connect('notify::visible', placeCollapse);
+    placeCollapse();
 
     list.connect('row-selected', (_list, row) => {
         if (!row)
@@ -139,10 +161,20 @@ function _createSidebarToggle(splitView) {
     return button;
 }
 
-function _createSidebarHeader(title, iconPath, splitView) {
+function _createSidebarHeaderBar(sidebarBox) {
+    const headerBar = new Adw.HeaderBar({show_title: false, show_end_title_buttons: false});
+    // Adw.HeaderBar can't tell whether its start side has buttons, a hidden
+    // probe can, and it follows layout changes while the window is open.
+    const probe = new Gtk.WindowControls({side: Gtk.PackType.START, visible: false});
+    sidebarBox.append(probe);
+    probe.bind_property('empty', headerBar, 'visible',
+        GObject.BindingFlags.SYNC_CREATE | GObject.BindingFlags.INVERT_BOOLEAN);
+    return headerBar;
+}
+
+function _createSidebarHeader(title, iconPath) {
     const box = new Gtk.Box({
         spacing: 12,
-        margin_top: 18,
         margin_bottom: 14,
         margin_start: 12,
         margin_end: 12,
@@ -158,13 +190,6 @@ function _createSidebarHeader(title, iconPath, splitView) {
     labels.append(new Gtk.Label({label: title, halign: Gtk.Align.START, css_classes: ['heading']}));
     labels.append(new Gtk.Label({label: _('Settings'), halign: Gtk.Align.START, css_classes: ['caption', 'dimmed']}));
     box.append(labels);
-
-    const collapse = _createSidebarToggle(splitView);
-    collapse.hexpand = true;
-    collapse.halign = Gtk.Align.END;
-    collapse.valign = Gtk.Align.CENTER;
-    box.append(collapse);
-
     return box;
 }
 
