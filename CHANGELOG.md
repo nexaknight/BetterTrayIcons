@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.3.2](https://github.com/nexaknight/BetterTrayIcons/compare/v3.3.1...v3.3.2) (2026-10-15)
+
+
+### Bug Fixes
+
+* **prefs:** show the close button when window buttons sit on the left ([#79](https://github.com/nexaknight/BetterTrayIcons/issues/79)) ([7d9a850](https://github.com/nexaknight/BetterTrayIcons/commit/7d9a8509803c6827c7bb44ce0be77c917476e29e)), closes [#77](https://github.com/nexaknight/BetterTrayIcons/issues/77)
+
 ## [3.3.1](https://github.com/nexaknight/BetterTrayIcons/compare/v3.3.0...v3.3.1) (2026-09-29)
 
 
