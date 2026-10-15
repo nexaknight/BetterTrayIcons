@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.3.4](https://github.com/nexaknight/BetterTrayIcons/compare/v3.3.3...v3.3.4) (2026-10-15)
+
+
+### Translations
+
+* update Italian translation ([#82](https://github.com/nexaknight/BetterTrayIcons/issues/82)) ([07889d6](https://github.com/nexaknight/BetterTrayIcons/commit/07889d61b40408cc89426905b5eff2064fa24306))
+
 ## [3.3.3](https://github.com/nexaknight/BetterTrayIcons/compare/v3.3.2...v3.3.3) (2026-10-15)
 
 
