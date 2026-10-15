@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.3.3](https://github.com/nexaknight/BetterTrayIcons/compare/v3.3.2...v3.3.3) (2026-10-15)
+
+
+### Bug Fixes
+
+* make tray menus discoverable by Blur My Shell ([#78](https://github.com/nexaknight/BetterTrayIcons/issues/78)) ([49a113b](https://github.com/nexaknight/BetterTrayIcons/commit/49a113b5dd11f76497565a5a1822a4c6bf09256b))
+
 ## [3.3.2](https://github.com/nexaknight/BetterTrayIcons/compare/v3.3.1...v3.3.2) (2026-10-15)
 
 
