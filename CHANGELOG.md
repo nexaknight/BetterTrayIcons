@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.3.5](https://github.com/nexaknight/BetterTrayIcons/compare/v3.3.4...v3.3.5) (2026-10-19)
+
+
+### Bug Fixes
+
+* **sni:** let a focused app toggle its window on activate ([71b8635](https://github.com/nexaknight/BetterTrayIcons/commit/71b8635603982660fab4c2208504c4ce50c3d039)), closes [#84](https://github.com/nexaknight/BetterTrayIcons/issues/84)
+
 ## [3.3.4](https://github.com/nexaknight/BetterTrayIcons/compare/v3.3.3...v3.3.4) (2026-10-15)
 
 
