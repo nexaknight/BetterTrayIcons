@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.3.6](https://github.com/nexaknight/BetterTrayIcons/compare/v3.3.5...v3.3.6) (2026-10-28)
+
+
+### Bug Fixes
+
+* **icons:** size custom svg overrides by the real raster scale ([d79b280](https://github.com/nexaknight/BetterTrayIcons/commit/d79b2808810ba2368dae33b77fa59dcadc2af936)), closes [#87](https://github.com/nexaknight/BetterTrayIcons/issues/87)
+
 ## [3.3.5](https://github.com/nexaknight/BetterTrayIcons/compare/v3.3.4...v3.3.5) (2026-10-19)
 
 
