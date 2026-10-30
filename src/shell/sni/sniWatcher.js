@@ -178,13 +178,21 @@ export class SniWatcher {
 
             const [names] = result.deep_unpack();
 
-            for (const name of names) {
-                // KDE's KStatusNotifierItem registers as
-                // org.kde.StatusNotifierItem-PID-ID, Chromium and Electron use
-                // the freedesktop variant when they claim a well-known name at all.
-                if (name.startsWith('org.kde.StatusNotifierItem') ||
-                    name.startsWith('org.freedesktop.StatusNotifierItem'))
-                    this._registerItem(name, DEFAULT_ITEM_OBJECT_PATH);
+            // KDE's KStatusNotifierItem registers as
+            // org.kde.StatusNotifierItem-PID-ID, Chromium and Electron use
+            // the freedesktop variant when they claim a well-known name at all.
+            const itemNames = names.filter(name =>
+                name.startsWith('org.kde.StatusNotifierItem') ||
+                name.startsWith('org.freedesktop.StatusNotifierItem'));
+
+            // Key by the unique owner, clients that registered by path are
+            // already stored under it.
+            const owners = await Promise.all(
+                itemNames.map(name => this._nameOwner(name)));
+
+            for (const owner of owners) {
+                if (owner)
+                    this._registerItem(owner, DEFAULT_ITEM_OBJECT_PATH);
             }
         } catch (e) {
             warn(`SniWatcher: Initial scan failed: ${e.message}`);
@@ -212,7 +220,7 @@ export class SniWatcher {
                 );
                 return;
             }
-            busName = service;
+            busName = sender || service;
         }
 
         this._registerItem(busName, objectPath);
