@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.3.7](https://github.com/nexaknight/BetterTrayIcons/compare/v3.3.6...v3.3.7) (2026-10-30)
+
+
+### Bug Fixes
+
+* **sni:** key items by unique bus owner to avoid duplicate icons ([#90](https://github.com/nexaknight/BetterTrayIcons/issues/90)) ([d25c28c](https://github.com/nexaknight/BetterTrayIcons/commit/d25c28cf2673a9afe4ee330d45beb26fa741096c))
+
 ## [3.3.6](https://github.com/nexaknight/BetterTrayIcons/compare/v3.3.5...v3.3.6) (2026-10-28)
 
 
