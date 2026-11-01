@@ -1,4 +1,5 @@
 import Clutter from 'gi://Clutter';
+import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import Shell from 'gi://Shell';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
@@ -89,6 +90,7 @@ export class TrayIcon {
         this._menu = null;
         this._menuDropId = 0;
         this._activateId = 0;
+        this._acceptsActivationToken = true;
         this._menuClient = null;
         this._tooltip = null;
         this._clickController = null;
@@ -389,6 +391,7 @@ export class TrayIcon {
     // Items without Activate answer UnknownMethod, the click did nothing
     // and closing would gain nothing, so the close waits for the reply.
     _fireAndClose(method) {
+        this._provideActivationToken();
         this._proxy[method](0, 0, (_result, err) => {
             if (this._isDestroyed)
                 return;
@@ -402,6 +405,23 @@ export class TrayIcon {
             if (isFailureKept && !this._settings.get_boolean('keep-popup-after-click'))
                 return;
             this._onCloseMenu(this.actor);
+        });
+    }
+
+    // On Wayland an app can only focus the window it shows with an activation
+    // token. Bus calls stay in order, so the token lands before the Activate.
+    _provideActivationToken() {
+        if (!this._acceptsActivationToken)
+            return;
+
+        const context = global.create_app_launch_context(global.display.get_current_time_roundtrip(), -1);
+        const token = context.get_startup_notify_id(null, []);
+        this._proxy.ProvideXdgActivationTokenRemote(token, (_result, err) => {
+            if (!err)
+                return;
+            context.launch_failed(token);
+            if (err.matches(Gio.DBusError, Gio.DBusError.UNKNOWN_METHOD))
+                this._acceptsActivationToken = false;
         });
     }
 
