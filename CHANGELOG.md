@@ -1,5 +1,26 @@
 # Changelog
 
+## [3.4.0](https://github.com/nexaknight/BetterTrayIcons/compare/v3.3.7...v3.4.0) (2026-11-01)
+
+
+### Features
+
+* **prefs:** add a global minimize when in front switch with row help ([9b27e81](https://github.com/nexaknight/BetterTrayIcons/commit/9b27e817a53a1ba80d8c6affa6e726fb4fa1b271))
+* **prefs:** add title bar actions and a badge visibility toggle ([9e940da](https://github.com/nexaknight/BetterTrayIcons/commit/9e940dad4aabb5b876825eaa344bbbbee394c1f6))
+* **prefs:** scroll the contributors sideways in one row ([63d98d9](https://github.com/nexaknight/BetterTrayIcons/commit/63d98d91bc1a640b1576dca697f66ff0471cd7a9))
+
+
+### Bug Fixes
+
+* **icons:** honour fill and stroke from inline svg styles when tinting ([3db3fbc](https://github.com/nexaknight/BetterTrayIcons/commit/3db3fbce1d28020dfafcc5cec88fc63d142e55dc)), closes [#92](https://github.com/nexaknight/BetterTrayIcons/issues/92)
+* **prefs:** let tab reach the title bar buttons ([3ddd00a](https://github.com/nexaknight/BetterTrayIcons/commit/3ddd00a92114aa743a7e2584c6be34952b3d24e9))
+* **sni:** close a kept popup before activate so the app sees focus ([82495f1](https://github.com/nexaknight/BetterTrayIcons/commit/82495f1cad65e5ac549eafd001c227061410472f))
+* **sni:** dedupe rescanned items by owner and drop them on name release ([0f0b435](https://github.com/nexaknight/BetterTrayIcons/commit/0f0b435177253b0702dee70c3b088e836aaff33e))
+* **sni:** hand the app an activation token before activate ([504e0cf](https://github.com/nexaknight/BetterTrayIcons/commit/504e0cf9730bf2eb469b07f9c0281a5bcb9ac1cd))
+* **sync:** import only matching keys and keep unknown ones on push ([dfcf001](https://github.com/nexaknight/BetterTrayIcons/commit/dfcf00140feaacae5c6204b7d1709b64ade58442))
+* **ui:** keep blur my shell off the custom styled popup ([a66031d](https://github.com/nexaknight/BetterTrayIcons/commit/a66031dc6760a5069c2ec64f1a4d6664a3e9ece7))
+* **ui:** keep inline icon clicks from opening the overflow popup ([52b25ff](https://github.com/nexaknight/BetterTrayIcons/commit/52b25ffc2034ce92b1da78295990e026736667e8)), closes [#89](https://github.com/nexaknight/BetterTrayIcons/issues/89)
+
 ## [3.3.7](https://github.com/nexaknight/BetterTrayIcons/compare/v3.3.6...v3.3.7) (2026-10-30)
 
 
