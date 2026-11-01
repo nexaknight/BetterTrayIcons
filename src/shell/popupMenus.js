@@ -31,7 +31,7 @@ export function menuAnimation(animate) {
 export const POPUP_ANIMATION_NONE = menuAnimation(false);
 export const POPUP_ANIMATION_FULL = menuAnimation(true);
 
-export function createPanelMenu(sourceActor, {configure = null, ownSurface = false} = {}) {
+export function createPanelMenu(sourceActor, {configure = null, ownSurface = false, parent = Main.layoutManager.uiGroup} = {}) {
     const menu = new PopupMenu.PopupMenu(sourceActor, 0.5, St.Side.TOP);
     menu.actor.add_style_class_name('panel-menu');
     configure?.(menu);
@@ -47,7 +47,7 @@ export function createPanelMenu(sourceActor, {configure = null, ownSurface = fal
             applyMenuBoxStyle(menu);
     });
 
-    Main.layoutManager.uiGroup.add_child(menu.actor);
+    parent.add_child(menu.actor);
     menu.actor.hide();
     return menu;
 }

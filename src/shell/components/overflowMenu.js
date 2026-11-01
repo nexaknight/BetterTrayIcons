@@ -23,6 +23,8 @@ const CONTAINER_STOCK_SIDE_PADDING_PX = 1;
 
 const FLOW_WIDTH_SLACK_PX = 1;
 
+const MENU_CONTENT_STYLE_CLASS = 'popup-menu-content';
+
 export class OverflowMenu {
     constructor(settings, toggleButton, onOpenStateChanged) {
         this._settings = settings;
@@ -32,7 +34,13 @@ export class OverflowMenu {
         this._cachedBaseStyle = '';
         this._enableCustomStyle = false;
         this._attached = false;
+        this._customLayer = null;
 
+        this._menu = this._createMenu();
+        this._buildContainer();
+    }
+
+    _createMenu() {
         const configure = menu => {
             // The theme's .popup-menu rule pins a 15em min-width on the BoxPointer
             // actor, and _reposition centers that wrapper on the toggle, which
@@ -43,18 +51,47 @@ export class OverflowMenu {
             menu.box.x_expand = false;
             menu.box.y_expand = false;
             menu.box.set_style(POPUP_UNCLAMP_CSS);
+            if (this._enableCustomStyle)
+                menu.box.remove_style_class_name(MENU_CONTENT_STYLE_CLASS);
         };
 
+        // Blur my Shell blurs any popup-menu-content box it finds among the
+        // uiGroup children, over the full box and with its own radius. Without
+        // the class it still finds the popup-menu actor there, hence the own layer.
+        const parent = this._enableCustomStyle ? this._ensureCustomLayer() : Main.layoutManager.uiGroup;
+
         // The popup paints its own background from the user's settings.
-        this._menu = createPanelMenu(this._toggleButton, {configure, ownSurface: true});
+        const menu = createPanelMenu(this._toggleButton, {configure, ownSurface: true, parent});
 
-        this._menu.connect('open-state-changed', (menu, isOpen) => {
+        menu.connect('open-state-changed', (_menu, isOpen) => {
             this._onOpenStateChanged(isOpen);
-            if (isOpen)
-                this.updateGeometry();
+            if (!isOpen)
+                return;
+            this.updateGeometry();
+            // The menu only raises itself inside its own parent
+            if (parent === this._customLayer)
+                Main.layoutManager.uiGroup.set_child_above_sibling(parent, null);
         });
+        return menu;
+    }
 
-        this._buildContainer();
+    _ensureCustomLayer() {
+        if (!this._customLayer) {
+            this._customLayer = new Clutter.Actor();
+            Main.layoutManager.uiGroup.add_child(this._customLayer);
+        }
+        return this._customLayer;
+    }
+
+    // Blur my Shell keeps blurring a menu it once found, until it is destroyed
+    _rebuildMenu() {
+        const wasAttached = this._attached;
+        this._menu.box.remove_child(this._container);
+        destroyMenuSafely(this._menu);
+        this._menu = this._createMenu();
+        this._menu.box.add_child(this._container);
+        if (wasAttached)
+            this.attachToManager();
     }
 
     get container() {
@@ -174,7 +211,10 @@ export class OverflowMenu {
     }
 
     applyStyle(enableCustomStyle) {
+        const isModeChange = enableCustomStyle !== this._enableCustomStyle;
         this._enableCustomStyle = enableCustomStyle;
+        if (isModeChange)
+            this._rebuildMenu();
         if (this._enableCustomStyle) {
             this._menu.box.set_style(`${POPUP_UNCLAMP_CSS} background-color: transparent; border: none; box-shadow: none; margin: 0; padding: 0;`);
 
@@ -223,7 +263,9 @@ export class OverflowMenu {
 
     destroy() {
         destroyMenuSafely(this._menu);
+        this._customLayer?.destroy();
         this._menu = null;
         this._container = null;
+        this._customLayer = null;
     }
 }
