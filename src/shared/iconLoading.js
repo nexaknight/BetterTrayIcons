@@ -316,6 +316,8 @@ const SVG_NODE_RE =
 
 const SVG_ATTR_RE = /([A-Za-z_][\w.:-]*)\s*=\s*(?:"([^"]*)"|'([^']*)')/g;
 
+const STYLE_PAINT_RE = /(?:^|;)\s*(fill|stroke)\s*:\s*([^;]*?)\s*(?:!important\s*)?(?=;|$)/gi;
+
 const CLASS_ATTR_RE = /(?<![\w.:-])class\s*=\s*(["'])([^"']*)\1/;
 
 function _markTintTargets(text, chroma) {
@@ -352,6 +354,10 @@ function _attrValues(attrs) {
     let match;
     while ((match = SVG_ATTR_RE.exec(attrs)) !== null)
         values.set(match[1], match[2] ?? match[3]);
+
+    // Editors write paint into style, and there it wins over the attribute
+    for (const [, name, value] of (values.get('style') ?? '').matchAll(STYLE_PAINT_RE))
+        values.set(name.toLowerCase(), value.toLowerCase());
     return values;
 }
 
