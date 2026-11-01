@@ -37,9 +37,13 @@ export function setPrefsWindow(window, {pages, iconPath}) {
     const navView = new Adw.NavigationView();
     navView.add(rootPage);
 
+    // With the default tab behavior Tab walks row by row and browse mode
+    // selects each row it lands on, so Tab flips through every page and
+    // never reaches the header. Arrow keys still move between rows.
     const list = new Gtk.ListBox({
         css_classes: ['navigation-sidebar'],
         selection_mode: Gtk.SelectionMode.BROWSE,
+        tab_behavior: Gtk.ListTabBehavior.ITEM,
     });
     pages.forEach(page => list.append(_createSidebarRow(page)));
 
@@ -130,7 +134,6 @@ export function setPrefsWindow(window, {pages, iconPath}) {
     _shells.set(window, {navView, overlay, splitView});
 }
 
-// A page's own actions sit left of its reset controls.
 function _createPageHeaderActions(page) {
     const widgets = [...(page.actions ?? []).map(createActionButton), page.headerActions].filter(Boolean);
     if (!widgets.length)
