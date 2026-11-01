@@ -204,7 +204,7 @@ export class BackgroundAppsProxyWatcher {
 
     _addIcon(appId, entry) {
         const icon = new BackgroundAppsProxyIcon(appId, entry, this._settings, {
-            onAfterClick: () => this._panelIndicator._handleIconClick(),
+            onAfterClick: actor => this._panelIndicator._handleIconClick(actor),
             onDragStateChange: forwardDragStateToIndicator(this._panelIndicator),
             onQuit: () => this._queueRefresh(),
         });

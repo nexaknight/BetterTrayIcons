@@ -90,7 +90,7 @@ export class XEmbedTrayIcon {
                 this.actor.remove_style_pseudo_class('active');
                 const isRightClick = event.get_button() === RIGHT_MOUSE_BUTTON;
                 this._forwardClick(event, isRightClick);
-                this._onAfterClick();
+                this._onAfterClick(this.actor);
                 return Clutter.EVENT_PROPAGATE;
             }),
             this.actor.connect('leave-event', () => {

@@ -367,7 +367,7 @@ export class TrayIcon {
             this._fireAndClose('ActivateRemote');
             return;
         }
-        this._onCloseMenu();
+        this._onCloseMenu(this.actor);
         if (app !== Shell.WindowTracker.get_default().focus_app) {
             raiseApp(app);
             return;
@@ -392,7 +392,7 @@ export class TrayIcon {
                     `${this.id} does not answer ${method}, leaving the popup open: ${err.message}`);
                 return;
             }
-            this._onCloseMenu();
+            this._onCloseMenu(this.actor);
         });
     }
 

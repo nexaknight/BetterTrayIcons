@@ -141,7 +141,7 @@ export class XEmbedTrayBridge {
                 rawIcon,
                 this._settings,
                 id => this._afterWrapperDestroyed(rawIcon, id),
-                () => this._panelIndicator._handleIconClick(),
+                actor => this._panelIndicator._handleIconClick(actor),
                 forwardDragStateToIndicator(this._panelIndicator),
                 cancellable
             );

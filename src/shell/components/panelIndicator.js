@@ -146,12 +146,14 @@ export const PanelIndicator = GObject.registerClass({GTypeName: 'BetterTrayIcons
             this._onIconsChanged = callback;
         }
 
-        _handleIconClick() {
+        _handleIconClick(actor) {
             if (!this._settings.get_boolean('keep-popup-after-click')) {
                 if (this._overflowMenu.isOpen)
                     this._overflowMenu.close();
                 return;
             }
+            if (!this._overflowMenu.container.contains(actor))
+                return;
 
             // The SNI action may shift focus, e.g. raise a window, which
             // drops Shell's modal grab and closes the popup.

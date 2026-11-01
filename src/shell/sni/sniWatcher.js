@@ -310,7 +310,7 @@ export class SniWatcher {
                     proxy,
                     (itemId, actor) => this._indicator.addIcon(itemId, actor),
                     itemId => this._onItemDestroyed(itemId),
-                    () => this._indicator._handleIconClick(),
+                    actor => this._indicator._handleIconClick(actor),
                     forwardDragStateToIndicator(this._indicator),
                     () => this._indicator.queueUpdateLayout()
                 );

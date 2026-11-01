@@ -153,7 +153,7 @@ export class BackgroundAppsProxyIcon {
     }
 
     _activate() {
-        this._onAfterClick();
+        this._onAfterClick(this.actor);
         this._app.activate();
     }
 
