@@ -1,4 +1,5 @@
 import Adw from 'gi://Adw';
+import Gdk from 'gi://Gdk';
 import GObject from 'gi://GObject';
 import Graphene from 'gi://Graphene';
 import Gsk from 'gi://Gsk';
@@ -24,7 +25,11 @@ const CARD_DEFAULT_COLUMNS = 3;
 
 const CARD_ROW_GAP_PX = 12;
 const CARD_ROW_MARGIN_PX = 4;
-const CARD_ROW_ALIGN_CENTER = 0.5;
+// Adwaita's overlay scrollbar grows on hover and then reaches 17px up from the
+// strip's bottom edge, against 8px while idle, plus 4px of air above it.
+const CARD_ROW_SCROLLBAR_ROOM_PX = 21;
+// GTK's own wheel step, pow(page_size, 2/3) in gtkscrolledwindow.c.
+const WHEEL_STEP_EXPONENT = 2 / 3;
 
 // libadwaita clamps page content to 576px however wide the window gets.
 // At 150 three columns still fit from 474px up, at 180 they need the full clamp.
@@ -180,17 +185,41 @@ function _createCardCaption(text, cssClasses, maxChars, halign) {
 }
 
 export function createCardRow({cards}) {
-    const wrap = new Adw.WrapBox({
-        child_spacing: CARD_ROW_GAP_PX,
-        line_spacing: CARD_ROW_GAP_PX,
-        align: CARD_ROW_ALIGN_CENTER,
+    const strip = new Gtk.Box({
+        spacing: CARD_ROW_GAP_PX,
+        halign: Gtk.Align.CENTER,
         margin_top: CARD_ROW_MARGIN_PX,
-        margin_bottom: CARD_ROW_MARGIN_PX,
+        margin_bottom: CARD_ROW_SCROLLBAR_ROOM_PX,
         margin_start: CARD_ROW_MARGIN_PX,
         margin_end: CARD_ROW_MARGIN_PX,
     });
-    cards.forEach(c => wrap.append(c));
-    return wrap;
+    cards.forEach(c => strip.append(c));
+
+    const scroller = new Gtk.ScrolledWindow({
+        child: strip,
+        hscrollbar_policy: Gtk.PolicyType.AUTOMATIC,
+        vscrollbar_policy: Gtk.PolicyType.NEVER,
+    });
+    _scrollWheelSideways(scroller);
+    return scroller;
+}
+
+// A mouse wheel only turns vertically and the strip only scrolls sideways.
+// Touchpads send both axes and need no help.
+function _scrollWheelSideways(scroller) {
+    const controller = new Gtk.EventControllerScroll({
+        flags: Gtk.EventControllerScrollFlags.VERTICAL,
+        propagation_phase: Gtk.PropagationPhase.CAPTURE,
+    });
+    controller.connect('scroll', (_controller, _dx, dy) => {
+        const adjustment = scroller.hadjustment;
+        const canScroll = adjustment.upper > adjustment.page_size;
+        if (controller.get_unit() !== Gdk.ScrollUnit.WHEEL || !canScroll)
+            return false;
+        adjustment.value += dy * Math.pow(adjustment.page_size, WHEEL_STEP_EXPONENT);
+        return true;
+    });
+    scroller.add_controller(controller);
 }
 
 // Gtk.FlowBox reflows too, but it wraps every child in a GtkFlowBoxChild
