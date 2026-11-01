@@ -375,7 +375,9 @@ export class TrayIcon {
             raiseApp(app);
             return;
         }
-        if (getAppConfigValue(this._settings, this.appId, 'minimize_when_focused', false)) {
+        const shouldMinimize = this._settings.get_boolean('minimize-when-focused') ||
+            getAppConfigValue(this._settings, this.appId, 'minimize_when_focused', false);
+        if (shouldMinimize) {
             this._onCloseMenu(this.actor);
             app.get_windows().forEach(window => window.minimize());
             return;
@@ -400,8 +402,8 @@ export class TrayIcon {
                 warnOnce(`${method}:${this.appId}`,
                     `${this.id} does not answer ${method}, leaving the popup open: ${err.message}`);
             }
-            // With keep-popup-after-click the call reopens the popup, which
-            // the focused-app path closed before the Activate.
+            // With keep-popup-after-click this reopens the popup the
+            // focused-app path closed before the Activate.
             if (isFailureKept && !this._settings.get_boolean('keep-popup-after-click'))
                 return;
             this._onCloseMenu(this.actor);

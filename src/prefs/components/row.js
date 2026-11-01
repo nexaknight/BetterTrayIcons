@@ -21,6 +21,10 @@ export const ACTION_DROPDOWN_WIDTH_PX = 240;
 
 const ROW_ICON_SIZE_PX = 24;
 
+const HELP_ICON_NAME = 'bti-help-symbolic';
+const HELP_TEXT_MAX_CHARS = 40;
+const HELP_TEXT_MARGIN_PX = 6;
+
 const STYLE_DIALOG_WIDTH_PX = 420;
 
 const WRAP_CONTROLS_MAX_FRACTION = 0.6;
@@ -64,12 +68,12 @@ const CONFIG_ROW_BUILDERS = Object.freeze({
     color: (settings, spec) => _createColorRow(spec.title, settings, spec.key),
 });
 
-export function createComboRow({title, subtitle = '', settings, key, options, values, width = -1}) {
+export function createComboRow({title, subtitle = '', settings, key, options, values, width = -1, help = null}) {
     const dropdown = _createBoundDropdown(settings, key, options, values, {width, label: title});
-    return _createWrapRow(title, subtitle, [dropdown]);
+    return _createWrapRow(title, subtitle, [dropdown], help);
 }
 
-function _createWrapRow(title, subtitle, controls) {
+function _createWrapRow(title, subtitle, controls, help) {
     const titles = new Gtk.Box({
         orientation: Gtk.Orientation.VERTICAL,
         valign: Gtk.Align.CENTER,
@@ -86,6 +90,8 @@ function _createWrapRow(title, subtitle, controls) {
     }
 
     const controlsBox = new Gtk.Box({spacing: 12, halign: Gtk.Align.END, valign: Gtk.Align.CENTER});
+    if (help)
+        controlsBox.append(_createHelpButton(help));
     controls.forEach(widget => controlsBox.append(widget));
 
     const box = new Gtk.Box({
@@ -168,13 +174,14 @@ const WrapRowLayout = GObject.registerClass({GTypeName: 'BetterTrayIconsWrapRowL
         }
     });
 
-export function createSpinRow({title, subtitle = '', settings, key, min = 0, max, step = 1}) {
+export function createSpinRow({title, subtitle = '', settings, key, min = 0, max, step = 1, help = null}) {
     const row = new Adw.SpinRow({
         title,
         subtitle,
         adjustment: new Gtk.Adjustment({lower: min, upper: max, step_increment: step}),
     });
     settings.bind(key, row, 'value', Gio.SettingsBindFlags.DEFAULT);
+    _addHelp(row, help);
     return row;
 }
 
@@ -183,7 +190,7 @@ function _schemaRange(settings, key) {
     return {min, max};
 }
 
-export function createSegmentedRow({title, subtitle = '', settings, key, options, values, negate = null}) {
+export function createSegmentedRow({title, subtitle = '', settings, key, options, values, negate = null, help = null}) {
     const group = new Adw.ToggleGroup({valign: Gtk.Align.CENTER});
     options.forEach((label, i) => group.add(new Adw.Toggle({label, name: values[i]})));
     group.update_property([Gtk.AccessibleProperty.LABEL], [title]);
@@ -196,7 +203,7 @@ export function createSegmentedRow({title, subtitle = '', settings, key, options
 
     const negateButton = negate ? _createNegateButton(settings, negate, group, options) : null;
 
-    return createActionRow({title, subtitle, suffixWidgets: [negateButton, group].filter(Boolean)});
+    return createActionRow({title, subtitle, suffixWidgets: [negateButton, group].filter(Boolean), help});
 }
 
 function _createNegateButton(settings, {key, iconName, tooltip}, group, options) {
@@ -214,7 +221,7 @@ function _createNegateButton(settings, {key, iconName, tooltip}, group, options)
     return button;
 }
 
-function _createColorRow(title, settings, key, {accentAware = false, parent = null, variants = null} = {}) {
+function _createColorRow(title, settings, key, {accentAware = false, parent = null, variants = null, help = null} = {}) {
     const row = new Adw.ActionRow({title});
     const colorButton = createColorButton(settings, key, title);
 
@@ -237,6 +244,7 @@ function _createColorRow(title, settings, key, {accentAware = false, parent = nu
     }
 
     row.add_suffix(colorButton);
+    _addHelp(row, help);
 
     return row;
 }
@@ -253,23 +261,25 @@ function _openStyleDialog(parentWindow, settings, {title, items}) {
     present(parentWindow);
 }
 
-export function createSwitchRow({title, subtitle = '', settings, key}) {
+export function createSwitchRow({title, subtitle = '', settings, key, help = null}) {
     const row = new Adw.SwitchRow({title, subtitle});
     settings.bind(key, row, 'active', Gio.SettingsBindFlags.DEFAULT);
+    _addHelp(row, help);
     return row;
 }
 
-export function createSubpageRow({title, subtitle = '', window, SubpageClass, settings, prefixIcon = null}) {
+export function createSubpageRow({title, subtitle = '', window, SubpageClass, settings, prefixIcon = null, help = null}) {
     return createActionRow({
         title,
         subtitle,
+        help,
         prefixWidget: prefixIcon ? new Gtk.Image({icon_name: prefixIcon}) : null,
         suffixIcon: NEXT_ICON_NAME,
         onActivate: () => pushSubpage(window, new SubpageClass(window, settings)),
     });
 }
 
-export function createIconPickerRow({title, settings, key, window, PickerClass, icons, ...options}) {
+export function createIconPickerRow({title, settings, key, window, PickerClass, icons, help = null, ...options}) {
     const iconPreview = new Gtk.Image({pixel_size: ROW_ICON_SIZE_PX, valign: Gtk.Align.CENTER});
     applyPathIcon(iconPreview, settings.get_string(key), settings);
 
@@ -278,6 +288,7 @@ export function createIconPickerRow({title, settings, key, window, PickerClass, 
         subtitle: settings.get_string(key),
         suffixWidgets: [iconPreview],
         suffixIcon: NEXT_ICON_NAME,
+        help,
         onActivate: () => {
             const picker = new PickerClass(settings, key, icons, null, null, options);
             picker.present(window);
@@ -295,7 +306,7 @@ export function createIconPickerRow({title, settings, key, window, PickerClass, 
     return row;
 }
 
-export function createComplexActionRow({title, subtitle = '', settings, key, options, values, window, DialogClass, dialogData}) {
+export function createComplexActionRow({title, subtitle = '', settings, key, options, values, window, DialogClass, dialogData, help = null}) {
     const gearButton = createDialogGearButton({
         window,
         settings,
@@ -307,12 +318,12 @@ export function createComplexActionRow({title, subtitle = '', settings, key, opt
     const dropdown = _createBoundDropdown(settings, key, options, values,
         {width: ACTION_DROPDOWN_WIDTH_PX, label: title});
 
-    return _createWrapRow(title, subtitle, [gearButton, dropdown]);
+    return _createWrapRow(title, subtitle, [gearButton, dropdown], help);
 }
 
 // Adw.SwitchRow packs its switch as the first suffix, so a gear added afterwards
 // lands right of it. Built by hand to keep the gear on the left.
-export function createComplexSwitchRow({title, subtitle = '', settings, key, window, DialogClass, dialogData, gearFollowsSwitch = true}) {
+export function createComplexSwitchRow({title, subtitle = '', settings, key, window, DialogClass, dialogData, gearFollowsSwitch = true, help = null}) {
     const gearButton = createDialogGearButton({window, settings, DialogClass, dialogData});
     if (gearFollowsSwitch)
         settings.bind(key, gearButton, 'sensitive', Gio.SettingsBindFlags.GET);
@@ -321,7 +332,7 @@ export function createComplexSwitchRow({title, subtitle = '', settings, key, win
     settings.bind(key, toggle, 'active', Gio.SettingsBindFlags.DEFAULT);
     toggle.update_property([Gtk.AccessibleProperty.LABEL], [title]);
 
-    const row = createActionRow({title, subtitle, suffixWidgets: [gearButton, toggle], activatable: true});
+    const row = createActionRow({title, subtitle, suffixWidgets: [gearButton, toggle], activatable: true, help});
     row.activatable_widget = toggle;
 
     return row;
@@ -348,6 +359,7 @@ export function createActionRow({
     badge = null,
     activatable = false,
     onActivate = null,
+    help = null,
 }) {
     const row = new Adw.ActionRow({
         title,
@@ -375,7 +387,43 @@ export function createActionRow({
     if (suffixIcon)
         row.add_suffix(new Gtk.Image({icon_name: suffixIcon, valign: Gtk.Align.CENTER}));
 
+    _addHelp(row, help);
+
     return row;
+}
+
+// Leads the suffixes where a gear would sit, so the switches of a group stay
+// in one column whether a row has help or not.
+function _addHelp(row, help) {
+    if (!help)
+        return;
+    const button = _createHelpButton(help);
+    row.add_suffix(button);
+    button.get_parent().reorder_child_after(button, null);
+}
+
+// A tooltip never shows on touch, so a tap opens the same text in a popover.
+function _createHelpButton(text) {
+    const label = new Gtk.Label({
+        label: text,
+        wrap: true,
+        max_width_chars: HELP_TEXT_MAX_CHARS,
+        xalign: 0,
+        margin_top: HELP_TEXT_MARGIN_PX,
+        margin_bottom: HELP_TEXT_MARGIN_PX,
+        margin_start: HELP_TEXT_MARGIN_PX,
+        margin_end: HELP_TEXT_MARGIN_PX,
+    });
+    const button = new Gtk.MenuButton({
+        icon_name: HELP_ICON_NAME,
+        popover: new Gtk.Popover({child: label}),
+        tooltip_text: text,
+        has_frame: false,
+        css_classes: ['circular'],
+        valign: Gtk.Align.CENTER,
+    });
+    button.update_property([Gtk.AccessibleProperty.LABEL], [_('Help')]);
+    return button;
 }
 
 export function createExpanderSection({title, subtitle = '', headerSuffix = null, badge = null}) {
@@ -438,7 +486,7 @@ export function createIconColorRows({parent, settings, keyPrefix}) {
     ].map(spec => createAccentColorRow({parent, settings, ...spec}));
 }
 
-export function createAccentColorRow({parent, settings, title, key, hoverKey = null, variantTitle}) {
+export function createAccentColorRow({parent, settings, title, key, hoverKey = null, variantTitle, help = null}) {
     const items = [{type: 'accent', title: _('Use Accent Color'), key}];
     if (hoverKey) {
         items.push(
@@ -449,6 +497,7 @@ export function createAccentColorRow({parent, settings, title, key, hoverKey = n
         parent,
         accentAware: true,
         variants: {title: variantTitle, items},
+        help,
     });
 }
 

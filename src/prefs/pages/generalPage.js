@@ -24,6 +24,7 @@ const GENERAL_RESET_KEYS = Object.freeze([
     'enable-tooltips',
     'tooltip-position',
     'tooltip-delay',
+    'minimize-when-focused',
 ]);
 
 export class GeneralPage extends Adw.PreferencesPage {
@@ -137,6 +138,14 @@ export class GeneralPage extends Adw.PreferencesPage {
                     ],
                 }],
             },
+        }));
+
+        group.add(createSwitchRow({
+            title: _('Minimize When in Front'),
+            subtitle: _('Clicking the icon while the app is in front minimizes its windows.'),
+            settings: this._settings,
+            key: 'minimize-when-focused',
+            help: _('A click on an app in front minimizes it instead of letting it hide itself to the tray, so it stays in the dock and taskbar. Apps that already toggle their window on a click lose that behavior.'),
         }));
     }
 

@@ -25,6 +25,7 @@ MacTahoe and Adwaita, and emblem-favorite-symbolic was missing from Adwaita.
     bti-hidden       <- eye-off              bti-warning      <- triangle-alert
     bti-sidebar-show <- panel-left-open      bti-sidebar-hide <- panel-left-close
     bti-link         <- link                 bti-unlink       <- unlink
+    bti-help         <- circle-question-mark
 
   The bti-sample-* icons stand in for typical tray applications in the
   live previews, same pipeline:
@@ -59,9 +60,9 @@ MacTahoe and Adwaita, and emblem-favorite-symbolic was missing from Adwaita.
   Feather                       MIT
   https://github.com/feathericons/feather
 
-  Nine of the Lucide icons above are derived from Feather, so its license
+  Ten of the Lucide icons above are derived from Feather, so its license
   applies to them as well: bti-about, bti-add, bti-code, bti-next,
-  bti-previous, bti-search, bti-select, bti-trash, bti-link.
+  bti-previous, bti-search, bti-select, bti-trash, bti-link, bti-help.
 
   The MIT License (MIT)
 

@@ -53,6 +53,12 @@
             <summary>Show tooltips when hovering tray icons</summary>
         </key>
 
+        <key name="minimize-when-focused" type="b">
+            <default>false</default>
+            <summary>Minimize a focused app on an icon click instead of activating it</summary>
+            <description>Default for apps without their own Minimize When in Front setting.</description>
+        </key>
+
         <key name="hide-background-apps" type="b">
             <default>false</default>
             <summary>Hide GNOME's Background Apps entry from Quick Settings</summary>

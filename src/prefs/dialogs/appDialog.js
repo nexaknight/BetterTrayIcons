@@ -114,12 +114,15 @@ export default class AppDialog extends Adw.Dialog {
         group.add(hideRow);
 
         if (!(this._data.is_xembed || this._data.is_background_proxy || this._data.is_foreign)) {
+            const forcedOn = this._settings.get_boolean('minimize-when-focused');
             const minimizeRow = new Adw.SwitchRow({
                 title: _('Minimize When in Front'),
-                subtitle: _('Clicking the icon while the app is in front minimizes its windows.'),
-                active: this._data.minimize_when_focused === true,
+                subtitle: forcedOn
+                    ? _('Turned on for every app on the General page.')
+                    : _('Clicking the icon while the app is in front minimizes its windows.'),
+                active: forcedOn || this._data.minimize_when_focused === true,
+                sensitive: !forcedOn,
             });
-
             minimizeRow.connect('notify::active', () => {
                 this._updateValue('minimize_when_focused', minimizeRow.active);
             });

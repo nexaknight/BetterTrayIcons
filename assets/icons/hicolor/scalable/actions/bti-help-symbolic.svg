@@ -1,0 +1,4 @@
+<!-- Derived from Lucide "circle-question-mark" (stroke outlined to fill). ISC - Copyright (c) 2026 Lucide Icons and Contributors -->
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" version="1.1">
+	<path d="M 1 12 A 11 11 0 1 1 23 12 A 11 11 0 1 1 1 12 Z M 3 12 A 9 9 0 1 0 21 12 A 9 9 0 1 0 3 12 Z M 8.147 8.668 A 4 4 0 0 1 15.92 10.001 C 15.92 12.721, 12.236 13.949, 12.236 13.949 A 1 1 0 0 1 11.604 12.051 C 11.604 12.051, 13.92 11.279, 13.92 9.999 A 2 2 0 0 0 10.033 9.332 A 1 1 0 0 1 8.147 8.668 Z M 11 17 A 1 1 0 1 1 13 17 A 1 1 0 1 1 11 17 Z" stroke="none" fill="#000" fill-rule="evenodd"/>
+</svg>
