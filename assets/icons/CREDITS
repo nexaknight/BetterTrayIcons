@@ -25,7 +25,7 @@ MacTahoe and Adwaita, and emblem-favorite-symbolic was missing from Adwaita.
     bti-hidden       <- eye-off              bti-warning      <- triangle-alert
     bti-sidebar-show <- panel-left-open      bti-sidebar-hide <- panel-left-close
     bti-link         <- link                 bti-unlink       <- unlink
-    bti-help         <- circle-question-mark
+    bti-help         <- circle-question-mark bti-tag-x        <- tag-x
 
   The bti-sample-* icons stand in for typical tray applications in the
   live previews, same pipeline:

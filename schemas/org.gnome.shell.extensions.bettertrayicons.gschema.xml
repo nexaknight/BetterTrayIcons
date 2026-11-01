@@ -119,6 +119,11 @@
             <summary>Measure the margin in the live preview on hover</summary>
         </key>
 
+        <key name="applications-show-badges" type="b">
+            <default>true</default>
+            <summary>Show packaging and origin badges on the Applications page</summary>
+        </key>
+
         <key name="icon-color-split" type="b">
             <default>true</default>
             <summary>Keep separate light and dark colour sets for tray icons</summary>

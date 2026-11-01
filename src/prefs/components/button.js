@@ -2,6 +2,7 @@ import Gio from 'gi://Gio';
 import Gtk from 'gi://Gtk';
 import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
+import {connectScoped} from '../../shared/lifecycle.js';
 import {GEAR_ICON_NAME} from './icon.js';
 import {ALIGN_PROPS, alignFor} from './text.js';
 
@@ -35,6 +36,38 @@ export function createIconButton(iconName, {circular = true, flat = true, extraC
     const button = createButton({iconName, cssClasses: classes, valign: 'center', onClick, ...props});
     if (tooltip)
         button.tooltip_text = tooltip;
+    return button;
+}
+
+export function createActionButton({
+    iconName,
+    tooltip,
+    onClick = null,
+    activeIconName = null,
+    activeTooltip = tooltip,
+    settings = null,
+    key = null,
+    isActive = () => settings.get_boolean(key),
+    onToggle = () => settings.set_boolean(key, !settings.get_boolean(key)),
+}) {
+    const button = createIconButton(iconName, {tooltip, onClick});
+    button.update_property([Gtk.AccessibleProperty.LABEL], [tooltip]);
+    if (!activeIconName)
+        return button;
+
+    const sync = () => {
+        const active = isActive();
+        button.icon_name = active ? activeIconName : iconName;
+        button.tooltip_text = active ? activeTooltip : tooltip;
+        button.update_property([Gtk.AccessibleProperty.LABEL], [button.tooltip_text]);
+    };
+    button.connect('clicked', () => {
+        onToggle();
+        sync();
+    });
+    if (settings)
+        connectScoped(button, settings, `changed::${key}`, sync);
+    sync();
     return button;
 }
 

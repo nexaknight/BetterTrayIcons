@@ -5,10 +5,13 @@ import Gtk from 'gi://Gtk';
 import Adw from 'gi://Adw';
 import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
+import {createActionButton} from './button.js';
+
 const PREFS_SIDEBAR_BREAKPOINT = 'max-width: 700sp';
 const SIDEBAR_HEADER_ICON_PX = 40;
 const SIDEBAR_HEADER_MARGIN_TOP_PX = 18;
 const SIDEBAR_HEADER_UNDER_BAR_MARGIN_TOP_PX = 6;
+const HEADER_ACTION_GAP_PX = 6;
 
 const _shells = new WeakMap();
 
@@ -106,16 +109,17 @@ export function setPrefsWindow(window, {pages, iconPath}) {
 
     contentHeader.pack_start(_createSidebarToggle(splitView));
 
+    const pageHeaders = new Map();
     pages.forEach(page => {
-        if (page.headerActions)
-            contentHeader.pack_end(page.headerActions);
+        const header = _createPageHeaderActions(page);
+        if (!header)
+            return;
+        contentHeader.pack_end(header);
+        pageHeaders.set(page, header);
     });
     const syncHeaderActions = () => {
         const active = stack.get_visible_child();
-        pages.forEach(page => {
-            if (page.headerActions)
-                page.headerActions.visible = page === active;
-        });
+        pageHeaders.forEach((header, page) => (header.visible = page === active));
     };
     stack.connect('notify::visible-child', syncHeaderActions);
     syncHeaderActions();
@@ -124,6 +128,16 @@ export function setPrefsWindow(window, {pages, iconPath}) {
     window.set_content(overlay);
 
     _shells.set(window, {navView, overlay, splitView});
+}
+
+// A page's own actions sit left of its reset controls.
+function _createPageHeaderActions(page) {
+    const widgets = [...(page.actions ?? []).map(createActionButton), page.headerActions].filter(Boolean);
+    if (!widgets.length)
+        return null;
+    const box = new Gtk.Box({spacing: HEADER_ACTION_GAP_PX});
+    widgets.forEach(widget => box.append(widget));
+    return box;
 }
 
 export function pushSubpage(window, page) {

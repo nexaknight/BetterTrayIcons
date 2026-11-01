@@ -357,6 +357,7 @@ export function createActionRow({
     suffixWidgets = [],
     headerSuffix = null,
     badge = null,
+    badgeVisibility = null,
     activatable = false,
     onActivate = null,
     help = null,
@@ -376,7 +377,9 @@ export function createActionRow({
     if (prefixWidget)
         row.add_prefix(_centered(prefixWidget));
 
-    attachBadge(row, badge);
+    const badgeBox = attachBadge(row, badge);
+    if (badgeBox && badgeVisibility)
+        badgeVisibility.settings.bind(badgeVisibility.key, badgeBox, 'visible', Gio.SettingsBindFlags.GET);
 
     if (headerSuffix)
         row.add_suffix(_centered(headerSuffix));

@@ -19,6 +19,8 @@ const PAGE_REBUILD_DEBOUNCE_MS = 100;
 
 const ROW_ICON_PX = 32;
 
+const BADGES_KEY = 'applications-show-badges';
+
 // A forgotten app that is still running keeps its cached icon until the shell
 // re-resolves it, several D-Bus round trips later. A shorter gap lets the
 // next deletion's write strand cached_icon_path, as OpenRGB does.
@@ -58,6 +60,14 @@ export class ApplicationsPage extends Adw.PreferencesPage {
         this._buildGeneration = 0;
 
         this._headerActions = null;
+        this.actions = [{
+            iconName: 'bti-tag-symbolic',
+            tooltip: _('Show Badges'),
+            activeIconName: 'bti-tag-x-symbolic',
+            activeTooltip: _('Hide Badges'),
+            settings,
+            key: BADGES_KEY,
+        }];
         this._buildUI();
 
         // One edit can fire several app-configs writes in a row (rename
@@ -169,6 +179,7 @@ export class ApplicationsPage extends Adw.PreferencesPage {
                 subtitle: `${_('ID')}: ${app.id}`,
                 prefixWidget: iconImage,
                 badge: badges,
+                badgeVisibility: {settings: this._settings, key: BADGES_KEY},
                 suffixWidgets: hiddenMark,
                 suffixIcon: NEXT_ICON_NAME,
                 onActivate: () => this._openAppConfiguration(app),

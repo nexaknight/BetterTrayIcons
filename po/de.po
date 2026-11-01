@@ -30,6 +30,9 @@ msgstr "Aktivieren"
 msgid "Add a state"
 msgstr "Zustand hinzufügen"
 
+msgid "A click on an app in front minimizes it instead of letting it hide itself to the tray, so it stays in the dock and taskbar. Apps that already toggle their window on a click lose that behavior."
+msgstr "Ein Klick auf eine App im Vordergrund minimiert sie, statt sie sich selbst in den Tray verstecken zu lassen. So bleibt sie im Dock und in der Taskleiste. Apps, die ihr Fenster bei einem Klick schon selbst ein- und ausblenden, verlieren dieses Verhalten."
+
 msgid "Adds a tray icon for windowless background apps that lack one of their own."
 msgstr "Ergänzt ein Tray-Icon für fensterlose Hintergrund-Apps, die keines haben."
 
@@ -272,6 +275,12 @@ msgstr "Raster-Spalten"
 
 msgid "Help translate this extension."
 msgstr "Hilf mit, diese Erweiterung zu übersetzen."
+
+msgid "Help"
+msgstr "Hilfe"
+
+msgid "Hide Badges"
+msgstr "Badges ausblenden"
 
 msgid "Hide Sidebar"
 msgstr "Seitenleiste verbergen"
@@ -644,6 +653,9 @@ msgstr "Anzeigen"
 msgid "Show icons from Wine and Proton apps."
 msgstr "Icons aus Wine- und Proton-Apps anzeigen."
 
+msgid "Show Badges"
+msgstr "Badges anzeigen"
+
 msgid "Show Sidebar"
 msgstr "Seitenleiste anzeigen"
 
@@ -982,3 +994,12 @@ msgstr "Innenabstand beim Überfahren der Vorschau ausmessen."
 
 msgid "Measure the margin while hovering the preview."
 msgstr "Außenabstand beim Überfahren der Vorschau ausmessen."
+
+msgid "version %s"
+msgstr "Version %s"
+
+msgid "an older version"
+msgstr "ältere Version"
+
+msgid "Turned on for every app on the General page."
+msgstr "Auf der Seite „Allgemein“ für alle Apps eingeschaltet."
