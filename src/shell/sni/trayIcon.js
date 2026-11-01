@@ -1,6 +1,7 @@
 import Clutter from 'gi://Clutter';
 import GLib from 'gi://GLib';
 import Shell from 'gi://Shell';
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
 import {warn, warnOnce} from '../../shared/logging.js';
 import {
@@ -367,17 +368,21 @@ export class TrayIcon {
             this._fireAndClose('ActivateRemote');
             return;
         }
-        this._onCloseMenu(this.actor);
         if (app !== Shell.WindowTracker.get_default().focus_app) {
+            this._onCloseMenu(this.actor);
             raiseApp(app);
             return;
         }
         if (getAppConfigValue(this._settings, this.appId, 'minimize_when_focused', false)) {
+            this._onCloseMenu(this.actor);
             app.get_windows().forEach(window => window.minimize());
             return;
         }
         // The app gets keyboard focus back from the popup grab only on the
         // next turn, and without it reads the Activate as show, not toggle.
+        const menu = Main.panel.menuManager.activeMenu;
+        if (menu?.box.contains(this.actor))
+            menu.close(POPUP_ANIMATION_NONE);
         debounceTo(this, '_activateId', 0, () => this._fireAndClose('ActivateRemote'));
     }
 
@@ -387,11 +392,15 @@ export class TrayIcon {
         this._proxy[method](0, 0, (_result, err) => {
             if (this._isDestroyed)
                 return;
-            if (err && this._settings.get_boolean('keep-popup-on-failed-click')) {
+            const isFailureKept = err && this._settings.get_boolean('keep-popup-on-failed-click');
+            if (isFailureKept) {
                 warnOnce(`${method}:${this.appId}`,
                     `${this.id} does not answer ${method}, leaving the popup open: ${err.message}`);
-                return;
             }
+            // With keep-popup-after-click the call reopens the popup, which
+            // the focused-app path closed before the Activate.
+            if (isFailureKept && !this._settings.get_boolean('keep-popup-after-click'))
+                return;
             this._onCloseMenu(this.actor);
         });
     }
