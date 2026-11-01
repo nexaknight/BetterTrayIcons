@@ -185,14 +185,15 @@ export class SniWatcher {
                 name.startsWith('org.kde.StatusNotifierItem') ||
                 name.startsWith('org.freedesktop.StatusNotifierItem'));
 
-            // Key by the unique owner, clients that registered by path are
-            // already stored under it.
             const owners = await Promise.all(
                 itemNames.map(name => this._nameOwner(name)));
 
-            for (const owner of owners) {
-                if (owner)
-                    this._registerItem(owner, DEFAULT_ITEM_OBJECT_PATH);
+            // A client that owns a name but registered an object path is
+            // already in, and its item may not live at the default path.
+            for (const [index, name] of itemNames.entries()) {
+                const owner = owners[index];
+                if (owner && !this._ownerHasItem(owner))
+                    this._registerItem(owner, DEFAULT_ITEM_OBJECT_PATH, name);
             }
         } catch (e) {
             warn(`SniWatcher: Initial scan failed: ${e.message}`);
@@ -207,6 +208,7 @@ export class SniWatcher {
         // /org/ayatana/NotificationItem/..., KDE clients pass their bus name.
         let busName = sender || service;
         let objectPath = DEFAULT_ITEM_OBJECT_PATH;
+        let watchedName;
 
         if (service.startsWith('/')) {
             objectPath = service;
@@ -221,9 +223,10 @@ export class SniWatcher {
                 return;
             }
             busName = sender || service;
+            watchedName = service;
         }
 
-        this._registerItem(busName, objectPath);
+        this._registerItem(busName, objectPath, watchedName);
 
         invocation.return_value(null);
     }
@@ -263,7 +266,12 @@ export class SniWatcher {
         }
     }
 
-    _registerItem(busName, objectPath) {
+    _ownerHasItem(owner) {
+        return [...this._items.values()].some(item => item.busName === owner) ||
+            [...this._pending.values()].includes(owner);
+    }
+
+    _registerItem(busName, objectPath, watchedName = busName) {
         // The disabled check covers awaits (initial scan, owner check) that
         // resolve after disable() and would re-populate the cleared maps.
         if (this._disabled)
@@ -275,7 +283,7 @@ export class SniWatcher {
             return;
 
         this._pending.set(id, busName);
-        this._watchName(id, busName);
+        this._watchName(id, watchedName);
 
         new this._itemProxyClass(
             Gio.DBus.session,
@@ -318,18 +326,18 @@ export class SniWatcher {
         );
     }
 
-    // One watch per item name instead of a global NameOwnerChanged
-    // subscription. The daemon filters per match rule, so the shell only
-    // wakes for names it tracks.
-    _watchName(id, busName) {
-        if (this._nameWatchers.has(id) || busName.startsWith('/'))
+    // One watch per item name, the daemon filters per match rule, so the
+    // shell only wakes for names it tracks. A client drops its item by
+    // releasing the name it registered while its connection lives on.
+    _watchName(id, name) {
+        if (this._nameWatchers.has(id) || name.startsWith('/'))
             return;
         this._nameWatchers.set(id, Gio.bus_watch_name(
             Gio.BusType.SESSION,
-            busName,
+            name,
             Gio.BusNameWatcherFlags.NONE,
             null,
-            () => this._onNameVanished(busName)
+            () => this._onNameVanished(id)
         ));
     }
 
@@ -342,19 +350,11 @@ export class SniWatcher {
         this._nameWatchers.delete(id);
     }
 
-    _onNameVanished(name) {
-        // Iterate over a snapshot so destroy() can mutate the map.
-        for (const item of Array.from(this._items.values())) {
-            if (item.busName === name)
-                item.destroy();
-        }
+    _onNameVanished(id) {
+        this._items.get(id)?.destroy();
 
-        for (const [id, pendingBusName] of Array.from(this._pending)) {
-            if (pendingBusName !== name)
-                continue;
-            this._pending.delete(id);
+        if (this._pending.delete(id))
             this._unwatchName(id);
-        }
     }
 
     _onItemDestroyed(id) {
