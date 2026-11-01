@@ -4,7 +4,7 @@ import Meta from 'gi://Meta';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 
-import {error, warn, clearWarnedOnce} from './src/shared/logging.js';
+import {error, warn, warnOnce, clearWarnedOnce} from './src/shared/logging.js';
 import {readFileText, isCancelledError} from './src/shared/asyncIo.js';
 import {importSettingsFromJSON, probeImportIconPaths, saveSettingsToFile, isOwnSyncSource} from './src/shared/settingsIO.js';
 import {clearIds, debounceTo, disconnectSignal, disconnectAll, disposeAll, removeTimer} from './src/shared/lifecycle.js';
@@ -180,11 +180,13 @@ export default class BetterTrayIconsExtension extends Extension {
 
                 // The flag covers import echoes delivered inside apply().
                 this._isImporting = true;
+                let skipped;
                 try {
-                    importSettingsFromJSON(this._settings, data, iconPaths, {merge: true});
+                    skipped = importSettingsFromJSON(this._settings, data, iconPaths, {merge: true});
                 } finally {
                     this._isImporting = false;
                 }
+                this._noteForeignVersion(data._meta, skipped);
                 // The change echo can land after the flag drops. Re-stamp by
                 // hand, or the next app-configs write counts the imported
                 // changes as the user's and pushes a file we just read.
@@ -194,6 +196,14 @@ export default class BetterTrayIconsExtension extends Extension {
                     warn(`Auto-sync import failed: ${e.message}`);
             });
         });
+    }
+
+    _noteForeignVersion(meta, skipped) {
+        const ownVersion = this.metadata['version-name'];
+        if (meta?.version === ownVersion)
+            return;
+        const writer = meta?.version ? `version ${meta.version}` : 'an older version';
+        warnOnce('sync-version', `Sync file was written by ${writer}, this is ${ownVersion}. ${skipped} settings from it were skipped.`);
     }
 
     _setupAutoPush() {
@@ -217,7 +227,7 @@ export default class BetterTrayIconsExtension extends Extension {
                 return;
 
             debounceTo(this, '_autoPushDebounceId', AUTO_PUSH_DEBOUNCE_MS, () => {
-                saveSettingsToFile(this._settings, this._settings.get_string('sync-file-path'))
+                saveSettingsToFile(this._settings, this._settings.get_string('sync-file-path'), {merge: true})
                     .catch(e => warn(`Auto-push failed: ${e.message}`));
             });
         });

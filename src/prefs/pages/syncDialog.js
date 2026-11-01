@@ -5,7 +5,7 @@ import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions
 
 import {error} from '../../shared/logging.js';
 import {readFileText, fileExists, isCancelledError} from '../../shared/asyncIo.js';
-import {saveSettingsToFile, loadSettingsFromFile, deleteBackup, listBackups, isOwnSyncSource} from '../../shared/settingsIO.js';
+import {saveSettingsToFile, loadSettingsFromFile, deleteBackup, listBackups, isOwnSyncSource, readOwnVersion} from '../../shared/settingsIO.js';
 import {clearIds, connectScoped, debounceTo, removeTimer} from '../../shared/lifecycle.js';
 import {createButton, createIconButton} from '../components/button.js';
 import {createImage} from '../components/image.js';
@@ -144,8 +144,9 @@ async function _probeSyncFile(path, statusRow, warningIcon, cancellable) {
 
     try {
         const data = JSON.parse(await readFileText(file, cancellable));
+        const ownVersion = await readOwnVersion();
         warningIcon.set_visible(false);
-        statusRow.set_subtitle(_formatSyncStatus(mtime, data._meta));
+        statusRow.set_subtitle(_formatSyncStatus(mtime, data._meta, ownVersion));
     } catch (e) {
         if (isCancelledError(e))
             return;
@@ -154,12 +155,16 @@ async function _probeSyncFile(path, statusRow, warningIcon, cancellable) {
     }
 }
 
-function _formatSyncStatus(mtime, meta) {
+function _formatSyncStatus(mtime, meta, ownVersion) {
     const timeText = mtime ? mtime.format(TIMESTAMP_FORMAT) : _('Unknown');
     if (!meta || !meta.source)
         return timeText;
     const origin = isOwnSyncSource(meta) ? _('this device') : meta.source;
-    return `${timeText} · ${_('from')} ${origin}`;
+    const status = `${timeText} · ${_('from')} ${origin}`;
+    if (meta.version === ownVersion)
+        return status;
+    const writer = meta.version ? _('version %s').format(meta.version) : _('an older version');
+    return `${status} · ${writer}`;
 }
 
 function _buildAutoSyncGroup(page, settings, pathRow, cancellable) {
@@ -211,7 +216,7 @@ function _buildActionsGroup(page, pathRow, settings, dialog, toast, onAfterActio
             const path = pathRow.get_text();
             if (!path)
                 return;
-            _runSyncOperation(() => saveSettingsToFile(settings, path), toast, onAfterAction, {
+            _runSyncOperation(() => saveSettingsToFile(settings, path, {merge: true}), toast, onAfterAction, {
                 successMessage: _('Settings pushed'), failurePrefix: _('Push failed'),
             });
         },

@@ -19,6 +19,15 @@ const COLOR_PATTERN = new RegExp(
 // host's file path or auto switch retargets or severs the link.
 const IMPORT_EXCLUDED_KEYS = new Set(['sync-file-path', 'enable-auto-sync']);
 
+// GJS turns a wrong value into a valid one without a word ('accent' into
+// true, 'x' into 0), so the type is checked before the variant is built.
+// Every schema key is b, i or s, a new type needs its own check here.
+const VALUE_FITS_TYPE = {
+    b: value => typeof value === 'boolean',
+    i: value => (value | 0) === value,
+    s: value => typeof value === 'string',
+};
+
 // Await this before importSettingsFromJSON, which has to stay synchronous so
 // the shell's _isImporting flag spans exactly its own writes.
 export function probeImportIconPaths(data, cancellable = null) {
@@ -49,9 +58,11 @@ export function probeImportIconPaths(data, cancellable = null) {
     return probePaths(paths, cancellable);
 }
 
+// Returns how many settings of the file did not land, keys this version does
+// not know plus values that do not fit the local key.
 export function importSettingsFromJSON(settings, data, iconPaths, {merge = false} = {}) {
     if (!data || typeof data !== 'object')
-        return;
+        return 0;
 
     const batch = new Gio.Settings({settings_schema: settings.settings_schema});
     batch.delay();
@@ -59,11 +70,17 @@ export function importSettingsFromJSON(settings, data, iconPaths, {merge = false
     const keys = batch.list_keys();
     const homeDir = GLib.get_home_dir();
     let syncMeta;
+    let skipped = 0;
 
     Object.keys(data).forEach(key => {
+        if (!keys.includes(key)) {
+            if (!key.startsWith('_'))
+                skipped++;
+            return;
+        }
         // The sync metadata travels as _app_config_meta and is applied together
         // with app-configs below, never set from a raw key.
-        if (!keys.includes(key) || IMPORT_EXCLUDED_KEYS.has(key) || key === 'app-config-sync-meta')
+        if (IMPORT_EXCLUDED_KEYS.has(key) || key === 'app-config-sync-meta')
             return;
 
         let value = data[key];
@@ -94,18 +111,31 @@ export function importSettingsFromJSON(settings, data, iconPaths, {merge = false
             }
         }
 
-        const typeString = batch.get_value(key).get_type_string();
-        try {
-            batch.set_value(key, GLib.Variant.new(typeString, value));
-        } catch (e) {
-            warn(`Failed to import key '${key}': ${e.message}`);
+        const variant = _variantForKey(batch, key, value);
+        if (!variant) {
+            skipped++;
+            warnOnce(`import:${key}`, `Import: Skipping '${key}', ${JSON.stringify(value)} does not fit this version's setting`);
+            return;
         }
+        batch.set_value(key, variant);
     });
 
     if (syncMeta && keys.includes('app-config-sync-meta'))
         batch.set_string('app-config-sync-meta', JSON.stringify(syncMeta));
 
     batch.apply();
+    return skipped;
+}
+
+// Another version can ship the same key with a new type, range or choices.
+// Out of range only makes GSettings print a warning and drop the write.
+function _variantForKey(settings, key, value) {
+    const typeString = settings.get_value(key).get_type_string();
+    if (!VALUE_FITS_TYPE[typeString](value))
+        return null;
+
+    const variant = GLib.Variant.new(typeString, value);
+    return settings.settings_schema.get_key(key).range_check(variant) ? variant : null;
 }
 
 // delay() on the shared instance would leave it delayed for good.
@@ -124,10 +154,19 @@ export function isOwnSyncSource(meta) {
 // finish in the other.
 let _pendingSave = Promise.resolve();
 
-export function saveSettingsToFile(settings, path) {
-    const done = _pendingSave.then(() => _writeSettingsFile(settings, path));
+// With merge the file keeps the keys this version does not know, so an older
+// host never strips what a newer one wrote. A plain export stays a full
+// snapshot of this host.
+export function saveSettingsToFile(settings, path, {merge = false} = {}) {
+    const done = _pendingSave.then(() => _writeSettingsFile(settings, path, merge));
     _pendingSave = done.catch(() => {});
     return done;
+}
+
+export async function readOwnVersion() {
+    const root = Gio.File.new_for_uri(import.meta.url).get_parent().get_parent().get_parent();
+    const metadata = JSON.parse(await readFileText(root.get_child('metadata.json')));
+    return metadata['version-name'];
 }
 
 export async function loadSettingsFromFile(settings, path, {merge = false} = {}) {
@@ -219,13 +258,17 @@ export async function deleteBackup(path) {
     } catch { /* gone or never existed */ }
 }
 
-async function _writeSettingsFile(settings, path) {
-    const data = _exportSettingsToJSON(settings);
+async function _writeSettingsFile(settings, path, merge) {
+    const data = _exportSettingsToJSON(settings, await readOwnVersion());
+    const onDisk = await _readSettingsFile(path).catch(() => null);
+
+    if (merge && onDisk)
+        _keepUnknownKeys(data, onDisk, settings.settings_schema);
 
     // A pull makes the other process see a change and push back. Without this
     // it would spend a backup on an identical file and stamp its own host into
     // _meta, so the sync dialog credits this machine for settings it received.
-    if (await _fileAlreadyHolds(path, data))
+    if (onDisk && _holdsSameSettings(onDisk, data))
         return;
 
     await _writeBackup(path, settings.get_int('max-backups'));
@@ -242,14 +285,17 @@ function _writeBytes(path, bytes) {
         new GLib.Bytes(bytes), null, false, Gio.FileCreateFlags.REPLACE_DESTINATION, null);
 }
 
-async function _fileAlreadyHolds(path, data) {
-    try {
-        const {_meta: unusedOnDisk, ...onDisk} = await _readSettingsFile(path);
-        const {_meta: unusedFresh, ...fresh} = data;
-        return _stableStringify(onDisk) === _stableStringify(fresh);
-    } catch {
-        return false;
+function _keepUnknownKeys(data, onDisk, schema) {
+    for (const [key, value] of Object.entries(onDisk)) {
+        if (!(key in data) && !schema.has_key(key))
+            data[key] = value;
     }
+}
+
+function _holdsSameSettings(onDisk, data) {
+    const {_meta: unusedOnDisk, ...held} = onDisk;
+    const {_meta: unusedFresh, ...fresh} = data;
+    return _stableStringify(held) === _stableStringify(fresh);
 }
 
 function _stableStringify(value) {
@@ -261,7 +307,7 @@ function _stableStringify(value) {
         `${JSON.stringify(key)}:${_stableStringify(value[key])}`).join(',')}}`;
 }
 
-function _exportSettingsToJSON(settings) {
+function _exportSettingsToJSON(settings, version) {
     const keys = settings.list_keys();
     const exportData = {};
     const homeDir = GLib.get_home_dir();
@@ -269,6 +315,7 @@ function _exportSettingsToJSON(settings) {
     exportData['_meta'] = {
         source: GLib.get_host_name(),
         timestamp: Date.now(),
+        version,
     };
 
     keys.forEach(key => {
