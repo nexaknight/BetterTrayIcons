@@ -3,23 +3,28 @@ import Gdk from 'gi://Gdk';
 
 import {boxGeometryCss} from '../../../shared/boxStyle.js';
 import {THEME_FOREGROUND} from '../../../shared/colorContrast.js';
+import {toggleIconKey, toggleIconName} from '../../../shared/toggleIconKeys.js';
 import {spacingGuides} from '../guide.js';
 import {
     PREVIEW_SAMPLE_ICONS, backgroundStyle, borderStyle, createSampleIcon, cssDeclaration,
     customIconStyle, hoverStyle, resolveColor, stockForeground, stockIconStyle, trayIconCss,
 } from './sceneInk.js';
 
+// Two icons show the side, more would only crowd the stage
+const SAMPLE_ICON_CAP = 2;
+
 export function buildTogglePreview(settings, scopeClass) {
     const box = new Gtk.Box();
     const toggle = new Gtk.Image({
-        icon_name: _toggleIconName(settings, 'toggle-icon-name'),
+        icon_name: toggleIconName(settings, 'toggle-icon-name'),
         pixel_size: settings.get_int('toggle-icon-size'),
         css_classes: [`${scopeClass}-toggle`],
         cursor: Gdk.Cursor.new_from_name('pointer', null),
     });
     _bindToggleClicks(settings, toggle);
     const size = settings.get_int('icon-size');
-    const icons = PREVIEW_SAMPLE_ICONS.slice(0, 2).map(name => createSampleIcon(name, size, scopeClass));
+    const count = Math.min(settings.get_int('visible-icon-limit'), SAMPLE_ICON_CAP);
+    const icons = PREVIEW_SAMPLE_ICONS.slice(0, count).map(name => createSampleIcon(name, size, scopeClass));
 
     const parts = settings.get_string('toggle-position') === 'left'
         ? [toggle, ...icons] : [...icons, toggle];
@@ -42,8 +47,8 @@ function _bindToggleClicks(settings, toggle) {
     let isOpen = false;
     click.connect('released', () => {
         isOpen = !isOpen;
-        if (!settings.get_boolean('toggle-icon-rotate')) {
-            toggle.icon_name = _toggleIconName(settings, isOpen ? 'toggle-icon-active-name' : 'toggle-icon-name');
+        if (!settings.get_boolean(toggleIconKey(settings, 'toggle-icon-rotate'))) {
+            toggle.icon_name = toggleIconName(settings, isOpen ? 'toggle-icon-active-name' : 'toggle-icon-name');
             return;
         }
         if (isOpen)
@@ -54,19 +59,16 @@ function _bindToggleClicks(settings, toggle) {
     toggle.add_controller(click);
 }
 
-function _toggleIconName(settings, key) {
-    return settings.get_string(key) || settings.get_default_value(key).unpack();
-}
-
 function _toggleOpenCss(settings, scopeClass) {
-    if (!settings.get_boolean('toggle-icon-rotate'))
+    const key = name => toggleIconKey(settings, name);
+    if (!settings.get_boolean(key('toggle-icon-rotate')))
         return '';
     const selector = `.${scopeClass}-toggle`;
-    const degrees = Number.parseInt(settings.get_string('toggle-icon-rotate-angle'), 10);
-    const angle = settings.get_boolean('toggle-icon-rotate-reverse') ? -degrees : degrees;
-    const transition = settings.get_boolean('toggle-icon-rotate-animate')
-        ? ` ${selector} { transition: -gtk-icon-transform ${settings.get_int('toggle-icon-rotate-duration')}ms ease-out` +
-            ` ${settings.get_int('toggle-icon-rotate-delay')}ms; }`
+    const degrees = Number.parseInt(settings.get_string(key('toggle-icon-rotate-angle')), 10);
+    const angle = settings.get_boolean(key('toggle-icon-rotate-reverse')) ? -degrees : degrees;
+    const transition = settings.get_boolean(key('toggle-icon-rotate-animate'))
+        ? ` ${selector} { transition: -gtk-icon-transform ${settings.get_int(key('toggle-icon-rotate-duration'))}ms ease-out` +
+            ` ${settings.get_int(key('toggle-icon-rotate-delay'))}ms; }`
         : '';
     return `${transition} ${selector}.open { -gtk-icon-transform: rotate(${angle}deg); }`;
 }

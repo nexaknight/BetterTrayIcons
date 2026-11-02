@@ -1,148 +1,157 @@
 import Adw from 'gi://Adw';
 import Gdk from 'gi://Gdk';
 import GObject from 'gi://GObject';
-import Graphene from 'gi://Graphene';
-import Gsk from 'gi://Gsk';
 import Gtk from 'gi://Gtk';
 import Pango from 'gi://Pango';
 
-import {connectScoped} from '../../shared/lifecycle.js';
-import {alignFor, createBox, createLabel, ensurePrefsCss} from './text.js';
+import {watchKeys} from '../../shared/lifecycle.js';
+import {createHelpButton} from './button.js';
+import {createBox, createLabel, ensurePrefsCss} from './text.js';
 
 const CARD_WIDTH_PX = 110;
 const CARD_HEIGHT_PX = 130;
 const CARD_ICON_PX = 40;
+// Three scene cards plus the strip's gaps and margins fit libadwaita's 576px
+// content clamp, so a three-card picker only scrolls in a narrower window.
+const STAGED_CARD_WIDTH_PX = 168;
+// Two cards at this width plus gap and margins fit the 336px a prefs window
+// at its 360px minimum leaves the strip.
+const STAGED_CARD_MIN_WIDTH_PX = 156;
 const CARD_TITLE_MAX_CHARS = 12;
+// A staged card is wider than a captioned one, so its caption gets that room,
+// and a long translation wraps once before it is cut.
+const STAGED_TITLE_MAX_CHARS = 24;
+const STAGED_TITLE_LINES = 2;
 const CARD_SUBTITLE_MAX_CHARS = 14;
 
 const CARD_CAPTION_GAP_PX = 4;
 const CARD_CAPTION_TOP_PX = 10;
 const CARD_CAPTION_BOTTOM_PX = 6;
 const CARD_CAPTION_SIDE_PX = 8;
-
-const CARD_GRID_GAP_PX = 12;
-const CARD_DEFAULT_COLUMNS = 3;
+const STAGED_CAPTION_GAP_PX = 8;
+const CHOICE_HELP_GAP_PX = 4;
 
 const CARD_ROW_GAP_PX = 12;
 const CARD_ROW_MARGIN_PX = 4;
 // Adwaita's overlay scrollbar grows on hover and then reaches 17px up from the
-// strip's bottom edge, against 8px while idle, plus 4px of air above it.
-const CARD_ROW_SCROLLBAR_ROOM_PX = 21;
+// strip's bottom edge, against 8px while idle. The row margin adds air above.
+const CARD_ROW_SCROLLBAR_ROOM_PX = 17;
 // GTK's own wheel step, pow(page_size, 2/3) in gtkscrolledwindow.c.
 const WHEEL_STEP_EXPONENT = 2 / 3;
-
-// libadwaita clamps page content to 576px however wide the window gets.
-// At 150 three columns still fit from 474px up, at 180 they need the full clamp.
-const CARD_MIN_WIDTH_PX = 150;
+// GTK's MAGIC_SCROLL_FACTOR for touchpad deltas in the same file.
+const SURFACE_SCROLL_FACTOR = 2.5;
 
 export function createCardPicker({title, description = '', settings, key, options, bleed = false}) {
     ensurePrefsCss();
     const group = new Adw.PreferencesGroup({title, description});
 
-    const grid = new Gtk.Box({
-        layout_manager: new CardGridLayout(CARD_MIN_WIDTH_PX, CARD_DEFAULT_COLUMNS),
-        hexpand: true,
-    });
-    group.add(grid);
-
-    const cards = new Map(options.map(option => [option.value, createCard({
+    const choices = new Map(options.map(option => [option.value, _createChoiceCard({
         preview: option.preview,
         bleed,
         title: option.label,
-        toggle: true,
-        extraClasses: ['bti-choice-card'],
-        width: -1,
-        height: -1,
-        valign: 'fill',
+        help: option.help,
     })]));
 
-    let first = null;
-    for (const card of cards.values()) {
-        if (first)
-            card.set_group(first);
-        else
-            first = card;
-        grid.append(card);
+    // A help button is taller than a title, every title line takes its height
+    // so the stages in the row stay level.
+    if (options.some(option => option.help)) {
+        const titleLines = new Gtk.SizeGroup({mode: Gtk.SizeGroupMode.VERTICAL});
+        choices.forEach(choice => titleLines.add_widget(choice.titleLine));
     }
 
-    const sync = () => cards.get(settings.get_string(key))?.set_active(true);
-    sync();
+    const [first, ...rest] = [...choices.values()].map(choice => choice.button);
+    rest.forEach(button => button.set_group(first));
+    const row = createCardRow({cards: [...choices.values()].map(choice => choice.card)});
+    group.add(row);
 
-    for (const [value, card] of cards) {
-        card.connect('toggled', () => {
-            if (card.active && settings.get_string(key) !== value)
+    watchKeys(row, settings, [key], () => choices.get(settings.get_string(key))?.button.set_active(true));
+
+    for (const [value, {button}] of choices) {
+        button.connect('toggled', () => {
+            if (button.active && settings.get_string(key) !== value)
                 settings.set_string(key, value);
         });
     }
-    connectScoped(grid, settings, `changed::${key}`, sync);
 
     return group;
 }
 
-export function createCard({
-    avatar = null,
-    iconName = null,
-    iconSize = CARD_ICON_PX,
-    preview = null,
-    bleed = false,
-    title = '',
-    subtitle = '',
-    onActivate = null,
-    tooltip = null,
-    toggle = false,
-    extraClasses = [],
-    width = CARD_WIDTH_PX,
-    height = CARD_HEIGHT_PX,
-    valign = 'center',
-} = {}) {
-    const ButtonClass = toggle ? Gtk.ToggleButton : Gtk.Button;
-    const button = new ButtonClass({
-        css_classes: ['card', 'flat', ...extraClasses],
-        width_request: width,
-        height_request: height,
-        valign: alignFor(valign),
-        // GTK expands a parent whose child expands, and the preview's vexpand
-        // would otherwise grow the card to the full page height.
-        vexpand: false,
+// The title line sits outside the toggle, so a help button next to the title
+// is never a button inside a button. The stage wears the card ring.
+function _createChoiceCard({preview, bleed, title, help}) {
+    const stage = createBox({
+        vexpand: true,
+        cssClasses: bleed ? ['bti-card-stage', 'bleed'] : ['bti-card-stage'],
     });
-
-    if (tooltip)
-        button.tooltip_text = tooltip;
-
-    button.set_child(preview
-        ? _buildStagedCard({preview, bleed, title, subtitle})
-        : _buildCaptionedCard({avatar, iconName, iconSize, title, subtitle}));
-
-    if (onActivate)
-        button.connect('clicked', onActivate);
-
-    return button;
-}
-
-// Stage and footer run edge to edge, a margin would show the card's own
-// background as a frame around the scene.
-function _buildStagedCard({preview, bleed, title, subtitle}) {
-    ensurePrefsCss();
-
-    const stage = createBox({vexpand: true, cssClasses: bleed ? ['bti-card-stage', 'bleed'] : ['bti-card-stage']});
     // GTK4 does not clip a child to its parent's rounded corners, so a scene
-    // wider than the stage sticks out past the card's top edge.
+    // wider than the stage sticks out past its corners.
     stage.overflow = Gtk.Overflow.HIDDEN;
     const align = bleed ? Gtk.Align.FILL : Gtk.Align.CENTER;
     preview.set_halign(align);
     preview.set_valign(align);
     stage.append(preview);
 
-    const footer = createBox({halign: 'fill', cssClasses: ['bti-card-footer']});
-    if (title)
-        footer.append(_createCardCaption(title, ['caption-heading'], CARD_TITLE_MAX_CHARS, 'start'));
-    if (subtitle)
-        footer.append(_createCardCaption(subtitle, ['caption', 'dimmed'], CARD_SUBTITLE_MAX_CHARS, 'start'));
+    const button = new Gtk.ToggleButton({child: stage, css_classes: ['flat'], vexpand: true});
+    button.update_property([Gtk.AccessibleProperty.LABEL], [title]);
 
-    const box = createBox({halign: 'fill'});
-    box.append(stage);
-    box.append(footer);
-    return box;
+    const caption = _createCardCaption(title, ['caption-heading'], STAGED_TITLE_MAX_CHARS, STAGED_TITLE_LINES);
+    const pick = new Gtk.GestureClick();
+    pick.connect('released', () => button.set_active(true));
+    caption.add_controller(pick);
+
+    const titleLine = createBox({orientation: 'horizontal', spacing: CHOICE_HELP_GAP_PX, halign: 'center'});
+    titleLine.append(caption);
+    if (help)
+        titleLine.append(createHelpButton(help, {compact: true}));
+
+    const card = new Gtk.Box({
+        layout_manager: new ShrinkingCardLayout({
+            orientation: Gtk.Orientation.VERTICAL,
+            spacing: STAGED_CAPTION_GAP_PX,
+        }),
+        vexpand: false,
+        css_classes: ['bti-choice-card'],
+    });
+    card.append(button);
+    card.append(titleLine);
+    return {card, button, titleLine};
+}
+
+// Asks for the full card width but settles for the floor, so a strip that
+// is a little short shrinks its cards before it starts to scroll.
+const ShrinkingCardLayout = GObject.registerClass(
+    {GTypeName: 'BetterTrayIconsShrinkingCardLayout'},
+    class ShrinkingCardLayout extends Gtk.BoxLayout {
+        vfunc_measure(widget, orientation, forSize) {
+            const [min, nat] = super.vfunc_measure(widget, orientation, forSize);
+            if (orientation === Gtk.Orientation.VERTICAL)
+                return [min, nat, -1, -1];
+            return [Math.max(min, STAGED_CARD_MIN_WIDTH_PX), Math.max(nat, STAGED_CARD_WIDTH_PX), -1, -1];
+        }
+    });
+
+export function createCard({
+    avatar = null,
+    iconName = null,
+    iconSize = CARD_ICON_PX,
+    title = '',
+    subtitle = '',
+    onActivate,
+    tooltip,
+}) {
+    const button = new Gtk.Button({
+        css_classes: ['card', 'flat'],
+        width_request: CARD_WIDTH_PX,
+        height_request: CARD_HEIGHT_PX,
+        valign: Gtk.Align.CENTER,
+        // GTK expands a parent whose child expands, and the picture's vexpand
+        // would otherwise grow the card to the full page height.
+        vexpand: false,
+        child: _buildCaptionedCard({avatar, iconName, iconSize, title, subtitle}),
+        tooltip_text: tooltip,
+    });
+    button.connect('clicked', onActivate);
+    return button;
 }
 
 function _buildCaptionedCard({avatar, iconName, iconSize, title, subtitle}) {
@@ -169,18 +178,19 @@ function _buildCaptionedCard({avatar, iconName, iconSize, title, subtitle}) {
     }
 
     if (title)
-        box.append(_createCardCaption(title, ['caption-heading'], CARD_TITLE_MAX_CHARS, 'center'));
+        box.append(_createCardCaption(title, ['caption-heading'], CARD_TITLE_MAX_CHARS));
     if (subtitle)
-        box.append(_createCardCaption(subtitle, ['caption', 'dimmed'], CARD_SUBTITLE_MAX_CHARS, 'center'));
+        box.append(_createCardCaption(subtitle, ['caption', 'dimmed'], CARD_SUBTITLE_MAX_CHARS));
 
     return box;
 }
 
-function _createCardCaption(text, cssClasses, maxChars, halign) {
+function _createCardCaption(text, cssClasses, maxChars, lines = 1) {
     return createLabel(text, cssClasses, {
         ellipsize: Pango.EllipsizeMode.END,
         max_width_chars: maxChars,
-        halign: alignFor(halign),
+        halign: Gtk.Align.CENTER,
+        ...lines > 1 ? {wrap: true, lines, justify: Gtk.Justification.CENTER} : {},
     });
 }
 
@@ -188,14 +198,15 @@ export function createCardRow({cards}) {
     const strip = new Gtk.Box({
         spacing: CARD_ROW_GAP_PX,
         halign: Gtk.Align.CENTER,
+        valign: Gtk.Align.START,
         margin_top: CARD_ROW_MARGIN_PX,
-        margin_bottom: CARD_ROW_SCROLLBAR_ROOM_PX,
+        margin_bottom: CARD_ROW_MARGIN_PX,
         margin_start: CARD_ROW_MARGIN_PX,
         margin_end: CARD_ROW_MARGIN_PX,
     });
     cards.forEach(c => strip.append(c));
 
-    const scroller = new Gtk.ScrolledWindow({
+    const scroller = new CardStrip({
         child: strip,
         hscrollbar_policy: Gtk.PolicyType.AUTOMATIC,
         vscrollbar_policy: Gtk.PolicyType.NEVER,
@@ -204,8 +215,28 @@ export function createCardRow({cards}) {
     return scroller;
 }
 
-// A mouse wheel only turns vertically and the strip only scrolls sideways.
-// Touchpads send both axes and need no help.
+// The overlay scrollbar would cover the captions, so the strip grows by its
+// room only at a width where there is something to scroll.
+const CardStrip = GObject.registerClass(
+    {GTypeName: 'BetterTrayIconsCardStrip'},
+    class CardStrip extends Gtk.ScrolledWindow {
+        vfunc_get_request_mode() {
+            return Gtk.SizeRequestMode.HEIGHT_FOR_WIDTH;
+        }
+
+        vfunc_measure(orientation, forSize) {
+            const [min, nat] = super.vfunc_measure(orientation, forSize);
+            if (orientation === Gtk.Orientation.HORIZONTAL || forSize < 0)
+                return [min, nat, -1, -1];
+            const [contentMin] = this.child.measure(Gtk.Orientation.HORIZONTAL, -1);
+            const room = contentMin > forSize ? CARD_ROW_SCROLLBAR_ROOM_PX : 0;
+            return [min + room, nat + room, -1, -1];
+        }
+    });
+
+// A mouse wheel and a touchpad's vertical swipe scroll the strip sideways.
+// At the end it is moving towards, the event goes on to the page instead,
+// otherwise the strip would swallow the page scroll.
 function _scrollWheelSideways(scroller) {
     const controller = new Gtk.EventControllerScroll({
         flags: Gtk.EventControllerScrollFlags.VERTICAL,
@@ -213,100 +244,16 @@ function _scrollWheelSideways(scroller) {
     });
     controller.connect('scroll', (_controller, _dx, dy) => {
         const adjustment = scroller.hadjustment;
-        const canScroll = adjustment.upper > adjustment.page_size;
-        if (controller.get_unit() !== Gdk.ScrollUnit.WHEEL || !canScroll)
-            return false;
-        adjustment.value += dy * Math.pow(adjustment.page_size, WHEEL_STEP_EXPONENT);
-        return true;
+        const atStart = adjustment.value <= adjustment.lower;
+        const atEnd = adjustment.value >= adjustment.upper - adjustment.page_size;
+        const isPastEnd = (dy > 0 && atEnd) || (dy < 0 && atStart);
+        if (dy === 0 || isPastEnd)
+            return Gdk.EVENT_PROPAGATE;
+        const step = controller.get_unit() === Gdk.ScrollUnit.WHEEL
+            ? Math.pow(adjustment.page_size, WHEEL_STEP_EXPONENT)
+            : SURFACE_SCROLL_FACTOR;
+        adjustment.value += dy * step;
+        return Gdk.EVENT_STOP;
     });
     scroller.add_controller(controller);
-}
-
-// Gtk.FlowBox reflows too, but it wraps every child in a GtkFlowBoxChild
-// of its own.
-const CardGridLayout = GObject.registerClass(
-    {GTypeName: 'BetterTrayIconsCardGridLayout'},
-    class CardGridLayout extends Gtk.LayoutManager {
-        _init(minCardWidth, maxColumns) {
-            super._init();
-            this._minCardWidth = minCardWidth;
-            this._maxColumns = maxColumns;
-        }
-
-        vfunc_get_request_mode(_widget) {
-            return Gtk.SizeRequestMode.HEIGHT_FOR_WIDTH;
-        }
-
-        vfunc_measure(widget, orientation, forSize) {
-            const cards = _cardsOf(widget);
-            if (!cards.length)
-                return [0, 0, -1, -1];
-
-            if (orientation === Gtk.Orientation.HORIZONTAL) {
-                const min = Math.max(...cards.map(card => card.measure(orientation, -1)[0]));
-                const columns = this._columns(-1, cards.length);
-                return [min, this._minCardWidth * columns + CARD_GRID_GAP_PX * (columns - 1), -1, -1];
-            }
-
-            const columns = this._columns(forSize, cards.length);
-            const cardWidth = _cardWidthFor(forSize, columns);
-            let min = 0;
-            let nat = 0;
-            for (const row of _rowsOf(cards, columns)) {
-                const gap = min ? CARD_GRID_GAP_PX : 0;
-                min += gap + Math.max(...row.map(card => card.measure(orientation, cardWidth)[0]));
-                nat += gap + Math.max(...row.map(card => card.measure(orientation, cardWidth)[1]));
-            }
-            return [min, nat, -1, -1];
-        }
-
-        vfunc_allocate(widget, width, _height, _baseline) {
-            const cards = _cardsOf(widget);
-            const columns = this._columns(width, cards.length);
-            const cardWidth = _cardWidthFor(width, columns);
-            let y = 0;
-            for (const row of _rowsOf(cards, columns)) {
-                const height = Math.max(
-                    ...row.map(card => card.measure(Gtk.Orientation.VERTICAL, cardWidth)[1]));
-                _placeRow(row, cardWidth, height, y);
-                y += height + CARD_GRID_GAP_PX;
-            }
-        }
-
-        // forSize is -1 while GTK asks what the widget would like rather than
-        // what it is getting, and the answer is then the full spread.
-        _columns(width, count) {
-            const cap = Math.min(this._maxColumns, count);
-            if (width < 0)
-                return cap;
-            const fits = Math.floor((width + CARD_GRID_GAP_PX) /
-                (this._minCardWidth + CARD_GRID_GAP_PX));
-            return Math.max(1, Math.min(cap, fits));
-        }
-    });
-
-function _placeRow(row, cardWidth, height, y) {
-    row.forEach((card, column) => card.allocate(cardWidth, height, -1,
-        Gsk.Transform.new().translate(new Graphene.Point({
-            x: column * (cardWidth + CARD_GRID_GAP_PX),
-            y,
-        }))));
-}
-
-function _cardsOf(widget) {
-    const out = [];
-    for (let child = widget.get_first_child(); child; child = child.get_next_sibling())
-        out.push(child);
-    return out;
-}
-
-function _rowsOf(cards, columns) {
-    const rows = [];
-    for (let i = 0; i < cards.length; i += columns)
-        rows.push(cards.slice(i, i + columns));
-    return rows;
-}
-
-function _cardWidthFor(width, columns) {
-    return Math.max(1, Math.floor((width - CARD_GRID_GAP_PX * (columns - 1)) / columns));
 }

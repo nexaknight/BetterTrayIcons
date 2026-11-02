@@ -2,7 +2,7 @@ import Adw from 'gi://Adw';
 import GObject from 'gi://GObject';
 import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
-import {connectScoped} from '../../shared/lifecycle.js';
+import {watchKeys} from '../../shared/lifecycle.js';
 import {buildPrefsWidget} from '../components/page.js';
 import {addConfigRows} from '../components/row.js';
 import {createCappedBanner, pinDialogWidth} from '../components/dialog.js';
@@ -62,8 +62,6 @@ export default class ConfigDialog extends Adw.Dialog {
             });
         };
 
-        doubleKeys.forEach(key =>
-            connectScoped(this, this._settings, `changed::${key}`, update, 'closed'));
-        update();
+        watchKeys(this, this._settings, doubleKeys, update, 'closed');
     }
 }

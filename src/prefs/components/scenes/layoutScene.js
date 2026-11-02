@@ -3,6 +3,8 @@ import Gtk from 'gi://Gtk';
 import {ensurePrefsCss} from '../text.js';
 import {PREVIEW_SAMPLE_ICONS} from './sceneInk.js';
 
+const SCENE_HEIGHT_PX = 66;
+
 const THUMBNAIL_ICON_PX = 14;
 const THUMBNAIL_SPACING_PX = 6;
 const THUMBNAIL_COLUMNS = 2;
@@ -20,7 +22,9 @@ export function buildLayoutThumbnail(mode) {
             inner.attach(new Gtk.Image({icon_name: name, pixel_size: THUMBNAIL_ICON_PX}),
                 i % THUMBNAIL_COLUMNS, Math.floor(i / THUMBNAIL_COLUMNS), 1, 1));
     }
-    const popup = new Gtk.Box({css_classes: ['bti-thumbnail-popup'], halign: Gtk.Align.CENTER});
+    const popup = new Gtk.Box({css_classes: ['bti-thumbnail-popup'], halign: Gtk.Align.CENTER, valign: Gtk.Align.CENTER, vexpand: true});
     popup.append(inner);
-    return popup;
+    const scene = new Gtk.Box({height_request: SCENE_HEIGHT_PX});
+    scene.append(popup);
+    return scene;
 }

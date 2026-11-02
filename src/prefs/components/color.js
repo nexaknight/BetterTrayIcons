@@ -2,7 +2,7 @@ import Gtk from 'gi://Gtk';
 import Gdk from 'gi://Gdk';
 import Adw from 'gi://Adw';
 
-import {connectScoped} from '../../shared/lifecycle.js';
+import {connectScoped, watchKeys} from '../../shared/lifecycle.js';
 import {usesAccent} from '../../shared/accentColor.js';
 import {COLOR_VARIANT_KEY, colorKeyFor, lightTwin, splitKeyFor} from '../../shared/colorVariant.js';
 
@@ -54,8 +54,7 @@ export function editedColorUsesAccent(settings, key) {
 }
 
 export function watchColorKey(owner, settings, key, sync) {
-    [key, lightTwin(key), COLOR_VARIANT_KEY, splitKeyFor(key)]
-        .forEach(watched => connectScoped(owner, settings, `changed::${watched}`, sync));
+    watchKeys(owner, settings, [key, lightTwin(key), COLOR_VARIANT_KEY, splitKeyFor(key)], sync);
 }
 
 export function createColorButton(settings, key, dialogTitle) {

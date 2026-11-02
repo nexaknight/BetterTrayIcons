@@ -12,18 +12,10 @@ const WRAP_BOX_ALIGN_END = 1;
 // an appended badge lands right of it. Pulling the control out and back is the
 // only way around that without touching the row's private children.
 export function attachBadge(row, badges) {
-    const entries = [badges].flat().filter(Boolean);
-    if (!entries.length)
+    if (![badges].flat().some(Boolean))
         return null;
 
-    const box = new Adw.WrapBox({
-        child_spacing: BADGE_GAP_PX,
-        line_spacing: BADGE_GAP_PX,
-        align: WRAP_BOX_ALIGN_END,
-        valign: Gtk.Align.CENTER,
-    });
-    for (const entry of entries)
-        box.append(createBadge(entry));
+    const box = createBadgeBox(badges);
 
     const actionWidget = row.get_activatable_widget?.();
     if (actionWidget) {
@@ -37,15 +29,33 @@ export function attachBadge(row, badges) {
     return box;
 }
 
-function createBadge({text, variant = 'warning'}) {
+export function createBadgeBox(badges) {
+    const box = new Adw.WrapBox({
+        child_spacing: BADGE_GAP_PX,
+        line_spacing: BADGE_GAP_PX,
+        align: WRAP_BOX_ALIGN_END,
+        valign: Gtk.Align.CENTER,
+    });
+    setBadges(box, badges);
+    return box;
+}
+
+export function setBadges(box, badges) {
+    box.remove_all();
+    for (const entry of [badges].flat().filter(Boolean))
+        box.append(createBadge(entry));
+}
+
+export function createBadge({text, variant}) {
     ensurePrefsCss();
     const label = new Gtk.Label({
         label: text,
         valign: Gtk.Align.CENTER,
     });
-    const classes = ['bti-badge'];
-    if (variant !== 'warning')
-        classes.push(variant);
-    label.set_css_classes(classes);
+    label.set_css_classes(badgeCssClasses(variant));
     return label;
+}
+
+export function badgeCssClasses(variant = 'warning') {
+    return variant === 'warning' ? ['bti-badge'] : ['bti-badge', variant];
 }

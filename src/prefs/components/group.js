@@ -5,7 +5,7 @@ import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions
 
 import {BORDER_RADIUS_MAX_PX, BORDER_WIDTH_MAX_PX} from '../../const.js';
 import {createLinkToggle} from './button.js';
-import {createSpinRow, createSwitchRow} from './row.js';
+import {createRangeRow, createSwitchRow, bindGroupsVisible} from './row.js';
 import {spacingLinkKey} from './spacing.js';
 import {ensurePrefsCss} from './text.js';
 
@@ -16,6 +16,8 @@ const SPACING_SIDE_SLOTS = Object.freeze({
 
 const SPACING_MAX_PX = 50;
 
+const BLUR_MAX = 100;
+
 // AdwClamp caps page content at 600sp whatever the window width, leaving the
 // group below about 576sp. Without these trims the two spacing cards wrap in a
 // window with plenty of visible room to spare.
@@ -24,13 +26,13 @@ const SPACING_CARD_GAP_PX = 8;
 
 export function createShapeGroup({settings, radiusKey, borderWidthKey}) {
     const group = new Adw.PreferencesGroup({title: _('Shape')});
-    group.add(createSpinRow({
+    group.add(createRangeRow({
         title: _('Corner Radius (px)'),
         settings,
         key: radiusKey,
         max: BORDER_RADIUS_MAX_PX,
     }));
-    group.add(createSpinRow({
+    group.add(createRangeRow({
         title: _('Border Width (px)'),
         settings,
         key: borderWidthKey,
@@ -39,14 +41,29 @@ export function createShapeGroup({settings, radiusKey, borderWidthKey}) {
     return group;
 }
 
-export function createCustomStyleSwitchGroup({settings, key}) {
+export function createCustomStyleSwitchGroup({settings, key, blurKey, blurVisible = null}) {
     const group = new Adw.PreferencesGroup({title: _('Style')});
     group.add(createSwitchRow({
         title: _('Custom Style'),
-        subtitle: _('Reveal colors, padding and margin controls below.'),
+        subtitle: _('Reveal the style controls below.'),
         settings,
         key,
     }));
+
+    const blurRow = createRangeRow({
+        title: _('Background Blur'),
+        subtitle: _('Blurs what lies behind it.'),
+        settings,
+        key: blurKey,
+        max: BLUR_MAX,
+    });
+    if (blurVisible) {
+        bindGroupsVisible(group, settings, [blurRow],
+            () => settings.get_boolean(key) && blurVisible.test(), key, ...blurVisible.keys);
+    } else {
+        settings.bind(key, blurRow, 'visible', Gio.SettingsBindFlags.GET);
+    }
+    group.add(blurRow);
     return group;
 }
 

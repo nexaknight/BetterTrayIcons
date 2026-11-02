@@ -5,6 +5,7 @@ import Gtk from 'gi://Gtk';
 import Adw from 'gi://Adw';
 import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
+import {connectScoped} from '../../shared/lifecycle.js';
 import {createActionButton} from './button.js';
 
 const PREFS_SIDEBAR_BREAKPOINT = 'max-width: 700sp';
@@ -141,6 +142,14 @@ function _createPageHeaderActions(page) {
     const box = new Gtk.Box({spacing: HEADER_ACTION_GAP_PX});
     widgets.forEach(widget => box.append(widget));
     return box;
+}
+
+// The sidebar collapses at the narrow breakpoint, so its state is the one
+// switch everything that adapts to a narrow window follows.
+export function bindNarrowWindow(window, owner, onChange) {
+    const {splitView} = _shells.get(window);
+    connectScoped(owner, splitView, 'notify::collapsed', () => onChange(splitView.collapsed));
+    return splitView.collapsed;
 }
 
 export function pushSubpage(window, page) {

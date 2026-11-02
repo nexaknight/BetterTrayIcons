@@ -5,6 +5,7 @@ import Adw from 'gi://Adw';
 import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
 import {error} from '../../shared/logging.js';
+import {bindNarrowWindow} from './sidebar.js';
 
 export const ENTRY_DEBOUNCE_MS = 300;
 
@@ -38,7 +39,7 @@ export function showConfirmationDialog(parent, {title, message, confirmLabel, de
     dialog.present(parent);
 }
 
-export function openFileChooser(parent, {title, action = 'open', acceptLabel = null, currentName = null, filters}, callback) {
+export function openFileChooser(parent, {title, action = 'open', acceptLabel = null, currentName = null, filters, onDismiss = null}, callback) {
     const dialog = new Gtk.FileDialog({
         title,
         accept_label: acceptLabel,
@@ -59,6 +60,7 @@ export function openFileChooser(parent, {title, action = 'open', acceptLabel = n
         } catch (e) {
             if (!e.matches?.(Gtk.DialogError, Gtk.DialogError.DISMISSED))
                 error('FileDialog failed', e);
+            onDismiss?.();
         }
     };
 
@@ -100,7 +102,7 @@ const NaturalWidthLayout = GObject.registerClass({GTypeName: 'BetterTrayIconsNat
                 nat = Math.max(nat, childNat);
             }
             if (orientation === Gtk.Orientation.HORIZONTAL)
-                nat = Math.max(nat, widget.naturalWidth);
+                nat = Math.max(nat, widget.isFullWidth ? widget.get_root().get_width() : widget.naturalWidth);
             return [min, nat, -1, -1];
         }
 
@@ -111,11 +113,21 @@ const NaturalWidthLayout = GObject.registerClass({GTypeName: 'BetterTrayIconsNat
     });
 
 // Floating keeps the dialog vertically centered at every window size,
-// the automatic mode would dock it to the bottom as a sheet instead.
+// the automatic mode would dock it to the bottom as a sheet instead. In a
+// narrow window the dialog asks for the whole width so its rows don't squeeze.
 export function pinDialogWidth(dialog, width) {
     dialog.presentation_mode = Adw.DialogPresentationMode.FLOATING;
     const bin = new Adw.Bin({layout_manager: new NaturalWidthLayout()});
     bin.naturalWidth = width;
+    bin.isFullWidth = false;
+    const setFullWidth = isNarrow => {
+        bin.isFullWidth = isNarrow;
+        bin.queue_resize();
+    };
+    const mapId = bin.connect('map', () => {
+        bin.disconnect(mapId);
+        setFullWidth(bindNarrowWindow(bin.get_root(), bin, setFullWidth));
+    });
     const child = dialog.child;
     dialog.child = null;
     bin.child = child;
@@ -153,11 +165,13 @@ export function showTextDialog(parent, {title, content}) {
     present(parent);
 }
 
-export function buildGroupDialog({title, width, groupTitle = ''}) {
-    const {toolbarView, page} = buildDialogShell();
-
-    const group = new Adw.PreferencesGroup({title: groupTitle});
-    page.add(group);
+// With tabs the header shows a switcher where the title was, and each tab
+// gets a page and a group of its own, in the order of the labels.
+export function buildGroupDialog({title, width, groupTitle = '', tabs = []}) {
+    const {toolbarView, headerBar, page} = buildDialogShell();
+    const groups = tabs.length
+        ? _addTabs(toolbarView, headerBar, tabs)
+        : [_addGroup(page, groupTitle)];
 
     const dialog = new Adw.Dialog({
         title,
@@ -166,7 +180,29 @@ export function buildGroupDialog({title, width, groupTitle = ''}) {
     });
     pinDialogWidth(dialog, width);
 
-    return {group, present: parent => dialog.present(parent)};
+    return {group: groups[0], groups, present: parent => dialog.present(parent)};
+}
+
+function _addGroup(page, title) {
+    const group = new Adw.PreferencesGroup({title});
+    page.add(group);
+    return group;
+}
+
+function _addTabs(toolbarView, headerBar, labels) {
+    const stack = new Adw.ViewStack();
+    const switcher = new Adw.ToggleGroup();
+    const groups = labels.map((label, i) => {
+        const name = `tab-${i}`;
+        const page = new Adw.PreferencesPage();
+        stack.add_named(page, name);
+        switcher.add(new Adw.Toggle({name, label}));
+        return _addGroup(page, '');
+    });
+    switcher.bind_property('active-name', stack, 'visible-child-name', GObject.BindingFlags.SYNC_CREATE);
+    headerBar.title_widget = switcher;
+    toolbarView.content = stack;
+    return groups;
 }
 
 export function createCappedBanner(title, props = {}) {

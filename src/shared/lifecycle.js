@@ -74,3 +74,8 @@ export function connectScoped(target, source, signal, callback, event = null) {
         target.connect(event, () => source.disconnect(id));
     return id;
 }
+
+export function watchKeys(owner, settings, keys, sync, event = null) {
+    keys.forEach(key => connectScoped(owner, settings, `changed::${key}`, sync, event));
+    sync();
+}

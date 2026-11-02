@@ -1,6 +1,8 @@
 import Gtk from 'gi://Gtk';
 import Gdk from 'gi://Gdk';
 import Adw from 'gi://Adw';
+import Graphene from 'gi://Graphene';
+import Gsk from 'gi://Gsk';
 
 import {usesAccent} from '../../../shared/accentColor.js';
 import {boxGeometryCss, borderShorthand} from '../../../shared/boxStyle.js';
@@ -9,6 +11,7 @@ import {
     DEFAULT_PILL_RADIUS_PX, DEFAULT_ICON_PADDING_PX, ICON_MARGIN_PX,
 } from '../../../const.js';
 import {editedColorKey, editsLightSet} from '../color.js';
+import {createBox} from '../text.js';
 
 export const PREVIEW_SAMPLE_ICONS = Object.freeze([
     'bti-sample-chat-symbolic',
@@ -21,8 +24,31 @@ export const PREVIEW_SAMPLE_ICONS = Object.freeze([
     'bti-sample-terminal-symbolic',
 ]);
 
+// The drawn screen with the shell's bar along its top, shared by the panel and
+// Quick Settings scenes.
+export const SCENE_SCREEN_HEIGHT_PX = 112;
+export const SCENE_BAR_HEIGHT_PX = 16;
+const SCENE_PILL_HEIGHT_PX = 5;
+
 // The stock popup in stylesheet.css wears the same shadow, keep the two in step.
 const PREVIEW_ELEMENT_SHADOW_CSS = 'box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);';
+
+export function createSceneDot(cssClass, size) {
+    return createBox({cssClasses: [cssClass], width_request: size, height_request: size});
+}
+
+export function createScenePill(props = {}) {
+    // Centered, or a taller sibling such as the drawer frame stretches it
+    return createBox({cssClasses: ['bti-scene-pill'], height_request: SCENE_PILL_HEIGHT_PX, valign: 'center', ...props});
+}
+
+export function edgeChildren(widget) {
+    return [widget.get_first_child(), widget.get_last_child()];
+}
+
+export function translateTo(x, y) {
+    return Gsk.Transform.new().translate(new Graphene.Point({x, y}));
+}
 
 export function createSampleIcon(iconName, size, scopeClass) {
     return new Gtk.Image({icon_name: iconName, pixel_size: size, css_classes: [`${scopeClass}-icon`]});

@@ -14,23 +14,77 @@
     color: @accent_color;
 }
 
-.bti-choice-card {
+/* Every grid row is exactly ROW_HEIGHT_PX in iconEmojiPicker.js, the scroll
+   position maps to a row by that height alone. */
+.bti-picker-grid,
+.bti-picker-grid > child,
+.bti-picker-grid > child:hover,
+.bti-picker-grid > child:focus-visible {
     padding: 0;
     min-height: 0;
-    border-radius: 14px;
-    border: 1.5px solid alpha(currentColor, 0.11);
-    background-color: @card_bg_color;
-    background-image: none;
+    background: none;
+    outline: none;
+    box-shadow: none;
 }
 
-.bti-choice-card:hover {
-    border-color: alpha(currentColor, 0.22);
+.bti-picker-cell {
+    padding: 0;
+    min-width: 0;
+    min-height: 0;
 }
 
-/* Picking recolours the border the card already wears. A thicker one here would
-   shove the scene inside it over by a pixel on every pick. */
-.bti-choice-card:checked {
+/* About 22px on the 11pt base, a glyph as tall as the 24px icons. */
+.bti-picker-emoji {
+    font-size: 1.5em;
+}
+
+.bti-picker-footer {
+    padding-top: 4px;
+}
+
+.bti-picker-custom {
+    padding: 12px;
+}
+
+.bti-markdown-code {
+    border-radius: 8px;
+    background-color: alpha(@window_fg_color, 0.06);
+}
+
+.bti-markdown-quote {
+    padding-left: 12px;
+    border-left: 2px solid alpha(@window_fg_color, 0.2);
+}
+
+/* The toggle only holds the stage, which wears the card look. Hover sits on
+   the whole card so pointing at the title lights the ring too. */
+.bti-choice-card > button {
+    padding: 0;
+    min-height: 0;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    background: none;
+}
+
+.bti-choice-card .bti-card-stage {
+    border: 1.5px solid alpha(@window_fg_color, 0.11);
+    background-clip: padding-box;
+}
+
+.bti-choice-card:hover .bti-card-stage {
+    border-color: alpha(@window_fg_color, 0.22);
+}
+
+/* Picking recolors the border the stage already wears. A thicker one here
+   would shove the scene inside it over by a pixel on every pick. */
+.bti-choice-card > button:checked .bti-card-stage {
     border-color: @accent_bg_color;
+}
+
+.bti-choice-card > button:focus-visible .bti-card-stage {
+    outline: 2px solid alpha(@accent_color, 0.5);
+    outline-offset: 2px;
 }
 
 /* The ground every scene stands on, the picker cards included. Scenes paint in
@@ -71,7 +125,7 @@
 }
 
 .bti-card-stage {
-    border-radius: 13px 13px 0 0;
+    border-radius: 14px;
     padding: 12px;
     color: white;
 }
@@ -80,16 +134,17 @@
     padding: 0;
 }
 
-.bti-card-footer {
-    padding: 12px 14px;
-}
-
 /* Darker than the stage on purpose, the picture is a lit desktop with the
    shell's bar over it. */
+.bti-scene-bar,
+.bti-scene-qs,
+.bti-scene-popup {
+    background: #23252f;
+}
+
 .bti-scene-bar {
     padding: 0 10px;
     border-radius: 13px 13px 0 0;
-    background: #23252f;
     border-top: 1px solid alpha(currentColor, 0.08);
     border-bottom: 1px solid alpha(currentColor, 0.08);
 }
@@ -146,4 +201,133 @@
 .bti-spacing-plain {
     border: 1px solid alpha(currentColor, 0.25);
     border-radius: 8px;
+}
+
+.bti-scene-qs,
+.bti-scene-popup {
+    border: 1px solid alpha(currentColor, 0.08);
+}
+
+.bti-scene-qs {
+    padding: 5px;
+    border-radius: 8px;
+}
+
+.bti-scene-qs-button,
+.bti-scene-qs-slider {
+    border-radius: 99px;
+    background: alpha(currentColor, 0.3);
+}
+
+.bti-scene-qs-tile {
+    border-radius: 99px;
+    background: alpha(currentColor, 0.18);
+}
+
+.bti-scene-qs-tile.on {
+    background: alpha(@accent_bg_color, 0.7);
+}
+
+.bti-scene-qs-row {
+    border-radius: 3px;
+    background: alpha(currentColor, 0.12);
+}
+
+.bti-scene-popup {
+    padding: 4px;
+    border-radius: 6px;
+}
+
+/* Dotted so the drawn drawer reads as the part that folds away */
+.bti-scene-drawer {
+    padding: 1px 0;
+    border-radius: 99px;
+    border: 1px dotted @accent_bg_color;
+}
+
+.bti-scene-qs-inline {
+    margin-left: 6px;
+    padding: 3px;
+    border-radius: 3px;
+    background: alpha(currentColor, 0.08);
+}
+
+/* A toggle action that is on. At 0.3 the untouched icon keeps 7.9:1 or more on
+   all nine system accents, light and dark, and hover and press still show
+   their own background. */
+button.flat.bti-action-active:not(:hover):not(:active) {
+    background-color: alpha(@accent_bg_color, 0.3);
+}
+
+/* On a wrap row's title line the stock 34px circle would push the subtitle
+   down, 24px keeps the line as tall as a plain title. */
+menubutton.bti-help-compact > button {
+    min-width: 24px;
+    min-height: 24px;
+    padding: 0;
+}
+
+/* Item metrics of the stock popover.menu, for menus built from our own widgets. */
+.bti-menu-list {
+    padding: 6px;
+}
+
+.bti-menu-list > button,
+.bti-menu-list > row {
+    min-height: 32px;
+    padding: 0 12px;
+    border-radius: 9px;
+    font-weight: normal;
+}
+
+/* A badge pill carries its own padding, the width and text inset of a menu
+   item would leave it floating in a wide row. */
+popover.menu.bti-suggestions > contents {
+    min-width: 0;
+}
+
+.bti-menu-list.bti-suggestions > row {
+    padding: 0 4px;
+    margin: 0;
+}
+
+.bti-menu-list > button:hover,
+.bti-menu-list > row:hover,
+.bti-menu-list > row:selected {
+    background-color: alpha(currentColor, 0.1);
+}
+
+.bti-menu-list > button:active,
+.bti-menu-list > row:active {
+    background-color: alpha(currentColor, 0.19);
+}
+
+/* One field holds the chips and the text, so it draws the entry look and the
+   focus ring the text would draw inside a stock entry. */
+.bti-token-search {
+    min-height: 36px;
+    padding: 0 12px;
+    border-radius: 9px;
+    background-color: alpha(currentColor, 0.1);
+    outline: 0 solid transparent;
+    outline-offset: 4px;
+}
+
+.bti-token-search:focus-within {
+    outline: 2px solid alpha(@accent_color, 0.5);
+    outline-offset: -2px;
+}
+
+.bti-token-search placeholder {
+    opacity: var(--dim-opacity);
+}
+
+.bti-chip {
+    padding: 0 0 0 8px;
+}
+
+.bti-chip > button {
+    min-width: 20px;
+    min-height: 20px;
+    padding: 0;
 }

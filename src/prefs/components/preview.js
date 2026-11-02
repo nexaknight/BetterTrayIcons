@@ -4,7 +4,7 @@ import Adw from 'gi://Adw';
 import GObject from 'gi://GObject';
 import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
-import {connectScoped} from '../../shared/lifecycle.js';
+import {connectScoped, watchKeys} from '../../shared/lifecycle.js';
 import {COLOR_VARIANT_KEY} from '../../shared/colorVariant.js';
 import {bindGuideOverlay, createGuideToggle} from './guide.js';
 import {editsLightFor} from './scenes/sceneInk.js';
@@ -114,9 +114,7 @@ export function createPreviewGroup({settings, watch, render, splitKey, stageHeig
     };
 
     connectScoped(group, Adw.StyleManager.get_default(), 'notify::accent-color', apply);
-    [...watch, COLOR_VARIANT_KEY]
-        .forEach(key => connectScoped(group, settings, `changed::${key}`, apply));
-    apply();
+    watchKeys(group, settings, [...watch, COLOR_VARIANT_KEY], apply);
 
     return group;
 }

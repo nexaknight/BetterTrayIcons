@@ -2,9 +2,18 @@ import Gio from 'gi://Gio';
 import Gtk from 'gi://Gtk';
 import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
-import {connectScoped} from '../../shared/lifecycle.js';
+import {watchKeys} from '../../shared/lifecycle.js';
 import {GEAR_ICON_NAME} from './icon.js';
-import {ALIGN_PROPS, alignFor} from './text.js';
+import {ALIGN_PROPS, alignFor, ensurePrefsCss} from './text.js';
+
+const ACTIVE_ACTION_CLASS = 'bti-action-active';
+
+const MENU_ITEM_GAP_PX = 8;
+
+const HELP_ICON_NAME = 'bti-help-symbolic';
+const HELP_COMPACT_CLASS = 'bti-help-compact';
+const HELP_TEXT_MAX_CHARS = 40;
+const HELP_TEXT_MARGIN_PX = 6;
 
 export function createButton({label, iconName, cssClasses = [], onClick = null, ...props}) {
     for (const key of ALIGN_PROPS) {
@@ -55,19 +64,54 @@ export function createActionButton({
     if (!activeIconName)
         return button;
 
+    ensurePrefsCss();
     const sync = () => {
         const active = isActive();
         button.icon_name = active ? activeIconName : iconName;
         button.tooltip_text = active ? activeTooltip : tooltip;
         button.update_property([Gtk.AccessibleProperty.LABEL], [button.tooltip_text]);
+        if (active)
+            button.add_css_class(ACTIVE_ACTION_CLASS);
+        else
+            button.remove_css_class(ACTIVE_ACTION_CLASS);
     };
     button.connect('clicked', () => {
         onToggle();
         sync();
     });
-    if (settings)
-        connectScoped(button, settings, `changed::${key}`, sync);
-    sync();
+    watchKeys(button, settings, [key], sync);
+    return button;
+}
+
+// A Gtk.PopoverMenu built from a Gio.Menu drops item icons, so the items are
+// plain buttons in a popover that wears the stock menu class.
+export function createMenuButton({iconName, tooltip, items}) {
+    ensurePrefsCss();
+    const list = new Gtk.Box({orientation: Gtk.Orientation.VERTICAL, css_classes: ['bti-menu-list']});
+    const popover = new Gtk.Popover({child: list, css_classes: ['menu']});
+    for (const item of items) {
+        const content = new Gtk.Box({spacing: MENU_ITEM_GAP_PX});
+        content.append(new Gtk.Image({icon_name: item.iconName}));
+        content.append(new Gtk.Label({label: item.label}));
+        list.append(createButton({
+            child: content,
+            cssClasses: ['flat', 'bti-menu-item'],
+            valign: 'fill',
+            onClick: () => {
+                popover.popdown();
+                item.onActivate();
+            },
+        }));
+    }
+
+    const button = new Gtk.MenuButton({
+        icon_name: iconName,
+        popover,
+        tooltip_text: tooltip,
+        valign: Gtk.Align.CENTER,
+        css_classes: ['flat', 'circular'],
+    });
+    button.update_property([Gtk.AccessibleProperty.LABEL], [tooltip]);
     return button;
 }
 
@@ -86,6 +130,30 @@ export function createBoundToggleButton(settings, key, {iconName = null, tooltip
         button.tooltip_text = tooltip;
 
     settings.bind(key, button, 'active', Gio.SettingsBindFlags.DEFAULT);
+    return button;
+}
+
+// A popover and no tooltip, a tooltip never shows on touch and would cover
+// the popover with the same text.
+export function createHelpButton(text, {compact = false} = {}) {
+    const label = new Gtk.Label({
+        label: text,
+        wrap: true,
+        max_width_chars: HELP_TEXT_MAX_CHARS,
+        xalign: 0,
+        margin_top: HELP_TEXT_MARGIN_PX,
+        margin_bottom: HELP_TEXT_MARGIN_PX,
+        margin_start: HELP_TEXT_MARGIN_PX,
+        margin_end: HELP_TEXT_MARGIN_PX,
+    });
+    const button = new Gtk.MenuButton({
+        icon_name: HELP_ICON_NAME,
+        popover: new Gtk.Popover({child: label}),
+        has_frame: false,
+        css_classes: compact ? ['circular', HELP_COMPACT_CLASS] : ['circular'],
+        valign: Gtk.Align.CENTER,
+    });
+    button.update_property([Gtk.AccessibleProperty.LABEL], [_('Help')]);
     return button;
 }
 

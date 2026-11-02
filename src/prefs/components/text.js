@@ -27,6 +27,13 @@ export function createBox(params = {}) {
     return box;
 }
 
+export function getChildren(widget) {
+    const children = [];
+    for (let child = widget.get_first_child(); child; child = child.get_next_sibling())
+        children.push(child);
+    return children;
+}
+
 export function clearChildren(container) {
     let child = container.get_first_child();
     while (child) {

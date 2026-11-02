@@ -17,6 +17,8 @@ promisify(Gio.File.prototype,
 promisify(Gio.FileEnumerator.prototype, 'next_files_async', 'close_async');
 promisify(Gio.OutputStream.prototype, 'splice_async');
 promisify(GdkPixbuf.Pixbuf, 'new_from_stream_async');
+// Both stream loaders share one finish function.
+Gio._promisify(GdkPixbuf.Pixbuf, 'new_from_stream_at_scale_async', 'new_from_stream_finish');
 
 export const isCancelledError = e => !!e?.matches?.(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED);
 
@@ -64,6 +66,16 @@ export async function fileExists(path, cancellable = null) {
 export async function readFileBytes(file, cancellable = null) {
     const [contents] = await file.load_contents_async(cancellable);
     return contents;
+}
+
+// Decoded off the main thread, scaled inside the loader rather than after.
+export async function readPixbufAtSize(file, size, cancellable = null) {
+    const stream = await file.read_async(GLib.PRIORITY_LOW, cancellable);
+    try {
+        return await GdkPixbuf.Pixbuf.new_from_stream_at_scale_async(stream, size, size, true, cancellable);
+    } finally {
+        stream.close_async(GLib.PRIORITY_LOW, null, null);
+    }
 }
 
 export async function readFileText(file, cancellable = null) {
