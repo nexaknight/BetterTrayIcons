@@ -746,6 +746,12 @@
             <summary>Maximum number of rotated sync backups to keep</summary>
         </key>
 
+        <!-- Icon and emoji picker -->
+        <key name="recent-emojis" type="as">
+            <default>[]</default>
+            <summary>Emojis picked lately, most recent first</summary>
+        </key>
+
     </schema>
 
 </schemalist>

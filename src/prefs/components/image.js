@@ -2,10 +2,52 @@ import Gtk from 'gi://Gtk';
 import Gdk from 'gi://Gdk';
 import Adw from 'gi://Adw';
 import GdkPixbuf from 'gi://GdkPixbuf';
+import Gio from 'gi://Gio';
+import System from 'system';
 
 import {error} from '../../shared/logging.js';
+import {readPixbufAtSize} from '../../shared/asyncIo.js';
 import {connectScoped} from '../../shared/lifecycle.js';
 import {withAlign} from './text.js';
+
+// glycin decodes in its sandboxed loader process and answers asynchronously.
+// gdk-pixbuf's stream loader runs the same decode on the main loop when it
+// closes, so it is only the fallback for a system without glycin.
+const Gly = await import('gi://Gly?version=2').then(module => module.default).catch(() => null);
+const GlyGtk4 = Gly ? await import('gi://GlyGtk4?version=2').then(module => module.default).catch(() => null) : null;
+if (GlyGtk4) {
+    Gio._promisify(Gly.Loader.prototype, 'load_async', 'load_finish');
+    Gio._promisify(Gly.Image.prototype, 'get_specific_frame_async', 'get_specific_frame_finish');
+}
+
+const _frameRequests = new Map();
+
+// glycin answers no more requests once a few thousand of its images are
+// alive, and an image only goes when the garbage collector frees its
+// wrapper. That wrapper is too small to make GJS collect on its own.
+const LOADS_PER_COLLECTION = 500;
+let _loadsSinceCollection = 0;
+
+function _frameRequest(size) {
+    if (!_frameRequests.has(size)) {
+        const request = new Gly.FrameRequest();
+        request.set_scale(size, size);
+        _frameRequests.set(size, request);
+    }
+    return _frameRequests.get(size);
+}
+
+export async function readIconTexture(path, size, cancellable = null) {
+    const file = Gio.File.new_for_path(path);
+    if (!GlyGtk4)
+        return Gdk.Texture.new_for_pixbuf(await readPixbufAtSize(file, size, cancellable));
+    if (++_loadsSinceCollection >= LOADS_PER_COLLECTION) {
+        _loadsSinceCollection = 0;
+        System.gc();
+    }
+    const image = await Gly.Loader.new(file).load_async(cancellable);
+    return GlyGtk4.frame_get_texture(await image.get_specific_frame_async(_frameRequest(size), cancellable));
+}
 
 export function createPicture(params = {}) {
     const {halign, valign, ...props} = params;

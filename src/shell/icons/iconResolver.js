@@ -6,6 +6,7 @@ import Shell from 'gi://Shell';
 
 import {
     resolveIcon,
+    emojiText,
     findIconInThemeAsync,
     buildSymbolicCandidates,
     orderThemedNames,
@@ -188,11 +189,11 @@ async function _resolveIcon(proxy, settings, appId, lastPixmapHash, status, dete
         }
         mapped ??= findStateIconEntry(stateIcons, stateNameOf(detectedName))?.[1];
         if (mapped)
-            return {...await _configuredIconAsync(mapped, settings, tint), detected, badge};
+            return {...await _configuredIconAsync(mapped, settings, tint), detected, badge, shownIcon: mapped};
     }
 
     if (customIcon && (!hasAlert || isAlertCovered))
-        return {...await _configuredIconAsync(customIcon, settings, tint), detected, badge};
+        return {...await _configuredIconAsync(customIcon, settings, tint), detected, badge, shownIcon: customIcon};
 
     // Qt serves showMessage's custom icon as an attention pixmap while the calm
     // IconName stays set, so the name has to yield or the cue never shows.
@@ -218,7 +219,7 @@ async function _resolveIcon(proxy, settings, appId, lastPixmapHash, status, dete
         const file = Gio.File.new_for_path(path);
         _snapshotIconToCache(settings, appId, file, generation).catch(() => {});
         const tinted = await _tinted(path, settings, tint);
-        return {gicon: tinted ?? new Gio.FileIcon({file}), iconName: null, detected, badge};
+        return {gicon: tinted ?? new Gio.FileIcon({file}), iconName: null, detected, badge, shownIcon: path};
     };
 
     const isAbsolutePath = !!iconName && iconName.startsWith('/');
@@ -288,12 +289,12 @@ async function _resolveIcon(proxy, settings, appId, lastPixmapHash, status, dete
         const file = appIcon.get_file?.();
         if (file)
             _snapshotIconToCache(settings, appId, file, generation).catch(() => {});
-        return {gicon: appIcon, iconName: null, detected, badge};
+        return {gicon: appIcon, iconName: null, detected, badge, shownIcon: file?.get_path() ?? appIcon.get_names?.()[0]};
     }
 
     warnOnce(`no-icon:${appId ?? pid}`,
         `Nothing renders for '${appId ?? pid}': IconName='${detectedName ?? ''}' IconThemePath='${iconThemePath ?? ''}', showing image-missing`);
-    return {gicon: null, iconName: 'image-missing', detected, badge};
+    return {gicon: null, iconName: 'image-missing', detected, badge, shownIcon: 'image-missing'};
 }
 
 // Seeding takes whatever is on screen, so an app that boots into its unread
@@ -405,6 +406,7 @@ function _themedIconFromName(iconName, settings, requireInTheme = true, appId = 
         gicon: new Gio.ThemedIcon({names, use_default_fallbacks: true}),
         iconName: null,
         themeFile,
+        shownIcon: names[0],
     };
 }
 
@@ -419,7 +421,7 @@ function _dropCachedIcon(settings, appId, map) {
 
 async function _tintedThemed(themed, settings, tint) {
     const tinted = await _tinted(themed.themeFile, settings, tint);
-    return {gicon: tinted ?? themed.gicon, iconName: null};
+    return {gicon: tinted ?? themed.gicon, iconName: null, shownIcon: themed.shownIcon};
 }
 
 function _tinted(path, settings, tint) {
@@ -439,6 +441,13 @@ async function _configuredIconAsync(value, settings, tint = null) {
 
 export function configuredIcon(value, settings, exists = null) {
     const resolved = resolveIcon({custom_icon: value});
+
+    if (resolved.type === 'emoji') {
+        const emoji = emojiText(resolved.value);
+        return emoji
+            ? {gicon: null, iconName: null, emoji}
+            : {gicon: null, iconName: 'image-missing'};
+    }
 
     if (resolved.type === 'file') {
         const file = Gio.File.new_for_path(resolved.value);

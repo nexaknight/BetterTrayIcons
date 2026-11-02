@@ -20,7 +20,7 @@ src/prefs/components/button.js
 src/prefs/components/dialog.js
 src/prefs/components/group.js
 src/prefs/components/page.js
-src/prefs/components/picker.js
+src/prefs/components/iconEmojiPicker.js
 src/prefs/components/preview.js
 src/prefs/components/row.js
 src/prefs/components/search.js

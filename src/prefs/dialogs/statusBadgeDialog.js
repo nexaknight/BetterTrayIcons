@@ -13,7 +13,8 @@ import {createCappedBanner, buildDialogShell, pinDialogWidth, buildGroupDialog} 
 import {createColorSwatch} from '../components/color.js';
 import {applyIconPreview, NEXT_ICON_NAME} from '../components/icon.js';
 import {createActionRow, createExpanderSection} from '../components/row.js';
-import IconPickerDialog from '../components/picker.js';
+import IconEmojiPicker from '../components/iconEmojiPicker.js';
+import {setIconSubtitle} from '../components/emoji.js';
 import {BADGE_POSITIONS, BADGE_DEFAULT_COLOR, BADGE_DEFAULT_TEXT_COLOR} from '../../const.js';
 
 const STATUS_BADGE_DIALOG_WIDTH_PX = 480;
@@ -275,8 +276,10 @@ export default class StatusBadgeDialog extends Adw.Dialog {
         const rows = [this._buildStateRow(ATTENTION_STATE_KEY)];
         if (this._addStateEntryRow)
             rows.push(this._addStateEntryRow);
-        for (const name of this._listStateNames())
-            rows.push(this._buildStateRow(name));
+        const names = this._listStateNames();
+        const stateRows = names.map(name => this._buildStateRow(name));
+        this._stateRows = new Map(names.map((name, i) => [name, stateRows[i]]));
+        rows.push(...stateRows);
 
         this._stateSection.setRows(rows);
     }
@@ -337,31 +340,29 @@ export default class StatusBadgeDialog extends Adw.Dialog {
             : _('Automatic');
         const row = createActionRow({
             title: isAttention ? _('Attention') : stateKey,
-            subtitle: mapped ?? fallbackSubtitle,
             prefixWidget: preview,
             suffixWidgets,
             suffixIcon: NEXT_ICON_NAME,
-            onActivate: () => this._openStatePicker(stateKey),
+            onActivate: () => this._openStatePicker(stateKey, row),
             // A configured state is known even if its name fell out of the
             // seen window, so don't badge it as unseen.
             badge: !isObserved && !mapped ? {text: _('Not seen yet')} : null,
         });
 
+        setIconSubtitle(row, mapped, fallbackSubtitle);
+
         return row;
     }
 
-    _openStatePicker(stateKey) {
+    _openStatePicker(stateKey, anchor) {
         const current = findStateIconEntry(this._data.state_icons, stateKey)?.[1];
         const fallback = stateKey === ATTENTION_STATE_KEY ? null : stateKey;
 
-        const picker = new IconPickerDialog(
-            this._settings,
-            null,
-            [],
-            selectedIcon => this._setStateIcon(stateKey, selectedIcon),
-            current ?? fallback
-        );
-        picker.present(this);
+        new IconEmojiPicker({
+            settings: this._settings,
+            current: current ?? fallback,
+            onSelect: selectedIcon => this._setStateIcon(stateKey, selectedIcon),
+        }).popupFor(anchor);
     }
 
     _setStateIcon(stateKey, iconValue) {
@@ -448,7 +449,7 @@ export default class StatusBadgeDialog extends Adw.Dialog {
 
         this._addStateEntryRow = null;
         this._setStateIcon(name, null);
-        this._openStatePicker(name);
+        this._openStatePicker(name, this._stateRows.get(name));
     }
 
     _toast(title) {

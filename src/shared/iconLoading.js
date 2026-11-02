@@ -18,6 +18,14 @@ export const MONO_ASSET_SUFFIX_RE = /([-_]tray)?[-_]mono$/i;
 
 const ICON_CACHE_SUBDIR = 'bettertrayicons/icons';
 
+// The config syncs between machines, so an emoji is kept as its codepoints
+// and every host draws it with its own font.
+export const EMOJI_ICON_PREFIX = 'emoji:';
+const EMOJI_VALUE_RE = /^emoji:([0-9a-f]{1,6}(?:-[0-9a-f]{1,6}){0,9})$/;
+const MAX_CODEPOINT = 0x10ffff;
+const SURROGATE_FIRST = 0xd800;
+const SURROGATE_LAST = 0xdfff;
+
 const ICON_FILE_EXTENSIONS = Object.freeze(['.png', '.svg', '.xpm', '.ico']);
 
 // Deep enough for <path>/hicolor/22x22/apps/foo.png, shallow enough that an
@@ -64,15 +72,24 @@ export function resolveIcon(config, hasThemeIcon = null, cachedPathExists = null
     if (config.custom_icon) {
         if (config.custom_icon.startsWith('/'))
             return {type: 'file', value: config.custom_icon};
+        if (config.custom_icon.startsWith(EMOJI_ICON_PREFIX))
+            return {type: 'emoji', value: config.custom_icon};
 
         return {type: 'name', value: config.custom_icon};
     }
 
     const iconName = config.detected_icon;
+    const isThemed = !!iconName && !iconName.startsWith('/') && !!hasThemeIcon?.(iconName);
+
+    // Same order as the tray, the app's own theme dir beats the system theme
+    // unless a -mono asset name lets the system theme supply the base. The
+    // cached snapshot of that file is a .png, which the tint would skip.
+    if (themeHit && !(isThemed && MONO_ASSET_SUFFIX_RE.test(iconName)))
+        return {type: 'file', value: themeHit};
 
     // A resolvable name beats any cached copy. The theme recolors it for light
     // and dark and renders it at the exact size, a snapshot does neither.
-    if (iconName && !iconName.startsWith('/') && hasThemeIcon?.(iconName))
+    if (isThemed)
         return {type: 'name', value: iconName};
 
     if (config.cached_icon_path) {
@@ -88,10 +105,22 @@ export function resolveIcon(config, hasThemeIcon = null, cachedPathExists = null
     if (iconName.startsWith('/'))
         return {type: 'file', value: iconName};
 
-    if (config.icon_theme_path && themeHit)
-        return {type: 'file', value: themeHit};
-
     return {type: 'name', value: iconName};
+}
+
+export function isEmojiIcon(value) {
+    return typeof value === 'string' && value.startsWith(EMOJI_ICON_PREFIX);
+}
+
+// A synced or hand-edited value can carry anything, so a malformed one reads
+// as no emoji rather than a broken string.
+export function emojiText(value) {
+    const match = typeof value === 'string' ? value.match(EMOJI_VALUE_RE) : null;
+    if (!match)
+        return null;
+    const codepoints = match[1].split('-').map(hex => parseInt(hex, 16));
+    const isInvalid = cp => cp > MAX_CODEPOINT || (cp >= SURROGATE_FIRST && cp <= SURROGATE_LAST);
+    return codepoints.some(isInvalid) ? null : String.fromCodePoint(...codepoints);
 }
 
 export async function findIconInThemeAsync(iconName, themePath, {targetSize = 0, cancellable = null} = {}) {
@@ -162,6 +191,18 @@ function _sizeDistance(path, targetSize) {
 
 export function themedIcon(name) {
     return new Gio.ThemedIcon({name});
+}
+
+const BUNDLED_ICON_PREFIX = 'bti-';
+const BUNDLED_ICON_DIR = Gio.File.new_for_uri(import.meta.url)
+    .resolve_relative_path('../../../assets/icons/hicolor/scalable/actions');
+
+// The shell's icon theme never sees the bundled files, only the prefs add
+// them to theirs
+export function bundledOrThemedIcon(name) {
+    if (!name.startsWith(BUNDLED_ICON_PREFIX))
+        return Gio.ThemedIcon.new_with_default_fallbacks(name);
+    return new Gio.FileIcon({file: BUNDLED_ICON_DIR.get_child(`${name}.svg`)});
 }
 
 export function pathOrThemedIcon(value, exists) {

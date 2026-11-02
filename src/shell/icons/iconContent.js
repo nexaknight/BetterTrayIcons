@@ -12,6 +12,10 @@ const BADGE_TEXT_MIN_PX = 8;
 const BADGE_TEXT_MIN_WIDTH_RATIO = 0.8;
 const BADGE_TEXT_PADDING_X_PX = 3;
 
+// A colour emoji glyph is about as tall as its font size, so this leaves the
+// same padding ring a symbolic icon draws inside its canvas.
+const EMOJI_GLYPH_ICON_RATIO = 0.83;
+
 export function attachStatusIcon(actor) {
     const icon = new St.Icon({
         style_class: 'system-status-icon',
@@ -39,14 +43,50 @@ export function attachStatusIcon(actor) {
 
 // gicon and icon_name are two hands on one St.Icon, the losing one has to
 // be cleared or its stale value keeps rendering.
-export function setIconContent(iconActor, gicon, iconName) {
+export function setIconContent(iconActor, {gicon = null, iconName = null, emoji = null}) {
+    _syncEmojiLabel(iconActor, emoji);
     if (gicon) {
         iconActor.icon_name = null;
         iconActor.set_gicon(gicon);
     } else {
         iconActor.set_gicon(null);
-        iconActor.icon_name = iconName;
+        iconActor.icon_name = emoji ? null : iconName;
     }
+}
+
+// St turns no font glyph into a GIcon without a file round trip, so an emoji
+// rides as a label inside the St.Icon. Size, style and placement keep acting
+// on the icon, whose BinLayout centers the label.
+function _syncEmojiLabel(iconActor, emoji) {
+    let label = iconActor._btiEmoji;
+    if (!emoji) {
+        if (label)
+            label.visible = false;
+        return;
+    }
+    if (!label) {
+        label = new St.Label({
+            x_expand: true,
+            y_expand: true,
+            x_align: Clutter.ActorAlign.CENTER,
+            y_align: Clutter.ActorAlign.CENTER,
+        });
+        iconActor.add_child(label);
+        iconActor._btiEmoji = label;
+        // The label lives and dies with the icon, so the handler needs no
+        // bookkeeping of its own.
+        iconActor.connect('notify::icon-size', () => _sizeEmojiLabel(label, iconActor));
+    }
+    label.text = emoji;
+    label.visible = true;
+    _sizeEmojiLabel(label, iconActor);
+}
+
+// icon_size stays -1 until the tray style sets one, the theme font size
+// stands in until then.
+function _sizeEmojiLabel(label, iconActor) {
+    const size = Math.round(iconActor.icon_size * EMOJI_GLYPH_ICON_RATIO);
+    label.set_style(size > 0 ? `font-size: ${size}px;` : null);
 }
 
 export function setBadgeContent(actor, settings, badge, style = null) {

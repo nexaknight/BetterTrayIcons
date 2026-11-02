@@ -3,9 +3,11 @@ import Gtk from 'gi://Gtk';
 import Gdk from 'gi://Gdk';
 import Adw from 'gi://Adw';
 
-import {buildSymbolicCandidates, orderThemedNames, themedIcon, pathOrThemedIcon, probeIconPaths, tintedSymbolicIcon, symbolicTint} from '../../shared/iconLoading.js';
+import {buildSymbolicCandidates, emojiText, isEmojiIcon, orderThemedNames, themedIcon, pathOrThemedIcon, probeIconPaths, resolveIcon, tintedSymbolicIcon, symbolicTint} from '../../shared/iconLoading.js';
 import {fileExists} from '../../shared/asyncIo.js';
+import {readShownIcons, SHOWN_ICONS_PATH, watchRuntimeFile} from '../../shared/appConfig.js';
 import {editsLightSet} from './color.js';
+import {EmojiPaintable} from './emoji.js';
 
 export const NEXT_ICON_NAME = 'bti-next-symbolic';
 export const GEAR_ICON_NAME = 'bti-gear-symbolic';
@@ -23,6 +25,11 @@ export function hasThemeIcon(name) {
 export function applyPathIcon(image, value, settings, options = {}) {
     if (!value) {
         image.clear();
+        return;
+    }
+
+    if (isEmojiIcon(value)) {
+        _applyEmojiIcon(image, value);
         return;
     }
 
@@ -91,6 +98,10 @@ export function devicePixelSize(widget, px = null) {
 export function applyTintedIcon(image, name, settings, options = {}) {
     if (!name)
         return;
+    if (isEmojiIcon(name)) {
+        _applyEmojiIcon(image, name);
+        return;
+    }
     image._btiPendingIcon = name;
     _tintedFor(name, settings, image, options).then(tinted => {
         if (image._btiPendingIcon === name)
@@ -106,7 +117,7 @@ export function applyIconPreview(image, iconResult, settings) {
     const value = iconResult?.value;
     if (iconResult?.type !== 'file') {
         applyResolvedIcon(image, iconResult, useSymbolic);
-        applyTintedIcon(image, value, settings);
+        applyTintedIcon(image, tintSource(iconResult, useSymbolic), settings);
         return;
     }
     image._btiPendingIcon = value;
@@ -119,6 +130,28 @@ export function applyIconPreview(image, iconResult, settings) {
     });
 }
 
+// The tray tints the file of the first candidate the theme carries, so a
+// -mono asset tints as its base and not as the raw name.
+export function tintSource(iconResult, useSymbolic) {
+    if (iconResult?.type !== 'name')
+        return iconResult?.value;
+    return buildSymbolicCandidates(iconResult.value, useSymbolic).find(hasThemeIcon) ??
+        iconResult.value;
+}
+
+// While the app runs, the shell reports what its tray item shows with the
+// status icon and any custom or per-state icon applied, which detected_icon
+// as the calm baseline cannot tell.
+export function resolveAppIcon(config, shown, cachedExists = null, themeHit = null) {
+    if (shown?.icon)
+        return resolveIcon({custom_icon: shown.icon});
+    return resolveIcon(config, hasThemeIcon, cachedExists, themeHit);
+}
+
+export function watchShownIcons(widget, onChange, event = null) {
+    watchRuntimeFile(widget, SHOWN_ICONS_PATH, readShownIcons, onChange, event);
+}
+
 export function applyResolvedIcon(image, iconResult, useSymbolic, iconPaths = null, tintedGicon = null) {
     if (!iconResult) {
         image.clear();
@@ -127,6 +160,11 @@ export function applyResolvedIcon(image, iconResult, useSymbolic, iconPaths = nu
 
     if (tintedGicon) {
         image.set_from_gicon(tintedGicon);
+        return;
+    }
+
+    if (iconResult.type === 'emoji') {
+        _applyEmojiIcon(image, iconResult.value);
         return;
     }
 
@@ -142,4 +180,13 @@ export function applyResolvedIcon(image, iconResult, useSymbolic, iconPaths = nu
     const candidates = buildSymbolicCandidates(iconResult.value, useSymbolic);
     const names = orderThemedNames(candidates, candidates.find(hasThemeIcon));
     image.set_from_gicon(new Gio.ThemedIcon({names, use_default_fallbacks: true}));
+}
+
+function _applyEmojiIcon(image, value) {
+    image._btiPendingIcon = value;
+    const text = emojiText(value);
+    if (text)
+        image.set_from_paintable(new EmojiPaintable(text));
+    else
+        image.set_from_gicon(themedIcon('image-missing'));
 }
