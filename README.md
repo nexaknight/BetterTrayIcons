@@ -179,7 +179,7 @@ This extension could be even better with your help. The [Contributing guide](CON
   </tr>
 </table>
 
-Full per-icon attribution and the license texts live in [assets/icons/CREDITS](assets/icons/CREDITS).
+Full per-icon attribution and the license texts live in [assets/icons/CREDITS.md](assets/icons/CREDITS.md), the emoji data sources and their license in [assets/emoji/CREDITS.md](assets/emoji/CREDITS.md).
 
 ## License
 

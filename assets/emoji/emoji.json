@@ -1,0 +1,11471 @@
+{
+  "version": "18.0",
+  "emoji": [
+    [
+      "1f600",
+      "grinning face",
+      0,
+      "cheerful cheery grin happy laugh nice smile smiling teeth"
+    ],
+    [
+      "1f603",
+      "grinning face with big eyes",
+      0,
+      "awesome grin happy mouth open smile smiling teeth yay"
+    ],
+    [
+      "1f604",
+      "grinning face with smiling eyes",
+      0,
+      "eye grin happy laugh lol mouth open smile"
+    ],
+    [
+      "1f601",
+      "beaming face with smiling eyes",
+      0,
+      "eye grin grinning happy nice smile teeth"
+    ],
+    [
+      "1f606",
+      "grinning squinting face",
+      0,
+      "closed eyes haha hahaha happy laugh lol mouth open rofl smile smiling"
+    ],
+    [
+      "1f605",
+      "grinning face with sweat",
+      0,
+      "cold dejected excited mouth nervous open smile smiling stress stressed"
+    ],
+    [
+      "1f923",
+      "rolling on the floor laughing",
+      0,
+      "crying face funny haha happy hehe hilarious joy laugh lmao lol rofl roflmao tear"
+    ],
+    [
+      "1f602",
+      "face with tears of joy",
+      0,
+      "crying feels funny haha happy hehe hilarious laugh lmao lol rofl roflmao tear"
+    ],
+    [
+      "1f642",
+      "slightly smiling face",
+      0,
+      "happy smile"
+    ],
+    [
+      "1f643",
+      "upside-down face",
+      0,
+      "hehe smile"
+    ],
+    [
+      "1fae0",
+      "melting face",
+      0,
+      "disappear dissolve embarrassed haha heat hot liquid lol melt sarcasm sarcastic"
+    ],
+    [
+      "1faeb",
+      "cracking face",
+      0,
+      "breaking crumbling masking resilience reveal tension transformation"
+    ],
+    [
+      "1f609",
+      "winking face",
+      0,
+      "flirt heartbreaker sexy slide tease wink winks"
+    ],
+    [
+      "1f60a",
+      "smiling face with smiling eyes",
+      0,
+      "blush eye glad satisfied smile"
+    ],
+    [
+      "1f607",
+      "smiling face with halo",
+      0,
+      "angel angelic angels blessed fairy fairytale fantasy happy innocent peaceful smile spirit tale"
+    ],
+    [
+      "1f970",
+      "smiling face with hearts",
+      0,
+      "3 adore crush heart ily love romance smile you"
+    ],
+    [
+      "1f60d",
+      "smiling face with heart-eyes",
+      0,
+      "143 bae eye feels hearts ily kisses love romance romantic smile xoxo"
+    ],
+    [
+      "1f929",
+      "star-struck",
+      0,
+      "excited eyes face grinning smile star starry-eyed wow"
+    ],
+    [
+      "1f618",
+      "face blowing a kiss",
+      0,
+      "adorbs bae flirt heart ily love lover miss muah romantic smooch xoxo you"
+    ],
+    [
+      "1f617",
+      "kissing face",
+      0,
+      "143 date dating flirt ily kiss love smooch smooches xoxo you"
+    ],
+    [
+      "263a-fe0f",
+      "smiling face",
+      0,
+      "happy outlined relaxed smile"
+    ],
+    [
+      "1f61a",
+      "kissing face with closed eyes",
+      0,
+      "143 bae blush date dating eye flirt ily kisses smooches xoxo"
+    ],
+    [
+      "1f619",
+      "kissing face with smiling eyes",
+      0,
+      "143 closed date dating eye flirt ily kiss kisses love night smile"
+    ],
+    [
+      "1f972",
+      "smiling face with tear",
+      0,
+      "glad grateful happy joy pain proud relieved smile smiley touched"
+    ],
+    [
+      "1f60b",
+      "face savoring food",
+      0,
+      "delicious eat full hungry savor smile smiling tasty um yum yummy"
+    ],
+    [
+      "1f61b",
+      "face with tongue",
+      0,
+      "awesome cool nice party stuck-out sweet"
+    ],
+    [
+      "1f61c",
+      "winking face with tongue",
+      0,
+      "crazy epic eye funny joke loopy nutty party stuck-out wacky weirdo wink yolo"
+    ],
+    [
+      "1f92a",
+      "zany face",
+      0,
+      "crazy eye eyes goofy large small"
+    ],
+    [
+      "1f61d",
+      "squinting face with tongue",
+      0,
+      "closed eye eyes gross horrible omg stuck-out taste whatever yolo"
+    ],
+    [
+      "1f911",
+      "money-mouth face",
+      0,
+      "money mouth paid"
+    ],
+    [
+      "1f917",
+      "smiling face with open hands",
+      0,
+      "hug hugging"
+    ],
+    [
+      "1f92d",
+      "face with hand over mouth",
+      0,
+      "giggle giggling oops realization secret shock sudden surprise whoops"
+    ],
+    [
+      "1fae2",
+      "face with open eyes and hand over mouth",
+      0,
+      "amazement awe disbelief embarrass gasp omg quiet scared shock surprise"
+    ],
+    [
+      "1fae3",
+      "face with peeking eye",
+      0,
+      "captivated embarrass hide hiding peek peep scared shy stare"
+    ],
+    [
+      "1f92b",
+      "shushing face",
+      0,
+      "quiet shh shush"
+    ],
+    [
+      "1f914",
+      "thinking face",
+      0,
+      "chin consider hmm ponder pondering wondering"
+    ],
+    [
+      "1fae1",
+      "saluting face",
+      0,
+      "good luck ma’am ok respect salute sir troops yes"
+    ],
+    [
+      "1f910",
+      "zipper-mouth face",
+      0,
+      "keep mouth quiet secret shut zip zipper"
+    ],
+    [
+      "1f928",
+      "face with raised eyebrow",
+      0,
+      "disapproval disbelief distrust emoji hmm mild skeptic skeptical skepticism surprise what"
+    ],
+    [
+      "1f610",
+      "neutral face",
+      0,
+      "awkward blank deadpan expressionless fine jealous meh oh shade straight unamused unhappy unimpressed whatever"
+    ],
+    [
+      "1f611",
+      "expressionless face",
+      0,
+      "awkward dead fine inexpressive jealous meh not oh omg straight uh unhappy unimpressed whatever"
+    ],
+    [
+      "1f636",
+      "face without mouth",
+      0,
+      "awkward blank expressionless mouthless mute quiet secret silence silent speechless"
+    ],
+    [
+      "1fae5",
+      "dotted line face",
+      0,
+      "depressed disappear hidden hide introvert invisible meh whatever wtv"
+    ],
+    [
+      "1f636-200d-1f32b-fe0f",
+      "face in clouds",
+      0,
+      "absentminded fog head"
+    ],
+    [
+      "1f60f",
+      "smirking face",
+      0,
+      "boss dapper flirt homie kidding leer shade slick sly smirk smug snicker suave suspicious swag"
+    ],
+    [
+      "1f612",
+      "unamused face",
+      0,
+      "... bored fine jealous jel jelly pissed smh ugh uhh unhappy weird whatever"
+    ],
+    [
+      "1f644",
+      "face with rolling eyes",
+      0,
+      "eyeroll shade ugh whatever"
+    ],
+    [
+      "1f62c",
+      "grimacing face",
+      0,
+      "awk awkward dentist grimace grinning smile smiling"
+    ],
+    [
+      "1f62e-200d-1f4a8",
+      "face exhaling",
+      0,
+      "blow blowing exhale exhausted gasp groan relief sigh smiley smoke whisper whistle"
+    ],
+    [
+      "1f925",
+      "lying face",
+      0,
+      "liar lie pinocchio"
+    ],
+    [
+      "1fae8",
+      "shaking face",
+      0,
+      "crazy daze earthquake omg panic shock surprise vibrate whoa wow"
+    ],
+    [
+      "1f642-200d-2194-fe0f",
+      "head shaking horizontally",
+      0,
+      "no shake"
+    ],
+    [
+      "1f642-200d-2195-fe0f",
+      "head shaking vertically",
+      0,
+      "nod yes"
+    ],
+    [
+      "1f60c",
+      "relieved face",
+      0,
+      "calm peace relief zen"
+    ],
+    [
+      "1f614",
+      "pensive face",
+      0,
+      "awful bored dejected died disappointed losing lost sad sucks"
+    ],
+    [
+      "1f62a",
+      "sleepy face",
+      0,
+      "crying good night sad sleep sleeping tired"
+    ],
+    [
+      "1f924",
+      "drooling face",
+      0,
+      ""
+    ],
+    [
+      "1f634",
+      "sleeping face",
+      0,
+      "bed bedtime good goodnight nap night sleep tired whatever yawn zzz"
+    ],
+    [
+      "1fae9",
+      "face with bags under eyes",
+      0,
+      "bored exhausted fatigued late sleepy tired weary"
+    ],
+    [
+      "1f637",
+      "face with medical mask",
+      0,
+      "cold dentist dermatologist doctor dr germs medicine sick"
+    ],
+    [
+      "1f912",
+      "face with thermometer",
+      0,
+      "ill sick"
+    ],
+    [
+      "1f915",
+      "face with head-bandage",
+      0,
+      "bandage hurt injury ouch"
+    ],
+    [
+      "1f922",
+      "nauseated face",
+      0,
+      "gross nasty sick vomit"
+    ],
+    [
+      "1f92e",
+      "face vomiting",
+      0,
+      "barf ew gross puke sick spew throw up vomit"
+    ],
+    [
+      "1f927",
+      "sneezing face",
+      0,
+      "fever flu gesundheit sick sneeze"
+    ],
+    [
+      "1f975",
+      "hot face",
+      0,
+      "dying feverish heat panting red-faced stroke sweating tongue"
+    ],
+    [
+      "1f976",
+      "cold face",
+      0,
+      "blue blue-faced freezing frostbite icicles subzero teeth"
+    ],
+    [
+      "1f974",
+      "woozy face",
+      0,
+      "dizzy drunk eyes intoxicated mouth tipsy uneven wavy"
+    ],
+    [
+      "1f635",
+      "face with crossed-out eyes",
+      0,
+      "dead dizzy feels knocked out sick tired"
+    ],
+    [
+      "1f635-200d-1f4ab",
+      "face with spiral eyes",
+      0,
+      "confused dizzy hypnotized omg smiley trouble whoa woah woozy"
+    ],
+    [
+      "1f92f",
+      "exploding head",
+      0,
+      "blown explode mind mindblown no shocked way"
+    ],
+    [
+      "1f920",
+      "cowboy hat face",
+      0,
+      "cowgirl"
+    ],
+    [
+      "1f973",
+      "partying face",
+      0,
+      "bday birthday celebrate celebration excited happy hat hooray horn party"
+    ],
+    [
+      "1f978",
+      "disguised face",
+      0,
+      "disguise eyebrow glasses incognito moustache mustache nose person spy tache tash"
+    ],
+    [
+      "1f60e",
+      "smiling face with sunglasses",
+      0,
+      "awesome beach bright bro chilling cool rad relaxed shades slay smile style swag win"
+    ],
+    [
+      "1f913",
+      "nerd face",
+      0,
+      "brainy clever expert geek gifted glasses intelligent smart"
+    ],
+    [
+      "1f9d0",
+      "face with monocle",
+      0,
+      "classy fancy rich stuffy wealthy"
+    ],
+    [
+      "1f615",
+      "confused face",
+      0,
+      "befuddled confusing dunno frown hm meh not sad sorry sure"
+    ],
+    [
+      "1fae4",
+      "face with diagonal mouth",
+      0,
+      "confused confusion disappointed doubt doubtful frustrated frustration meh skeptical unsure whatever wtv"
+    ],
+    [
+      "1f61f",
+      "worried face",
+      0,
+      "anxious butterflies nerves nervous sad stress stressed surprised worry"
+    ],
+    [
+      "1f641",
+      "slightly frowning face",
+      0,
+      "frown sad"
+    ],
+    [
+      "2639-fe0f",
+      "frowning face",
+      0,
+      "frown sad"
+    ],
+    [
+      "1f62e",
+      "face with open mouth",
+      0,
+      "believe forgot omg shocked surprised sympathy unbelievable unreal whoa wow you"
+    ],
+    [
+      "1f62f",
+      "hushed face",
+      0,
+      "epic omg stunned surprised whoa woah"
+    ],
+    [
+      "1f632",
+      "astonished face",
+      0,
+      "cost no omg shocked totally way"
+    ],
+    [
+      "1f633",
+      "flushed face",
+      0,
+      "amazed awkward crazy dazed dead disbelief embarrassed geez heat hot impressed jeez what wow"
+    ],
+    [
+      "1faea",
+      "distorted face",
+      0,
+      "anxiety bloated panic shocked surprised vulnerable"
+    ],
+    [
+      "1f97a",
+      "pleading face",
+      0,
+      "begging big eyes mercy not please pretty puppy sad why"
+    ],
+    [
+      "1f979",
+      "face holding back tears",
+      0,
+      "admiration aww cry embarrassed feelings grateful gratitude joy please proud resist sad"
+    ],
+    [
+      "1f626",
+      "frowning face with open mouth",
+      0,
+      "caught frown guard scared scary surprise what wow"
+    ],
+    [
+      "1f627",
+      "anguished face",
+      0,
+      "forgot scared scary stressed surprise unhappy what wow"
+    ],
+    [
+      "1f628",
+      "fearful face",
+      0,
+      "afraid anxious blame fear scared worried"
+    ],
+    [
+      "1f630",
+      "anxious face with sweat",
+      0,
+      "blue cold eek mouth nervous open rushed scared yikes"
+    ],
+    [
+      "1f625",
+      "sad but relieved face",
+      0,
+      "anxious call close complicated disappointed not sweat time whew"
+    ],
+    [
+      "1f622",
+      "crying face",
+      0,
+      "awful cry feels miss sad tear triste unhappy"
+    ],
+    [
+      "1f62d",
+      "loudly crying face",
+      0,
+      "bawling cry sad sob tear tears unhappy"
+    ],
+    [
+      "1f631",
+      "face screaming in fear",
+      0,
+      "epic fearful munch scared scream screamer shocked surprised woah"
+    ],
+    [
+      "1f616",
+      "confounded face",
+      0,
+      "annoyed confused cringe distraught feels frustrated mad sad"
+    ],
+    [
+      "1f623",
+      "persevering face",
+      0,
+      "concentrate concentration focus headache persevere"
+    ],
+    [
+      "1f61e",
+      "disappointed face",
+      0,
+      "awful blame dejected fail losing sad unhappy"
+    ],
+    [
+      "1f613",
+      "downcast face with sweat",
+      0,
+      "close cold feels headache nervous sad scared yikes"
+    ],
+    [
+      "1f629",
+      "weary face",
+      0,
+      "crying fail feels hungry mad nooo sad sleepy tired unhappy"
+    ],
+    [
+      "1f62b",
+      "tired face",
+      0,
+      "cost feels nap sad sneeze"
+    ],
+    [
+      "1f971",
+      "yawning face",
+      0,
+      "bedtime bored goodnight nap night sleep sleepy tired whatever yawn zzz"
+    ],
+    [
+      "1f624",
+      "face with steam from nose",
+      0,
+      "anger angry feels fume fuming furious fury mad triumph unhappy won"
+    ],
+    [
+      "1f621",
+      "enraged face",
+      0,
+      "anger angry feels mad maddening pouting rage red shade unhappy upset"
+    ],
+    [
+      "1f620",
+      "angry face",
+      0,
+      "anger blame feels frustrated mad maddening rage shade unhappy upset"
+    ],
+    [
+      "1f92c",
+      "face with symbols on mouth",
+      0,
+      "censor cursing cussing mad pissed swearing"
+    ],
+    [
+      "1f608",
+      "smiling face with horns",
+      0,
+      "demon devil evil fairy fairytale fantasy purple shade smile tale"
+    ],
+    [
+      "1f47f",
+      "angry face with horns",
+      0,
+      "demon devil evil fairy fairytale fantasy imp mischievous purple shade tale"
+    ],
+    [
+      "1f480",
+      "skull",
+      0,
+      "body dead death face fairy fairytale i’m lmao monster tale yolo"
+    ],
+    [
+      "2620-fe0f",
+      "skull and crossbones",
+      0,
+      "bone dead death face monster"
+    ],
+    [
+      "1f4a9",
+      "pile of poo",
+      0,
+      "bs comic doo dung face fml monster poop smelly smh stink stinks stinky turd"
+    ],
+    [
+      "1f921",
+      "clown face",
+      0,
+      ""
+    ],
+    [
+      "1f479",
+      "ogre",
+      0,
+      "creature devil face fairy fairytale fantasy mask monster scary tale"
+    ],
+    [
+      "1f47a",
+      "goblin",
+      0,
+      "angry creature face fairy fairytale fantasy mask mean monster tale"
+    ],
+    [
+      "1f47b",
+      "ghost",
+      0,
+      "boo creature excited face fairy fairytale fantasy halloween haunting monster scary silly tale"
+    ],
+    [
+      "1f47d",
+      "alien",
+      0,
+      "creature extraterrestrial face fairy fairytale fantasy monster space tale ufo"
+    ],
+    [
+      "1f47e",
+      "alien monster",
+      0,
+      "creature extraterrestrial face fairy fairytale fantasy game gamer games pixelated space tale ufo"
+    ],
+    [
+      "1f916",
+      "robot",
+      0,
+      "face monster"
+    ],
+    [
+      "1f63a",
+      "grinning cat",
+      0,
+      "animal face mouth open smile smiling"
+    ],
+    [
+      "1f638",
+      "grinning cat with smiling eyes",
+      0,
+      "animal eye face grin smile"
+    ],
+    [
+      "1f639",
+      "cat with tears of joy",
+      0,
+      "animal face laugh laughing lol tear"
+    ],
+    [
+      "1f63b",
+      "smiling cat with heart-eyes",
+      0,
+      "animal eye face heart love smile"
+    ],
+    [
+      "1f63c",
+      "cat with wry smile",
+      0,
+      "animal face ironic"
+    ],
+    [
+      "1f63d",
+      "kissing cat",
+      0,
+      "animal closed eye eyes face kiss"
+    ],
+    [
+      "1f640",
+      "weary cat",
+      0,
+      "animal face oh surprised"
+    ],
+    [
+      "1f63f",
+      "crying cat",
+      0,
+      "animal cry face sad tear"
+    ],
+    [
+      "1f63e",
+      "pouting cat",
+      0,
+      "animal face"
+    ],
+    [
+      "1f648",
+      "see-no-evil monkey",
+      0,
+      "embarrassed evil face forbidden forgot gesture hide no omg prohibited scared secret smh watch"
+    ],
+    [
+      "1f649",
+      "hear-no-evil monkey",
+      0,
+      "animal ears evil face forbidden gesture hear listen no not prohibited secret shh tmi"
+    ],
+    [
+      "1f64a",
+      "speak-no-evil monkey",
+      0,
+      "animal evil face forbidden gesture no not oops prohibited quiet secret speak stealth"
+    ],
+    [
+      "1f48c",
+      "love letter",
+      0,
+      "heart mail romance valentine"
+    ],
+    [
+      "1f498",
+      "heart with arrow",
+      0,
+      "143 adorbs cupid date emotion ily love romance valentine"
+    ],
+    [
+      "1f49d",
+      "heart with ribbon",
+      0,
+      "143 anniversary emotion ily kisses valentine xoxo"
+    ],
+    [
+      "1f496",
+      "sparkling heart",
+      0,
+      "143 emotion excited good ily kisses morning night sparkle xoxo"
+    ],
+    [
+      "1f497",
+      "growing heart",
+      0,
+      "143 emotion excited heartpulse ily kisses muah nervous pulse xoxo"
+    ],
+    [
+      "1f493",
+      "beating heart",
+      0,
+      "143 cardio emotion heartbeat ily love pulsating pulse"
+    ],
+    [
+      "1f49e",
+      "revolving hearts",
+      0,
+      "143 adorbs anniversary emotion heart"
+    ],
+    [
+      "1f495",
+      "two hearts",
+      0,
+      "143 anniversary date dating emotion heart ily kisses love loving xoxo"
+    ],
+    [
+      "1f49f",
+      "heart decoration",
+      0,
+      "143 emotion hearth purple white"
+    ],
+    [
+      "2763-fe0f",
+      "heart exclamation",
+      0,
+      "bang heavy mark punctuation"
+    ],
+    [
+      "1f494",
+      "broken heart",
+      0,
+      "break crushed emotion heartbroken lonely sad"
+    ],
+    [
+      "2764-fe0f-200d-1f525",
+      "heart on fire",
+      0,
+      "burn love lust sacred"
+    ],
+    [
+      "2764-fe0f-200d-1fa79",
+      "mending heart",
+      0,
+      "healthier improving recovering recuperating well"
+    ],
+    [
+      "2764-fe0f",
+      "red heart",
+      0,
+      "emotion love"
+    ],
+    [
+      "1fa77",
+      "pink heart",
+      0,
+      "143 adorable cute emotion ily like love special sweet"
+    ],
+    [
+      "1f9e1",
+      "orange heart",
+      0,
+      "143"
+    ],
+    [
+      "1f49b",
+      "yellow heart",
+      0,
+      "143 cardiac emotion ily love"
+    ],
+    [
+      "1f49a",
+      "green heart",
+      0,
+      "143 emotion ily love romantic"
+    ],
+    [
+      "1f499",
+      "blue heart",
+      0,
+      "143 emotion ily love romance"
+    ],
+    [
+      "1fa75",
+      "light blue heart",
+      0,
+      "143 cute cyan emotion ily like love sky special teal"
+    ],
+    [
+      "1f49c",
+      "purple heart",
+      0,
+      "143 bestest emotion ily love"
+    ],
+    [
+      "1f90e",
+      "brown heart",
+      0,
+      "143"
+    ],
+    [
+      "1f5a4",
+      "black heart",
+      0,
+      "evil wicked"
+    ],
+    [
+      "1fa76",
+      "grey heart",
+      0,
+      "143 emotion gray ily love silver slate special"
+    ],
+    [
+      "1f90d",
+      "white heart",
+      0,
+      "143"
+    ],
+    [
+      "1f48b",
+      "kiss mark",
+      0,
+      "dating emotion heart kissing lips romance sexy"
+    ],
+    [
+      "1f4af",
+      "hundred points",
+      0,
+      "100 a+ agree clearly definitely faithful fleek full keep perfect point score true truth yup"
+    ],
+    [
+      "1f4a2",
+      "anger symbol",
+      0,
+      "angry comic mad upset"
+    ],
+    [
+      "1faef",
+      "fight cloud",
+      0,
+      "argument brawl debate disagreement ruckus wrestle"
+    ],
+    [
+      "1f4a5",
+      "collision",
+      0,
+      "bomb boom collide comic explode"
+    ],
+    [
+      "1f4ab",
+      "dizzy",
+      0,
+      "comic shining shooting star stars"
+    ],
+    [
+      "1f4a6",
+      "sweat droplets",
+      0,
+      "comic drip droplet drops splashing squirt water wet work workout"
+    ],
+    [
+      "1f4a8",
+      "dashing away",
+      0,
+      "cloud comic dash fart fast go gone gotta running smoke"
+    ],
+    [
+      "1f573-fe0f",
+      "hole",
+      0,
+      ""
+    ],
+    [
+      "1f4ac",
+      "speech balloon",
+      0,
+      "bubble comic dialog message sms talk text typing"
+    ],
+    [
+      "1f441-fe0f-200d-1f5e8-fe0f",
+      "eye in speech bubble",
+      0,
+      "balloon witness"
+    ],
+    [
+      "1f5e8-fe0f",
+      "left speech bubble",
+      0,
+      "balloon dialog"
+    ],
+    [
+      "1f5ef-fe0f",
+      "right anger bubble",
+      0,
+      "angry balloon mad"
+    ],
+    [
+      "1f4ad",
+      "thought balloon",
+      0,
+      "bubble cartoon cloud comic daydream decisions dream idea invent invention realize think thoughts wonder"
+    ],
+    [
+      "1f4a4",
+      "ZZZ",
+      0,
+      "comic good goodnight night sleep sleeping sleepy tired"
+    ],
+    [
+      "1f44b",
+      "waving hand",
+      0,
+      "bye cya g2g greetings gtg hello hey hi later outtie ttfn ttyl wave yo you"
+    ],
+    [
+      "1f91a",
+      "raised back of hand",
+      0,
+      "backhand"
+    ],
+    [
+      "1f590-fe0f",
+      "hand with fingers splayed",
+      0,
+      "finger raised stop"
+    ],
+    [
+      "270b",
+      "raised hand",
+      0,
+      "5 five high stop"
+    ],
+    [
+      "1f596",
+      "vulcan salute",
+      0,
+      "finger hand hands"
+    ],
+    [
+      "1faf1",
+      "rightwards hand",
+      0,
+      "handshake hold reach right rightward shake"
+    ],
+    [
+      "1faf2",
+      "leftwards hand",
+      0,
+      "handshake hold left leftward reach shake"
+    ],
+    [
+      "1faf3",
+      "palm down hand",
+      0,
+      "dismiss drop dropped pick shoo up"
+    ],
+    [
+      "1faf4",
+      "palm up hand",
+      0,
+      "beckon catch come hold know lift me offer tell"
+    ],
+    [
+      "1faf7",
+      "leftwards pushing hand",
+      0,
+      "block five halt high hold leftward pause push refuse slap stop wait"
+    ],
+    [
+      "1faf8",
+      "rightwards pushing hand",
+      0,
+      "block five halt high hold pause push refuse rightward slap stop wait"
+    ],
+    [
+      "1f44c",
+      "OK hand",
+      0,
+      "awesome bet dope fleek fosho got gotcha legit okay pinch rad sure sweet three"
+    ],
+    [
+      "1f90c",
+      "pinched fingers",
+      0,
+      "gesture hand hold huh interrogation patience relax sarcastic ugh what zip"
+    ],
+    [
+      "1f90f",
+      "pinching hand",
+      0,
+      "amount bit fingers little small sort"
+    ],
+    [
+      "270c-fe0f",
+      "victory hand",
+      0,
+      "peace v"
+    ],
+    [
+      "1f91e",
+      "crossed fingers",
+      0,
+      "cross finger hand luck"
+    ],
+    [
+      "1faf0",
+      "hand with index finger and thumb crossed",
+      0,
+      "<3 expensive heart love money snap"
+    ],
+    [
+      "1f91f",
+      "love-you gesture",
+      0,
+      "fingers hand ily love three you"
+    ],
+    [
+      "1f918",
+      "sign of the horns",
+      0,
+      "finger hand rock-on"
+    ],
+    [
+      "1f919",
+      "call me hand",
+      0,
+      "hang loose shaka"
+    ],
+    [
+      "1f448",
+      "backhand index pointing left",
+      0,
+      "finger hand point"
+    ],
+    [
+      "1f449",
+      "backhand index pointing right",
+      0,
+      "finger hand point"
+    ],
+    [
+      "1f446",
+      "backhand index pointing up",
+      0,
+      "finger hand point"
+    ],
+    [
+      "1f595",
+      "middle finger",
+      0,
+      "hand"
+    ],
+    [
+      "1f447",
+      "backhand index pointing down",
+      0,
+      "finger hand point"
+    ],
+    [
+      "261d-fe0f",
+      "index pointing up",
+      0,
+      "finger hand point this"
+    ],
+    [
+      "1faf5",
+      "index pointing at the viewer",
+      0,
+      "finger hand poke you"
+    ],
+    [
+      "1f44d",
+      "thumbs up",
+      0,
+      "+1 good hand like thumb yes"
+    ],
+    [
+      "1f44e",
+      "thumbs down",
+      0,
+      "-1 bad dislike good hand no nope thumb"
+    ],
+    [
+      "1faf9",
+      "leftwards thumb sign",
+      0,
+      "grip left neutral point that this"
+    ],
+    [
+      "1fafa",
+      "rightwards thumb sign",
+      0,
+      "grip neutral point right that this"
+    ],
+    [
+      "270a",
+      "raised fist",
+      0,
+      "clenched hand punch solidarity"
+    ],
+    [
+      "1f44a",
+      "oncoming fist",
+      0,
+      "absolutely agree boom bro bruh bump clenched correct hand knuckle pound punch rock ttyl"
+    ],
+    [
+      "1f91b",
+      "left-facing fist",
+      0,
+      "leftwards"
+    ],
+    [
+      "1f91c",
+      "right-facing fist",
+      0,
+      "rightwards"
+    ],
+    [
+      "1f44f",
+      "clapping hands",
+      0,
+      "applause approval awesome clap congrats congratulations excited good great hand homie job nice prayed well yay"
+    ],
+    [
+      "1f64c",
+      "raising hands",
+      0,
+      "celebration gesture hand hooray praise raised"
+    ],
+    [
+      "1faf6",
+      "heart hands",
+      0,
+      "<3 love you"
+    ],
+    [
+      "1f450",
+      "open hands",
+      0,
+      "hand hug jazz swerve"
+    ],
+    [
+      "1f932",
+      "palms up together",
+      0,
+      "cupped dua hands pray prayer wish"
+    ],
+    [
+      "1f91d",
+      "handshake",
+      0,
+      "agreement deal hand meeting shake"
+    ],
+    [
+      "1f64f",
+      "folded hands",
+      0,
+      "appreciate ask beg blessed bow cmon five gesture hand high please pray thanks thx"
+    ],
+    [
+      "270d-fe0f",
+      "writing hand",
+      0,
+      "write"
+    ],
+    [
+      "1f485",
+      "nail polish",
+      0,
+      "bored care cosmetics done makeup manicure whatever"
+    ],
+    [
+      "1f933",
+      "selfie",
+      0,
+      "camera phone"
+    ],
+    [
+      "1f4aa",
+      "flexed biceps",
+      0,
+      "arm beast bench bodybuilder bro curls flex gains gym jacked muscle press ripped strong weightlift"
+    ],
+    [
+      "1f9be",
+      "mechanical arm",
+      0,
+      "accessibility prosthetic"
+    ],
+    [
+      "1f9bf",
+      "mechanical leg",
+      0,
+      "accessibility prosthetic"
+    ],
+    [
+      "1f9b5",
+      "leg",
+      0,
+      "bent foot kick knee limb"
+    ],
+    [
+      "1f9b6",
+      "foot",
+      0,
+      "ankle feet kick stomp"
+    ],
+    [
+      "1f442",
+      "ear",
+      0,
+      "body ears hear hearing listen listening sound"
+    ],
+    [
+      "1f9bb",
+      "ear with hearing aid",
+      0,
+      "accessibility hard"
+    ],
+    [
+      "1f443",
+      "nose",
+      0,
+      "body noses nosey odor smell smells"
+    ],
+    [
+      "1f9e0",
+      "brain",
+      0,
+      "intelligent smart"
+    ],
+    [
+      "1fac0",
+      "anatomical heart",
+      0,
+      "beat cardiology heartbeat organ pulse real red"
+    ],
+    [
+      "1fac1",
+      "lungs",
+      0,
+      "breath breathe exhalation inhalation lung organ respiration"
+    ],
+    [
+      "1f9b7",
+      "tooth",
+      0,
+      "dentist pearly teeth white"
+    ],
+    [
+      "1f9b4",
+      "bone",
+      0,
+      "bones dog skeleton wishbone"
+    ],
+    [
+      "1f440",
+      "eyes",
+      0,
+      "body eye face googly look looking omg peep see seeing"
+    ],
+    [
+      "1f441-fe0f",
+      "eye",
+      0,
+      "1 body one"
+    ],
+    [
+      "1f445",
+      "tongue",
+      0,
+      "body lick slurp"
+    ],
+    [
+      "1f444",
+      "mouth",
+      0,
+      "beauty body kiss kissing lips lipstick"
+    ],
+    [
+      "1fae6",
+      "biting lip",
+      0,
+      "anxious bite fear flirt flirting kiss lipstick nervous sexy uncomfortable worried worry"
+    ],
+    [
+      "1f476",
+      "baby",
+      0,
+      "babies children goo infant newborn pregnant young"
+    ],
+    [
+      "1f9d2",
+      "child",
+      0,
+      "bright-eyed grandchild kid young younger"
+    ],
+    [
+      "1f466",
+      "boy",
+      0,
+      "bright-eyed child grandson kid son young younger"
+    ],
+    [
+      "1f467",
+      "girl",
+      0,
+      "bright-eyed child daughter granddaughter kid virgo young younger zodiac"
+    ],
+    [
+      "1f9d1",
+      "person",
+      0,
+      "adult"
+    ],
+    [
+      "1f471",
+      "person: blond hair",
+      0,
+      "blond-haired human"
+    ],
+    [
+      "1f468",
+      "man",
+      0,
+      "adult bro"
+    ],
+    [
+      "1f9d4",
+      "person: beard",
+      0,
+      "bearded whiskers"
+    ],
+    [
+      "1f9d4-200d-2642-fe0f",
+      "man: beard",
+      0,
+      "bearded whiskers"
+    ],
+    [
+      "1f9d4-200d-2640-fe0f",
+      "woman: beard",
+      0,
+      "bearded whiskers"
+    ],
+    [
+      "1f469",
+      "woman",
+      0,
+      "adult lady"
+    ],
+    [
+      "1f471-200d-2640-fe0f",
+      "woman: blond hair",
+      0,
+      "blond-haired blonde"
+    ],
+    [
+      "1f471-200d-2642-fe0f",
+      "man: blond hair",
+      0,
+      "blond-haired"
+    ],
+    [
+      "1f9d3",
+      "older person",
+      0,
+      "adult elderly grandparent old wise"
+    ],
+    [
+      "1f474",
+      "old man",
+      0,
+      "adult bald elderly gramps grandfather grandpa wise"
+    ],
+    [
+      "1f475",
+      "old woman",
+      0,
+      "adult elderly grandma grandmother granny lady wise"
+    ],
+    [
+      "1f64d",
+      "person frowning",
+      0,
+      "annoyed disappointed disgruntled disturbed frown frustrated gesture irritated upset"
+    ],
+    [
+      "1f64d-200d-2642-fe0f",
+      "man frowning",
+      0,
+      "annoyed disappointed disgruntled disturbed frown frustrated gesture irritated upset"
+    ],
+    [
+      "1f64d-200d-2640-fe0f",
+      "woman frowning",
+      0,
+      "annoyed disappointed disgruntled disturbed frown frustrated gesture irritated upset"
+    ],
+    [
+      "1f64e",
+      "person pouting",
+      0,
+      "disappointed downtrodden frown grimace scowl sulk upset whine"
+    ],
+    [
+      "1f64e-200d-2642-fe0f",
+      "man pouting",
+      0,
+      "disappointed downtrodden frown grimace scowl sulk upset whine"
+    ],
+    [
+      "1f64e-200d-2640-fe0f",
+      "woman pouting",
+      0,
+      "disappointed downtrodden frown grimace scowl sulk upset whine"
+    ],
+    [
+      "1f645",
+      "person gesturing NO",
+      0,
+      "forbidden gesture hand not prohibit"
+    ],
+    [
+      "1f645-200d-2642-fe0f",
+      "man gesturing NO",
+      0,
+      "forbidden gesture hand not prohibit"
+    ],
+    [
+      "1f645-200d-2640-fe0f",
+      "woman gesturing NO",
+      0,
+      "forbidden gesture hand not prohibit"
+    ],
+    [
+      "1f646",
+      "person gesturing OK",
+      0,
+      "exercise gesture hand omg"
+    ],
+    [
+      "1f646-200d-2642-fe0f",
+      "man gesturing OK",
+      0,
+      "exercise gesture hand omg"
+    ],
+    [
+      "1f646-200d-2640-fe0f",
+      "woman gesturing OK",
+      0,
+      "exercise gesture hand omg"
+    ],
+    [
+      "1f481",
+      "person tipping hand",
+      0,
+      "fetch flick flip gossip sarcasm sarcastic sassy seriously whatever"
+    ],
+    [
+      "1f481-200d-2642-fe0f",
+      "man tipping hand",
+      0,
+      "fetch flick flip gossip sarcasm sarcastic sassy seriously whatever"
+    ],
+    [
+      "1f481-200d-2640-fe0f",
+      "woman tipping hand",
+      0,
+      "fetch flick flip gossip sarcasm sarcastic sassy seriously whatever"
+    ],
+    [
+      "1f64b",
+      "person raising hand",
+      0,
+      "gesture here know me pick question raise"
+    ],
+    [
+      "1f64b-200d-2642-fe0f",
+      "man raising hand",
+      0,
+      "gesture here know me pick question raise"
+    ],
+    [
+      "1f64b-200d-2640-fe0f",
+      "woman raising hand",
+      0,
+      "gesture here know me pick question raise"
+    ],
+    [
+      "1f9cf",
+      "deaf person",
+      0,
+      "accessibility ear gesture hear"
+    ],
+    [
+      "1f9cf-200d-2642-fe0f",
+      "deaf man",
+      0,
+      "accessibility ear gesture hear"
+    ],
+    [
+      "1f9cf-200d-2640-fe0f",
+      "deaf woman",
+      0,
+      "accessibility ear gesture hear"
+    ],
+    [
+      "1f647",
+      "person bowing",
+      0,
+      "apology ask beg bow favor forgive gesture meditate meditation pity regret sorry"
+    ],
+    [
+      "1f647-200d-2642-fe0f",
+      "man bowing",
+      0,
+      "apology ask beg bow favor forgive gesture meditate meditation pity regret sorry"
+    ],
+    [
+      "1f647-200d-2640-fe0f",
+      "woman bowing",
+      0,
+      "apology ask beg bow favor forgive gesture meditate meditation pity regret sorry"
+    ],
+    [
+      "1f926",
+      "person facepalming",
+      0,
+      "again bewilder disbelief exasperation facepalm no not oh omg shock smh"
+    ],
+    [
+      "1f926-200d-2642-fe0f",
+      "man facepalming",
+      0,
+      "again bewilder disbelief exasperation facepalm no not oh omg shock smh"
+    ],
+    [
+      "1f926-200d-2640-fe0f",
+      "woman facepalming",
+      0,
+      "again bewilder disbelief exasperation facepalm no not oh omg shock smh"
+    ],
+    [
+      "1f937",
+      "person shrugging",
+      0,
+      "doubt dunno guess idk ignorance indifference knows maybe shrug whatever who"
+    ],
+    [
+      "1f937-200d-2642-fe0f",
+      "man shrugging",
+      0,
+      "doubt dunno guess idk ignorance indifference knows maybe shrug whatever who"
+    ],
+    [
+      "1f937-200d-2640-fe0f",
+      "woman shrugging",
+      0,
+      "doubt dunno guess idk ignorance indifference knows maybe shrug whatever who"
+    ],
+    [
+      "1f9d1-200d-2695-fe0f",
+      "health worker",
+      0,
+      "doctor healthcare nurse therapist"
+    ],
+    [
+      "1f468-200d-2695-fe0f",
+      "man health worker",
+      0,
+      "doctor healthcare nurse therapist"
+    ],
+    [
+      "1f469-200d-2695-fe0f",
+      "woman health worker",
+      0,
+      "doctor healthcare nurse therapist"
+    ],
+    [
+      "1f9d1-200d-1f393",
+      "student",
+      0,
+      "graduate"
+    ],
+    [
+      "1f468-200d-1f393",
+      "man student",
+      0,
+      "graduate"
+    ],
+    [
+      "1f469-200d-1f393",
+      "woman student",
+      0,
+      "graduate"
+    ],
+    [
+      "1f9d1-200d-1f3eb",
+      "teacher",
+      0,
+      "instructor lecturer professor"
+    ],
+    [
+      "1f468-200d-1f3eb",
+      "man teacher",
+      0,
+      "instructor lecturer professor"
+    ],
+    [
+      "1f469-200d-1f3eb",
+      "woman teacher",
+      0,
+      "instructor lecturer professor"
+    ],
+    [
+      "1f9d1-200d-2696-fe0f",
+      "judge",
+      0,
+      "justice law scales"
+    ],
+    [
+      "1f468-200d-2696-fe0f",
+      "man judge",
+      0,
+      "justice law scales"
+    ],
+    [
+      "1f469-200d-2696-fe0f",
+      "woman judge",
+      0,
+      "justice law scales"
+    ],
+    [
+      "1f9d1-200d-1f33e",
+      "farmer",
+      0,
+      "gardener rancher"
+    ],
+    [
+      "1f468-200d-1f33e",
+      "man farmer",
+      0,
+      "gardener rancher"
+    ],
+    [
+      "1f469-200d-1f33e",
+      "woman farmer",
+      0,
+      "gardener rancher"
+    ],
+    [
+      "1f9d1-200d-1f373",
+      "cook",
+      0,
+      "chef"
+    ],
+    [
+      "1f468-200d-1f373",
+      "man cook",
+      0,
+      "chef"
+    ],
+    [
+      "1f469-200d-1f373",
+      "woman cook",
+      0,
+      "chef"
+    ],
+    [
+      "1f9d1-200d-1f527",
+      "mechanic",
+      0,
+      "electrician plumber tradesperson"
+    ],
+    [
+      "1f468-200d-1f527",
+      "man mechanic",
+      0,
+      "electrician plumber tradesperson"
+    ],
+    [
+      "1f469-200d-1f527",
+      "woman mechanic",
+      0,
+      "electrician plumber tradesperson"
+    ],
+    [
+      "1f9d1-200d-1f3ed",
+      "factory worker",
+      0,
+      "assembly industrial"
+    ],
+    [
+      "1f468-200d-1f3ed",
+      "man factory worker",
+      0,
+      "assembly industrial"
+    ],
+    [
+      "1f469-200d-1f3ed",
+      "woman factory worker",
+      0,
+      "assembly industrial"
+    ],
+    [
+      "1f9d1-200d-1f4bc",
+      "office worker",
+      0,
+      "architect business manager white-collar"
+    ],
+    [
+      "1f468-200d-1f4bc",
+      "man office worker",
+      0,
+      "architect business manager white-collar"
+    ],
+    [
+      "1f469-200d-1f4bc",
+      "woman office worker",
+      0,
+      "architect business manager white-collar"
+    ],
+    [
+      "1f9d1-200d-1f52c",
+      "scientist",
+      0,
+      "biologist chemist engineer mathematician physicist"
+    ],
+    [
+      "1f468-200d-1f52c",
+      "man scientist",
+      0,
+      "biologist chemist engineer mathematician physicist"
+    ],
+    [
+      "1f469-200d-1f52c",
+      "woman scientist",
+      0,
+      "biologist chemist engineer mathematician physicist"
+    ],
+    [
+      "1f9d1-200d-1f4bb",
+      "technologist",
+      0,
+      "coder computer developer inventor software"
+    ],
+    [
+      "1f468-200d-1f4bb",
+      "man technologist",
+      0,
+      "coder computer developer inventor software"
+    ],
+    [
+      "1f469-200d-1f4bb",
+      "woman technologist",
+      0,
+      "coder computer developer inventor software"
+    ],
+    [
+      "1f9d1-200d-1f3a4",
+      "singer",
+      0,
+      "actor entertainer rock rockstar star"
+    ],
+    [
+      "1f468-200d-1f3a4",
+      "man singer",
+      0,
+      "actor entertainer rock rockstar star"
+    ],
+    [
+      "1f469-200d-1f3a4",
+      "woman singer",
+      0,
+      "actor entertainer rock rockstar star"
+    ],
+    [
+      "1f9d1-200d-1f3a8",
+      "artist",
+      0,
+      "palette"
+    ],
+    [
+      "1f468-200d-1f3a8",
+      "man artist",
+      0,
+      "palette"
+    ],
+    [
+      "1f469-200d-1f3a8",
+      "woman artist",
+      0,
+      "palette"
+    ],
+    [
+      "1f9d1-200d-2708-fe0f",
+      "pilot",
+      0,
+      "plane"
+    ],
+    [
+      "1f468-200d-2708-fe0f",
+      "man pilot",
+      0,
+      "plane"
+    ],
+    [
+      "1f469-200d-2708-fe0f",
+      "woman pilot",
+      0,
+      "plane"
+    ],
+    [
+      "1f9d1-200d-1f680",
+      "astronaut",
+      0,
+      "rocket space"
+    ],
+    [
+      "1f468-200d-1f680",
+      "man astronaut",
+      0,
+      "rocket space"
+    ],
+    [
+      "1f469-200d-1f680",
+      "woman astronaut",
+      0,
+      "rocket space"
+    ],
+    [
+      "1f9d1-200d-1f692",
+      "firefighter",
+      0,
+      "fire firetruck"
+    ],
+    [
+      "1f468-200d-1f692",
+      "man firefighter",
+      0,
+      "fire firetruck"
+    ],
+    [
+      "1f469-200d-1f692",
+      "woman firefighter",
+      0,
+      "fire firetruck"
+    ],
+    [
+      "1f46e",
+      "police officer",
+      0,
+      "apprehend arrest citation cop law over pulled undercover"
+    ],
+    [
+      "1f46e-200d-2642-fe0f",
+      "man police officer",
+      0,
+      "apprehend arrest citation cop law over pulled undercover"
+    ],
+    [
+      "1f46e-200d-2640-fe0f",
+      "woman police officer",
+      0,
+      "apprehend arrest citation cop law over pulled undercover"
+    ],
+    [
+      "1f575-fe0f",
+      "detective",
+      0,
+      "sleuth spy"
+    ],
+    [
+      "1f575-fe0f-200d-2642-fe0f",
+      "man detective",
+      0,
+      "sleuth spy"
+    ],
+    [
+      "1f575-fe0f-200d-2640-fe0f",
+      "woman detective",
+      0,
+      "sleuth spy"
+    ],
+    [
+      "1f482",
+      "guard",
+      0,
+      "buckingham helmet london palace"
+    ],
+    [
+      "1f482-200d-2642-fe0f",
+      "man guard",
+      0,
+      "buckingham helmet london palace"
+    ],
+    [
+      "1f482-200d-2640-fe0f",
+      "woman guard",
+      0,
+      "buckingham helmet london palace"
+    ],
+    [
+      "1f977",
+      "ninja",
+      0,
+      "assassin fight fighter hidden person secret skills sly soldier stealth war"
+    ],
+    [
+      "1f477",
+      "construction worker",
+      0,
+      "build fix hardhat hat man person rebuild remodel repair work"
+    ],
+    [
+      "1f477-200d-2642-fe0f",
+      "man construction worker",
+      0,
+      "build fix hardhat hat rebuild remodel repair work"
+    ],
+    [
+      "1f477-200d-2640-fe0f",
+      "woman construction worker",
+      0,
+      "build fix hardhat hat man rebuild remodel repair work"
+    ],
+    [
+      "1fac5",
+      "person with crown",
+      0,
+      "monarch noble regal royal royalty"
+    ],
+    [
+      "1f934",
+      "prince",
+      0,
+      "crown fairy fairytale fantasy king royal royalty tale"
+    ],
+    [
+      "1f478",
+      "princess",
+      0,
+      "crown fairy fairytale fantasy queen royal royalty tale"
+    ],
+    [
+      "1f473",
+      "person wearing turban",
+      0,
+      ""
+    ],
+    [
+      "1f473-200d-2642-fe0f",
+      "man wearing turban",
+      0,
+      ""
+    ],
+    [
+      "1f473-200d-2640-fe0f",
+      "woman wearing turban",
+      0,
+      ""
+    ],
+    [
+      "1f472",
+      "person with skullcap",
+      0,
+      "cap chinese gua guapi hat mao pi"
+    ],
+    [
+      "1f9d5",
+      "woman with headscarf",
+      0,
+      "bandana head hijab kerchief mantilla tichel"
+    ],
+    [
+      "1f935",
+      "person in tuxedo",
+      0,
+      "formal wedding"
+    ],
+    [
+      "1f935-200d-2642-fe0f",
+      "man in tuxedo",
+      0,
+      "formal groom wedding"
+    ],
+    [
+      "1f935-200d-2640-fe0f",
+      "woman in tuxedo",
+      0,
+      "formal wedding"
+    ],
+    [
+      "1f470",
+      "person with veil",
+      0,
+      "wedding"
+    ],
+    [
+      "1f470-200d-2642-fe0f",
+      "man with veil",
+      0,
+      "wedding"
+    ],
+    [
+      "1f470-200d-2640-fe0f",
+      "woman with veil",
+      0,
+      "bride wedding"
+    ],
+    [
+      "1f930",
+      "pregnant woman",
+      0,
+      ""
+    ],
+    [
+      "1fac3",
+      "pregnant man",
+      0,
+      "belly bloated full overeat"
+    ],
+    [
+      "1fac4",
+      "pregnant person",
+      0,
+      "belly bloated full overeat stuffed"
+    ],
+    [
+      "1f931",
+      "breast-feeding",
+      0,
+      "baby breast feeding mom mother nursing woman"
+    ],
+    [
+      "1f469-200d-1f37c",
+      "woman feeding baby",
+      0,
+      "feed mom mother nanny newborn nursing"
+    ],
+    [
+      "1f468-200d-1f37c",
+      "man feeding baby",
+      0,
+      "dad father feed nanny newborn nursing"
+    ],
+    [
+      "1f9d1-200d-1f37c",
+      "person feeding baby",
+      0,
+      "feed nanny newborn nursing parent"
+    ],
+    [
+      "1f47c",
+      "baby angel",
+      0,
+      "church face fairy fairytale fantasy tale"
+    ],
+    [
+      "1f385",
+      "Santa Claus",
+      0,
+      "celebration christmas fairy fantasy father holiday merry tale xmas"
+    ],
+    [
+      "1f936",
+      "Mrs. Claus",
+      0,
+      "celebration christmas fairy fantasy holiday merry mother mrs santa tale xmas"
+    ],
+    [
+      "1f9d1-200d-1f384",
+      "Mx Claus",
+      0,
+      "celebration christmas fairy fantasy holiday merry santa tale xmas"
+    ],
+    [
+      "1f9b8",
+      "superhero",
+      0,
+      "good hero superpower"
+    ],
+    [
+      "1f9b8-200d-2642-fe0f",
+      "man superhero",
+      0,
+      "good hero superpower"
+    ],
+    [
+      "1f9b8-200d-2640-fe0f",
+      "woman superhero",
+      0,
+      "good hero heroine superpower"
+    ],
+    [
+      "1f9b9",
+      "supervillain",
+      0,
+      "bad criminal evil superpower villain"
+    ],
+    [
+      "1f9b9-200d-2642-fe0f",
+      "man supervillain",
+      0,
+      "bad criminal evil superpower villain"
+    ],
+    [
+      "1f9b9-200d-2640-fe0f",
+      "woman supervillain",
+      0,
+      "bad criminal evil superpower villain"
+    ],
+    [
+      "1f9d9",
+      "mage",
+      0,
+      "fantasy magic play sorcerer sorceress sorcery spell summon witch wizard"
+    ],
+    [
+      "1f9d9-200d-2642-fe0f",
+      "man mage",
+      0,
+      "fantasy magic play sorcerer sorceress sorcery spell summon witch wizard"
+    ],
+    [
+      "1f9d9-200d-2640-fe0f",
+      "woman mage",
+      0,
+      "fantasy magic play sorcerer sorceress sorcery spell summon witch wizard"
+    ],
+    [
+      "1f9da",
+      "fairy",
+      0,
+      "fairytale fantasy myth person pixie tale wings"
+    ],
+    [
+      "1f9da-200d-2642-fe0f",
+      "man fairy",
+      0,
+      "fairytale fantasy myth oberon person pixie puck tale wings"
+    ],
+    [
+      "1f9da-200d-2640-fe0f",
+      "woman fairy",
+      0,
+      "fairytale fantasy myth person pixie tale titania wings"
+    ],
+    [
+      "1f9db",
+      "vampire",
+      0,
+      "blood dracula fangs halloween scary supernatural teeth undead"
+    ],
+    [
+      "1f9db-200d-2642-fe0f",
+      "man vampire",
+      0,
+      "blood fangs halloween scary supernatural teeth undead"
+    ],
+    [
+      "1f9db-200d-2640-fe0f",
+      "woman vampire",
+      0,
+      "blood fangs halloween scary supernatural teeth undead"
+    ],
+    [
+      "1f9dc",
+      "merperson",
+      0,
+      "creature fairytale folklore ocean sea siren trident"
+    ],
+    [
+      "1f9dc-200d-2642-fe0f",
+      "merman",
+      0,
+      "creature fairytale folklore neptune ocean poseidon sea siren trident triton"
+    ],
+    [
+      "1f9dc-200d-2640-fe0f",
+      "mermaid",
+      0,
+      "creature fairytale folklore merwoman ocean sea siren trident"
+    ],
+    [
+      "1f9dd",
+      "elf",
+      0,
+      "elves enchantment fantasy folklore magic magical myth"
+    ],
+    [
+      "1f9dd-200d-2642-fe0f",
+      "man elf",
+      0,
+      "elves enchantment fantasy folklore magic magical myth"
+    ],
+    [
+      "1f9dd-200d-2640-fe0f",
+      "woman elf",
+      0,
+      "elves enchantment fantasy folklore magic magical myth"
+    ],
+    [
+      "1f9de",
+      "genie",
+      0,
+      "djinn fantasy jinn lamp myth rub wishes"
+    ],
+    [
+      "1f9de-200d-2642-fe0f",
+      "man genie",
+      0,
+      "djinn fantasy jinn lamp myth rub wishes"
+    ],
+    [
+      "1f9de-200d-2640-fe0f",
+      "woman genie",
+      0,
+      "djinn fantasy jinn lamp myth rub wishes"
+    ],
+    [
+      "1f9df",
+      "zombie",
+      0,
+      "apocalypse dead halloween horror scary undead walking"
+    ],
+    [
+      "1f9df-200d-2642-fe0f",
+      "man zombie",
+      0,
+      "apocalypse dead halloween horror scary undead walking"
+    ],
+    [
+      "1f9df-200d-2640-fe0f",
+      "woman zombie",
+      0,
+      "apocalypse dead halloween horror scary undead walking"
+    ],
+    [
+      "1f9cc",
+      "troll",
+      0,
+      "fairy fantasy monster tale trolling"
+    ],
+    [
+      "1fac8",
+      "hairy creature",
+      0,
+      "bigfoot cryptid forest giant sasquatch woodwose yeti"
+    ],
+    [
+      "1f486",
+      "person getting massage",
+      0,
+      "face headache relax relaxing salon soothe spa tension therapy treatment"
+    ],
+    [
+      "1f486-200d-2642-fe0f",
+      "man getting massage",
+      0,
+      "face headache relax relaxing salon soothe spa tension therapy treatment"
+    ],
+    [
+      "1f486-200d-2640-fe0f",
+      "woman getting massage",
+      0,
+      "face headache relax relaxing salon soothe spa tension therapy treatment"
+    ],
+    [
+      "1f487",
+      "person getting haircut",
+      0,
+      "barber beauty chop cosmetology cut groom hair parlor shears style"
+    ],
+    [
+      "1f487-200d-2642-fe0f",
+      "man getting haircut",
+      0,
+      "barber beauty chop cosmetology cut groom hair parlor person shears style"
+    ],
+    [
+      "1f487-200d-2640-fe0f",
+      "woman getting haircut",
+      0,
+      "barber beauty chop cosmetology cut groom hair parlor person shears style"
+    ],
+    [
+      "1f6b6",
+      "person walking",
+      0,
+      "amble gait hike man pace pedestrian stride stroll walk"
+    ],
+    [
+      "1f6b6-200d-2642-fe0f",
+      "man walking",
+      0,
+      "amble gait hike pace pedestrian stride stroll walk"
+    ],
+    [
+      "1f6b6-200d-2640-fe0f",
+      "woman walking",
+      0,
+      "amble gait hike man pace pedestrian stride stroll walk"
+    ],
+    [
+      "1f6b6-200d-27a1-fe0f",
+      "person walking facing right",
+      0,
+      "amble gait hike man pace pedestrian stride stroll walk"
+    ],
+    [
+      "1f6b6-200d-2640-fe0f-200d-27a1-fe0f",
+      "woman walking facing right",
+      0,
+      "amble gait hike man pace pedestrian stride stroll walk"
+    ],
+    [
+      "1f6b6-200d-2642-fe0f-200d-27a1-fe0f",
+      "man walking facing right",
+      0,
+      "amble gait hike pace pedestrian stride stroll walk"
+    ],
+    [
+      "1f9cd",
+      "person standing",
+      0,
+      "stand"
+    ],
+    [
+      "1f9cd-200d-2642-fe0f",
+      "man standing",
+      0,
+      "stand"
+    ],
+    [
+      "1f9cd-200d-2640-fe0f",
+      "woman standing",
+      0,
+      "stand"
+    ],
+    [
+      "1f9ce",
+      "person kneeling",
+      0,
+      "kneel knees"
+    ],
+    [
+      "1f9ce-200d-2642-fe0f",
+      "man kneeling",
+      0,
+      "kneel knees"
+    ],
+    [
+      "1f9ce-200d-2640-fe0f",
+      "woman kneeling",
+      0,
+      "kneel knees"
+    ],
+    [
+      "1f9ce-200d-27a1-fe0f",
+      "person kneeling facing right",
+      0,
+      "kneel knees"
+    ],
+    [
+      "1f9ce-200d-2640-fe0f-200d-27a1-fe0f",
+      "woman kneeling facing right",
+      0,
+      "kneel knees"
+    ],
+    [
+      "1f9ce-200d-2642-fe0f-200d-27a1-fe0f",
+      "man kneeling facing right",
+      0,
+      "kneel knees"
+    ],
+    [
+      "1f9d1-200d-1f9af",
+      "person with white cane",
+      0,
+      "accessibility blind probing"
+    ],
+    [
+      "1f9d1-200d-1f9af-200d-27a1-fe0f",
+      "person with white cane facing right",
+      0,
+      "accessibility blind probing"
+    ],
+    [
+      "1f468-200d-1f9af",
+      "man with white cane",
+      0,
+      "accessibility blind probing"
+    ],
+    [
+      "1f468-200d-1f9af-200d-27a1-fe0f",
+      "man with white cane facing right",
+      0,
+      "accessibility blind probing"
+    ],
+    [
+      "1f469-200d-1f9af",
+      "woman with white cane",
+      0,
+      "accessibility blind probing"
+    ],
+    [
+      "1f469-200d-1f9af-200d-27a1-fe0f",
+      "woman with white cane facing right",
+      0,
+      "accessibility blind probing"
+    ],
+    [
+      "1f9d1-200d-1f9bc",
+      "person in motorized wheelchair",
+      0,
+      "accessibility"
+    ],
+    [
+      "1f9d1-200d-1f9bc-200d-27a1-fe0f",
+      "person in motorized wheelchair facing right",
+      0,
+      "accessibility"
+    ],
+    [
+      "1f468-200d-1f9bc",
+      "man in motorized wheelchair",
+      0,
+      "accessibility"
+    ],
+    [
+      "1f468-200d-1f9bc-200d-27a1-fe0f",
+      "man in motorized wheelchair facing right",
+      0,
+      "accessibility"
+    ],
+    [
+      "1f469-200d-1f9bc",
+      "woman in motorized wheelchair",
+      0,
+      "accessibility"
+    ],
+    [
+      "1f469-200d-1f9bc-200d-27a1-fe0f",
+      "woman in motorized wheelchair facing right",
+      0,
+      "accessibility"
+    ],
+    [
+      "1f9d1-200d-1f9bd",
+      "person in manual wheelchair",
+      0,
+      "accessibility"
+    ],
+    [
+      "1f9d1-200d-1f9bd-200d-27a1-fe0f",
+      "person in manual wheelchair facing right",
+      0,
+      "accessibility"
+    ],
+    [
+      "1f468-200d-1f9bd",
+      "man in manual wheelchair",
+      0,
+      "accessibility"
+    ],
+    [
+      "1f468-200d-1f9bd-200d-27a1-fe0f",
+      "man in manual wheelchair facing right",
+      0,
+      "accessibility"
+    ],
+    [
+      "1f469-200d-1f9bd",
+      "woman in manual wheelchair",
+      0,
+      "accessibility"
+    ],
+    [
+      "1f469-200d-1f9bd-200d-27a1-fe0f",
+      "woman in manual wheelchair facing right",
+      0,
+      "accessibility"
+    ],
+    [
+      "1f3c3",
+      "person running",
+      0,
+      "fast hurry marathon move quick race racing run rush speed"
+    ],
+    [
+      "1f3c3-200d-2642-fe0f",
+      "man running",
+      0,
+      "fast hurry marathon move quick race racing run rush speed"
+    ],
+    [
+      "1f3c3-200d-2640-fe0f",
+      "woman running",
+      0,
+      "fast hurry marathon move quick race racing run rush speed"
+    ],
+    [
+      "1f3c3-200d-27a1-fe0f",
+      "person running facing right",
+      0,
+      "fast hurry marathon move quick race racing run rush speed"
+    ],
+    [
+      "1f3c3-200d-2640-fe0f-200d-27a1-fe0f",
+      "woman running facing right",
+      0,
+      "fast hurry marathon move quick race racing run rush speed"
+    ],
+    [
+      "1f3c3-200d-2642-fe0f-200d-27a1-fe0f",
+      "man running facing right",
+      0,
+      "fast hurry marathon move quick race racing run rush speed"
+    ],
+    [
+      "1f9d1-200d-1fa70",
+      "ballet dancer",
+      0,
+      ""
+    ],
+    [
+      "1f483",
+      "woman dancing",
+      0,
+      "dance dancer elegant festive flair flamenco groove let’s salsa tango"
+    ],
+    [
+      "1f57a",
+      "man dancing",
+      0,
+      "dance dancer elegant festive flair flamenco groove let’s salsa tango"
+    ],
+    [
+      "1f574-fe0f",
+      "person in suit levitating",
+      0,
+      "business"
+    ],
+    [
+      "1f46f",
+      "people with bunny ears",
+      0,
+      "bestie bff counterpart dancer double ear identical pair party partying soulmate twin twinsies"
+    ],
+    [
+      "1f46f-200d-2642-fe0f",
+      "men with bunny ears",
+      0,
+      "bestie bff counterpart dancer double ear identical pair party partying people soulmate twin twinsies"
+    ],
+    [
+      "1f46f-200d-2640-fe0f",
+      "women with bunny ears",
+      0,
+      "bestie bff counterpart dancer double ear identical pair party partying people soulmate twin twinsies"
+    ],
+    [
+      "1f9d6",
+      "person in steamy room",
+      0,
+      "day luxurious pamper relax sauna spa steam steambath unwind"
+    ],
+    [
+      "1f9d6-200d-2642-fe0f",
+      "man in steamy room",
+      0,
+      "day luxurious pamper relax sauna spa steam steambath unwind"
+    ],
+    [
+      "1f9d6-200d-2640-fe0f",
+      "woman in steamy room",
+      0,
+      "day luxurious pamper relax sauna spa steam steambath unwind"
+    ],
+    [
+      "1f9d7",
+      "person climbing",
+      0,
+      "climb climber mountain rock scale up"
+    ],
+    [
+      "1f9d7-200d-2642-fe0f",
+      "man climbing",
+      0,
+      "climb climber mountain rock scale up"
+    ],
+    [
+      "1f9d7-200d-2640-fe0f",
+      "woman climbing",
+      0,
+      "climb climber mountain rock scale up"
+    ],
+    [
+      "1f93a",
+      "person fencing",
+      0,
+      "fencer sword"
+    ],
+    [
+      "1f3c7",
+      "horse racing",
+      0,
+      "jockey racehorse riding sport"
+    ],
+    [
+      "26f7-fe0f",
+      "skier",
+      0,
+      "ski snow"
+    ],
+    [
+      "1f3c2",
+      "snowboarder",
+      0,
+      "ski snow snowboard sport"
+    ],
+    [
+      "1f3cc-fe0f",
+      "person golfing",
+      0,
+      "ball birdie caddy driving golf green pga putt range tee"
+    ],
+    [
+      "1f3cc-fe0f-200d-2642-fe0f",
+      "man golfing",
+      0,
+      "ball birdie caddy driving golf green pga putt range tee"
+    ],
+    [
+      "1f3cc-fe0f-200d-2640-fe0f",
+      "woman golfing",
+      0,
+      "ball birdie caddy driving golf green pga putt range tee"
+    ],
+    [
+      "1f3c4",
+      "person surfing",
+      0,
+      "beach ocean sport surf surfer swell waves"
+    ],
+    [
+      "1f3c4-200d-2642-fe0f",
+      "man surfing",
+      0,
+      "beach ocean sport surf surfer swell waves"
+    ],
+    [
+      "1f3c4-200d-2640-fe0f",
+      "woman surfing",
+      0,
+      "beach ocean person sport surf surfer swell waves"
+    ],
+    [
+      "1f6a3",
+      "person rowing boat",
+      0,
+      "canoe cruise fishing lake oar paddle raft river row rowboat"
+    ],
+    [
+      "1f6a3-200d-2642-fe0f",
+      "man rowing boat",
+      0,
+      "canoe cruise fishing lake oar paddle raft river row rowboat"
+    ],
+    [
+      "1f6a3-200d-2640-fe0f",
+      "woman rowing boat",
+      0,
+      "canoe cruise fishing lake oar paddle raft river row rowboat"
+    ],
+    [
+      "1f3ca",
+      "person swimming",
+      0,
+      "freestyle sport swim swimmer triathlon"
+    ],
+    [
+      "1f3ca-200d-2642-fe0f",
+      "man swimming",
+      0,
+      "freestyle sport swim swimmer triathlon"
+    ],
+    [
+      "1f3ca-200d-2640-fe0f",
+      "woman swimming",
+      0,
+      "freestyle man sport swim swimmer triathlon"
+    ],
+    [
+      "26f9-fe0f",
+      "person bouncing ball",
+      0,
+      "athletic basketball championship dribble net player throw"
+    ],
+    [
+      "26f9-fe0f-200d-2642-fe0f",
+      "man bouncing ball",
+      0,
+      "athletic basketball championship dribble net player throw"
+    ],
+    [
+      "26f9-fe0f-200d-2640-fe0f",
+      "woman bouncing ball",
+      0,
+      "athletic basketball championship dribble net player throw"
+    ],
+    [
+      "1f3cb-fe0f",
+      "person lifting weights",
+      0,
+      "barbell bodybuilder deadlift lifter powerlifting weight weightlifter workout"
+    ],
+    [
+      "1f3cb-fe0f-200d-2642-fe0f",
+      "man lifting weights",
+      0,
+      "barbell bodybuilder deadlift lifter powerlifting weight weightlifter workout"
+    ],
+    [
+      "1f3cb-fe0f-200d-2640-fe0f",
+      "woman lifting weights",
+      0,
+      "barbell bodybuilder deadlift lifter powerlifting weight weightlifter workout"
+    ],
+    [
+      "1f6b4",
+      "person biking",
+      0,
+      "bicycle bicyclist bike cycle cyclist riding sport"
+    ],
+    [
+      "1f6b4-200d-2642-fe0f",
+      "man biking",
+      0,
+      "bicycle bicyclist bike cycle cyclist riding sport"
+    ],
+    [
+      "1f6b4-200d-2640-fe0f",
+      "woman biking",
+      0,
+      "bicycle bicyclist bike cycle cyclist riding sport"
+    ],
+    [
+      "1f6b5",
+      "person mountain biking",
+      0,
+      "bicycle bicyclist bike cycle cyclist riding sport"
+    ],
+    [
+      "1f6b5-200d-2642-fe0f",
+      "man mountain biking",
+      0,
+      "bicycle bicyclist bike cycle cyclist riding sport"
+    ],
+    [
+      "1f6b5-200d-2640-fe0f",
+      "woman mountain biking",
+      0,
+      "bicycle bicyclist bike cycle cyclist riding sport"
+    ],
+    [
+      "1f938",
+      "person cartwheeling",
+      0,
+      "active cartwheel excited flip gymnastics happy somersault"
+    ],
+    [
+      "1f938-200d-2642-fe0f",
+      "man cartwheeling",
+      0,
+      "active cartwheel excited flip gymnastics happy somersault"
+    ],
+    [
+      "1f938-200d-2640-fe0f",
+      "woman cartwheeling",
+      0,
+      "active cartwheel excited flip gymnastics happy somersault"
+    ],
+    [
+      "1f93c",
+      "people wrestling",
+      0,
+      "combat duel grapple ring tournament wrestle"
+    ],
+    [
+      "1f93c-200d-2642-fe0f",
+      "men wrestling",
+      0,
+      "combat duel grapple ring tournament wrestle"
+    ],
+    [
+      "1f93c-200d-2640-fe0f",
+      "women wrestling",
+      0,
+      "combat duel grapple ring tournament wrestle"
+    ],
+    [
+      "1f93d",
+      "person playing water polo",
+      0,
+      "sport swimming waterpolo"
+    ],
+    [
+      "1f93d-200d-2642-fe0f",
+      "man playing water polo",
+      0,
+      "sport swimming waterpolo"
+    ],
+    [
+      "1f93d-200d-2640-fe0f",
+      "woman playing water polo",
+      0,
+      "sport swimming waterpolo"
+    ],
+    [
+      "1f93e",
+      "person playing handball",
+      0,
+      "athletics ball catch chuck hurl lob pitch sport throw toss"
+    ],
+    [
+      "1f93e-200d-2642-fe0f",
+      "man playing handball",
+      0,
+      "athletics ball catch chuck hurl lob pitch sport throw toss"
+    ],
+    [
+      "1f93e-200d-2640-fe0f",
+      "woman playing handball",
+      0,
+      "athletics ball catch chuck hurl lob pitch sport throw toss"
+    ],
+    [
+      "1f939",
+      "person juggling",
+      0,
+      "act balance balancing handle juggle manage multitask skill"
+    ],
+    [
+      "1f939-200d-2642-fe0f",
+      "man juggling",
+      0,
+      "act balance balancing handle juggle manage multitask skill"
+    ],
+    [
+      "1f939-200d-2640-fe0f",
+      "woman juggling",
+      0,
+      "act balance balancing handle juggle manage multitask skill"
+    ],
+    [
+      "1f9d8",
+      "person in lotus position",
+      0,
+      "cross legged legs meditation peace relax serenity yoga yogi zen"
+    ],
+    [
+      "1f9d8-200d-2642-fe0f",
+      "man in lotus position",
+      0,
+      "cross legged legs meditation peace relax serenity yoga yogi zen"
+    ],
+    [
+      "1f9d8-200d-2640-fe0f",
+      "woman in lotus position",
+      0,
+      "cross legged legs meditation peace relax serenity yoga yogi zen"
+    ],
+    [
+      "1f6c0",
+      "person taking bath",
+      0,
+      "bathtub tub"
+    ],
+    [
+      "1f6cc",
+      "person in bed",
+      0,
+      "bedtime good goodnight hotel nap night sleep tired zzz"
+    ],
+    [
+      "1f9d1-200d-1f91d-200d-1f9d1",
+      "people holding hands",
+      0,
+      "bae bestie bff couple dating flirt friends hand hold twins"
+    ],
+    [
+      "1f46d",
+      "women holding hands",
+      0,
+      "bae bestie bff couple dating flirt friends girls hand hold sisters twins"
+    ],
+    [
+      "1f46b",
+      "woman and man holding hands",
+      0,
+      "bae bestie bff couple dating flirt friends hand hold twins"
+    ],
+    [
+      "1f46c",
+      "men holding hands",
+      0,
+      "bae bestie bff boys brothers couple dating flirt friends hand hold twins"
+    ],
+    [
+      "1f48f",
+      "kiss",
+      0,
+      "anniversary babe bae couple date dating heart love mwah person romance together xoxo"
+    ],
+    [
+      "1f469-200d-2764-fe0f-200d-1f48b-200d-1f468",
+      "kiss: woman, man",
+      0,
+      "anniversary babe bae couple date dating heart love mwah person romance together xoxo"
+    ],
+    [
+      "1f468-200d-2764-fe0f-200d-1f48b-200d-1f468",
+      "kiss: man, man",
+      0,
+      "anniversary babe bae couple date dating heart love mwah person romance together xoxo"
+    ],
+    [
+      "1f469-200d-2764-fe0f-200d-1f48b-200d-1f469",
+      "kiss: woman, woman",
+      0,
+      "anniversary babe bae couple date dating heart love mwah person romance together xoxo"
+    ],
+    [
+      "1f491",
+      "couple with heart",
+      0,
+      "anniversary babe bae dating kiss love person relationship romance together you"
+    ],
+    [
+      "1f469-200d-2764-fe0f-200d-1f468",
+      "couple with heart: woman, man",
+      0,
+      "anniversary babe bae dating kiss love person relationship romance together you"
+    ],
+    [
+      "1f468-200d-2764-fe0f-200d-1f468",
+      "couple with heart: man, man",
+      0,
+      "anniversary babe bae dating kiss love person relationship romance together you"
+    ],
+    [
+      "1f469-200d-2764-fe0f-200d-1f469",
+      "couple with heart: woman, woman",
+      0,
+      "anniversary babe bae dating kiss love person relationship romance together you"
+    ],
+    [
+      "1f468-200d-1f469-200d-1f466",
+      "family: man, woman, boy",
+      0,
+      "child"
+    ],
+    [
+      "1f468-200d-1f469-200d-1f467",
+      "family: man, woman, girl",
+      0,
+      "child"
+    ],
+    [
+      "1f468-200d-1f469-200d-1f467-200d-1f466",
+      "family: man, woman, girl, boy",
+      0,
+      "child"
+    ],
+    [
+      "1f468-200d-1f469-200d-1f466-200d-1f466",
+      "family: man, woman, boy, boy",
+      0,
+      "child"
+    ],
+    [
+      "1f468-200d-1f469-200d-1f467-200d-1f467",
+      "family: man, woman, girl, girl",
+      0,
+      "child"
+    ],
+    [
+      "1f468-200d-1f468-200d-1f466",
+      "family: man, man, boy",
+      0,
+      "child"
+    ],
+    [
+      "1f468-200d-1f468-200d-1f467",
+      "family: man, man, girl",
+      0,
+      "child"
+    ],
+    [
+      "1f468-200d-1f468-200d-1f467-200d-1f466",
+      "family: man, man, girl, boy",
+      0,
+      "child"
+    ],
+    [
+      "1f468-200d-1f468-200d-1f466-200d-1f466",
+      "family: man, man, boy, boy",
+      0,
+      "child"
+    ],
+    [
+      "1f468-200d-1f468-200d-1f467-200d-1f467",
+      "family: man, man, girl, girl",
+      0,
+      "child"
+    ],
+    [
+      "1f469-200d-1f469-200d-1f466",
+      "family: woman, woman, boy",
+      0,
+      "child"
+    ],
+    [
+      "1f469-200d-1f469-200d-1f467",
+      "family: woman, woman, girl",
+      0,
+      "child"
+    ],
+    [
+      "1f469-200d-1f469-200d-1f467-200d-1f466",
+      "family: woman, woman, girl, boy",
+      0,
+      "child"
+    ],
+    [
+      "1f469-200d-1f469-200d-1f466-200d-1f466",
+      "family: woman, woman, boy, boy",
+      0,
+      "child"
+    ],
+    [
+      "1f469-200d-1f469-200d-1f467-200d-1f467",
+      "family: woman, woman, girl, girl",
+      0,
+      "child"
+    ],
+    [
+      "1f468-200d-1f466",
+      "family: man, boy",
+      0,
+      "child"
+    ],
+    [
+      "1f468-200d-1f466-200d-1f466",
+      "family: man, boy, boy",
+      0,
+      "child"
+    ],
+    [
+      "1f468-200d-1f467",
+      "family: man, girl",
+      0,
+      "child"
+    ],
+    [
+      "1f468-200d-1f467-200d-1f466",
+      "family: man, girl, boy",
+      0,
+      "child"
+    ],
+    [
+      "1f468-200d-1f467-200d-1f467",
+      "family: man, girl, girl",
+      0,
+      "child"
+    ],
+    [
+      "1f469-200d-1f466",
+      "family: woman, boy",
+      0,
+      "child"
+    ],
+    [
+      "1f469-200d-1f466-200d-1f466",
+      "family: woman, boy, boy",
+      0,
+      "child"
+    ],
+    [
+      "1f469-200d-1f467",
+      "family: woman, girl",
+      0,
+      "child"
+    ],
+    [
+      "1f469-200d-1f467-200d-1f466",
+      "family: woman, girl, boy",
+      0,
+      "child"
+    ],
+    [
+      "1f469-200d-1f467-200d-1f467",
+      "family: woman, girl, girl",
+      0,
+      "child"
+    ],
+    [
+      "1f5e3-fe0f",
+      "speaking head",
+      0,
+      "face silhouette speak"
+    ],
+    [
+      "1f464",
+      "bust in silhouette",
+      0,
+      "mysterious shadow"
+    ],
+    [
+      "1f465",
+      "busts in silhouette",
+      0,
+      "bff bust everyone friend friends people"
+    ],
+    [
+      "1fac2",
+      "people hugging",
+      0,
+      "comfort embrace farewell friendship goodbye hello hug love thanks"
+    ],
+    [
+      "1f46a",
+      "family",
+      0,
+      "child"
+    ],
+    [
+      "1f9d1-200d-1f9d1-200d-1f9d2",
+      "family: adult, adult, child",
+      0,
+      ""
+    ],
+    [
+      "1f9d1-200d-1f9d1-200d-1f9d2-200d-1f9d2",
+      "family: adult, adult, child, child",
+      0,
+      ""
+    ],
+    [
+      "1f9d1-200d-1f9d2",
+      "family: adult, child",
+      0,
+      ""
+    ],
+    [
+      "1f9d1-200d-1f9d2-200d-1f9d2",
+      "family: adult, child, child",
+      0,
+      ""
+    ],
+    [
+      "1f463",
+      "footprints",
+      0,
+      "barefoot clothing footprint omw print walk"
+    ],
+    [
+      "1fac6",
+      "fingerprint",
+      0,
+      "clue crime detective forensics identity mystery print safety trace"
+    ],
+    [
+      "1f435",
+      "monkey face",
+      1,
+      "animal banana"
+    ],
+    [
+      "1f412",
+      "monkey",
+      1,
+      "animal banana"
+    ],
+    [
+      "1f98d",
+      "gorilla",
+      1,
+      "animal"
+    ],
+    [
+      "1f9a7",
+      "orangutan",
+      1,
+      "animal ape monkey"
+    ],
+    [
+      "1f436",
+      "dog face",
+      1,
+      "adorbs animal pet puppies puppy"
+    ],
+    [
+      "1f415",
+      "dog",
+      1,
+      "animal animals dogs pet"
+    ],
+    [
+      "1f9ae",
+      "guide dog",
+      1,
+      "accessibility animal blind"
+    ],
+    [
+      "1f415-200d-1f9ba",
+      "service dog",
+      1,
+      "accessibility animal assistance"
+    ],
+    [
+      "1f429",
+      "poodle",
+      1,
+      "animal dog fluffy"
+    ],
+    [
+      "1f43a",
+      "wolf",
+      1,
+      "animal face"
+    ],
+    [
+      "1f98a",
+      "fox",
+      1,
+      "animal face"
+    ],
+    [
+      "1f99d",
+      "raccoon",
+      1,
+      "animal curious sly"
+    ],
+    [
+      "1f431",
+      "cat face",
+      1,
+      "animal kitten kitty pet"
+    ],
+    [
+      "1f408",
+      "cat",
+      1,
+      "animal animals cats kitten pet"
+    ],
+    [
+      "1f408-200d-2b1b",
+      "black cat",
+      1,
+      "animal feline halloween meow unlucky"
+    ],
+    [
+      "1f981",
+      "lion",
+      1,
+      "alpha animal face leo mane order rawr roar safari strong zodiac"
+    ],
+    [
+      "1f42f",
+      "tiger face",
+      1,
+      "animal big cat predator"
+    ],
+    [
+      "1f405",
+      "tiger",
+      1,
+      "animal big cat predator zoo"
+    ],
+    [
+      "1f406",
+      "leopard",
+      1,
+      "animal big cat predator zoo"
+    ],
+    [
+      "1f434",
+      "horse face",
+      1,
+      "animal dressage equine farm horses"
+    ],
+    [
+      "1face",
+      "moose",
+      1,
+      "alces animal antlers elk mammal"
+    ],
+    [
+      "1facf",
+      "donkey",
+      1,
+      "animal ass burro hinny mammal mule stubborn"
+    ],
+    [
+      "1f40e",
+      "horse",
+      1,
+      "animal equestrian farm racehorse racing"
+    ],
+    [
+      "1f984",
+      "unicorn",
+      1,
+      "face"
+    ],
+    [
+      "1f993",
+      "zebra",
+      1,
+      "animal stripe"
+    ],
+    [
+      "1f98c",
+      "deer",
+      1,
+      "animal"
+    ],
+    [
+      "1f9ac",
+      "bison",
+      1,
+      "animal buffalo herd wisent"
+    ],
+    [
+      "1f42e",
+      "cow face",
+      1,
+      "animal farm milk moo"
+    ],
+    [
+      "1f402",
+      "ox",
+      1,
+      "animal animals bull farm taurus zodiac"
+    ],
+    [
+      "1f403",
+      "water buffalo",
+      1,
+      "animal zoo"
+    ],
+    [
+      "1f404",
+      "cow",
+      1,
+      "animal animals farm milk moo"
+    ],
+    [
+      "1f437",
+      "pig face",
+      1,
+      "animal bacon farm pork"
+    ],
+    [
+      "1f416",
+      "pig",
+      1,
+      "animal bacon farm pork sow"
+    ],
+    [
+      "1f417",
+      "boar",
+      1,
+      "animal pig"
+    ],
+    [
+      "1f43d",
+      "pig nose",
+      1,
+      "animal face farm smell snout"
+    ],
+    [
+      "1f40f",
+      "ram",
+      1,
+      "animal aries horns male sheep zodiac zoo"
+    ],
+    [
+      "1f411",
+      "ewe",
+      1,
+      "animal baa farm female fluffy lamb sheep wool"
+    ],
+    [
+      "1f410",
+      "goat",
+      1,
+      "animal capricorn farm milk zodiac"
+    ],
+    [
+      "1f42a",
+      "camel",
+      1,
+      "animal desert dromedary hump one"
+    ],
+    [
+      "1f42b",
+      "two-hump camel",
+      1,
+      "animal bactrian desert hump two"
+    ],
+    [
+      "1f999",
+      "llama",
+      1,
+      "alpaca animal guanaco vicuña wool"
+    ],
+    [
+      "1f992",
+      "giraffe",
+      1,
+      "animal spots"
+    ],
+    [
+      "1f418",
+      "elephant",
+      1,
+      "animal"
+    ],
+    [
+      "1f9a3",
+      "mammoth",
+      1,
+      "animal extinction large tusk wooly"
+    ],
+    [
+      "1f98f",
+      "rhinoceros",
+      1,
+      "animal"
+    ],
+    [
+      "1f99b",
+      "hippopotamus",
+      1,
+      "animal hippo"
+    ],
+    [
+      "1f42d",
+      "mouse face",
+      1,
+      "animal"
+    ],
+    [
+      "1f401",
+      "mouse",
+      1,
+      "animal animals"
+    ],
+    [
+      "1f400",
+      "rat",
+      1,
+      "animal"
+    ],
+    [
+      "1f439",
+      "hamster",
+      1,
+      "animal face pet"
+    ],
+    [
+      "1f430",
+      "rabbit face",
+      1,
+      "animal bunny pet"
+    ],
+    [
+      "1f407",
+      "rabbit",
+      1,
+      "animal bunny pet"
+    ],
+    [
+      "1f43f-fe0f",
+      "chipmunk",
+      1,
+      "animal squirrel"
+    ],
+    [
+      "1f9ab",
+      "beaver",
+      1,
+      "animal dam teeth"
+    ],
+    [
+      "1f994",
+      "hedgehog",
+      1,
+      "animal spiny"
+    ],
+    [
+      "1f987",
+      "bat",
+      1,
+      "animal vampire"
+    ],
+    [
+      "1f43b",
+      "bear",
+      1,
+      "animal face grizzly growl honey"
+    ],
+    [
+      "1f43b-200d-2744-fe0f",
+      "polar bear",
+      1,
+      "animal arctic white"
+    ],
+    [
+      "1f428",
+      "koala",
+      1,
+      "animal australia bear down face marsupial under"
+    ],
+    [
+      "1f43c",
+      "panda",
+      1,
+      "animal bamboo face"
+    ],
+    [
+      "1f9a5",
+      "sloth",
+      1,
+      "lazy slow"
+    ],
+    [
+      "1f9a6",
+      "otter",
+      1,
+      "animal fishing playful"
+    ],
+    [
+      "1f9a8",
+      "skunk",
+      1,
+      "animal stink"
+    ],
+    [
+      "1f998",
+      "kangaroo",
+      1,
+      "animal joey jump marsupial"
+    ],
+    [
+      "1f9a1",
+      "badger",
+      1,
+      "animal honey pester"
+    ],
+    [
+      "1f43e",
+      "paw prints",
+      1,
+      "feet paws print"
+    ],
+    [
+      "1f983",
+      "turkey",
+      1,
+      "bird gobble thanksgiving"
+    ],
+    [
+      "1f414",
+      "chicken",
+      1,
+      "animal bird ornithology"
+    ],
+    [
+      "1f413",
+      "rooster",
+      1,
+      "animal bird ornithology"
+    ],
+    [
+      "1f423",
+      "hatching chick",
+      1,
+      "animal baby bird egg"
+    ],
+    [
+      "1f424",
+      "baby chick",
+      1,
+      "animal bird ornithology"
+    ],
+    [
+      "1f425",
+      "front-facing baby chick",
+      1,
+      "animal bird newborn ornithology"
+    ],
+    [
+      "1f426",
+      "bird",
+      1,
+      "animal ornithology"
+    ],
+    [
+      "1f427",
+      "penguin",
+      1,
+      "animal antarctica bird ornithology"
+    ],
+    [
+      "1f54a-fe0f",
+      "dove",
+      1,
+      "bird fly ornithology peace"
+    ],
+    [
+      "1f985",
+      "eagle",
+      1,
+      "animal bird ornithology"
+    ],
+    [
+      "1f986",
+      "duck",
+      1,
+      "animal bird ornithology"
+    ],
+    [
+      "1f9a2",
+      "swan",
+      1,
+      "animal bird cygnet duckling ornithology ugly"
+    ],
+    [
+      "1f989",
+      "owl",
+      1,
+      "animal bird ornithology wise"
+    ],
+    [
+      "1f9a4",
+      "dodo",
+      1,
+      "animal bird extinction large ornithology"
+    ],
+    [
+      "1fab6",
+      "feather",
+      1,
+      "bird flight light plumage"
+    ],
+    [
+      "1f9a9",
+      "flamingo",
+      1,
+      "animal bird flamboyant ornithology tropical"
+    ],
+    [
+      "1f99a",
+      "peacock",
+      1,
+      "animal bird colorful ornithology ostentatious peahen pretty proud"
+    ],
+    [
+      "1f99c",
+      "parrot",
+      1,
+      "animal bird ornithology pirate talk"
+    ],
+    [
+      "1fabd",
+      "wing",
+      1,
+      "angelic ascend aviation bird fly flying heavenly mythology soar"
+    ],
+    [
+      "1f426-200d-2b1b",
+      "black bird",
+      1,
+      "animal beak caw corvid crow ornithology raven rook"
+    ],
+    [
+      "1fabf",
+      "goose",
+      1,
+      "animal bird duck flock fowl gaggle gander geese honk ornithology silly"
+    ],
+    [
+      "1f426-200d-1f525",
+      "phoenix",
+      1,
+      "ascend ascension emerge fantasy firebird glory immortal rebirth reincarnation reinvent renewal revival revive rise transform"
+    ],
+    [
+      "1f438",
+      "frog",
+      1,
+      "animal face"
+    ],
+    [
+      "1f40a",
+      "crocodile",
+      1,
+      "animal zoo"
+    ],
+    [
+      "1f422",
+      "turtle",
+      1,
+      "animal terrapin tortoise"
+    ],
+    [
+      "1f98e",
+      "lizard",
+      1,
+      "animal reptile"
+    ],
+    [
+      "1f40d",
+      "snake",
+      1,
+      "animal bearer ophiuchus serpent zodiac"
+    ],
+    [
+      "1f432",
+      "dragon face",
+      1,
+      "animal fairy fairytale tale"
+    ],
+    [
+      "1f409",
+      "dragon",
+      1,
+      "animal fairy fairytale knights tale"
+    ],
+    [
+      "1f995",
+      "sauropod",
+      1,
+      "brachiosaurus brontosaurus dinosaur diplodocus"
+    ],
+    [
+      "1f996",
+      "T-Rex",
+      1,
+      "dinosaur rex t tyrannosaurus"
+    ],
+    [
+      "1f433",
+      "spouting whale",
+      1,
+      "animal beach face ocean"
+    ],
+    [
+      "1f40b",
+      "whale",
+      1,
+      "animal beach ocean"
+    ],
+    [
+      "1f42c",
+      "dolphin",
+      1,
+      "animal beach flipper ocean"
+    ],
+    [
+      "1facd",
+      "orca",
+      1,
+      "marine ocean whale"
+    ],
+    [
+      "1f9ad",
+      "seal",
+      1,
+      "animal lion ocean sea"
+    ],
+    [
+      "1f41f",
+      "fish",
+      1,
+      "animal dinner fishes fishing pisces zodiac"
+    ],
+    [
+      "1f420",
+      "tropical fish",
+      1,
+      "animal fishes"
+    ],
+    [
+      "1f421",
+      "blowfish",
+      1,
+      "animal fish"
+    ],
+    [
+      "1f988",
+      "shark",
+      1,
+      "animal fish"
+    ],
+    [
+      "1f419",
+      "octopus",
+      1,
+      "animal creature ocean"
+    ],
+    [
+      "1f41a",
+      "spiral shell",
+      1,
+      "animal beach conch sea"
+    ],
+    [
+      "1fab8",
+      "coral",
+      1,
+      "change climate ocean reef sea"
+    ],
+    [
+      "1fabc",
+      "jellyfish",
+      1,
+      "animal aquarium burn invertebrate jelly life marine ocean ouch plankton sea sting stinger tentacles"
+    ],
+    [
+      "1f980",
+      "crab",
+      1,
+      "cancer zodiac"
+    ],
+    [
+      "1f99e",
+      "lobster",
+      1,
+      "animal bisque claws seafood"
+    ],
+    [
+      "1f990",
+      "shrimp",
+      1,
+      "food shellfish small"
+    ],
+    [
+      "1f991",
+      "squid",
+      1,
+      "animal food mollusk"
+    ],
+    [
+      "1f9aa",
+      "oyster",
+      1,
+      "diving pearl"
+    ],
+    [
+      "1f40c",
+      "snail",
+      1,
+      "animal escargot garden nature slug"
+    ],
+    [
+      "1f98b",
+      "butterfly",
+      1,
+      "insect pretty"
+    ],
+    [
+      "1facc",
+      "monarch butterfly",
+      1,
+      "caterpillar change fragile hope insect metamorphosis migration transformation"
+    ],
+    [
+      "1f41b",
+      "bug",
+      1,
+      "animal garden insect"
+    ],
+    [
+      "1f41c",
+      "ant",
+      1,
+      "animal garden insect"
+    ],
+    [
+      "1f41d",
+      "honeybee",
+      1,
+      "animal bee bumblebee honey insect nature spring"
+    ],
+    [
+      "1fab2",
+      "beetle",
+      1,
+      "animal bug insect"
+    ],
+    [
+      "1f41e",
+      "lady beetle",
+      1,
+      "animal garden insect ladybird ladybug nature"
+    ],
+    [
+      "1f997",
+      "cricket",
+      1,
+      "animal bug grasshopper insect orthoptera"
+    ],
+    [
+      "1fab3",
+      "cockroach",
+      1,
+      "animal insect pest roach"
+    ],
+    [
+      "1f577-fe0f",
+      "spider",
+      1,
+      "animal insect"
+    ],
+    [
+      "1f578-fe0f",
+      "spider web",
+      1,
+      ""
+    ],
+    [
+      "1f982",
+      "scorpion",
+      1,
+      "scorpio scorpius zodiac"
+    ],
+    [
+      "1f99f",
+      "mosquito",
+      1,
+      "bite disease fever insect malaria pest virus"
+    ],
+    [
+      "1fab0",
+      "fly",
+      1,
+      "animal disease insect maggot pest rotting"
+    ],
+    [
+      "1fab1",
+      "worm",
+      1,
+      "animal annelid earthworm parasite"
+    ],
+    [
+      "1f9a0",
+      "microbe",
+      1,
+      "amoeba bacteria science virus"
+    ],
+    [
+      "1f490",
+      "bouquet",
+      1,
+      "anniversary birthday date flower love plant romance"
+    ],
+    [
+      "1f338",
+      "cherry blossom",
+      1,
+      "flower plant spring springtime"
+    ],
+    [
+      "1f4ae",
+      "white flower",
+      1,
+      ""
+    ],
+    [
+      "1fab7",
+      "lotus",
+      1,
+      "beauty buddhism calm flower hinduism peace purity serenity"
+    ],
+    [
+      "1f3f5-fe0f",
+      "rosette",
+      1,
+      "plant"
+    ],
+    [
+      "1f339",
+      "rose",
+      1,
+      "beauty elegant flower love plant red valentine"
+    ],
+    [
+      "1f940",
+      "wilted flower",
+      1,
+      "dying"
+    ],
+    [
+      "1f33a",
+      "hibiscus",
+      1,
+      "flower plant"
+    ],
+    [
+      "1f33b",
+      "sunflower",
+      1,
+      "flower outdoors plant sun"
+    ],
+    [
+      "1f33c",
+      "blossom",
+      1,
+      "buttercup dandelion flower plant"
+    ],
+    [
+      "1f337",
+      "tulip",
+      1,
+      "blossom flower growth plant"
+    ],
+    [
+      "1fabb",
+      "hyacinth",
+      1,
+      "bloom bluebonnet flower indigo lavender lilac lupine plant purple shrub snapdragon spring violet"
+    ],
+    [
+      "1f331",
+      "seedling",
+      1,
+      "plant sapling sprout young"
+    ],
+    [
+      "1fab4",
+      "potted plant",
+      1,
+      "decor grow house nurturing pot"
+    ],
+    [
+      "1f332",
+      "evergreen tree",
+      1,
+      "christmas forest pine"
+    ],
+    [
+      "1f333",
+      "deciduous tree",
+      1,
+      "forest green habitat shedding"
+    ],
+    [
+      "1f334",
+      "palm tree",
+      1,
+      "beach plant tropical"
+    ],
+    [
+      "1f335",
+      "cactus",
+      1,
+      "desert drought nature plant"
+    ],
+    [
+      "1f33e",
+      "sheaf of rice",
+      1,
+      "ear grain grains plant"
+    ],
+    [
+      "1f33f",
+      "herb",
+      1,
+      "leaf plant"
+    ],
+    [
+      "2618-fe0f",
+      "shamrock",
+      1,
+      "irish plant"
+    ],
+    [
+      "1f340",
+      "four leaf clover",
+      1,
+      "4 four-leaf irish lucky plant"
+    ],
+    [
+      "1f341",
+      "maple leaf",
+      1,
+      "falling"
+    ],
+    [
+      "1f342",
+      "fallen leaf",
+      1,
+      "autumn fall falling"
+    ],
+    [
+      "1f343",
+      "leaf fluttering in wind",
+      1,
+      "blow flutter"
+    ],
+    [
+      "1fab9",
+      "empty nest",
+      1,
+      "branch home nesting"
+    ],
+    [
+      "1faba",
+      "nest with eggs",
+      1,
+      "bird branch egg nesting"
+    ],
+    [
+      "1f344",
+      "mushroom",
+      1,
+      "fungus toadstool"
+    ],
+    [
+      "1fabe",
+      "leafless tree",
+      1,
+      "bare barren branches dead drought trunk winter wood"
+    ],
+    [
+      "1f347",
+      "grapes",
+      2,
+      "dionysus fruit grape"
+    ],
+    [
+      "1f348",
+      "melon",
+      2,
+      "cantaloupe fruit"
+    ],
+    [
+      "1f349",
+      "watermelon",
+      2,
+      "fruit"
+    ],
+    [
+      "1f34a",
+      "tangerine",
+      2,
+      "c citrus fruit nectarine orange vitamin"
+    ],
+    [
+      "1f34b",
+      "lemon",
+      2,
+      "citrus fruit sour"
+    ],
+    [
+      "1f34b-200d-1f7e9",
+      "lime",
+      2,
+      "acidity citrus cocktail fruit garnish key margarita mojito refreshing salsa sour tangy tequila tropical zest"
+    ],
+    [
+      "1f34c",
+      "banana",
+      2,
+      "fruit potassium"
+    ],
+    [
+      "1f34d",
+      "pineapple",
+      2,
+      "colada fruit pina tropical"
+    ],
+    [
+      "1f96d",
+      "mango",
+      2,
+      "food fruit tropical"
+    ],
+    [
+      "1f34e",
+      "red apple",
+      2,
+      "diet food fruit health ripe"
+    ],
+    [
+      "1f34f",
+      "green apple",
+      2,
+      "fruit"
+    ],
+    [
+      "1f350",
+      "pear",
+      2,
+      "fruit"
+    ],
+    [
+      "1f351",
+      "peach",
+      2,
+      "fruit"
+    ],
+    [
+      "1f352",
+      "cherries",
+      2,
+      "berries cherry fruit red"
+    ],
+    [
+      "1f353",
+      "strawberry",
+      2,
+      "berry fruit"
+    ],
+    [
+      "1fad0",
+      "blueberries",
+      2,
+      "berries berry bilberry blue blueberry food fruit"
+    ],
+    [
+      "1f95d",
+      "kiwi fruit",
+      2,
+      "food"
+    ],
+    [
+      "1f345",
+      "tomato",
+      2,
+      "food fruit vegetable"
+    ],
+    [
+      "1fad2",
+      "olive",
+      2,
+      "food"
+    ],
+    [
+      "1f965",
+      "coconut",
+      2,
+      "colada palm piña"
+    ],
+    [
+      "1f951",
+      "avocado",
+      2,
+      "food fruit"
+    ],
+    [
+      "1f346",
+      "eggplant",
+      2,
+      "aubergine vegetable"
+    ],
+    [
+      "1f954",
+      "potato",
+      2,
+      "food vegetable"
+    ],
+    [
+      "1f955",
+      "carrot",
+      2,
+      "food vegetable"
+    ],
+    [
+      "1f33d",
+      "ear of corn",
+      2,
+      "crops farm maize maze"
+    ],
+    [
+      "1f336-fe0f",
+      "hot pepper",
+      2,
+      ""
+    ],
+    [
+      "1fad1",
+      "bell pepper",
+      2,
+      "capsicum food vegetable"
+    ],
+    [
+      "1f952",
+      "cucumber",
+      2,
+      "food pickle vegetable"
+    ],
+    [
+      "1fadd",
+      "pickle",
+      2,
+      "brine condiment cucumber ferment gherkin relish trouble"
+    ],
+    [
+      "1f96c",
+      "leafy green",
+      2,
+      "bok burgers cabbage choy kale lettuce salad"
+    ],
+    [
+      "1f966",
+      "broccoli",
+      2,
+      "cabbage wild"
+    ],
+    [
+      "1f9c4",
+      "garlic",
+      2,
+      "flavoring"
+    ],
+    [
+      "1f9c5",
+      "onion",
+      2,
+      "flavoring"
+    ],
+    [
+      "1f95c",
+      "peanuts",
+      2,
+      "food nut peanut vegetable"
+    ],
+    [
+      "1fad8",
+      "beans",
+      2,
+      "food kidney legume small"
+    ],
+    [
+      "1f330",
+      "chestnut",
+      2,
+      "almond plant"
+    ],
+    [
+      "1fada",
+      "ginger root",
+      2,
+      "beer health herb natural spice"
+    ],
+    [
+      "1fadb",
+      "pea pod",
+      2,
+      "beans beanstalk edamame legume soybean vegetable veggie"
+    ],
+    [
+      "1f344-200d-1f7eb",
+      "brown mushroom",
+      2,
+      "food fungi fungus nature pizza portobello shiitake shroom spore sprout toppings truffle vegetable vegetarian veggie"
+    ],
+    [
+      "1fadc",
+      "root vegetable",
+      2,
+      "beet food garden radish salad turnip vegetarian"
+    ],
+    [
+      "1f35e",
+      "bread",
+      2,
+      "carbs food grain loaf restaurant toast wheat"
+    ],
+    [
+      "1f950",
+      "croissant",
+      2,
+      "bread breakfast crescent food french roll"
+    ],
+    [
+      "1f956",
+      "baguette bread",
+      2,
+      "food french"
+    ],
+    [
+      "1fad3",
+      "flatbread",
+      2,
+      "arepa bread food gordita lavash naan pita"
+    ],
+    [
+      "1f968",
+      "pretzel",
+      2,
+      "convoluted twisted"
+    ],
+    [
+      "1f96f",
+      "bagel",
+      2,
+      "bakery bread breakfast schmear"
+    ],
+    [
+      "1f95e",
+      "pancakes",
+      2,
+      "breakfast crêpe food hotcake pancake"
+    ],
+    [
+      "1f9c7",
+      "waffle",
+      2,
+      "breakfast indecisive iron"
+    ],
+    [
+      "1f9c0",
+      "cheese wedge",
+      2,
+      ""
+    ],
+    [
+      "1f356",
+      "meat on bone",
+      2,
+      ""
+    ],
+    [
+      "1f357",
+      "poultry leg",
+      2,
+      "bone chicken drumstick hungry turkey"
+    ],
+    [
+      "1f969",
+      "cut of meat",
+      2,
+      "chop lambchop porkchop red steak"
+    ],
+    [
+      "1f953",
+      "bacon",
+      2,
+      "breakfast food meat"
+    ],
+    [
+      "1f354",
+      "hamburger",
+      2,
+      "burger eat fast food hungry"
+    ],
+    [
+      "1f35f",
+      "french fries",
+      2,
+      "fast food"
+    ],
+    [
+      "1f355",
+      "pizza",
+      2,
+      "cheese food hungry pepperoni slice"
+    ],
+    [
+      "1f32d",
+      "hot dog",
+      2,
+      "frankfurter hotdog sausage"
+    ],
+    [
+      "1f96a",
+      "sandwich",
+      2,
+      "bread"
+    ],
+    [
+      "1f32e",
+      "taco",
+      2,
+      "mexican"
+    ],
+    [
+      "1f32f",
+      "burrito",
+      2,
+      "mexican wrap"
+    ],
+    [
+      "1fad4",
+      "tamale",
+      2,
+      "food mexican pamonha wrapped"
+    ],
+    [
+      "1f959",
+      "stuffed flatbread",
+      2,
+      "falafel food gyro kebab"
+    ],
+    [
+      "1f9c6",
+      "falafel",
+      2,
+      "chickpea meatball"
+    ],
+    [
+      "1f95a",
+      "egg",
+      2,
+      "breakfast food"
+    ],
+    [
+      "1f373",
+      "cooking",
+      2,
+      "breakfast easy egg fry frying over pan restaurant side sunny up"
+    ],
+    [
+      "1f958",
+      "shallow pan of food",
+      2,
+      "casserole paella"
+    ],
+    [
+      "1f372",
+      "pot of food",
+      2,
+      "soup stew"
+    ],
+    [
+      "1fad5",
+      "fondue",
+      2,
+      "cheese chocolate food melted pot ski"
+    ],
+    [
+      "1f963",
+      "bowl with spoon",
+      2,
+      "breakfast cereal congee oatmeal porridge"
+    ],
+    [
+      "1f957",
+      "green salad",
+      2,
+      "food"
+    ],
+    [
+      "1f37f",
+      "popcorn",
+      2,
+      "corn movie pop"
+    ],
+    [
+      "1f9c8",
+      "butter",
+      2,
+      "dairy"
+    ],
+    [
+      "1f9c2",
+      "salt",
+      2,
+      "condiment flavor mad salty shaker taste upset"
+    ],
+    [
+      "1f96b",
+      "canned food",
+      2,
+      "can"
+    ],
+    [
+      "1f371",
+      "bento box",
+      2,
+      "food"
+    ],
+    [
+      "1f358",
+      "rice cracker",
+      2,
+      "food"
+    ],
+    [
+      "1f359",
+      "rice ball",
+      2,
+      "food japanese"
+    ],
+    [
+      "1f35a",
+      "cooked rice",
+      2,
+      "food"
+    ],
+    [
+      "1f35b",
+      "curry rice",
+      2,
+      "food"
+    ],
+    [
+      "1f35c",
+      "steaming bowl",
+      2,
+      "chopsticks food noodle pho ramen soup"
+    ],
+    [
+      "1f35d",
+      "spaghetti",
+      2,
+      "food meatballs pasta restaurant"
+    ],
+    [
+      "1f360",
+      "roasted sweet potato",
+      2,
+      "food"
+    ],
+    [
+      "1f362",
+      "oden",
+      2,
+      "food kebab restaurant seafood skewer stick"
+    ],
+    [
+      "1f363",
+      "sushi",
+      2,
+      "food"
+    ],
+    [
+      "1f364",
+      "fried shrimp",
+      2,
+      "prawn tempura"
+    ],
+    [
+      "1f365",
+      "fish cake with swirl",
+      2,
+      "food pastry restaurant"
+    ],
+    [
+      "1f96e",
+      "moon cake",
+      2,
+      "autumn festival yuèbǐng"
+    ],
+    [
+      "1f361",
+      "dango",
+      2,
+      "dessert japanese skewer stick sweet"
+    ],
+    [
+      "1f95f",
+      "dumpling",
+      2,
+      "empanada gyōza jiaozi pierogi potsticker"
+    ],
+    [
+      "1f960",
+      "fortune cookie",
+      2,
+      "prophecy"
+    ],
+    [
+      "1f961",
+      "takeout box",
+      2,
+      "chopsticks delivery food oyster pail"
+    ],
+    [
+      "1f366",
+      "soft ice cream",
+      2,
+      "dessert food icecream restaurant serve sweet"
+    ],
+    [
+      "1f367",
+      "shaved ice",
+      2,
+      "dessert restaurant sweet"
+    ],
+    [
+      "1f368",
+      "ice cream",
+      2,
+      "dessert food restaurant sweet"
+    ],
+    [
+      "1f369",
+      "doughnut",
+      2,
+      "breakfast dessert donut food sweet"
+    ],
+    [
+      "1f36a",
+      "cookie",
+      2,
+      "chip chocolate dessert sweet"
+    ],
+    [
+      "1f382",
+      "birthday cake",
+      2,
+      "bday celebration dessert happy pastry sweet"
+    ],
+    [
+      "1f370",
+      "shortcake",
+      2,
+      "cake dessert pastry slice sweet"
+    ],
+    [
+      "1f9c1",
+      "cupcake",
+      2,
+      "bakery dessert sprinkles sugar sweet treat"
+    ],
+    [
+      "1f967",
+      "pie",
+      2,
+      "apple filling fruit meat pastry pumpkin slice"
+    ],
+    [
+      "1f36b",
+      "chocolate bar",
+      2,
+      "candy dessert halloween sweet tooth"
+    ],
+    [
+      "1f36c",
+      "candy",
+      2,
+      "cavities dessert halloween restaurant sweet tooth wrapper"
+    ],
+    [
+      "1f36d",
+      "lollipop",
+      2,
+      "candy dessert food restaurant sweet"
+    ],
+    [
+      "1f36e",
+      "custard",
+      2,
+      "dessert pudding sweet"
+    ],
+    [
+      "1f36f",
+      "honey pot",
+      2,
+      "barrel bear food honeypot jar sweet"
+    ],
+    [
+      "1f37c",
+      "baby bottle",
+      2,
+      "babies birth born drink infant milk newborn"
+    ],
+    [
+      "1f95b",
+      "glass of milk",
+      2,
+      "drink"
+    ],
+    [
+      "2615",
+      "hot beverage",
+      2,
+      "cafe caffeine chai coffee drink morning steaming tea"
+    ],
+    [
+      "1fad6",
+      "teapot",
+      2,
+      "brew drink food pot tea"
+    ],
+    [
+      "1f375",
+      "teacup without handle",
+      2,
+      "beverage cup drink oolong tea"
+    ],
+    [
+      "1f376",
+      "sake",
+      2,
+      "bar beverage bottle cup drink restaurant"
+    ],
+    [
+      "1f37e",
+      "bottle with popping cork",
+      2,
+      "bar drink"
+    ],
+    [
+      "1f377",
+      "wine glass",
+      2,
+      "alcohol bar beverage booze club drink drinking drinks restaurant"
+    ],
+    [
+      "1f378",
+      "cocktail glass",
+      2,
+      "alcohol bar booze club drink drinking drinks mad martini men"
+    ],
+    [
+      "1f379",
+      "tropical drink",
+      2,
+      "alcohol bar booze club cocktail drinking drinks drunk mai party tai tropics"
+    ],
+    [
+      "1f37a",
+      "beer mug",
+      2,
+      "alcohol ale bar booze drink drinking drinks octoberfest oktoberfest pint stein summer"
+    ],
+    [
+      "1f37b",
+      "clinking beer mugs",
+      2,
+      "alcohol bar booze bottoms cheers clink drinking drinks"
+    ],
+    [
+      "1f942",
+      "clinking glasses",
+      2,
+      "celebrate clink drink glass"
+    ],
+    [
+      "1f943",
+      "tumbler glass",
+      2,
+      "liquor scotch shot whiskey whisky"
+    ],
+    [
+      "1fad7",
+      "pouring liquid",
+      2,
+      "accident drink empty glass oops pour spill water"
+    ],
+    [
+      "1f964",
+      "cup with straw",
+      2,
+      "drink juice malt soda soft water"
+    ],
+    [
+      "1f9cb",
+      "bubble tea",
+      2,
+      "boba food milk pearl"
+    ],
+    [
+      "1f9c3",
+      "beverage box",
+      2,
+      "juice straw sweet"
+    ],
+    [
+      "1f9c9",
+      "mate",
+      2,
+      "drink"
+    ],
+    [
+      "1f9ca",
+      "ice",
+      2,
+      "cold cube iceberg"
+    ],
+    [
+      "1f962",
+      "chopsticks",
+      2,
+      "hashi jeotgarak kuaizi"
+    ],
+    [
+      "1f37d-fe0f",
+      "fork and knife with plate",
+      2,
+      "cooking dinner eat"
+    ],
+    [
+      "1f374",
+      "fork and knife",
+      2,
+      "breakfast breaky cooking cutlery delicious dinner eat feed food hungry lunch restaurant yum yummy"
+    ],
+    [
+      "1f944",
+      "spoon",
+      2,
+      "eat tableware"
+    ],
+    [
+      "1f52a",
+      "kitchen knife",
+      2,
+      "chef cooking hocho tool weapon"
+    ],
+    [
+      "1fad9",
+      "jar",
+      2,
+      "condiment container empty nothing sauce store"
+    ],
+    [
+      "1f3fa",
+      "amphora",
+      2,
+      "aquarius cooking drink jug tool weapon zodiac"
+    ],
+    [
+      "1f30d",
+      "globe showing Europe-Africa",
+      3,
+      "africa earth europe world"
+    ],
+    [
+      "1f30e",
+      "globe showing Americas",
+      3,
+      "earth world"
+    ],
+    [
+      "1f30f",
+      "globe showing Asia-Australia",
+      3,
+      "asia australia earth world"
+    ],
+    [
+      "1f310",
+      "globe with meridians",
+      3,
+      "earth internet web world worldwide"
+    ],
+    [
+      "1f5fa-fe0f",
+      "world map",
+      3,
+      ""
+    ],
+    [
+      "1f5fe",
+      "map of Japan",
+      3,
+      ""
+    ],
+    [
+      "1f9ed",
+      "compass",
+      3,
+      "direction magnetic navigation orienteering"
+    ],
+    [
+      "1f3d4-fe0f",
+      "snow-capped mountain",
+      3,
+      "cold snow"
+    ],
+    [
+      "26f0-fe0f",
+      "mountain",
+      3,
+      ""
+    ],
+    [
+      "1f6d8",
+      "landslide",
+      3,
+      "avalanche danger disaster earthquake mountain mudslide rocks"
+    ],
+    [
+      "1f30b",
+      "volcano",
+      3,
+      "eruption mountain nature"
+    ],
+    [
+      "1f5fb",
+      "mount fuji",
+      3,
+      "mountain nature"
+    ],
+    [
+      "1f3d5-fe0f",
+      "camping",
+      3,
+      ""
+    ],
+    [
+      "1f3d6-fe0f",
+      "beach with umbrella",
+      3,
+      ""
+    ],
+    [
+      "1f3dc-fe0f",
+      "desert",
+      3,
+      ""
+    ],
+    [
+      "1f3dd-fe0f",
+      "desert island",
+      3,
+      ""
+    ],
+    [
+      "1f3de-fe0f",
+      "national park",
+      3,
+      ""
+    ],
+    [
+      "1f3df-fe0f",
+      "stadium",
+      3,
+      ""
+    ],
+    [
+      "1f3db-fe0f",
+      "classical building",
+      3,
+      ""
+    ],
+    [
+      "1f3d7-fe0f",
+      "building construction",
+      3,
+      "crane"
+    ],
+    [
+      "1f9f1",
+      "brick",
+      3,
+      "bricks clay mortar wall"
+    ],
+    [
+      "1faa8",
+      "rock",
+      3,
+      "boulder heavy solid stone tough"
+    ],
+    [
+      "1fab5",
+      "wood",
+      3,
+      "log lumber timber"
+    ],
+    [
+      "1f6d6",
+      "hut",
+      3,
+      "home house roundhouse shelter yurt"
+    ],
+    [
+      "1f3d8-fe0f",
+      "houses",
+      3,
+      "house"
+    ],
+    [
+      "1f3da-fe0f",
+      "derelict house",
+      3,
+      "home"
+    ],
+    [
+      "1f3e0",
+      "house",
+      3,
+      "building country heart home ranch settle simple suburban suburbia where"
+    ],
+    [
+      "1f3e1",
+      "house with garden",
+      3,
+      "building country heart home ranch settle simple suburban suburbia where"
+    ],
+    [
+      "1f3e2",
+      "office building",
+      3,
+      "city cubical job"
+    ],
+    [
+      "1f3e3",
+      "Japanese post office",
+      3,
+      "building"
+    ],
+    [
+      "1f3e4",
+      "post office",
+      3,
+      "building european"
+    ],
+    [
+      "1f3e5",
+      "hospital",
+      3,
+      "building doctor medicine"
+    ],
+    [
+      "1f3e6",
+      "bank",
+      3,
+      "building"
+    ],
+    [
+      "1f3e8",
+      "hotel",
+      3,
+      "building"
+    ],
+    [
+      "1f3e9",
+      "love hotel",
+      3,
+      "building"
+    ],
+    [
+      "1f3ea",
+      "convenience store",
+      3,
+      "24 building hours"
+    ],
+    [
+      "1f3eb",
+      "school",
+      3,
+      "building"
+    ],
+    [
+      "1f3ec",
+      "department store",
+      3,
+      "building"
+    ],
+    [
+      "1f3ed",
+      "factory",
+      3,
+      "building"
+    ],
+    [
+      "1f3ef",
+      "Japanese castle",
+      3,
+      "building"
+    ],
+    [
+      "1f3f0",
+      "castle",
+      3,
+      "building european"
+    ],
+    [
+      "1f492",
+      "wedding",
+      3,
+      "chapel hitched nuptials romance"
+    ],
+    [
+      "1f5fc",
+      "Tokyo tower",
+      3,
+      ""
+    ],
+    [
+      "1f5fd",
+      "Statue of Liberty",
+      3,
+      "new ny nyc york"
+    ],
+    [
+      "26ea",
+      "church",
+      3,
+      "bless chapel christian cross religion"
+    ],
+    [
+      "1f54c",
+      "mosque",
+      3,
+      "islam masjid muslim religion"
+    ],
+    [
+      "1f6d5",
+      "hindu temple",
+      3,
+      ""
+    ],
+    [
+      "1f54d",
+      "synagogue",
+      3,
+      "jew jewish judaism religion temple"
+    ],
+    [
+      "26e9-fe0f",
+      "shinto shrine",
+      3,
+      "religion"
+    ],
+    [
+      "1f54b",
+      "kaaba",
+      3,
+      "hajj islam muslim religion umrah"
+    ],
+    [
+      "26f2",
+      "fountain",
+      3,
+      ""
+    ],
+    [
+      "26fa",
+      "tent",
+      3,
+      "camping"
+    ],
+    [
+      "1f301",
+      "foggy",
+      3,
+      "fog"
+    ],
+    [
+      "1f303",
+      "night with stars",
+      3,
+      "star"
+    ],
+    [
+      "1f3d9-fe0f",
+      "cityscape",
+      3,
+      "city"
+    ],
+    [
+      "1f304",
+      "sunrise over mountains",
+      3,
+      "morning sun"
+    ],
+    [
+      "1f305",
+      "sunrise",
+      3,
+      "morning nature sun"
+    ],
+    [
+      "1f306",
+      "cityscape at dusk",
+      3,
+      "building city evening landscape sun sunset"
+    ],
+    [
+      "1f307",
+      "sunset",
+      3,
+      "building dusk sun"
+    ],
+    [
+      "1f309",
+      "bridge at night",
+      3,
+      ""
+    ],
+    [
+      "2668-fe0f",
+      "hot springs",
+      3,
+      "hotsprings steaming"
+    ],
+    [
+      "1f3a0",
+      "carousel horse",
+      3,
+      "entertainment"
+    ],
+    [
+      "1f6dd",
+      "playground slide",
+      3,
+      "amusement park play playing sliding theme"
+    ],
+    [
+      "1f3a1",
+      "ferris wheel",
+      3,
+      "amusement park theme"
+    ],
+    [
+      "1f3a2",
+      "roller coaster",
+      3,
+      "amusement park theme"
+    ],
+    [
+      "1f488",
+      "barber pole",
+      3,
+      "cut fresh haircut shave"
+    ],
+    [
+      "1f3aa",
+      "circus tent",
+      3,
+      ""
+    ],
+    [
+      "1f682",
+      "locomotive",
+      3,
+      "caboose engine railway steam train trains travel"
+    ],
+    [
+      "1f683",
+      "railway car",
+      3,
+      "electric train tram travel trolleybus"
+    ],
+    [
+      "1f684",
+      "high-speed train",
+      3,
+      "railway shinkansen speed"
+    ],
+    [
+      "1f685",
+      "bullet train",
+      3,
+      "high-speed nose railway shinkansen speed travel"
+    ],
+    [
+      "1f686",
+      "train",
+      3,
+      "arrived choo railway"
+    ],
+    [
+      "1f687",
+      "metro",
+      3,
+      "subway travel"
+    ],
+    [
+      "1f688",
+      "light rail",
+      3,
+      "arrived monorail railway"
+    ],
+    [
+      "1f689",
+      "station",
+      3,
+      "railway train"
+    ],
+    [
+      "1f68a",
+      "tram",
+      3,
+      "trolleybus"
+    ],
+    [
+      "1f69d",
+      "monorail",
+      3,
+      "vehicle"
+    ],
+    [
+      "1f69e",
+      "mountain railway",
+      3,
+      "car trip"
+    ],
+    [
+      "1f68b",
+      "tram car",
+      3,
+      "bus trolley trolleybus"
+    ],
+    [
+      "1f68c",
+      "bus",
+      3,
+      "school vehicle"
+    ],
+    [
+      "1f68d",
+      "oncoming bus",
+      3,
+      "cars"
+    ],
+    [
+      "1f68e",
+      "trolleybus",
+      3,
+      "bus tram trolley"
+    ],
+    [
+      "1f690",
+      "minibus",
+      3,
+      "bus drive van vehicle"
+    ],
+    [
+      "1f691",
+      "ambulance",
+      3,
+      "emergency vehicle"
+    ],
+    [
+      "1f692",
+      "fire engine",
+      3,
+      "truck"
+    ],
+    [
+      "1f693",
+      "police car",
+      3,
+      "5–0 cops patrol"
+    ],
+    [
+      "1f694",
+      "oncoming police car",
+      3,
+      ""
+    ],
+    [
+      "1f695",
+      "taxi",
+      3,
+      "cab cabbie car drive vehicle yellow"
+    ],
+    [
+      "1f696",
+      "oncoming taxi",
+      3,
+      "cab cabbie cars drove hail yellow"
+    ],
+    [
+      "1f697",
+      "automobile",
+      3,
+      "car driving vehicle"
+    ],
+    [
+      "1f698",
+      "oncoming automobile",
+      3,
+      "car cars drove vehicle"
+    ],
+    [
+      "1f699",
+      "sport utility vehicle",
+      3,
+      "car drive recreational sportutility"
+    ],
+    [
+      "1f6fb",
+      "pickup truck",
+      3,
+      "automobile car flatbed pick-up transportation"
+    ],
+    [
+      "1f69a",
+      "delivery truck",
+      3,
+      "car drive vehicle"
+    ],
+    [
+      "1f69b",
+      "articulated lorry",
+      3,
+      "car drive move semi truck vehicle"
+    ],
+    [
+      "1f69c",
+      "tractor",
+      3,
+      "vehicle"
+    ],
+    [
+      "1f3ce-fe0f",
+      "racing car",
+      3,
+      "zoom"
+    ],
+    [
+      "1f3cd-fe0f",
+      "motorcycle",
+      3,
+      "racing"
+    ],
+    [
+      "1f6f5",
+      "motor scooter",
+      3,
+      ""
+    ],
+    [
+      "1f9bd",
+      "manual wheelchair",
+      3,
+      "accessibility"
+    ],
+    [
+      "1f9bc",
+      "motorized wheelchair",
+      3,
+      "accessibility"
+    ],
+    [
+      "1f6fa",
+      "auto rickshaw",
+      3,
+      "tuk"
+    ],
+    [
+      "1f6b2",
+      "bicycle",
+      3,
+      "bike class cycle cycling cyclist gang ride spin spinning"
+    ],
+    [
+      "1f6f4",
+      "kick scooter",
+      3,
+      ""
+    ],
+    [
+      "1f6f9",
+      "skateboard",
+      3,
+      "board skate skater wheels"
+    ],
+    [
+      "1f6fc",
+      "roller skate",
+      3,
+      "blades skates sport"
+    ],
+    [
+      "1f68f",
+      "bus stop",
+      3,
+      "busstop"
+    ],
+    [
+      "1f6e3-fe0f",
+      "motorway",
+      3,
+      "highway road"
+    ],
+    [
+      "1f6e4-fe0f",
+      "railway track",
+      3,
+      "train"
+    ],
+    [
+      "1f6e2-fe0f",
+      "oil drum",
+      3,
+      ""
+    ],
+    [
+      "26fd",
+      "fuel pump",
+      3,
+      "diesel fuelpump gas gasoline station"
+    ],
+    [
+      "1f6de",
+      "wheel",
+      3,
+      "car circle tire turn vehicle"
+    ],
+    [
+      "1f6a8",
+      "police car light",
+      3,
+      "alarm alert beacon emergency revolving siren"
+    ],
+    [
+      "1f6a5",
+      "horizontal traffic light",
+      3,
+      "intersection signal stop stoplight"
+    ],
+    [
+      "1f6a6",
+      "vertical traffic light",
+      3,
+      "drove intersection signal stop stoplight"
+    ],
+    [
+      "1f6d1",
+      "stop sign",
+      3,
+      "octagonal"
+    ],
+    [
+      "1f6a7",
+      "construction",
+      3,
+      "barrier"
+    ],
+    [
+      "1f6d9",
+      "lighthouse",
+      3,
+      "beacon enlightenment guidance hope light maritime navigation sea signal"
+    ],
+    [
+      "2693",
+      "anchor",
+      3,
+      "ship tool"
+    ],
+    [
+      "1f6df",
+      "ring buoy",
+      3,
+      "float life lifesaver preserver rescue safety save saver swim"
+    ],
+    [
+      "26f5",
+      "sailboat",
+      3,
+      "boat resort sailing sea yacht"
+    ],
+    [
+      "1f6f6",
+      "canoe",
+      3,
+      "boat"
+    ],
+    [
+      "1f6a4",
+      "speedboat",
+      3,
+      "billionaire boat lake luxury millionaire summer travel"
+    ],
+    [
+      "1f6f3-fe0f",
+      "passenger ship",
+      3,
+      ""
+    ],
+    [
+      "26f4-fe0f",
+      "ferry",
+      3,
+      "boat passenger"
+    ],
+    [
+      "1f6e5-fe0f",
+      "motor boat",
+      3,
+      "motorboat"
+    ],
+    [
+      "1f6a2",
+      "ship",
+      3,
+      "boat passenger travel"
+    ],
+    [
+      "2708-fe0f",
+      "airplane",
+      3,
+      "aeroplane fly flying jet plane travel"
+    ],
+    [
+      "1f6e9-fe0f",
+      "small airplane",
+      3,
+      "aeroplane plane"
+    ],
+    [
+      "1f6eb",
+      "airplane departure",
+      3,
+      "aeroplane check-in departures plane"
+    ],
+    [
+      "1f6ec",
+      "airplane arrival",
+      3,
+      "aeroplane arrivals arriving landing plane"
+    ],
+    [
+      "1fa82",
+      "parachute",
+      3,
+      "hang-glide parasail skydive"
+    ],
+    [
+      "1f4ba",
+      "seat",
+      3,
+      "chair"
+    ],
+    [
+      "1f681",
+      "helicopter",
+      3,
+      "copter roflcopter travel vehicle"
+    ],
+    [
+      "1f69f",
+      "suspension railway",
+      3,
+      ""
+    ],
+    [
+      "1f6a0",
+      "mountain cableway",
+      3,
+      "cable gondola lift ski"
+    ],
+    [
+      "1f6a1",
+      "aerial tramway",
+      3,
+      "cable car gondola ropeway"
+    ],
+    [
+      "1f6f0-fe0f",
+      "satellite",
+      3,
+      "space"
+    ],
+    [
+      "1f680",
+      "rocket",
+      3,
+      "launch rockets space travel"
+    ],
+    [
+      "1f6f8",
+      "flying saucer",
+      3,
+      "aliens extra terrestrial ufo"
+    ],
+    [
+      "1f6ce-fe0f",
+      "bellhop bell",
+      3,
+      "hotel"
+    ],
+    [
+      "1f9f3",
+      "luggage",
+      3,
+      "bag packing roller suitcase travel"
+    ],
+    [
+      "231b",
+      "hourglass done",
+      3,
+      "sand time timer"
+    ],
+    [
+      "23f3",
+      "hourglass not done",
+      3,
+      "flowing hours sand timer waiting yolo"
+    ],
+    [
+      "231a",
+      "watch",
+      3,
+      "clock time"
+    ],
+    [
+      "23f0",
+      "alarm clock",
+      3,
+      "hours hrs late time waiting"
+    ],
+    [
+      "23f1-fe0f",
+      "stopwatch",
+      3,
+      "clock time"
+    ],
+    [
+      "23f2-fe0f",
+      "timer clock",
+      3,
+      ""
+    ],
+    [
+      "1f570-fe0f",
+      "mantelpiece clock",
+      3,
+      "time"
+    ],
+    [
+      "1f55b",
+      "twelve o’clock",
+      3,
+      "12 12:00 clock time"
+    ],
+    [
+      "1f567",
+      "twelve-thirty",
+      3,
+      "12 12:30 30 clock thirty time twelve"
+    ],
+    [
+      "1f550",
+      "one o’clock",
+      3,
+      "1 1:00 clock time"
+    ],
+    [
+      "1f55c",
+      "one-thirty",
+      3,
+      "1 1:30 30 clock one thirty time"
+    ],
+    [
+      "1f551",
+      "two o’clock",
+      3,
+      "2 2:00 clock time"
+    ],
+    [
+      "1f55d",
+      "two-thirty",
+      3,
+      "2 2:30 30 clock thirty time two"
+    ],
+    [
+      "1f552",
+      "three o’clock",
+      3,
+      "3 3:00 clock time"
+    ],
+    [
+      "1f55e",
+      "three-thirty",
+      3,
+      "3 3:30 30 clock thirty three time"
+    ],
+    [
+      "1f553",
+      "four o’clock",
+      3,
+      "4 4:00 clock time"
+    ],
+    [
+      "1f55f",
+      "four-thirty",
+      3,
+      "30 4 4:30 clock four thirty time"
+    ],
+    [
+      "1f554",
+      "five o’clock",
+      3,
+      "5 5:00 clock time"
+    ],
+    [
+      "1f560",
+      "five-thirty",
+      3,
+      "30 5 5:30 clock five thirty time"
+    ],
+    [
+      "1f555",
+      "six o’clock",
+      3,
+      "6 6:00 clock time"
+    ],
+    [
+      "1f561",
+      "six-thirty",
+      3,
+      "30 6 6:30 clock six thirty"
+    ],
+    [
+      "1f556",
+      "seven o’clock",
+      3,
+      "0 7 7:00 clock"
+    ],
+    [
+      "1f562",
+      "seven-thirty",
+      3,
+      "30 7 7:30 clock seven thirty"
+    ],
+    [
+      "1f557",
+      "eight o’clock",
+      3,
+      "8 8:00 clock time"
+    ],
+    [
+      "1f563",
+      "eight-thirty",
+      3,
+      "30 8 8:30 clock eight thirty time"
+    ],
+    [
+      "1f558",
+      "nine o’clock",
+      3,
+      "9 9:00 clock time"
+    ],
+    [
+      "1f564",
+      "nine-thirty",
+      3,
+      "30 9 9:30 clock nine thirty time"
+    ],
+    [
+      "1f559",
+      "ten o’clock",
+      3,
+      "0 10 10:00 clock"
+    ],
+    [
+      "1f565",
+      "ten-thirty",
+      3,
+      "10 10:30 30 clock ten thirty time"
+    ],
+    [
+      "1f55a",
+      "eleven o’clock",
+      3,
+      "11 11:00 clock time"
+    ],
+    [
+      "1f566",
+      "eleven-thirty",
+      3,
+      "11 11:30 30 clock eleven thirty time"
+    ],
+    [
+      "1f311",
+      "new moon",
+      3,
+      "dark space"
+    ],
+    [
+      "1f312",
+      "waxing crescent moon",
+      3,
+      "dreams space"
+    ],
+    [
+      "1f313",
+      "first quarter moon",
+      3,
+      "space"
+    ],
+    [
+      "1f314",
+      "waxing gibbous moon",
+      3,
+      "space"
+    ],
+    [
+      "1f315",
+      "full moon",
+      3,
+      "space"
+    ],
+    [
+      "1f316",
+      "waning gibbous moon",
+      3,
+      "space"
+    ],
+    [
+      "1f317",
+      "last quarter moon",
+      3,
+      "space"
+    ],
+    [
+      "1f318",
+      "waning crescent moon",
+      3,
+      "space"
+    ],
+    [
+      "1f319",
+      "crescent moon",
+      3,
+      "ramadan space"
+    ],
+    [
+      "1f31a",
+      "new moon face",
+      3,
+      "space"
+    ],
+    [
+      "1f31b",
+      "first quarter moon face",
+      3,
+      "space"
+    ],
+    [
+      "1f31c",
+      "last quarter moon face",
+      3,
+      "dreams"
+    ],
+    [
+      "1f321-fe0f",
+      "thermometer",
+      3,
+      "weather"
+    ],
+    [
+      "2600-fe0f",
+      "sun",
+      3,
+      "bright rays space sunny weather"
+    ],
+    [
+      "1f31d",
+      "full moon face",
+      3,
+      "bright"
+    ],
+    [
+      "1f31e",
+      "sun with face",
+      3,
+      "beach bright day heat shine sunny sunshine weather"
+    ],
+    [
+      "1fa90",
+      "ringed planet",
+      3,
+      "saturn saturnine"
+    ],
+    [
+      "2b50",
+      "star",
+      3,
+      "astronomy medium stars white"
+    ],
+    [
+      "1f31f",
+      "glowing star",
+      3,
+      "glittery glow night shining sparkle win"
+    ],
+    [
+      "1f320",
+      "shooting star",
+      3,
+      "falling night space"
+    ],
+    [
+      "1f30c",
+      "milky way",
+      3,
+      "space"
+    ],
+    [
+      "2601-fe0f",
+      "cloud",
+      3,
+      "weather"
+    ],
+    [
+      "26c5",
+      "sun behind cloud",
+      3,
+      "cloudy weather"
+    ],
+    [
+      "26c8-fe0f",
+      "cloud with lightning and rain",
+      3,
+      "thunder thunderstorm"
+    ],
+    [
+      "1f324-fe0f",
+      "sun behind small cloud",
+      3,
+      "weather"
+    ],
+    [
+      "1f325-fe0f",
+      "sun behind large cloud",
+      3,
+      "weather"
+    ],
+    [
+      "1f326-fe0f",
+      "sun behind rain cloud",
+      3,
+      "weather"
+    ],
+    [
+      "1f327-fe0f",
+      "cloud with rain",
+      3,
+      "weather"
+    ],
+    [
+      "1f328-fe0f",
+      "cloud with snow",
+      3,
+      "cold weather"
+    ],
+    [
+      "1f329-fe0f",
+      "cloud with lightning",
+      3,
+      "weather"
+    ],
+    [
+      "1f32a-fe0f",
+      "tornado",
+      3,
+      "cloud weather whirlwind"
+    ],
+    [
+      "1f32b-fe0f",
+      "fog",
+      3,
+      "cloud weather"
+    ],
+    [
+      "1f32c-fe0f",
+      "wind face",
+      3,
+      "blow cloud"
+    ],
+    [
+      "1f300",
+      "cyclone",
+      3,
+      "dizzy hurricane twister typhoon weather"
+    ],
+    [
+      "1f308",
+      "rainbow",
+      3,
+      "gay genderqueer glbt glbtq lesbian lgbt lgbtq lgbtqia nature pride queer rain trans transgender weather"
+    ],
+    [
+      "1f302",
+      "closed umbrella",
+      3,
+      "clothing rain"
+    ],
+    [
+      "2602-fe0f",
+      "umbrella",
+      3,
+      "clothing rain"
+    ],
+    [
+      "2614",
+      "umbrella with rain drops",
+      3,
+      "clothing drop weather"
+    ],
+    [
+      "26f1-fe0f",
+      "umbrella on ground",
+      3,
+      "rain sun"
+    ],
+    [
+      "26a1",
+      "high voltage",
+      3,
+      "danger electric electricity lightning nature thunder thunderbolt zap"
+    ],
+    [
+      "2744-fe0f",
+      "snowflake",
+      3,
+      "cold snow weather"
+    ],
+    [
+      "2603-fe0f",
+      "snowman",
+      3,
+      "cold man snow"
+    ],
+    [
+      "26c4",
+      "snowman without snow",
+      3,
+      "cold man"
+    ],
+    [
+      "2604-fe0f",
+      "comet",
+      3,
+      "space"
+    ],
+    [
+      "1fa8b",
+      "meteor",
+      3,
+      "apocalypse falling fireball gravity rock space star"
+    ],
+    [
+      "1f525",
+      "fire",
+      3,
+      "af burn flame hot lit litaf tool"
+    ],
+    [
+      "1f4a7",
+      "droplet",
+      3,
+      "cold comic drop nature sad sweat tear water weather"
+    ],
+    [
+      "1f30a",
+      "water wave",
+      3,
+      "nature ocean surf surfer surfing"
+    ],
+    [
+      "1f383",
+      "jack-o-lantern",
+      4,
+      "celebration halloween jack lantern pumpkin"
+    ],
+    [
+      "1f384",
+      "Christmas tree",
+      4,
+      "celebration"
+    ],
+    [
+      "1f386",
+      "fireworks",
+      4,
+      "boom celebration entertainment yolo"
+    ],
+    [
+      "1f387",
+      "sparkler",
+      4,
+      "boom celebration fireworks sparkle"
+    ],
+    [
+      "1f9e8",
+      "firecracker",
+      4,
+      "dynamite explosive fire fireworks light pop popping spark"
+    ],
+    [
+      "2728",
+      "sparkles",
+      4,
+      "* magic sparkle star"
+    ],
+    [
+      "1f388",
+      "balloon",
+      4,
+      "birthday celebrate celebration"
+    ],
+    [
+      "1f389",
+      "party popper",
+      4,
+      "awesome birthday celebrate celebration excited hooray tada woohoo"
+    ],
+    [
+      "1f38a",
+      "confetti ball",
+      4,
+      "celebrate celebration party woohoo"
+    ],
+    [
+      "1f38b",
+      "tanabata tree",
+      4,
+      "banner celebration japanese"
+    ],
+    [
+      "1f38d",
+      "pine decoration",
+      4,
+      "bamboo celebration japanese plant"
+    ],
+    [
+      "1f38e",
+      "Japanese dolls",
+      4,
+      "celebration doll festival"
+    ],
+    [
+      "1f38f",
+      "carp streamer",
+      4,
+      "celebration"
+    ],
+    [
+      "1f390",
+      "wind chime",
+      4,
+      "bell celebration"
+    ],
+    [
+      "1f391",
+      "moon viewing ceremony",
+      4,
+      "celebration"
+    ],
+    [
+      "1f9e7",
+      "red envelope",
+      4,
+      "gift good hóngbāo lai luck money see"
+    ],
+    [
+      "1f380",
+      "ribbon",
+      4,
+      "celebration"
+    ],
+    [
+      "1f381",
+      "wrapped gift",
+      4,
+      "birthday bow box celebration christmas present surprise"
+    ],
+    [
+      "1f397-fe0f",
+      "reminder ribbon",
+      4,
+      "celebration"
+    ],
+    [
+      "1f39f-fe0f",
+      "admission tickets",
+      4,
+      "ticket"
+    ],
+    [
+      "1f3ab",
+      "ticket",
+      4,
+      "admission stub"
+    ],
+    [
+      "1f396-fe0f",
+      "military medal",
+      4,
+      "award celebration"
+    ],
+    [
+      "1f3c6",
+      "trophy",
+      4,
+      "champion champs prize slay sport victory win winning"
+    ],
+    [
+      "1f3c5",
+      "sports medal",
+      4,
+      "award gold winner"
+    ],
+    [
+      "1f947",
+      "1st place medal",
+      4,
+      "first gold"
+    ],
+    [
+      "1f948",
+      "2nd place medal",
+      4,
+      "second silver"
+    ],
+    [
+      "1f949",
+      "3rd place medal",
+      4,
+      "bronze third"
+    ],
+    [
+      "26bd",
+      "soccer ball",
+      4,
+      "football futbol sport"
+    ],
+    [
+      "26be",
+      "baseball",
+      4,
+      "ball sport"
+    ],
+    [
+      "1f94e",
+      "softball",
+      4,
+      "ball glove sports underarm"
+    ],
+    [
+      "1f3c0",
+      "basketball",
+      4,
+      "ball hoop sport"
+    ],
+    [
+      "1f3d0",
+      "volleyball",
+      4,
+      "ball game"
+    ],
+    [
+      "1f3c8",
+      "american football",
+      4,
+      "ball bowl sport super"
+    ],
+    [
+      "1f3c9",
+      "rugby football",
+      4,
+      "ball sport"
+    ],
+    [
+      "1f3be",
+      "tennis",
+      4,
+      "ball racquet sport"
+    ],
+    [
+      "1f94f",
+      "flying disc",
+      4,
+      "ultimate"
+    ],
+    [
+      "1f3b3",
+      "bowling",
+      4,
+      "ball game sport strike"
+    ],
+    [
+      "1f3cf",
+      "cricket game",
+      4,
+      "ball bat"
+    ],
+    [
+      "1f3d1",
+      "field hockey",
+      4,
+      "ball game stick"
+    ],
+    [
+      "1f3d2",
+      "ice hockey",
+      4,
+      "game puck stick"
+    ],
+    [
+      "1f94d",
+      "lacrosse",
+      4,
+      "ball goal sports stick"
+    ],
+    [
+      "1f3d3",
+      "ping pong",
+      4,
+      "ball bat game paddle pingpong table tennis"
+    ],
+    [
+      "1f3f8",
+      "badminton",
+      4,
+      "birdie game racquet shuttlecock"
+    ],
+    [
+      "1f94a",
+      "boxing glove",
+      4,
+      ""
+    ],
+    [
+      "1f94b",
+      "martial arts uniform",
+      4,
+      "judo karate taekwondo"
+    ],
+    [
+      "1f945",
+      "goal net",
+      4,
+      ""
+    ],
+    [
+      "26f3",
+      "flag in hole",
+      4,
+      "golf sport"
+    ],
+    [
+      "26f8-fe0f",
+      "ice skate",
+      4,
+      "skating"
+    ],
+    [
+      "1f3a3",
+      "fishing pole",
+      4,
+      "entertainment fish sport"
+    ],
+    [
+      "1f93f",
+      "diving mask",
+      4,
+      "scuba snorkeling"
+    ],
+    [
+      "1f3bd",
+      "running shirt",
+      4,
+      "athletics sash"
+    ],
+    [
+      "1f3bf",
+      "skis",
+      4,
+      "ski snow sport"
+    ],
+    [
+      "1f6f7",
+      "sled",
+      4,
+      "luge sledge sleigh snow toboggan"
+    ],
+    [
+      "1f94c",
+      "curling stone",
+      4,
+      "game rock"
+    ],
+    [
+      "1f3af",
+      "bullseye",
+      4,
+      "bull dart direct entertainment game hit target"
+    ],
+    [
+      "1fa80",
+      "yo-yo",
+      4,
+      "fluctuate toy"
+    ],
+    [
+      "1fa81",
+      "kite",
+      4,
+      "fly soar"
+    ],
+    [
+      "1f52b",
+      "water pistol",
+      4,
+      "gun handgun revolver tool weapon"
+    ],
+    [
+      "1f3b1",
+      "pool 8 ball",
+      4,
+      "8ball billiard eight game"
+    ],
+    [
+      "1f52e",
+      "crystal ball",
+      4,
+      "fairy fairytale fantasy fortune future magic tale tool"
+    ],
+    [
+      "1fa84",
+      "magic wand",
+      4,
+      "magician witch wizard"
+    ],
+    [
+      "1f3ae",
+      "video game",
+      4,
+      "controller entertainment"
+    ],
+    [
+      "1f579-fe0f",
+      "joystick",
+      4,
+      "game video videogame"
+    ],
+    [
+      "1f3b0",
+      "slot machine",
+      4,
+      "casino gamble gambling game slots"
+    ],
+    [
+      "1f3b2",
+      "game die",
+      4,
+      "dice entertainment"
+    ],
+    [
+      "1f9e9",
+      "puzzle piece",
+      4,
+      "clue interlocking jigsaw"
+    ],
+    [
+      "1f9f8",
+      "teddy bear",
+      4,
+      "plaything plush stuffed toy"
+    ],
+    [
+      "1fa85",
+      "piñata",
+      4,
+      "candy celebrate celebration cinco de festive mayo party pinada pinata"
+    ],
+    [
+      "1faa9",
+      "mirror ball",
+      4,
+      "dance disco glitter party"
+    ],
+    [
+      "1fa86",
+      "nesting dolls",
+      4,
+      "babooshka baboushka babushka doll matryoshka russia"
+    ],
+    [
+      "2660-fe0f",
+      "spade suit",
+      4,
+      "card game"
+    ],
+    [
+      "2665-fe0f",
+      "heart suit",
+      4,
+      "card emotion game hearts"
+    ],
+    [
+      "2666-fe0f",
+      "diamond suit",
+      4,
+      "card game"
+    ],
+    [
+      "2663-fe0f",
+      "club suit",
+      4,
+      "card clubs game"
+    ],
+    [
+      "265f-fe0f",
+      "chess pawn",
+      4,
+      "dupe expendable"
+    ],
+    [
+      "1f0cf",
+      "joker",
+      4,
+      "card game wildcard"
+    ],
+    [
+      "1f004",
+      "mahjong red dragon",
+      4,
+      "game"
+    ],
+    [
+      "1f3b4",
+      "flower playing cards",
+      4,
+      "card game japanese"
+    ],
+    [
+      "1f3ad",
+      "performing arts",
+      4,
+      "actor actress art entertainment mask theater theatre thespian"
+    ],
+    [
+      "1f5bc-fe0f",
+      "framed picture",
+      4,
+      "art frame museum painting"
+    ],
+    [
+      "1f3a8",
+      "artist palette",
+      4,
+      "art artsy arty colorful creative entertainment museum painter painting"
+    ],
+    [
+      "1f9f5",
+      "thread",
+      4,
+      "needle sewing spool string"
+    ],
+    [
+      "1faa1",
+      "sewing needle",
+      4,
+      "embroidery sew stitches sutures tailoring thread"
+    ],
+    [
+      "1f9f6",
+      "yarn",
+      4,
+      "ball crochet knit"
+    ],
+    [
+      "1faa2",
+      "knot",
+      4,
+      "cord rope tangled tie twine twist"
+    ],
+    [
+      "1f453",
+      "glasses",
+      5,
+      "clothing eye eyeglasses eyewear"
+    ],
+    [
+      "1f576-fe0f",
+      "sunglasses",
+      5,
+      "dark eye eyewear glasses"
+    ],
+    [
+      "1f97d",
+      "goggles",
+      5,
+      "dive eye protection scuba swimming welding"
+    ],
+    [
+      "1f97c",
+      "lab coat",
+      5,
+      "clothes doctor dr experiment jacket scientist white"
+    ],
+    [
+      "1f9ba",
+      "safety vest",
+      5,
+      "emergency"
+    ],
+    [
+      "1f454",
+      "necktie",
+      5,
+      "clothing employed serious shirt tie"
+    ],
+    [
+      "1f455",
+      "t-shirt",
+      5,
+      "blue casual clothes clothing collar dressed shirt shopping tshirt weekend"
+    ],
+    [
+      "1f456",
+      "jeans",
+      5,
+      "blue casual clothes clothing denim dressed pants shopping trousers weekend"
+    ],
+    [
+      "1f9e3",
+      "scarf",
+      5,
+      "bundle cold neck up"
+    ],
+    [
+      "1f9e4",
+      "gloves",
+      5,
+      "hand"
+    ],
+    [
+      "1f9e5",
+      "coat",
+      5,
+      "brr bundle cold jacket up"
+    ],
+    [
+      "1f9e6",
+      "socks",
+      5,
+      "stocking"
+    ],
+    [
+      "1f457",
+      "dress",
+      5,
+      "clothes clothing dressed fancy shopping"
+    ],
+    [
+      "1f458",
+      "kimono",
+      5,
+      "clothing comfortable"
+    ],
+    [
+      "1f97b",
+      "sari",
+      5,
+      "clothing dress"
+    ],
+    [
+      "1fa71",
+      "one-piece swimsuit",
+      5,
+      "bathing suit"
+    ],
+    [
+      "1fa72",
+      "briefs",
+      5,
+      "bathing one-piece suit swimsuit underwear"
+    ],
+    [
+      "1fa73",
+      "shorts",
+      5,
+      "bathing pants suit swimsuit underwear"
+    ],
+    [
+      "1f459",
+      "bikini",
+      5,
+      "bathing beach clothing pool suit swim"
+    ],
+    [
+      "1f45a",
+      "woman’s clothes",
+      5,
+      "blouse clothing collar dress dressed lady shirt shopping woman"
+    ],
+    [
+      "1faad",
+      "folding hand fan",
+      5,
+      "clack clap cool cooling dance flirt flutter hot shy"
+    ],
+    [
+      "1f45b",
+      "purse",
+      5,
+      "clothes clothing coin dress fancy handbag shopping"
+    ],
+    [
+      "1f45c",
+      "handbag",
+      5,
+      "bag clothes clothing dress lady purse shopping"
+    ],
+    [
+      "1f45d",
+      "clutch bag",
+      5,
+      "clothes clothing dress handbag pouch purse"
+    ],
+    [
+      "1f6cd-fe0f",
+      "shopping bags",
+      5,
+      "bag hotel"
+    ],
+    [
+      "1f392",
+      "backpack",
+      5,
+      "backpacking bag bookbag education rucksack satchel school"
+    ],
+    [
+      "1fa74",
+      "thong sandal",
+      5,
+      "beach flip flop sandals shoe thongs zōri"
+    ],
+    [
+      "1f45e",
+      "man’s shoe",
+      5,
+      "brown clothes clothing feet foot kick man shoes shopping"
+    ],
+    [
+      "1f45f",
+      "running shoe",
+      5,
+      "athletic clothes clothing fast kick shoes shopping sneaker tennis"
+    ],
+    [
+      "1f97e",
+      "hiking boot",
+      5,
+      "backpacking brown camping outdoors shoe"
+    ],
+    [
+      "1f97f",
+      "flat shoe",
+      5,
+      "ballet comfy flats slip-on slipper"
+    ],
+    [
+      "1f460",
+      "high-heeled shoe",
+      5,
+      "clothes clothing dress fashion heel heels shoes shopping stiletto woman"
+    ],
+    [
+      "1f461",
+      "woman’s sandal",
+      5,
+      "clothing shoe woman"
+    ],
+    [
+      "1fa70",
+      "ballet shoes",
+      5,
+      "dance"
+    ],
+    [
+      "1f462",
+      "woman’s boot",
+      5,
+      "clothes clothing dress shoe shoes shopping woman"
+    ],
+    [
+      "1faae",
+      "hair pick",
+      5,
+      "afro comb groom"
+    ],
+    [
+      "1f451",
+      "crown",
+      5,
+      "clothing family king medieval queen royal royalty win"
+    ],
+    [
+      "1f452",
+      "woman’s hat",
+      5,
+      "clothes clothing garden hats party woman"
+    ],
+    [
+      "1f3a9",
+      "top hat",
+      5,
+      "clothes clothing fancy formal magic tophat"
+    ],
+    [
+      "1f393",
+      "graduation cap",
+      5,
+      "celebration clothing education hat scholar"
+    ],
+    [
+      "1f9e2",
+      "billed cap",
+      5,
+      "baseball bent dad hat"
+    ],
+    [
+      "1fa96",
+      "military helmet",
+      5,
+      "army soldier war warrior"
+    ],
+    [
+      "26d1-fe0f",
+      "rescue worker’s helmet",
+      5,
+      "aid cross face hat"
+    ],
+    [
+      "1f4ff",
+      "prayer beads",
+      5,
+      "clothing necklace religion"
+    ],
+    [
+      "1f484",
+      "lipstick",
+      5,
+      "cosmetics date makeup"
+    ],
+    [
+      "1f48d",
+      "ring",
+      5,
+      "diamond engaged engagement married romance shiny sparkling wedding"
+    ],
+    [
+      "1f48e",
+      "gem stone",
+      5,
+      "diamond engagement jewel money romance wedding"
+    ],
+    [
+      "1f507",
+      "muted speaker",
+      5,
+      "mute quiet silent sound"
+    ],
+    [
+      "1f508",
+      "speaker low volume",
+      5,
+      "soft sound"
+    ],
+    [
+      "1f509",
+      "speaker medium volume",
+      5,
+      "sound"
+    ],
+    [
+      "1f50a",
+      "speaker high volume",
+      5,
+      "loud music sound"
+    ],
+    [
+      "1f4e2",
+      "loudspeaker",
+      5,
+      "address communication loud public sound"
+    ],
+    [
+      "1f4e3",
+      "megaphone",
+      5,
+      "cheering sound"
+    ],
+    [
+      "1f4ef",
+      "postal horn",
+      5,
+      "post"
+    ],
+    [
+      "1f514",
+      "bell",
+      5,
+      "break church sound"
+    ],
+    [
+      "1f515",
+      "bell with slash",
+      5,
+      "forbidden mute no not prohibited quiet silent sound"
+    ],
+    [
+      "1f3bc",
+      "musical score",
+      5,
+      "music note"
+    ],
+    [
+      "1f3b5",
+      "musical note",
+      5,
+      "music sound"
+    ],
+    [
+      "1f3b6",
+      "musical notes",
+      5,
+      "music note sound"
+    ],
+    [
+      "1f399-fe0f",
+      "studio microphone",
+      5,
+      "mic music"
+    ],
+    [
+      "1f39a-fe0f",
+      "level slider",
+      5,
+      "music"
+    ],
+    [
+      "1f39b-fe0f",
+      "control knobs",
+      5,
+      "music"
+    ],
+    [
+      "1f3a4",
+      "microphone",
+      5,
+      "karaoke mic music sing sound"
+    ],
+    [
+      "1f3a7",
+      "headphone",
+      5,
+      "earbud sound"
+    ],
+    [
+      "1f4fb",
+      "radio",
+      5,
+      "entertainment tbt video"
+    ],
+    [
+      "1f3b7",
+      "saxophone",
+      5,
+      "instrument music sax"
+    ],
+    [
+      "1f3ba",
+      "trumpet",
+      5,
+      "instrument music"
+    ],
+    [
+      "1fa8a",
+      "trombone",
+      5,
+      "brass instrument jazz music sad slide"
+    ],
+    [
+      "1fa97",
+      "accordion",
+      5,
+      "box concertina instrument music squeeze squeezebox"
+    ],
+    [
+      "1f3b8",
+      "guitar",
+      5,
+      "instrument music strat"
+    ],
+    [
+      "1f3b9",
+      "musical keyboard",
+      5,
+      "instrument music piano"
+    ],
+    [
+      "1f3bb",
+      "violin",
+      5,
+      "instrument music"
+    ],
+    [
+      "1fa95",
+      "banjo",
+      5,
+      "music stringed"
+    ],
+    [
+      "1f941",
+      "drum",
+      5,
+      "drumsticks music"
+    ],
+    [
+      "1fa98",
+      "long drum",
+      5,
+      "beat conga instrument rhythm"
+    ],
+    [
+      "1fa87",
+      "maracas",
+      5,
+      "cha dance instrument music party percussion rattle shake shaker"
+    ],
+    [
+      "1fa88",
+      "flute",
+      5,
+      "band fife flautist instrument marching music orchestra piccolo pipe recorder woodwind"
+    ],
+    [
+      "1fa89",
+      "harp",
+      5,
+      "cupid instrument love music orchestra"
+    ],
+    [
+      "1f4f1",
+      "mobile phone",
+      5,
+      "cell communication telephone"
+    ],
+    [
+      "1f4f2",
+      "mobile phone with arrow",
+      5,
+      "build call cell communication receive telephone"
+    ],
+    [
+      "260e-fe0f",
+      "telephone",
+      5,
+      "phone"
+    ],
+    [
+      "1f4de",
+      "telephone receiver",
+      5,
+      "communication phone voip"
+    ],
+    [
+      "1f4df",
+      "pager",
+      5,
+      "communication"
+    ],
+    [
+      "1f4e0",
+      "fax machine",
+      5,
+      "communication"
+    ],
+    [
+      "1f50b",
+      "battery",
+      5,
+      ""
+    ],
+    [
+      "1faab",
+      "low battery",
+      5,
+      "drained electronic energy power"
+    ],
+    [
+      "1f50c",
+      "electric plug",
+      5,
+      "electricity"
+    ],
+    [
+      "1f4bb",
+      "laptop",
+      5,
+      "computer office pc personal"
+    ],
+    [
+      "1f5a5-fe0f",
+      "desktop computer",
+      5,
+      "monitor"
+    ],
+    [
+      "1f5a8-fe0f",
+      "printer",
+      5,
+      "computer"
+    ],
+    [
+      "2328-fe0f",
+      "keyboard",
+      5,
+      "computer"
+    ],
+    [
+      "1f5b1-fe0f",
+      "computer mouse",
+      5,
+      ""
+    ],
+    [
+      "1f5b2-fe0f",
+      "trackball",
+      5,
+      "computer"
+    ],
+    [
+      "1f4bd",
+      "computer disk",
+      5,
+      "minidisk optical"
+    ],
+    [
+      "1f4be",
+      "floppy disk",
+      5,
+      "computer"
+    ],
+    [
+      "1f4bf",
+      "optical disk",
+      5,
+      "blu-ray cd computer dvd"
+    ],
+    [
+      "1f4c0",
+      "dvd",
+      5,
+      "blu-ray cd computer disk optical"
+    ],
+    [
+      "1f9ee",
+      "abacus",
+      5,
+      "calculation calculator"
+    ],
+    [
+      "1f3a5",
+      "movie camera",
+      5,
+      "bollywood cinema film hollywood record"
+    ],
+    [
+      "1f39e-fe0f",
+      "film frames",
+      5,
+      "cinema movie"
+    ],
+    [
+      "1f4fd-fe0f",
+      "film projector",
+      5,
+      "cinema movie video"
+    ],
+    [
+      "1f3ac",
+      "clapper board",
+      5,
+      "action movie"
+    ],
+    [
+      "1f4fa",
+      "television",
+      5,
+      "tv video"
+    ],
+    [
+      "1f4f7",
+      "camera",
+      5,
+      "photo selfie snap tbt trip video"
+    ],
+    [
+      "1f4f8",
+      "camera with flash",
+      5,
+      "video"
+    ],
+    [
+      "1f4f9",
+      "video camera",
+      5,
+      "camcorder tbt"
+    ],
+    [
+      "1f4fc",
+      "videocassette",
+      5,
+      "old school tape vcr vhs video"
+    ],
+    [
+      "1f50d",
+      "magnifying glass tilted left",
+      5,
+      "lab left-pointing science search tool"
+    ],
+    [
+      "1f50e",
+      "magnifying glass tilted right",
+      5,
+      "contact lab right-pointing science search tool"
+    ],
+    [
+      "1f56f-fe0f",
+      "candle",
+      5,
+      "light"
+    ],
+    [
+      "1f4a1",
+      "light bulb",
+      5,
+      "comic electric idea"
+    ],
+    [
+      "1f526",
+      "flashlight",
+      5,
+      "electric light tool torch"
+    ],
+    [
+      "1f3ee",
+      "red paper lantern",
+      5,
+      "bar light restaurant"
+    ],
+    [
+      "1fa94",
+      "diya lamp",
+      5,
+      "light oil"
+    ],
+    [
+      "1f4d4",
+      "notebook with decorative cover",
+      5,
+      "book decorated education school writing"
+    ],
+    [
+      "1f4d5",
+      "closed book",
+      5,
+      "education"
+    ],
+    [
+      "1f4d6",
+      "open book",
+      5,
+      "education fantasy knowledge library novels reading"
+    ],
+    [
+      "1f4d7",
+      "green book",
+      5,
+      "education fantasy library reading"
+    ],
+    [
+      "1f4d8",
+      "blue book",
+      5,
+      "education fantasy library reading"
+    ],
+    [
+      "1f4d9",
+      "orange book",
+      5,
+      "education fantasy library reading"
+    ],
+    [
+      "1f4da",
+      "books",
+      5,
+      "book education fantasy knowledge library novels reading school study"
+    ],
+    [
+      "1f4d3",
+      "notebook",
+      5,
+      ""
+    ],
+    [
+      "1f4d2",
+      "ledger",
+      5,
+      "notebook"
+    ],
+    [
+      "1f4c3",
+      "page with curl",
+      5,
+      "document paper"
+    ],
+    [
+      "1f4dc",
+      "scroll",
+      5,
+      "paper"
+    ],
+    [
+      "1f4c4",
+      "page facing up",
+      5,
+      "document paper"
+    ],
+    [
+      "1f4f0",
+      "newspaper",
+      5,
+      "communication news paper"
+    ],
+    [
+      "1f5de-fe0f",
+      "rolled-up newspaper",
+      5,
+      "news paper rolled"
+    ],
+    [
+      "1f4d1",
+      "bookmark tabs",
+      5,
+      "mark marker"
+    ],
+    [
+      "1f516",
+      "bookmark",
+      5,
+      "mark"
+    ],
+    [
+      "1f3f7-fe0f",
+      "label",
+      5,
+      "tag"
+    ],
+    [
+      "1fa99",
+      "coin",
+      5,
+      "dollar euro gold metal money rich silver treasure"
+    ],
+    [
+      "1f4b0",
+      "money bag",
+      5,
+      "bank bet billion cash cost dollar gold million moneybag paid paying pot rich win"
+    ],
+    [
+      "1fa8e",
+      "treasure chest",
+      5,
+      "gem gold jewels loot money prize silver valuables wealth"
+    ],
+    [
+      "1f4b4",
+      "yen banknote",
+      5,
+      "bank bill currency money note"
+    ],
+    [
+      "1f4b5",
+      "dollar banknote",
+      5,
+      "bank bill currency money note"
+    ],
+    [
+      "1f4b6",
+      "euro banknote",
+      5,
+      "100 bank bill currency money note rich"
+    ],
+    [
+      "1f4b7",
+      "pound banknote",
+      5,
+      "bank bill billion cash currency money note pounds"
+    ],
+    [
+      "1f4b8",
+      "money with wings",
+      5,
+      "bank banknote bill billion cash dollar fly million note pay"
+    ],
+    [
+      "1f4b3",
+      "credit card",
+      5,
+      "bank cash charge money pay"
+    ],
+    [
+      "1f9fe",
+      "receipt",
+      5,
+      "accounting bookkeeping evidence invoice proof"
+    ],
+    [
+      "1f4b9",
+      "chart increasing with yen",
+      5,
+      "bank currency graph growth market money rise trend upward"
+    ],
+    [
+      "2709-fe0f",
+      "envelope",
+      5,
+      "e-mail email letter"
+    ],
+    [
+      "1f4e7",
+      "e-mail",
+      5,
+      "email letter mail"
+    ],
+    [
+      "1f4e8",
+      "incoming envelope",
+      5,
+      "delivering e-mail email letter mail receive sent"
+    ],
+    [
+      "1f4e9",
+      "envelope with arrow",
+      5,
+      "communication down e-mail email letter mail outgoing send sent"
+    ],
+    [
+      "1f4e4",
+      "outbox tray",
+      5,
+      "box email letter mail sent"
+    ],
+    [
+      "1f4e5",
+      "inbox tray",
+      5,
+      "box email letter mail receive zero"
+    ],
+    [
+      "1f4e6",
+      "package",
+      5,
+      "box communication delivery parcel shipping"
+    ],
+    [
+      "1f4eb",
+      "closed mailbox with raised flag",
+      5,
+      "communication mail postbox"
+    ],
+    [
+      "1f4ea",
+      "closed mailbox with lowered flag",
+      5,
+      "mail postbox"
+    ],
+    [
+      "1f4ec",
+      "open mailbox with raised flag",
+      5,
+      "mail postbox"
+    ],
+    [
+      "1f4ed",
+      "open mailbox with lowered flag",
+      5,
+      "mail postbox"
+    ],
+    [
+      "1f4ee",
+      "postbox",
+      5,
+      "mail mailbox"
+    ],
+    [
+      "1f5f3-fe0f",
+      "ballot box with ballot",
+      5,
+      ""
+    ],
+    [
+      "270f-fe0f",
+      "pencil",
+      5,
+      ""
+    ],
+    [
+      "2712-fe0f",
+      "black nib",
+      5,
+      "pen"
+    ],
+    [
+      "1f58b-fe0f",
+      "fountain pen",
+      5,
+      ""
+    ],
+    [
+      "1f58a-fe0f",
+      "pen",
+      5,
+      "ballpoint"
+    ],
+    [
+      "1f58c-fe0f",
+      "paintbrush",
+      5,
+      "painting"
+    ],
+    [
+      "1f58d-fe0f",
+      "crayon",
+      5,
+      ""
+    ],
+    [
+      "1f4dd",
+      "memo",
+      5,
+      "communication media notes pencil"
+    ],
+    [
+      "1fa8c",
+      "eraser",
+      5,
+      "correction delete drawing erase error mistake remove rub undo writing"
+    ],
+    [
+      "1f4bc",
+      "briefcase",
+      5,
+      "office"
+    ],
+    [
+      "1f4c1",
+      "file folder",
+      5,
+      ""
+    ],
+    [
+      "1f4c2",
+      "open file folder",
+      5,
+      ""
+    ],
+    [
+      "1f5c2-fe0f",
+      "card index dividers",
+      5,
+      ""
+    ],
+    [
+      "1f4c5",
+      "calendar",
+      5,
+      "date"
+    ],
+    [
+      "1f4c6",
+      "tear-off calendar",
+      5,
+      ""
+    ],
+    [
+      "1f5d2-fe0f",
+      "spiral notepad",
+      5,
+      "note pad"
+    ],
+    [
+      "1f5d3-fe0f",
+      "spiral calendar",
+      5,
+      "pad"
+    ],
+    [
+      "1f4c7",
+      "card index",
+      5,
+      "old rolodex school"
+    ],
+    [
+      "1f4c8",
+      "chart increasing",
+      5,
+      "data graph growth right trend up upward"
+    ],
+    [
+      "1f4c9",
+      "chart decreasing",
+      5,
+      "data down downward graph negative trend"
+    ],
+    [
+      "1f4ca",
+      "bar chart",
+      5,
+      "data graph"
+    ],
+    [
+      "1f4cb",
+      "clipboard",
+      5,
+      "do list notes"
+    ],
+    [
+      "1f4cc",
+      "pushpin",
+      5,
+      "collage pin"
+    ],
+    [
+      "1f4cd",
+      "round pushpin",
+      5,
+      "location map pin"
+    ],
+    [
+      "1f4ce",
+      "paperclip",
+      5,
+      ""
+    ],
+    [
+      "1f587-fe0f",
+      "linked paperclips",
+      5,
+      "link paperclip"
+    ],
+    [
+      "1f4cf",
+      "straight ruler",
+      5,
+      "angle edge math straightedge"
+    ],
+    [
+      "1f4d0",
+      "triangular ruler",
+      5,
+      "angle math rule set slide triangle"
+    ],
+    [
+      "2702-fe0f",
+      "scissors",
+      5,
+      "cut cutting paper tool"
+    ],
+    [
+      "1f5c3-fe0f",
+      "card file box",
+      5,
+      ""
+    ],
+    [
+      "1f5c4-fe0f",
+      "file cabinet",
+      5,
+      "filing paper"
+    ],
+    [
+      "1f5d1-fe0f",
+      "wastebasket",
+      5,
+      "can garbage trash waste"
+    ],
+    [
+      "1f512",
+      "locked",
+      5,
+      "closed lock private"
+    ],
+    [
+      "1f513",
+      "unlocked",
+      5,
+      "cracked lock open unlock"
+    ],
+    [
+      "1f50f",
+      "locked with pen",
+      5,
+      "ink lock nib privacy"
+    ],
+    [
+      "1f510",
+      "locked with key",
+      5,
+      "bike closed lock secure"
+    ],
+    [
+      "1f511",
+      "key",
+      5,
+      "keys lock major password unlock"
+    ],
+    [
+      "1f5dd-fe0f",
+      "old key",
+      5,
+      "clue lock"
+    ],
+    [
+      "1fa8d",
+      "net with handle",
+      5,
+      "catch collect mesh trap"
+    ],
+    [
+      "1f528",
+      "hammer",
+      5,
+      "home improvement repairs tool"
+    ],
+    [
+      "1fa93",
+      "axe",
+      5,
+      "ax chop hatchet split wood"
+    ],
+    [
+      "26cf-fe0f",
+      "pick",
+      5,
+      "hammer mining tool"
+    ],
+    [
+      "2692-fe0f",
+      "hammer and pick",
+      5,
+      "tool"
+    ],
+    [
+      "1f6e0-fe0f",
+      "hammer and wrench",
+      5,
+      "spanner tool"
+    ],
+    [
+      "1f5e1-fe0f",
+      "dagger",
+      5,
+      "knife weapon"
+    ],
+    [
+      "2694-fe0f",
+      "crossed swords",
+      5,
+      "weapon"
+    ],
+    [
+      "1f4a3",
+      "bomb",
+      5,
+      "boom comic dangerous explosion hot"
+    ],
+    [
+      "1fa83",
+      "boomerang",
+      5,
+      "rebound repercussion weapon"
+    ],
+    [
+      "1f3f9",
+      "bow and arrow",
+      5,
+      "archer archery sagittarius tool weapon zodiac"
+    ],
+    [
+      "1f6e1-fe0f",
+      "shield",
+      5,
+      "weapon"
+    ],
+    [
+      "1fa9a",
+      "carpentry saw",
+      5,
+      "carpenter cut lumber tool trim"
+    ],
+    [
+      "1f527",
+      "wrench",
+      5,
+      "home improvement spanner tool"
+    ],
+    [
+      "1fa9b",
+      "screwdriver",
+      5,
+      "flathead handy screw tool"
+    ],
+    [
+      "1f529",
+      "nut and bolt",
+      5,
+      "home improvement tool"
+    ],
+    [
+      "2699-fe0f",
+      "gear",
+      5,
+      "cog cogwheel tool"
+    ],
+    [
+      "1f5dc-fe0f",
+      "clamp",
+      5,
+      "compress tool vice"
+    ],
+    [
+      "2696-fe0f",
+      "balance scale",
+      5,
+      "justice libra scales tool weight zodiac"
+    ],
+    [
+      "1f9af",
+      "white cane",
+      5,
+      "accessibility blind probing"
+    ],
+    [
+      "1f517",
+      "link",
+      5,
+      "links"
+    ],
+    [
+      "26d3-fe0f-200d-1f4a5",
+      "broken chain",
+      5,
+      "break breaking cuffs freedom"
+    ],
+    [
+      "26d3-fe0f",
+      "chains",
+      5,
+      "chain"
+    ],
+    [
+      "1fa9d",
+      "hook",
+      5,
+      "catch crook curve ensnare point selling"
+    ],
+    [
+      "1f9f0",
+      "toolbox",
+      5,
+      "box chest mechanic red tool"
+    ],
+    [
+      "1f9f2",
+      "magnet",
+      5,
+      "attraction horseshoe magnetic negative positive shape u"
+    ],
+    [
+      "1fa9c",
+      "ladder",
+      5,
+      "climb rung step"
+    ],
+    [
+      "1fa8f",
+      "shovel",
+      5,
+      "bury dig garden hole plant scoop snow spade"
+    ],
+    [
+      "2697-fe0f",
+      "alembic",
+      5,
+      "chemistry tool"
+    ],
+    [
+      "1f9ea",
+      "test tube",
+      5,
+      "chemist chemistry experiment lab science"
+    ],
+    [
+      "1f9eb",
+      "petri dish",
+      5,
+      "bacteria biologist biology culture lab"
+    ],
+    [
+      "1f9ec",
+      "dna",
+      5,
+      "biologist evolution gene genetics life"
+    ],
+    [
+      "1f52c",
+      "microscope",
+      5,
+      "experiment lab science tool"
+    ],
+    [
+      "1f52d",
+      "telescope",
+      5,
+      "contact extraterrestrial science tool"
+    ],
+    [
+      "1f4e1",
+      "satellite antenna",
+      5,
+      "aliens contact dish science"
+    ],
+    [
+      "1f489",
+      "syringe",
+      5,
+      "doctor flu medicine needle shot sick tool vaccination"
+    ],
+    [
+      "1fa78",
+      "drop of blood",
+      5,
+      "bleed donation injury medicine menstruation"
+    ],
+    [
+      "1f48a",
+      "pill",
+      5,
+      "doctor drugs medicated medicine pills sick vitamin"
+    ],
+    [
+      "1fa79",
+      "adhesive bandage",
+      5,
+      ""
+    ],
+    [
+      "1fa7c",
+      "crutch",
+      5,
+      "aid cane disability help hurt injured mobility stick"
+    ],
+    [
+      "1fa7a",
+      "stethoscope",
+      5,
+      "doctor heart medicine"
+    ],
+    [
+      "1fa7b",
+      "x-ray",
+      5,
+      "bones doctor medical skeleton skull xray"
+    ],
+    [
+      "1f6aa",
+      "door",
+      5,
+      "back closet front"
+    ],
+    [
+      "1f6d7",
+      "elevator",
+      5,
+      "accessibility hoist lift"
+    ],
+    [
+      "1fa9e",
+      "mirror",
+      5,
+      "makeup reflection reflector speculum"
+    ],
+    [
+      "1fa9f",
+      "window",
+      5,
+      "air frame fresh opening transparent view"
+    ],
+    [
+      "1f6cf-fe0f",
+      "bed",
+      5,
+      "hotel sleep"
+    ],
+    [
+      "1f6cb-fe0f",
+      "couch and lamp",
+      5,
+      "hotel"
+    ],
+    [
+      "1fa91",
+      "chair",
+      5,
+      "seat sit"
+    ],
+    [
+      "1f6bd",
+      "toilet",
+      5,
+      "bathroom"
+    ],
+    [
+      "1faa0",
+      "plunger",
+      5,
+      "cup force plumber poop suction toilet"
+    ],
+    [
+      "1f6bf",
+      "shower",
+      5,
+      "water"
+    ],
+    [
+      "1f6c1",
+      "bathtub",
+      5,
+      "bath"
+    ],
+    [
+      "1faa4",
+      "mouse trap",
+      5,
+      "bait cheese lure mousetrap snare"
+    ],
+    [
+      "1fa92",
+      "razor",
+      5,
+      "sharp shave"
+    ],
+    [
+      "1f9f4",
+      "lotion bottle",
+      5,
+      "moisturizer shampoo sunscreen"
+    ],
+    [
+      "1f9f7",
+      "safety pin",
+      5,
+      "diaper punk rock"
+    ],
+    [
+      "1f9f9",
+      "broom",
+      5,
+      "cleaning sweeping witch"
+    ],
+    [
+      "1f9fa",
+      "basket",
+      5,
+      "farming laundry picnic"
+    ],
+    [
+      "1f9fb",
+      "roll of paper",
+      5,
+      "toilet towels"
+    ],
+    [
+      "1faa3",
+      "bucket",
+      5,
+      "cask pail vat"
+    ],
+    [
+      "1f9fc",
+      "soap",
+      5,
+      "bar bathing clean cleaning lather soapdish"
+    ],
+    [
+      "1fae7",
+      "bubbles",
+      5,
+      "bubble burp clean floating pearl soap underwater"
+    ],
+    [
+      "1faa5",
+      "toothbrush",
+      5,
+      "bathroom brush clean dental hygiene teeth toiletry"
+    ],
+    [
+      "1f9fd",
+      "sponge",
+      5,
+      "absorbing cleaning porous soak"
+    ],
+    [
+      "1f9ef",
+      "fire extinguisher",
+      5,
+      "extinguish quench"
+    ],
+    [
+      "1f6d2",
+      "shopping cart",
+      5,
+      "trolley"
+    ],
+    [
+      "1f6ac",
+      "cigarette",
+      5,
+      "smoking"
+    ],
+    [
+      "26b0-fe0f",
+      "coffin",
+      5,
+      "dead death vampire"
+    ],
+    [
+      "1faa6",
+      "headstone",
+      5,
+      "cemetery dead grave graveyard memorial rip tomb tombstone"
+    ],
+    [
+      "26b1-fe0f",
+      "funeral urn",
+      5,
+      "ashes death"
+    ],
+    [
+      "1f9ff",
+      "nazar amulet",
+      5,
+      "bead blue charm evil-eye talisman"
+    ],
+    [
+      "1faac",
+      "hamsa",
+      5,
+      "amulet fatima fortune guide hand mary miriam palm protect protection"
+    ],
+    [
+      "1f5ff",
+      "moai",
+      5,
+      "face moyai statue stoneface travel"
+    ],
+    [
+      "1faa7",
+      "placard",
+      5,
+      "card demonstration notice picket plaque protest sign"
+    ],
+    [
+      "1faaa",
+      "identification card",
+      5,
+      "credentials document id license security"
+    ],
+    [
+      "1f3e7",
+      "ATM sign",
+      6,
+      "automated bank cash money teller"
+    ],
+    [
+      "1f6ae",
+      "litter in bin sign",
+      6,
+      "litterbin"
+    ],
+    [
+      "1f6b0",
+      "potable water",
+      6,
+      "drinking"
+    ],
+    [
+      "267f",
+      "wheelchair symbol",
+      6,
+      "access handicap"
+    ],
+    [
+      "1f6b9",
+      "men’s room",
+      6,
+      "bathroom lavatory man restroom toilet wc"
+    ],
+    [
+      "1f6ba",
+      "women’s room",
+      6,
+      "bathroom lavatory restroom toilet wc woman"
+    ],
+    [
+      "1f6bb",
+      "restroom",
+      6,
+      "bathroom lavatory toilet wc"
+    ],
+    [
+      "1f6bc",
+      "baby symbol",
+      6,
+      "changing"
+    ],
+    [
+      "1f6be",
+      "water closet",
+      6,
+      "bathroom lavatory restroom toilet wc"
+    ],
+    [
+      "1f6c2",
+      "passport control",
+      6,
+      ""
+    ],
+    [
+      "1f6c3",
+      "customs",
+      6,
+      "packing"
+    ],
+    [
+      "1f6c4",
+      "baggage claim",
+      6,
+      "arrived bags case checked journey packing plane ready travel trip"
+    ],
+    [
+      "1f6c5",
+      "left luggage",
+      6,
+      "baggage case locker"
+    ],
+    [
+      "26a0-fe0f",
+      "warning",
+      6,
+      "caution"
+    ],
+    [
+      "1f6b8",
+      "children crossing",
+      6,
+      "child pedestrian traffic"
+    ],
+    [
+      "26d4",
+      "no entry",
+      6,
+      "do fail forbidden not pass prohibited traffic"
+    ],
+    [
+      "1f6ab",
+      "prohibited",
+      6,
+      "entry forbidden no not smoke"
+    ],
+    [
+      "1f6b3",
+      "no bicycles",
+      6,
+      "bicycle bike forbidden not prohibited"
+    ],
+    [
+      "1f6ad",
+      "no smoking",
+      6,
+      "forbidden not prohibited smoke"
+    ],
+    [
+      "1f6af",
+      "no littering",
+      6,
+      "forbidden litter not prohibited"
+    ],
+    [
+      "1f6b1",
+      "non-potable water",
+      6,
+      "dry non-drinking prohibited"
+    ],
+    [
+      "1f6b7",
+      "no pedestrians",
+      6,
+      "forbidden not pedestrian prohibited"
+    ],
+    [
+      "1f4f5",
+      "no mobile phones",
+      6,
+      "cell forbidden not phone prohibited telephone"
+    ],
+    [
+      "1f51e",
+      "no one under eighteen",
+      6,
+      "18 age forbidden not prohibited restriction underage"
+    ],
+    [
+      "2622-fe0f",
+      "radioactive",
+      6,
+      "sign"
+    ],
+    [
+      "2623-fe0f",
+      "biohazard",
+      6,
+      "sign"
+    ],
+    [
+      "2b06-fe0f",
+      "up arrow",
+      6,
+      "cardinal direction north"
+    ],
+    [
+      "2197-fe0f",
+      "up-right arrow",
+      6,
+      "direction intercardinal northeast"
+    ],
+    [
+      "27a1-fe0f",
+      "right arrow",
+      6,
+      "cardinal direction east"
+    ],
+    [
+      "2198-fe0f",
+      "down-right arrow",
+      6,
+      "direction intercardinal southeast"
+    ],
+    [
+      "2b07-fe0f",
+      "down arrow",
+      6,
+      "cardinal direction south"
+    ],
+    [
+      "2199-fe0f",
+      "down-left arrow",
+      6,
+      "direction intercardinal southwest"
+    ],
+    [
+      "2b05-fe0f",
+      "left arrow",
+      6,
+      "cardinal direction west"
+    ],
+    [
+      "2196-fe0f",
+      "up-left arrow",
+      6,
+      "direction intercardinal northwest"
+    ],
+    [
+      "2195-fe0f",
+      "up-down arrow",
+      6,
+      ""
+    ],
+    [
+      "2194-fe0f",
+      "left-right arrow",
+      6,
+      ""
+    ],
+    [
+      "21a9-fe0f",
+      "right arrow curving left",
+      6,
+      ""
+    ],
+    [
+      "21aa-fe0f",
+      "left arrow curving right",
+      6,
+      ""
+    ],
+    [
+      "2934-fe0f",
+      "right arrow curving up",
+      6,
+      ""
+    ],
+    [
+      "2935-fe0f",
+      "right arrow curving down",
+      6,
+      ""
+    ],
+    [
+      "1f503",
+      "clockwise vertical arrows",
+      6,
+      "arrow refresh reload"
+    ],
+    [
+      "1f504",
+      "counterclockwise arrows button",
+      6,
+      "again anticlockwise arrow deja refresh rewindershins vu"
+    ],
+    [
+      "1f519",
+      "BACK arrow",
+      6,
+      ""
+    ],
+    [
+      "1f51a",
+      "END arrow",
+      6,
+      ""
+    ],
+    [
+      "1f51b",
+      "ON! arrow",
+      6,
+      "mark"
+    ],
+    [
+      "1f51c",
+      "SOON arrow",
+      6,
+      "brb omw"
+    ],
+    [
+      "1f51d",
+      "TOP arrow",
+      6,
+      "homie up"
+    ],
+    [
+      "1f6d0",
+      "place of worship",
+      6,
+      "pray religion"
+    ],
+    [
+      "269b-fe0f",
+      "atom symbol",
+      6,
+      "atheist"
+    ],
+    [
+      "1f549-fe0f",
+      "om",
+      6,
+      "hindu religion"
+    ],
+    [
+      "2721-fe0f",
+      "star of David",
+      6,
+      "jew jewish judaism religion"
+    ],
+    [
+      "2638-fe0f",
+      "wheel of dharma",
+      6,
+      "buddhist religion"
+    ],
+    [
+      "262f-fe0f",
+      "yin yang",
+      6,
+      "difficult lives religion tao taoist total yinyang"
+    ],
+    [
+      "271d-fe0f",
+      "latin cross",
+      6,
+      "christ christian religion"
+    ],
+    [
+      "2626-fe0f",
+      "orthodox cross",
+      6,
+      "christian religion"
+    ],
+    [
+      "262a-fe0f",
+      "star and crescent",
+      6,
+      "islam muslim ramadan religion"
+    ],
+    [
+      "262e-fe0f",
+      "peace symbol",
+      6,
+      "healing peaceful"
+    ],
+    [
+      "1f54e",
+      "menorah",
+      6,
+      "candelabrum candlestick hanukkah jewish judaism religion"
+    ],
+    [
+      "1f52f",
+      "dotted six-pointed star",
+      6,
+      "fortune jewish judaism"
+    ],
+    [
+      "1faaf",
+      "khanda",
+      6,
+      "deg fateh khalsa religion sikh sikhism tegh"
+    ],
+    [
+      "2648",
+      "Aries",
+      6,
+      "horoscope ram zodiac"
+    ],
+    [
+      "2649",
+      "Taurus",
+      6,
+      "bull horoscope ox zodiac"
+    ],
+    [
+      "264a",
+      "Gemini",
+      6,
+      "horoscope twins zodiac"
+    ],
+    [
+      "264b",
+      "Cancer",
+      6,
+      "crab horoscope zodiac"
+    ],
+    [
+      "264c",
+      "Leo",
+      6,
+      "horoscope lion zodiac"
+    ],
+    [
+      "264d",
+      "Virgo",
+      6,
+      "horoscope zodiac"
+    ],
+    [
+      "264e",
+      "Libra",
+      6,
+      "balance horoscope justice scales zodiac"
+    ],
+    [
+      "264f",
+      "Scorpio",
+      6,
+      "horoscope scorpion scorpius zodiac"
+    ],
+    [
+      "2650",
+      "Sagittarius",
+      6,
+      "archer horoscope zodiac"
+    ],
+    [
+      "2651",
+      "Capricorn",
+      6,
+      "goat horoscope zodiac"
+    ],
+    [
+      "2652",
+      "Aquarius",
+      6,
+      "bearer horoscope water zodiac"
+    ],
+    [
+      "2653",
+      "Pisces",
+      6,
+      "fish horoscope zodiac"
+    ],
+    [
+      "26ce",
+      "Ophiuchus",
+      6,
+      "bearer serpent snake zodiac"
+    ],
+    [
+      "1f500",
+      "shuffle tracks button",
+      6,
+      "arrow crossed"
+    ],
+    [
+      "1f501",
+      "repeat button",
+      6,
+      "arrow clockwise"
+    ],
+    [
+      "1f502",
+      "repeat single button",
+      6,
+      "arrow clockwise once"
+    ],
+    [
+      "25b6-fe0f",
+      "play button",
+      6,
+      "arrow right triangle"
+    ],
+    [
+      "23e9",
+      "fast-forward button",
+      6,
+      "arrow double fast forward"
+    ],
+    [
+      "23ed-fe0f",
+      "next track button",
+      6,
+      "arrow scene triangle"
+    ],
+    [
+      "23ef-fe0f",
+      "play or pause button",
+      6,
+      "arrow right triangle"
+    ],
+    [
+      "25c0-fe0f",
+      "reverse button",
+      6,
+      "arrow left triangle"
+    ],
+    [
+      "23ea",
+      "fast reverse button",
+      6,
+      "arrow double rewind"
+    ],
+    [
+      "23ee-fe0f",
+      "last track button",
+      6,
+      "arrow previous scene triangle"
+    ],
+    [
+      "1f53c",
+      "upwards button",
+      6,
+      "arrow red up"
+    ],
+    [
+      "23eb",
+      "fast up button",
+      6,
+      "arrow double"
+    ],
+    [
+      "1f53d",
+      "downwards button",
+      6,
+      "arrow down red"
+    ],
+    [
+      "23ec",
+      "fast down button",
+      6,
+      "arrow double"
+    ],
+    [
+      "23f8-fe0f",
+      "pause button",
+      6,
+      "bar double vertical"
+    ],
+    [
+      "23f9-fe0f",
+      "stop button",
+      6,
+      "square"
+    ],
+    [
+      "23fa-fe0f",
+      "record button",
+      6,
+      "circle"
+    ],
+    [
+      "23cf-fe0f",
+      "eject button",
+      6,
+      ""
+    ],
+    [
+      "1f3a6",
+      "cinema",
+      6,
+      "camera film movie"
+    ],
+    [
+      "1f505",
+      "dim button",
+      6,
+      "brightness low"
+    ],
+    [
+      "1f506",
+      "bright button",
+      6,
+      "brightness light"
+    ],
+    [
+      "1f4f6",
+      "antenna bars",
+      6,
+      "bar cell communication mobile phone signal telephone"
+    ],
+    [
+      "1f6dc",
+      "wireless",
+      6,
+      "broadband computer connectivity hotspot internet network router smartphone wi-fi wifi wlan"
+    ],
+    [
+      "1f4f3",
+      "vibration mode",
+      6,
+      "cell communication mobile phone telephone"
+    ],
+    [
+      "1f4f4",
+      "mobile phone off",
+      6,
+      "cell telephone"
+    ],
+    [
+      "2640-fe0f",
+      "female sign",
+      6,
+      "woman"
+    ],
+    [
+      "2642-fe0f",
+      "male sign",
+      6,
+      "man"
+    ],
+    [
+      "26a7-fe0f",
+      "transgender symbol",
+      6,
+      ""
+    ],
+    [
+      "2716-fe0f",
+      "multiply",
+      6,
+      "× cancel multiplication sign x"
+    ],
+    [
+      "2795",
+      "plus",
+      6,
+      "+"
+    ],
+    [
+      "2796",
+      "minus",
+      6,
+      "- − heavy math sign"
+    ],
+    [
+      "2797",
+      "divide",
+      6,
+      "÷ division heavy math sign"
+    ],
+    [
+      "1f7f0",
+      "heavy equals sign",
+      6,
+      "answer equal equality math"
+    ],
+    [
+      "267e-fe0f",
+      "infinity",
+      6,
+      "forever unbounded universal"
+    ],
+    [
+      "203c-fe0f",
+      "double exclamation mark",
+      6,
+      "! !! bangbang punctuation"
+    ],
+    [
+      "2049-fe0f",
+      "exclamation question mark",
+      6,
+      "! !? ? interrobang punctuation"
+    ],
+    [
+      "2753",
+      "red question mark",
+      6,
+      "? punctuation"
+    ],
+    [
+      "2754",
+      "white question mark",
+      6,
+      "? outlined punctuation"
+    ],
+    [
+      "2755",
+      "white exclamation mark",
+      6,
+      "! bang outlined punctuation"
+    ],
+    [
+      "2757",
+      "red exclamation mark",
+      6,
+      "! bang punctuation"
+    ],
+    [
+      "3030-fe0f",
+      "wavy dash",
+      6,
+      "punctuation"
+    ],
+    [
+      "1f4b1",
+      "currency exchange",
+      6,
+      "bank money"
+    ],
+    [
+      "1f4b2",
+      "heavy dollar sign",
+      6,
+      "billion cash charge currency million money pay"
+    ],
+    [
+      "2695-fe0f",
+      "medical symbol",
+      6,
+      "aesculapius medicine staff"
+    ],
+    [
+      "267b-fe0f",
+      "recycling symbol",
+      6,
+      "recycle"
+    ],
+    [
+      "269c-fe0f",
+      "fleur-de-lis",
+      6,
+      "knights"
+    ],
+    [
+      "1f531",
+      "trident emblem",
+      6,
+      "anchor poseidon ship tool"
+    ],
+    [
+      "1f4db",
+      "name badge",
+      6,
+      ""
+    ],
+    [
+      "1f530",
+      "Japanese symbol for beginner",
+      6,
+      "chevron green leaf tool yellow"
+    ],
+    [
+      "2b55",
+      "hollow red circle",
+      6,
+      "heavy large o"
+    ],
+    [
+      "2705",
+      "check mark button",
+      6,
+      "✓ checked checkmark complete completed done fixed tick"
+    ],
+    [
+      "2611-fe0f",
+      "check box with check",
+      6,
+      "✓ ballot checked done off tick"
+    ],
+    [
+      "2714-fe0f",
+      "check mark",
+      6,
+      "✓ checked checkmark done heavy tick"
+    ],
+    [
+      "274c",
+      "cross mark",
+      6,
+      "× cancel multiplication multiply x"
+    ],
+    [
+      "274e",
+      "cross mark button",
+      6,
+      "× multiplication multiply square x"
+    ],
+    [
+      "27b0",
+      "curly loop",
+      6,
+      "curl"
+    ],
+    [
+      "27bf",
+      "double curly loop",
+      6,
+      "curl"
+    ],
+    [
+      "303d-fe0f",
+      "part alternation mark",
+      6,
+      ""
+    ],
+    [
+      "2733-fe0f",
+      "eight-spoked asterisk",
+      6,
+      "*"
+    ],
+    [
+      "2734-fe0f",
+      "eight-pointed star",
+      6,
+      "*"
+    ],
+    [
+      "2747-fe0f",
+      "sparkle",
+      6,
+      "*"
+    ],
+    [
+      "a9-fe0f",
+      "copyright",
+      6,
+      "c"
+    ],
+    [
+      "ae-fe0f",
+      "registered",
+      6,
+      "r"
+    ],
+    [
+      "2122-fe0f",
+      "trade mark",
+      6,
+      "tm trademark"
+    ],
+    [
+      "1fadf",
+      "splatter",
+      6,
+      "drip holi ink liquid mess paint spill stain"
+    ],
+    [
+      "23-fe0f-20e3",
+      "keycap: #",
+      6,
+      ""
+    ],
+    [
+      "2a-fe0f-20e3",
+      "keycap: *",
+      6,
+      ""
+    ],
+    [
+      "30-fe0f-20e3",
+      "keycap: 0",
+      6,
+      "zero"
+    ],
+    [
+      "31-fe0f-20e3",
+      "keycap: 1",
+      6,
+      "one"
+    ],
+    [
+      "32-fe0f-20e3",
+      "keycap: 2",
+      6,
+      "two"
+    ],
+    [
+      "33-fe0f-20e3",
+      "keycap: 3",
+      6,
+      "three"
+    ],
+    [
+      "34-fe0f-20e3",
+      "keycap: 4",
+      6,
+      "four"
+    ],
+    [
+      "35-fe0f-20e3",
+      "keycap: 5",
+      6,
+      "five"
+    ],
+    [
+      "36-fe0f-20e3",
+      "keycap: 6",
+      6,
+      "six"
+    ],
+    [
+      "37-fe0f-20e3",
+      "keycap: 7",
+      6,
+      "seven"
+    ],
+    [
+      "38-fe0f-20e3",
+      "keycap: 8",
+      6,
+      "eight"
+    ],
+    [
+      "39-fe0f-20e3",
+      "keycap: 9",
+      6,
+      "nine"
+    ],
+    [
+      "1f51f",
+      "keycap: 10",
+      6,
+      ""
+    ],
+    [
+      "1f520",
+      "input latin uppercase",
+      6,
+      "abcd letters"
+    ],
+    [
+      "1f521",
+      "input latin lowercase",
+      6,
+      "abcd letters"
+    ],
+    [
+      "1f522",
+      "input numbers",
+      6,
+      "1234"
+    ],
+    [
+      "1f523",
+      "input symbols",
+      6,
+      "& % ♪ 〒"
+    ],
+    [
+      "1f524",
+      "input latin letters",
+      6,
+      "abc alphabet"
+    ],
+    [
+      "1f170-fe0f",
+      "A button (blood type)",
+      6,
+      "blood type"
+    ],
+    [
+      "1f18e",
+      "AB button (blood type)",
+      6,
+      "blood type"
+    ],
+    [
+      "1f171-fe0f",
+      "B button (blood type)",
+      6,
+      "blood type"
+    ],
+    [
+      "1f191",
+      "CL button",
+      6,
+      ""
+    ],
+    [
+      "1f192",
+      "COOL button",
+      6,
+      ""
+    ],
+    [
+      "1f193",
+      "FREE button",
+      6,
+      ""
+    ],
+    [
+      "2139-fe0f",
+      "information",
+      6,
+      "i"
+    ],
+    [
+      "1f194",
+      "ID button",
+      6,
+      "identity"
+    ],
+    [
+      "24c2-fe0f",
+      "circled M",
+      6,
+      "circle"
+    ],
+    [
+      "1f195",
+      "NEW button",
+      6,
+      ""
+    ],
+    [
+      "1f196",
+      "NG button",
+      6,
+      ""
+    ],
+    [
+      "1f17e-fe0f",
+      "O button (blood type)",
+      6,
+      "blood type"
+    ],
+    [
+      "1f197",
+      "OK button",
+      6,
+      "okay"
+    ],
+    [
+      "1f17f-fe0f",
+      "P button",
+      6,
+      "parking"
+    ],
+    [
+      "1f198",
+      "SOS button",
+      6,
+      "help"
+    ],
+    [
+      "1f199",
+      "UP! button",
+      6,
+      "mark up"
+    ],
+    [
+      "1f19a",
+      "VS button",
+      6,
+      "versus"
+    ],
+    [
+      "1f201",
+      "Japanese “here” button",
+      6,
+      "here katakana"
+    ],
+    [
+      "1f202-fe0f",
+      "Japanese “service charge” button",
+      6,
+      "charge katakana service"
+    ],
+    [
+      "1f237-fe0f",
+      "Japanese “monthly amount” button",
+      6,
+      "amount ideograph monthly"
+    ],
+    [
+      "1f236",
+      "Japanese “not free of charge” button",
+      6,
+      "charge ideograph not"
+    ],
+    [
+      "1f22f",
+      "Japanese “reserved” button",
+      6,
+      "ideograph reserved"
+    ],
+    [
+      "1f250",
+      "Japanese “bargain” button",
+      6,
+      "bargain ideograph"
+    ],
+    [
+      "1f239",
+      "Japanese “discount” button",
+      6,
+      "discount ideograph"
+    ],
+    [
+      "1f21a",
+      "Japanese “free of charge” button",
+      6,
+      "charge free ideograph"
+    ],
+    [
+      "1f232",
+      "Japanese “prohibited” button",
+      6,
+      "ideograph prohibited"
+    ],
+    [
+      "1f251",
+      "Japanese “acceptable” button",
+      6,
+      "acceptable ideograph"
+    ],
+    [
+      "1f238",
+      "Japanese “application” button",
+      6,
+      "application ideograph"
+    ],
+    [
+      "1f234",
+      "Japanese “passing grade” button",
+      6,
+      "grade ideograph passing"
+    ],
+    [
+      "1f233",
+      "Japanese “vacancy” button",
+      6,
+      "ideograph vacancy"
+    ],
+    [
+      "3297-fe0f",
+      "Japanese “congratulations” button",
+      6,
+      "congratulations ideograph"
+    ],
+    [
+      "3299-fe0f",
+      "Japanese “secret” button",
+      6,
+      "ideograph secret"
+    ],
+    [
+      "1f23a",
+      "Japanese “open for business” button",
+      6,
+      "business ideograph open"
+    ],
+    [
+      "1f235",
+      "Japanese “no vacancy” button",
+      6,
+      "ideograph no vacancy"
+    ],
+    [
+      "1f534",
+      "red circle",
+      6,
+      "geometric"
+    ],
+    [
+      "1f7e0",
+      "orange circle",
+      6,
+      ""
+    ],
+    [
+      "1f7e1",
+      "yellow circle",
+      6,
+      ""
+    ],
+    [
+      "1f7e2",
+      "green circle",
+      6,
+      ""
+    ],
+    [
+      "1f535",
+      "blue circle",
+      6,
+      "geometric"
+    ],
+    [
+      "1f7e3",
+      "purple circle",
+      6,
+      ""
+    ],
+    [
+      "1f7e4",
+      "brown circle",
+      6,
+      ""
+    ],
+    [
+      "26ab",
+      "black circle",
+      6,
+      "geometric"
+    ],
+    [
+      "26aa",
+      "white circle",
+      6,
+      "geometric"
+    ],
+    [
+      "1f7e5",
+      "red square",
+      6,
+      "card penalty"
+    ],
+    [
+      "1f7e7",
+      "orange square",
+      6,
+      ""
+    ],
+    [
+      "1f7e8",
+      "yellow square",
+      6,
+      "card penalty"
+    ],
+    [
+      "1f7e9",
+      "green square",
+      6,
+      ""
+    ],
+    [
+      "1f7e6",
+      "blue square",
+      6,
+      ""
+    ],
+    [
+      "1f7ea",
+      "purple square",
+      6,
+      ""
+    ],
+    [
+      "1f7eb",
+      "brown square",
+      6,
+      ""
+    ],
+    [
+      "2b1b",
+      "black large square",
+      6,
+      "geometric"
+    ],
+    [
+      "2b1c",
+      "white large square",
+      6,
+      "geometric"
+    ],
+    [
+      "25fc-fe0f",
+      "black medium square",
+      6,
+      "geometric"
+    ],
+    [
+      "25fb-fe0f",
+      "white medium square",
+      6,
+      "geometric"
+    ],
+    [
+      "25fe",
+      "black medium-small square",
+      6,
+      "geometric"
+    ],
+    [
+      "25fd",
+      "white medium-small square",
+      6,
+      "geometric"
+    ],
+    [
+      "25aa-fe0f",
+      "black small square",
+      6,
+      "geometric"
+    ],
+    [
+      "25ab-fe0f",
+      "white small square",
+      6,
+      "geometric"
+    ],
+    [
+      "1f536",
+      "large orange diamond",
+      6,
+      "geometric"
+    ],
+    [
+      "1f537",
+      "large blue diamond",
+      6,
+      "geometric"
+    ],
+    [
+      "1f538",
+      "small orange diamond",
+      6,
+      "geometric"
+    ],
+    [
+      "1f539",
+      "small blue diamond",
+      6,
+      "geometric"
+    ],
+    [
+      "1f53a",
+      "red triangle pointed up",
+      6,
+      "geometric"
+    ],
+    [
+      "1f53b",
+      "red triangle pointed down",
+      6,
+      "geometric"
+    ],
+    [
+      "1f4a0",
+      "diamond with a dot",
+      6,
+      "comic geometric"
+    ],
+    [
+      "1f518",
+      "radio button",
+      6,
+      "geometric"
+    ],
+    [
+      "1f533",
+      "white square button",
+      6,
+      "geometric outlined"
+    ],
+    [
+      "1f532",
+      "black square button",
+      6,
+      "geometric"
+    ],
+    [
+      "1f3c1",
+      "chequered flag",
+      7,
+      "checkered finish flags game race racing sport win"
+    ],
+    [
+      "1f6a9",
+      "triangular flag",
+      7,
+      "construction golf post"
+    ],
+    [
+      "1f38c",
+      "crossed flags",
+      7,
+      "celebration cross japanese"
+    ],
+    [
+      "1f3f4",
+      "black flag",
+      7,
+      "waving"
+    ],
+    [
+      "1f3f3-fe0f",
+      "white flag",
+      7,
+      "waving"
+    ],
+    [
+      "1f3f3-fe0f-200d-1f308",
+      "rainbow flag",
+      7,
+      "bisexual gay genderqueer glbt glbtq lesbian lgbt lgbtq lgbtqia pride queer trans transgender"
+    ],
+    [
+      "1f3f3-fe0f-200d-26a7-fe0f",
+      "transgender flag",
+      7,
+      "blue light pink white"
+    ],
+    [
+      "1f3f4-200d-2620-fe0f",
+      "pirate flag",
+      7,
+      "jolly plunder roger treasure"
+    ],
+    [
+      "1f1e6-1f1e8",
+      "flag: Ascension Island",
+      7,
+      ""
+    ],
+    [
+      "1f1e6-1f1e9",
+      "flag: Andorra",
+      7,
+      ""
+    ],
+    [
+      "1f1e6-1f1ea",
+      "flag: United Arab Emirates",
+      7,
+      ""
+    ],
+    [
+      "1f1e6-1f1eb",
+      "flag: Afghanistan",
+      7,
+      ""
+    ],
+    [
+      "1f1e6-1f1ec",
+      "flag: Antigua & Barbuda",
+      7,
+      ""
+    ],
+    [
+      "1f1e6-1f1ee",
+      "flag: Anguilla",
+      7,
+      ""
+    ],
+    [
+      "1f1e6-1f1f1",
+      "flag: Albania",
+      7,
+      ""
+    ],
+    [
+      "1f1e6-1f1f2",
+      "flag: Armenia",
+      7,
+      ""
+    ],
+    [
+      "1f1e6-1f1f4",
+      "flag: Angola",
+      7,
+      ""
+    ],
+    [
+      "1f1e6-1f1f6",
+      "flag: Antarctica",
+      7,
+      ""
+    ],
+    [
+      "1f1e6-1f1f7",
+      "flag: Argentina",
+      7,
+      ""
+    ],
+    [
+      "1f1e6-1f1f8",
+      "flag: American Samoa",
+      7,
+      ""
+    ],
+    [
+      "1f1e6-1f1f9",
+      "flag: Austria",
+      7,
+      ""
+    ],
+    [
+      "1f1e6-1f1fa",
+      "flag: Australia",
+      7,
+      ""
+    ],
+    [
+      "1f1e6-1f1fc",
+      "flag: Aruba",
+      7,
+      ""
+    ],
+    [
+      "1f1e6-1f1fd",
+      "flag: Åland Islands",
+      7,
+      ""
+    ],
+    [
+      "1f1e6-1f1ff",
+      "flag: Azerbaijan",
+      7,
+      ""
+    ],
+    [
+      "1f1e7-1f1e6",
+      "flag: Bosnia & Herzegovina",
+      7,
+      ""
+    ],
+    [
+      "1f1e7-1f1e7",
+      "flag: Barbados",
+      7,
+      ""
+    ],
+    [
+      "1f1e7-1f1e9",
+      "flag: Bangladesh",
+      7,
+      ""
+    ],
+    [
+      "1f1e7-1f1ea",
+      "flag: Belgium",
+      7,
+      ""
+    ],
+    [
+      "1f1e7-1f1eb",
+      "flag: Burkina Faso",
+      7,
+      ""
+    ],
+    [
+      "1f1e7-1f1ec",
+      "flag: Bulgaria",
+      7,
+      ""
+    ],
+    [
+      "1f1e7-1f1ed",
+      "flag: Bahrain",
+      7,
+      ""
+    ],
+    [
+      "1f1e7-1f1ee",
+      "flag: Burundi",
+      7,
+      ""
+    ],
+    [
+      "1f1e7-1f1ef",
+      "flag: Benin",
+      7,
+      ""
+    ],
+    [
+      "1f1e7-1f1f1",
+      "flag: St. Barthélemy",
+      7,
+      ""
+    ],
+    [
+      "1f1e7-1f1f2",
+      "flag: Bermuda",
+      7,
+      ""
+    ],
+    [
+      "1f1e7-1f1f3",
+      "flag: Brunei",
+      7,
+      ""
+    ],
+    [
+      "1f1e7-1f1f4",
+      "flag: Bolivia",
+      7,
+      ""
+    ],
+    [
+      "1f1e7-1f1f6",
+      "flag: Caribbean Netherlands",
+      7,
+      ""
+    ],
+    [
+      "1f1e7-1f1f7",
+      "flag: Brazil",
+      7,
+      ""
+    ],
+    [
+      "1f1e7-1f1f8",
+      "flag: Bahamas",
+      7,
+      ""
+    ],
+    [
+      "1f1e7-1f1f9",
+      "flag: Bhutan",
+      7,
+      ""
+    ],
+    [
+      "1f1e7-1f1fb",
+      "flag: Bouvet Island",
+      7,
+      ""
+    ],
+    [
+      "1f1e7-1f1fc",
+      "flag: Botswana",
+      7,
+      ""
+    ],
+    [
+      "1f1e7-1f1fe",
+      "flag: Belarus",
+      7,
+      ""
+    ],
+    [
+      "1f1e7-1f1ff",
+      "flag: Belize",
+      7,
+      ""
+    ],
+    [
+      "1f1e8-1f1e6",
+      "flag: Canada",
+      7,
+      ""
+    ],
+    [
+      "1f1e8-1f1e8",
+      "flag: Cocos (Keeling) Islands",
+      7,
+      ""
+    ],
+    [
+      "1f1e8-1f1e9",
+      "flag: Congo - Kinshasa",
+      7,
+      ""
+    ],
+    [
+      "1f1e8-1f1eb",
+      "flag: Central African Republic",
+      7,
+      ""
+    ],
+    [
+      "1f1e8-1f1ec",
+      "flag: Congo - Brazzaville",
+      7,
+      ""
+    ],
+    [
+      "1f1e8-1f1ed",
+      "flag: Switzerland",
+      7,
+      ""
+    ],
+    [
+      "1f1e8-1f1ee",
+      "flag: Côte d’Ivoire",
+      7,
+      ""
+    ],
+    [
+      "1f1e8-1f1f0",
+      "flag: Cook Islands",
+      7,
+      ""
+    ],
+    [
+      "1f1e8-1f1f1",
+      "flag: Chile",
+      7,
+      ""
+    ],
+    [
+      "1f1e8-1f1f2",
+      "flag: Cameroon",
+      7,
+      ""
+    ],
+    [
+      "1f1e8-1f1f3",
+      "flag: China",
+      7,
+      ""
+    ],
+    [
+      "1f1e8-1f1f4",
+      "flag: Colombia",
+      7,
+      ""
+    ],
+    [
+      "1f1e8-1f1f5",
+      "flag: Clipperton Island",
+      7,
+      ""
+    ],
+    [
+      "1f1e8-1f1f6",
+      "flag: Sark",
+      7,
+      ""
+    ],
+    [
+      "1f1e8-1f1f7",
+      "flag: Costa Rica",
+      7,
+      ""
+    ],
+    [
+      "1f1e8-1f1fa",
+      "flag: Cuba",
+      7,
+      ""
+    ],
+    [
+      "1f1e8-1f1fb",
+      "flag: Cape Verde",
+      7,
+      ""
+    ],
+    [
+      "1f1e8-1f1fc",
+      "flag: Curaçao",
+      7,
+      ""
+    ],
+    [
+      "1f1e8-1f1fd",
+      "flag: Christmas Island",
+      7,
+      ""
+    ],
+    [
+      "1f1e8-1f1fe",
+      "flag: Cyprus",
+      7,
+      ""
+    ],
+    [
+      "1f1e8-1f1ff",
+      "flag: Czechia",
+      7,
+      ""
+    ],
+    [
+      "1f1e9-1f1ea",
+      "flag: Germany",
+      7,
+      ""
+    ],
+    [
+      "1f1e9-1f1ec",
+      "flag: Diego Garcia",
+      7,
+      ""
+    ],
+    [
+      "1f1e9-1f1ef",
+      "flag: Djibouti",
+      7,
+      ""
+    ],
+    [
+      "1f1e9-1f1f0",
+      "flag: Denmark",
+      7,
+      ""
+    ],
+    [
+      "1f1e9-1f1f2",
+      "flag: Dominica",
+      7,
+      ""
+    ],
+    [
+      "1f1e9-1f1f4",
+      "flag: Dominican Republic",
+      7,
+      ""
+    ],
+    [
+      "1f1e9-1f1ff",
+      "flag: Algeria",
+      7,
+      ""
+    ],
+    [
+      "1f1ea-1f1e6",
+      "flag: Ceuta & Melilla",
+      7,
+      ""
+    ],
+    [
+      "1f1ea-1f1e8",
+      "flag: Ecuador",
+      7,
+      ""
+    ],
+    [
+      "1f1ea-1f1ea",
+      "flag: Estonia",
+      7,
+      ""
+    ],
+    [
+      "1f1ea-1f1ec",
+      "flag: Egypt",
+      7,
+      ""
+    ],
+    [
+      "1f1ea-1f1ed",
+      "flag: Western Sahara",
+      7,
+      ""
+    ],
+    [
+      "1f1ea-1f1f7",
+      "flag: Eritrea",
+      7,
+      ""
+    ],
+    [
+      "1f1ea-1f1f8",
+      "flag: Spain",
+      7,
+      ""
+    ],
+    [
+      "1f1ea-1f1f9",
+      "flag: Ethiopia",
+      7,
+      ""
+    ],
+    [
+      "1f1ea-1f1fa",
+      "flag: European Union",
+      7,
+      ""
+    ],
+    [
+      "1f1eb-1f1ee",
+      "flag: Finland",
+      7,
+      ""
+    ],
+    [
+      "1f1eb-1f1ef",
+      "flag: Fiji",
+      7,
+      ""
+    ],
+    [
+      "1f1eb-1f1f0",
+      "flag: Falkland Islands",
+      7,
+      ""
+    ],
+    [
+      "1f1eb-1f1f2",
+      "flag: Micronesia",
+      7,
+      ""
+    ],
+    [
+      "1f1eb-1f1f4",
+      "flag: Faroe Islands",
+      7,
+      ""
+    ],
+    [
+      "1f1eb-1f1f7",
+      "flag: France",
+      7,
+      ""
+    ],
+    [
+      "1f1ec-1f1e6",
+      "flag: Gabon",
+      7,
+      ""
+    ],
+    [
+      "1f1ec-1f1e7",
+      "flag: United Kingdom",
+      7,
+      ""
+    ],
+    [
+      "1f1ec-1f1e9",
+      "flag: Grenada",
+      7,
+      ""
+    ],
+    [
+      "1f1ec-1f1ea",
+      "flag: Georgia",
+      7,
+      ""
+    ],
+    [
+      "1f1ec-1f1eb",
+      "flag: French Guiana",
+      7,
+      ""
+    ],
+    [
+      "1f1ec-1f1ec",
+      "flag: Guernsey",
+      7,
+      ""
+    ],
+    [
+      "1f1ec-1f1ed",
+      "flag: Ghana",
+      7,
+      ""
+    ],
+    [
+      "1f1ec-1f1ee",
+      "flag: Gibraltar",
+      7,
+      ""
+    ],
+    [
+      "1f1ec-1f1f1",
+      "flag: Greenland",
+      7,
+      ""
+    ],
+    [
+      "1f1ec-1f1f2",
+      "flag: Gambia",
+      7,
+      ""
+    ],
+    [
+      "1f1ec-1f1f3",
+      "flag: Guinea",
+      7,
+      ""
+    ],
+    [
+      "1f1ec-1f1f5",
+      "flag: Guadeloupe",
+      7,
+      ""
+    ],
+    [
+      "1f1ec-1f1f6",
+      "flag: Equatorial Guinea",
+      7,
+      ""
+    ],
+    [
+      "1f1ec-1f1f7",
+      "flag: Greece",
+      7,
+      ""
+    ],
+    [
+      "1f1ec-1f1f8",
+      "flag: South Georgia & South Sandwich Islands",
+      7,
+      ""
+    ],
+    [
+      "1f1ec-1f1f9",
+      "flag: Guatemala",
+      7,
+      ""
+    ],
+    [
+      "1f1ec-1f1fa",
+      "flag: Guam",
+      7,
+      ""
+    ],
+    [
+      "1f1ec-1f1fc",
+      "flag: Guinea-Bissau",
+      7,
+      ""
+    ],
+    [
+      "1f1ec-1f1fe",
+      "flag: Guyana",
+      7,
+      ""
+    ],
+    [
+      "1f1ed-1f1f0",
+      "flag: Hong Kong SAR China",
+      7,
+      ""
+    ],
+    [
+      "1f1ed-1f1f2",
+      "flag: Heard Island & McDonald Islands",
+      7,
+      ""
+    ],
+    [
+      "1f1ed-1f1f3",
+      "flag: Honduras",
+      7,
+      ""
+    ],
+    [
+      "1f1ed-1f1f7",
+      "flag: Croatia",
+      7,
+      ""
+    ],
+    [
+      "1f1ed-1f1f9",
+      "flag: Haiti",
+      7,
+      ""
+    ],
+    [
+      "1f1ed-1f1fa",
+      "flag: Hungary",
+      7,
+      ""
+    ],
+    [
+      "1f1ee-1f1e8",
+      "flag: Canary Islands",
+      7,
+      ""
+    ],
+    [
+      "1f1ee-1f1e9",
+      "flag: Indonesia",
+      7,
+      ""
+    ],
+    [
+      "1f1ee-1f1ea",
+      "flag: Ireland",
+      7,
+      ""
+    ],
+    [
+      "1f1ee-1f1f1",
+      "flag: Israel",
+      7,
+      ""
+    ],
+    [
+      "1f1ee-1f1f2",
+      "flag: Isle of Man",
+      7,
+      ""
+    ],
+    [
+      "1f1ee-1f1f3",
+      "flag: India",
+      7,
+      ""
+    ],
+    [
+      "1f1ee-1f1f4",
+      "flag: British Indian Ocean Territory",
+      7,
+      ""
+    ],
+    [
+      "1f1ee-1f1f6",
+      "flag: Iraq",
+      7,
+      ""
+    ],
+    [
+      "1f1ee-1f1f7",
+      "flag: Iran",
+      7,
+      ""
+    ],
+    [
+      "1f1ee-1f1f8",
+      "flag: Iceland",
+      7,
+      ""
+    ],
+    [
+      "1f1ee-1f1f9",
+      "flag: Italy",
+      7,
+      ""
+    ],
+    [
+      "1f1ef-1f1ea",
+      "flag: Jersey",
+      7,
+      ""
+    ],
+    [
+      "1f1ef-1f1f2",
+      "flag: Jamaica",
+      7,
+      ""
+    ],
+    [
+      "1f1ef-1f1f4",
+      "flag: Jordan",
+      7,
+      ""
+    ],
+    [
+      "1f1ef-1f1f5",
+      "flag: Japan",
+      7,
+      ""
+    ],
+    [
+      "1f1f0-1f1ea",
+      "flag: Kenya",
+      7,
+      ""
+    ],
+    [
+      "1f1f0-1f1ec",
+      "flag: Kyrgyzstan",
+      7,
+      ""
+    ],
+    [
+      "1f1f0-1f1ed",
+      "flag: Cambodia",
+      7,
+      ""
+    ],
+    [
+      "1f1f0-1f1ee",
+      "flag: Kiribati",
+      7,
+      ""
+    ],
+    [
+      "1f1f0-1f1f2",
+      "flag: Comoros",
+      7,
+      ""
+    ],
+    [
+      "1f1f0-1f1f3",
+      "flag: St. Kitts & Nevis",
+      7,
+      ""
+    ],
+    [
+      "1f1f0-1f1f5",
+      "flag: North Korea",
+      7,
+      ""
+    ],
+    [
+      "1f1f0-1f1f7",
+      "flag: South Korea",
+      7,
+      ""
+    ],
+    [
+      "1f1f0-1f1fc",
+      "flag: Kuwait",
+      7,
+      ""
+    ],
+    [
+      "1f1f0-1f1fe",
+      "flag: Cayman Islands",
+      7,
+      ""
+    ],
+    [
+      "1f1f0-1f1ff",
+      "flag: Kazakhstan",
+      7,
+      ""
+    ],
+    [
+      "1f1f1-1f1e6",
+      "flag: Laos",
+      7,
+      ""
+    ],
+    [
+      "1f1f1-1f1e7",
+      "flag: Lebanon",
+      7,
+      ""
+    ],
+    [
+      "1f1f1-1f1e8",
+      "flag: St. Lucia",
+      7,
+      ""
+    ],
+    [
+      "1f1f1-1f1ee",
+      "flag: Liechtenstein",
+      7,
+      ""
+    ],
+    [
+      "1f1f1-1f1f0",
+      "flag: Sri Lanka",
+      7,
+      ""
+    ],
+    [
+      "1f1f1-1f1f7",
+      "flag: Liberia",
+      7,
+      ""
+    ],
+    [
+      "1f1f1-1f1f8",
+      "flag: Lesotho",
+      7,
+      ""
+    ],
+    [
+      "1f1f1-1f1f9",
+      "flag: Lithuania",
+      7,
+      ""
+    ],
+    [
+      "1f1f1-1f1fa",
+      "flag: Luxembourg",
+      7,
+      ""
+    ],
+    [
+      "1f1f1-1f1fb",
+      "flag: Latvia",
+      7,
+      ""
+    ],
+    [
+      "1f1f1-1f1fe",
+      "flag: Libya",
+      7,
+      ""
+    ],
+    [
+      "1f1f2-1f1e6",
+      "flag: Morocco",
+      7,
+      ""
+    ],
+    [
+      "1f1f2-1f1e8",
+      "flag: Monaco",
+      7,
+      ""
+    ],
+    [
+      "1f1f2-1f1e9",
+      "flag: Moldova",
+      7,
+      ""
+    ],
+    [
+      "1f1f2-1f1ea",
+      "flag: Montenegro",
+      7,
+      ""
+    ],
+    [
+      "1f1f2-1f1eb",
+      "flag: St. Martin",
+      7,
+      ""
+    ],
+    [
+      "1f1f2-1f1ec",
+      "flag: Madagascar",
+      7,
+      ""
+    ],
+    [
+      "1f1f2-1f1ed",
+      "flag: Marshall Islands",
+      7,
+      ""
+    ],
+    [
+      "1f1f2-1f1f0",
+      "flag: North Macedonia",
+      7,
+      ""
+    ],
+    [
+      "1f1f2-1f1f1",
+      "flag: Mali",
+      7,
+      ""
+    ],
+    [
+      "1f1f2-1f1f2",
+      "flag: Myanmar (Burma)",
+      7,
+      ""
+    ],
+    [
+      "1f1f2-1f1f3",
+      "flag: Mongolia",
+      7,
+      ""
+    ],
+    [
+      "1f1f2-1f1f4",
+      "flag: Macao SAR China",
+      7,
+      ""
+    ],
+    [
+      "1f1f2-1f1f5",
+      "flag: Northern Mariana Islands",
+      7,
+      ""
+    ],
+    [
+      "1f1f2-1f1f6",
+      "flag: Martinique",
+      7,
+      ""
+    ],
+    [
+      "1f1f2-1f1f7",
+      "flag: Mauritania",
+      7,
+      ""
+    ],
+    [
+      "1f1f2-1f1f8",
+      "flag: Montserrat",
+      7,
+      ""
+    ],
+    [
+      "1f1f2-1f1f9",
+      "flag: Malta",
+      7,
+      ""
+    ],
+    [
+      "1f1f2-1f1fa",
+      "flag: Mauritius",
+      7,
+      ""
+    ],
+    [
+      "1f1f2-1f1fb",
+      "flag: Maldives",
+      7,
+      ""
+    ],
+    [
+      "1f1f2-1f1fc",
+      "flag: Malawi",
+      7,
+      ""
+    ],
+    [
+      "1f1f2-1f1fd",
+      "flag: Mexico",
+      7,
+      ""
+    ],
+    [
+      "1f1f2-1f1fe",
+      "flag: Malaysia",
+      7,
+      ""
+    ],
+    [
+      "1f1f2-1f1ff",
+      "flag: Mozambique",
+      7,
+      ""
+    ],
+    [
+      "1f1f3-1f1e6",
+      "flag: Namibia",
+      7,
+      ""
+    ],
+    [
+      "1f1f3-1f1e8",
+      "flag: New Caledonia",
+      7,
+      ""
+    ],
+    [
+      "1f1f3-1f1ea",
+      "flag: Niger",
+      7,
+      ""
+    ],
+    [
+      "1f1f3-1f1eb",
+      "flag: Norfolk Island",
+      7,
+      ""
+    ],
+    [
+      "1f1f3-1f1ec",
+      "flag: Nigeria",
+      7,
+      ""
+    ],
+    [
+      "1f1f3-1f1ee",
+      "flag: Nicaragua",
+      7,
+      ""
+    ],
+    [
+      "1f1f3-1f1f1",
+      "flag: Netherlands",
+      7,
+      ""
+    ],
+    [
+      "1f1f3-1f1f4",
+      "flag: Norway",
+      7,
+      ""
+    ],
+    [
+      "1f1f3-1f1f5",
+      "flag: Nepal",
+      7,
+      ""
+    ],
+    [
+      "1f1f3-1f1f7",
+      "flag: Nauru",
+      7,
+      ""
+    ],
+    [
+      "1f1f3-1f1fa",
+      "flag: Niue",
+      7,
+      ""
+    ],
+    [
+      "1f1f3-1f1ff",
+      "flag: New Zealand",
+      7,
+      ""
+    ],
+    [
+      "1f1f4-1f1f2",
+      "flag: Oman",
+      7,
+      ""
+    ],
+    [
+      "1f1f5-1f1e6",
+      "flag: Panama",
+      7,
+      ""
+    ],
+    [
+      "1f1f5-1f1ea",
+      "flag: Peru",
+      7,
+      ""
+    ],
+    [
+      "1f1f5-1f1eb",
+      "flag: French Polynesia",
+      7,
+      ""
+    ],
+    [
+      "1f1f5-1f1ec",
+      "flag: Papua New Guinea",
+      7,
+      ""
+    ],
+    [
+      "1f1f5-1f1ed",
+      "flag: Philippines",
+      7,
+      ""
+    ],
+    [
+      "1f1f5-1f1f0",
+      "flag: Pakistan",
+      7,
+      ""
+    ],
+    [
+      "1f1f5-1f1f1",
+      "flag: Poland",
+      7,
+      ""
+    ],
+    [
+      "1f1f5-1f1f2",
+      "flag: St. Pierre & Miquelon",
+      7,
+      ""
+    ],
+    [
+      "1f1f5-1f1f3",
+      "flag: Pitcairn Islands",
+      7,
+      ""
+    ],
+    [
+      "1f1f5-1f1f7",
+      "flag: Puerto Rico",
+      7,
+      ""
+    ],
+    [
+      "1f1f5-1f1f8",
+      "flag: Palestinian Territories",
+      7,
+      ""
+    ],
+    [
+      "1f1f5-1f1f9",
+      "flag: Portugal",
+      7,
+      ""
+    ],
+    [
+      "1f1f5-1f1fc",
+      "flag: Palau",
+      7,
+      ""
+    ],
+    [
+      "1f1f5-1f1fe",
+      "flag: Paraguay",
+      7,
+      ""
+    ],
+    [
+      "1f1f6-1f1e6",
+      "flag: Qatar",
+      7,
+      ""
+    ],
+    [
+      "1f1f7-1f1ea",
+      "flag: Réunion",
+      7,
+      ""
+    ],
+    [
+      "1f1f7-1f1f4",
+      "flag: Romania",
+      7,
+      ""
+    ],
+    [
+      "1f1f7-1f1f8",
+      "flag: Serbia",
+      7,
+      ""
+    ],
+    [
+      "1f1f7-1f1fa",
+      "flag: Russia",
+      7,
+      ""
+    ],
+    [
+      "1f1f7-1f1fc",
+      "flag: Rwanda",
+      7,
+      ""
+    ],
+    [
+      "1f1f8-1f1e6",
+      "flag: Saudi Arabia",
+      7,
+      ""
+    ],
+    [
+      "1f1f8-1f1e7",
+      "flag: Solomon Islands",
+      7,
+      ""
+    ],
+    [
+      "1f1f8-1f1e8",
+      "flag: Seychelles",
+      7,
+      ""
+    ],
+    [
+      "1f1f8-1f1e9",
+      "flag: Sudan",
+      7,
+      ""
+    ],
+    [
+      "1f1f8-1f1ea",
+      "flag: Sweden",
+      7,
+      ""
+    ],
+    [
+      "1f1f8-1f1ec",
+      "flag: Singapore",
+      7,
+      ""
+    ],
+    [
+      "1f1f8-1f1ed",
+      "flag: St. Helena, Ascension & Tristan da Cunha",
+      7,
+      ""
+    ],
+    [
+      "1f1f8-1f1ee",
+      "flag: Slovenia",
+      7,
+      ""
+    ],
+    [
+      "1f1f8-1f1ef",
+      "flag: Svalbard & Jan Mayen",
+      7,
+      ""
+    ],
+    [
+      "1f1f8-1f1f0",
+      "flag: Slovakia",
+      7,
+      ""
+    ],
+    [
+      "1f1f8-1f1f1",
+      "flag: Sierra Leone",
+      7,
+      ""
+    ],
+    [
+      "1f1f8-1f1f2",
+      "flag: San Marino",
+      7,
+      ""
+    ],
+    [
+      "1f1f8-1f1f3",
+      "flag: Senegal",
+      7,
+      ""
+    ],
+    [
+      "1f1f8-1f1f4",
+      "flag: Somalia",
+      7,
+      ""
+    ],
+    [
+      "1f1f8-1f1f7",
+      "flag: Suriname",
+      7,
+      ""
+    ],
+    [
+      "1f1f8-1f1f8",
+      "flag: South Sudan",
+      7,
+      ""
+    ],
+    [
+      "1f1f8-1f1f9",
+      "flag: São Tomé & Príncipe",
+      7,
+      ""
+    ],
+    [
+      "1f1f8-1f1fb",
+      "flag: El Salvador",
+      7,
+      ""
+    ],
+    [
+      "1f1f8-1f1fd",
+      "flag: Sint Maarten",
+      7,
+      ""
+    ],
+    [
+      "1f1f8-1f1fe",
+      "flag: Syria",
+      7,
+      ""
+    ],
+    [
+      "1f1f8-1f1ff",
+      "flag: Eswatini",
+      7,
+      ""
+    ],
+    [
+      "1f1f9-1f1e6",
+      "flag: Tristan da Cunha",
+      7,
+      ""
+    ],
+    [
+      "1f1f9-1f1e8",
+      "flag: Turks & Caicos Islands",
+      7,
+      ""
+    ],
+    [
+      "1f1f9-1f1e9",
+      "flag: Chad",
+      7,
+      ""
+    ],
+    [
+      "1f1f9-1f1eb",
+      "flag: French Southern and Antarctic Lands",
+      7,
+      ""
+    ],
+    [
+      "1f1f9-1f1ec",
+      "flag: Togo",
+      7,
+      ""
+    ],
+    [
+      "1f1f9-1f1ed",
+      "flag: Thailand",
+      7,
+      ""
+    ],
+    [
+      "1f1f9-1f1ef",
+      "flag: Tajikistan",
+      7,
+      ""
+    ],
+    [
+      "1f1f9-1f1f0",
+      "flag: Tokelau",
+      7,
+      ""
+    ],
+    [
+      "1f1f9-1f1f1",
+      "flag: Timor-Leste",
+      7,
+      ""
+    ],
+    [
+      "1f1f9-1f1f2",
+      "flag: Turkmenistan",
+      7,
+      ""
+    ],
+    [
+      "1f1f9-1f1f3",
+      "flag: Tunisia",
+      7,
+      ""
+    ],
+    [
+      "1f1f9-1f1f4",
+      "flag: Tonga",
+      7,
+      ""
+    ],
+    [
+      "1f1f9-1f1f7",
+      "flag: Türkiye",
+      7,
+      ""
+    ],
+    [
+      "1f1f9-1f1f9",
+      "flag: Trinidad & Tobago",
+      7,
+      ""
+    ],
+    [
+      "1f1f9-1f1fb",
+      "flag: Tuvalu",
+      7,
+      ""
+    ],
+    [
+      "1f1f9-1f1fc",
+      "flag: Taiwan",
+      7,
+      ""
+    ],
+    [
+      "1f1f9-1f1ff",
+      "flag: Tanzania",
+      7,
+      ""
+    ],
+    [
+      "1f1fa-1f1e6",
+      "flag: Ukraine",
+      7,
+      ""
+    ],
+    [
+      "1f1fa-1f1ec",
+      "flag: Uganda",
+      7,
+      ""
+    ],
+    [
+      "1f1fa-1f1f2",
+      "flag: U.S. Outlying Islands",
+      7,
+      ""
+    ],
+    [
+      "1f1fa-1f1f3",
+      "flag: United Nations",
+      7,
+      ""
+    ],
+    [
+      "1f1fa-1f1f8",
+      "flag: United States",
+      7,
+      ""
+    ],
+    [
+      "1f1fa-1f1fe",
+      "flag: Uruguay",
+      7,
+      ""
+    ],
+    [
+      "1f1fa-1f1ff",
+      "flag: Uzbekistan",
+      7,
+      ""
+    ],
+    [
+      "1f1fb-1f1e6",
+      "flag: Vatican City",
+      7,
+      ""
+    ],
+    [
+      "1f1fb-1f1e8",
+      "flag: St. Vincent & Grenadines",
+      7,
+      ""
+    ],
+    [
+      "1f1fb-1f1ea",
+      "flag: Venezuela",
+      7,
+      ""
+    ],
+    [
+      "1f1fb-1f1ec",
+      "flag: British Virgin Islands",
+      7,
+      ""
+    ],
+    [
+      "1f1fb-1f1ee",
+      "flag: U.S. Virgin Islands",
+      7,
+      ""
+    ],
+    [
+      "1f1fb-1f1f3",
+      "flag: Vietnam",
+      7,
+      ""
+    ],
+    [
+      "1f1fb-1f1fa",
+      "flag: Vanuatu",
+      7,
+      ""
+    ],
+    [
+      "1f1fc-1f1eb",
+      "flag: Wallis & Futuna",
+      7,
+      ""
+    ],
+    [
+      "1f1fc-1f1f8",
+      "flag: Samoa",
+      7,
+      ""
+    ],
+    [
+      "1f1fd-1f1f0",
+      "flag: Kosovo",
+      7,
+      ""
+    ],
+    [
+      "1f1fe-1f1ea",
+      "flag: Yemen",
+      7,
+      ""
+    ],
+    [
+      "1f1fe-1f1f9",
+      "flag: Mayotte",
+      7,
+      ""
+    ],
+    [
+      "1f1ff-1f1e6",
+      "flag: South Africa",
+      7,
+      ""
+    ],
+    [
+      "1f1ff-1f1f2",
+      "flag: Zambia",
+      7,
+      ""
+    ],
+    [
+      "1f1ff-1f1fc",
+      "flag: Zimbabwe",
+      7,
+      ""
+    ],
+    [
+      "1f3f4-e0067-e0062-e0065-e006e-e0067-e007f",
+      "flag: England",
+      7,
+      ""
+    ],
+    [
+      "1f3f4-e0067-e0062-e0073-e0063-e0074-e007f",
+      "flag: Scotland",
+      7,
+      ""
+    ],
+    [
+      "1f3f4-e0067-e0062-e0077-e006c-e0073-e007f",
+      "flag: Wales",
+      7,
+      ""
+    ]
+  ]
+}
