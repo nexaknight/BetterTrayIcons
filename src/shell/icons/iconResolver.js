@@ -49,7 +49,8 @@ const FNV_OFFSET_BASIS = 0x811c9dc5;
 const FNV_PRIME = 0x01000193;
 
 // The SNI spec bounds no pixmap size, and hashing plus PNG encoding run on
-// the compositor loop. 128 is the largest icon-size, 256 device pixels at scale 2.
+// the compositor loop. The largest icon-size is 40, 80 device pixels at
+// scale 2, so anything past this cap only costs time.
 const MAX_PIXMAP_SIZE_PX = 512;
 
 export async function identifyApp(proxy, busName, settings, onRekey) {

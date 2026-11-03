@@ -253,7 +253,7 @@
         </key>
 
         <key name="icon-size" type="i">
-            <range min="1"/>
+            <range min="1" max="40"/>
             <default>20</default>
             <summary>Tray icon size in pixels</summary>
         </key>
@@ -391,7 +391,7 @@
         </key>
 
         <key name="toggle-icon-size" type="i">
-            <range min="1"/>
+            <range min="1" max="40"/>
             <default>20</default>
             <summary>Toggle button icon size in pixels</summary>
         </key>

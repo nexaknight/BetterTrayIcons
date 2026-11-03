@@ -17,7 +17,7 @@ export const TOUCH_BINDING = 'tap';
 
 // Spinner bounds the schema does not carry. It names a minimum and no maximum,
 // so a spinner sized off the schema alone would offer a two billion pixel icon.
-export const ICON_SIZE_RANGE_PX = Object.freeze({min: 16, max: 128, step: 2});
+export const ICON_SIZE_RANGE_PX = Object.freeze({min: 16, max: 40, step: 1});
 
 export const BORDER_RADIUS_MAX_PX = 50;
 
