@@ -16,6 +16,7 @@ import {
     symbolicTint,
     clearTintCache,
     MONO_ASSET_SUFFIX_RE,
+    ICON_FILE_MAX_BYTES,
 } from '../../shared/iconLoading.js';
 import {
     updateAppConfig,
@@ -31,7 +32,7 @@ import {
     unreadBadgeEnabled,
     ATTENTION_STATE_KEY,
 } from '../../shared/appConfig.js';
-import {readFileBytes, fileExists} from '../../shared/asyncIo.js';
+import {fileExists, isBoundedRegularFile, readFileBytesCapped} from '../../shared/asyncIo.js';
 import {warnOnce} from '../../shared/logging.js';
 import {getItemAddress, refreshPropertyOnProxy, refreshStringOnProxy} from '../dbusCalls.js';
 import {getProcessInfo} from '../identity/processIdentity.js';
@@ -223,14 +224,14 @@ async function _resolveIcon(proxy, settings, appId, lastPixmapHash, status, dete
     };
 
     const isAbsolutePath = !!iconName && iconName.startsWith('/');
-    if (isAbsolutePath && await fileExists(iconName))
+    if (isAbsolutePath && await _isIconFile(iconName))
         return fileIconResult(iconName);
 
     const canSearchAppTheme = !!iconName && !isAbsolutePath && !!iconThemePath;
     if (canSearchAppTheme) {
         const resolvedPath = await findIconInThemeAsync(iconName, iconThemePath,
             {targetSize: _deviceIconSize(settings)});
-        if (resolvedPath)
+        if (resolvedPath && await _isIconFile(resolvedPath))
             return fileIconResult(resolvedPath);
     }
 
@@ -331,9 +332,9 @@ async function _liveIconContentHash(proxy, settings, detectedName) {
         const path = detectedName.startsWith('/')
             ? detectedName
             : await _appThemeIconPath(proxy, settings, detectedName);
-        if (!path || !await fileExists(path))
+        if (!path || !await _isIconFile(path))
             return null;
-        const bytes = await readFileBytes(Gio.File.new_for_path(path));
+        const bytes = await readFileBytesCapped(Gio.File.new_for_path(path), ICON_FILE_MAX_BYTES);
         return bytes.length ? _hashBytes(bytes) : null;
     }
 
@@ -343,6 +344,10 @@ async function _liveIconContentHash(proxy, settings, detectedName) {
         return null;
     const src = _pixmapBytes(usable[2]);
     return src ? _hashPixmap(usable[0], usable[1], src) : null;
+}
+
+function _isIconFile(path) {
+    return isBoundedRegularFile(path, ICON_FILE_MAX_BYTES);
 }
 
 async function _appThemeIconPath(proxy, settings, iconName) {
@@ -538,7 +543,7 @@ async function _writeIconSnapshot(settings, appId, file, generation, seq) {
     try {
         if (isOvertaken())
             return;
-        const contents = await readFileBytes(file);
+        const contents = await readFileBytesCapped(file, ICON_FILE_MAX_BYTES);
         if (contents.length === 0 || isOvertaken())
             return;
         const path = await writeCachedIcon(appId, contents);

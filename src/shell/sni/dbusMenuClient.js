@@ -36,6 +36,13 @@ const RGBA_CHANNELS = 4;
 // pixmap.
 const OPAQUE_ALPHA_MIN = 128;
 
+// Room for any real menu icon, the menu draws them at 16 px.
+const ICON_DATA_MAX_PIXELS = 1024 * 1024;
+
+// The PNG loader reports the size once it reaches the image data, so a file
+// with more metadata than this ahead of it gets refused.
+const ICON_DATA_HEADER_BYTES = 4096;
+
 // Every icon builds its own client, the proxy wrapper is the same for all.
 let _MenuProxyClass = null;
 
@@ -228,10 +235,15 @@ export class DBusMenuClient {
     }
 
     async _applyIconData(icon, iconData) {
-        const stream = Gio.MemoryInputStream.new_from_bytes(iconData.get_data_as_bytes());
+        const bytes = iconData.get_data_as_bytes();
+        const size = MENU_ICON_SIZE * stageScaleFactor();
 
         try {
-            const pixbuf = await GdkPixbuf.Pixbuf.new_from_stream_async(stream, this._cancellable);
+            if (!fitsDecodeLimit(bytes))
+                throw new Error('image exceeds the decode limit');
+            const stream = Gio.MemoryInputStream.new_from_bytes(bytes);
+            const pixbuf = await GdkPixbuf.Pixbuf.new_from_stream_at_scale_async(
+                stream, size, size, true, this._cancellable);
             if (!isDisposed(icon))
                 icon.gicon = recoloredMonochrome(pixbuf, menuForegroundColor()) ?? pixbuf;
         } catch (e) {
@@ -462,6 +474,27 @@ export class DBusMenuClient {
         this._proxy = null;
         this._onCloseMenu = null;
     }
+}
+
+// The PNG loader allocates the full canvas before it scales, and a small file
+// can name a huge canvas. A zero size set from size-prepared stops it ahead of
+// that allocation (gdk-pixbuf io-png.c, png_info_callback).
+function fitsDecodeLimit(bytes) {
+    const loader = new GdkPixbuf.PixbufLoader();
+    let fits = false;
+    loader.connect('size-prepared', (_loader, width, height) => {
+        fits = width * height <= ICON_DATA_MAX_PIXELS;
+        if (!fits)
+            loader.set_size(0, 0);
+    });
+    const header = GLib.Bytes.new_from_bytes(bytes, 0, Math.min(bytes.get_size(), ICON_DATA_HEADER_BYTES));
+    try {
+        loader.write_bytes(header);
+        loader.close();
+    } catch {
+        // Only the size matters, not whether the cut-off image decodes
+    }
+    return fits;
 }
 
 // An app renders its menu pixmaps for its own theme, and one flat grey lands

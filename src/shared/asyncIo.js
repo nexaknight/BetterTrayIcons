@@ -15,10 +15,13 @@ promisify(Gio.File.prototype,
     'replace_async',
     'delete_async');
 promisify(Gio.FileEnumerator.prototype, 'next_files_async', 'close_async');
+promisify(Gio.InputStream.prototype, 'read_bytes_async');
 promisify(Gio.OutputStream.prototype, 'splice_async');
 promisify(GdkPixbuf.Pixbuf, 'new_from_stream_async');
 // Both stream loaders share one finish function.
 Gio._promisify(GdkPixbuf.Pixbuf, 'new_from_stream_at_scale_async', 'new_from_stream_finish');
+
+const READ_CHUNK_BYTES = 64 * 1024;
 
 export const isCancelledError = e => !!e?.matches?.(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED);
 
@@ -66,6 +69,51 @@ export async function fileExists(path, cancellable = null) {
 export async function readFileBytes(file, cancellable = null) {
     const [contents] = await file.load_contents_async(cancellable);
     return contents;
+}
+
+// An app can name a FIFO, which blocks the thread that opens it, or a device
+// that never ends.
+export async function isBoundedRegularFile(path, maxBytes) {
+    try {
+        const info = await Gio.File.new_for_path(path).query_info_async(
+            'standard::type,standard::size',
+            Gio.FileQueryInfoFlags.NONE,
+            GLib.PRIORITY_DEFAULT,
+            null
+        );
+        return info.get_file_type() === Gio.FileType.REGULAR && info.get_size() <= maxBytes;
+    } catch {
+        return false;
+    }
+}
+
+// load_contents grows its buffer until EOF, and /proc files report size 0, so
+// the size check alone does not bound what gets read.
+export async function readFileBytesCapped(file, maxBytes, cancellable = null) {
+    const stream = await file.read_async(GLib.PRIORITY_DEFAULT, cancellable);
+    try {
+        const chunks = await _readChunks(stream, maxBytes, [], cancellable);
+        const contents = new Uint8Array(chunks.reduce((sum, chunk) => sum + chunk.length, 0));
+        let offset = 0;
+        for (const chunk of chunks) {
+            contents.set(chunk, offset);
+            offset += chunk.length;
+        }
+        return contents;
+    } finally {
+        stream.close_async(GLib.PRIORITY_LOW, null, null);
+    }
+}
+
+async function _readChunks(stream, remaining, chunks, cancellable) {
+    const bytes = await stream.read_bytes_async(READ_CHUNK_BYTES, GLib.PRIORITY_DEFAULT, cancellable);
+    const size = bytes.get_size();
+    if (size === 0)
+        return chunks;
+    if (size > remaining)
+        throw new Error('File exceeds the read limit');
+    chunks.push(bytes.toArray());
+    return _readChunks(stream, remaining - size, chunks, cancellable);
 }
 
 // Decoded off the main thread, scaled inside the loader rather than after.

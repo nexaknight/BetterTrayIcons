@@ -2,7 +2,7 @@ import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 
 import {warnOnce} from './logging.js';
-import {fileExists, readFileBytes, readFileText, probePaths} from './asyncIo.js';
+import {fileExists, readFileBytes, readFileBytesCapped, probePaths} from './asyncIo.js';
 import {usesAccent} from './accentColor.js';
 import {colorKeyFor} from './colorVariant.js';
 
@@ -17,6 +17,9 @@ const MONO_ICON_NAME_RE = new RegExp(`[-_](${MONO_VARIANT_PATTERN}|mono)$`, 'i')
 export const MONO_ASSET_SUFFIX_RE = /([-_]tray)?[-_]mono$/i;
 
 const ICON_CACHE_SUBDIR = 'bettertrayicons/icons';
+
+// Far above any real icon file, far below what hurts the shell.
+export const ICON_FILE_MAX_BYTES = 4 * 1024 * 1024;
 
 // The config syncs between machines, so an emoji is kept as its codepoints
 // and every host draws it with its own font.
@@ -316,7 +319,8 @@ export async function tintedSymbolicIconMap(values, tint, options = {}) {
 
 async function _tintedIcon(path, color, size, cancellable) {
     try {
-        const text = await readFileText(Gio.File.new_for_path(path), cancellable);
+        const bytes = await readFileBytesCapped(Gio.File.new_for_path(path), ICON_FILE_MAX_BYTES, cancellable);
+        const text = new TextDecoder('utf-8', {fatal: false}).decode(bytes);
         if (!_wantsTint(path, text))
             return null;
         const svg = _tintedSvg(text, color, size);
