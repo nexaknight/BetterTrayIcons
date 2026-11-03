@@ -124,6 +124,11 @@
             <summary>Show packaging and origin badges on the Applications page</summary>
         </key>
 
+        <key name="applications-show-filter" type="b">
+            <default>false</default>
+            <summary>Show the filter bar on the Applications page</summary>
+        </key>
+
         <key name="icon-color-split" type="b">
             <default>true</default>
             <summary>Keep separate light and dark colour sets for tray icons</summary>
