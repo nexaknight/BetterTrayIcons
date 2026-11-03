@@ -20,13 +20,13 @@ MacTahoe and Adwaita, and `emblem-favorite-symbolic` was missing from Adwaita.
 - `bti-close` ← Lucide `x`
 - `bti-code` ← Lucide `code`
 - `bti-color` ← Lucide `palette`
+- `bti-copy` ← Lucide `copy`
 - `bti-download` ← Lucide `archive-restore`
 - `bti-ellipsis-vertical` ← Lucide `ellipsis-vertical`
 - `bti-export` ← Lucide `file-output`
 - `bti-flag` ← Lucide `flag`
 - `bti-folder` ← Lucide `folder-open`
 - `bti-folder-search` ← Lucide `folder-search`
-- `bti-funnel` ← Lucide `funnel`
 - `bti-gear` ← Lucide `settings-2`
 - `bti-general` ← Lucide `settings`
 - `bti-grid` ← Lucide `grid-2x2`
@@ -77,8 +77,9 @@ previews, same pipeline:
 Lucide draws with strokes, GNOME recolors symbolic icons by forcing a fill on
 rect, circle and path and never touches stroke. Dropped in unmodified, the
 lines vanish and the rings fill in as solid discs. So every icon above was
-outlined from stroke to fill. That is the only modification, the shapes are
-Lucide's.
+outlined from stroke to fill with `scripts/outlineLucide.py` (Skia's stroker,
+2 px, round caps and joins, from the `icons/<name>.svg` of `lucide-static`
+1.66.0). That is the only modification, the shapes are Lucide's.
 
 > ISC License
 >
