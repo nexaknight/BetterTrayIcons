@@ -258,6 +258,12 @@
             <summary>Tray icon size in pixels</summary>
         </key>
 
+        <key name="icon-blur" type="i">
+            <range min="0" max="100"/>
+            <default>0</default>
+            <summary>Background blur strength behind each tray icon in the custom style, 0 to 100</summary>
+        </key>
+
         <key name="icon-padding-top" type="i">
             <range min="0"/>
             <default>5</default>
@@ -468,6 +474,12 @@
             <summary>Toggle button border width in pixels</summary>
         </key>
 
+        <key name="toggle-blur" type="i">
+            <range min="0" max="100"/>
+            <default>0</default>
+            <summary>Background blur strength behind the toggle button in the custom style, 0 to 100</summary>
+        </key>
+
         <key name="toggle-padding-top" type="i">
             <range min="0"/>
             <default>0</default>
@@ -547,6 +559,12 @@
             <range min="0"/>
             <default>0</default>
             <summary>Overflow popup border width in pixels</summary>
+        </key>
+
+        <key name="overflow-container-blur" type="i">
+            <range min="0" max="100"/>
+            <default>0</default>
+            <summary>Background blur strength behind the overflow popup in the custom style, 0 to 100</summary>
         </key>
 
         <key name="overflow-container-padding-top" type="i">

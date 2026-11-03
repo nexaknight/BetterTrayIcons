@@ -17,6 +17,7 @@ const GRID_COLUMNS_MIN = 1;
 const GRID_COLUMNS_MAX = 10;
 
 export const OVERFLOW_STYLE_KEYS = Object.freeze([
+    'overflow-container-blur',
     'overflow-layout-mode',
     'grid-column-limit',
     'overflow-container-padding-top',
@@ -90,6 +91,7 @@ export default class OverflowMenuSubpage extends Adw.NavigationPage {
         contentPage.add(createCustomStyleSwitchGroup({
             settings: this._settings,
             key: 'enable-custom-overflow-style',
+            blurKey: 'overflow-container-blur',
         }));
 
         const colorGroup = new Adw.PreferencesGroup({title: _('Colors')});

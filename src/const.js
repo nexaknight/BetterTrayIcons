@@ -46,6 +46,7 @@ export const TRAY_STYLE_KEYS = Object.freeze([
     'icon-border-radius',
     'icon-border-width',
     'icon-color-split',
+    'icon-blur',
     ...withLightTwins(TRAY_COLOR_KEYS),
 ]);
 
