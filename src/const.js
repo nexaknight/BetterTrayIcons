@@ -57,6 +57,19 @@ export const BADGE_POSITIONS = Object.freeze(['bottom-right', 'bottom-left', 'to
 export const BADGE_DEFAULT_COLOR = '#e01b24';
 export const BADGE_DEFAULT_TEXT_COLOR = '#ffffff';
 
+// The donation services metadata.json may list, with the base URL and name
+// extensions.gnome.org uses for each, so a row opens the same page EGO links.
+// A service without a bundled icon gets the plain link glyph.
+export const DONATION_SERVICES = Object.freeze({
+    buymeacoffee: {name: 'Buy Me a Coffee', baseUrl: 'https://www.buymeacoffee.com', iconName: 'bti-buymeacoffee-symbolic'},
+    github: {name: 'GitHub', baseUrl: 'https://github.com/sponsors', iconName: 'bti-github-symbolic'},
+    kofi: {name: 'Ko-fi', baseUrl: 'https://ko-fi.com'},
+    liberapay: {name: 'Liberapay', baseUrl: 'https://liberapay.com'},
+    opencollective: {name: 'Open Collective', baseUrl: 'https://opencollective.com'},
+    patreon: {name: 'Patreon', baseUrl: 'https://www.patreon.com'},
+    paypal: {name: 'PayPal', baseUrl: 'https://paypal.me'},
+});
+
 // CONTRIBUTING.md has the opt-out procedure.
 export const CONTRIBUTORS_OPTOUT = new Set([
     'github-actions[bot]',

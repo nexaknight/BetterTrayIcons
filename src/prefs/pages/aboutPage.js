@@ -6,22 +6,22 @@ import GObject from 'gi://GObject';
 import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
 import {error} from '../../shared/logging.js';
-import {fetchJson, fetchBytes, isCancelledError} from '../../shared/asyncIo.js';
+import {fetchJson, fetchBytes, isCancelledError, readFileText} from '../../shared/asyncIo.js';
 import {createAvatar, createImage, createPicture, createTextureFromBytes, bindLogoToTheme} from '../components/image.js';
 import {createBox, createLabel} from '../components/text.js';
 import {createButton} from '../components/button.js';
 import {createCard, createCardRow} from '../components/card.js';
-import {createActionRow} from '../components/row.js';
+import {createMarkdownView} from '../components/markdown.js';
+import {createActionRow, createExpanderSection} from '../components/row.js';
 import {showTextDialog, buildGroupDialog} from '../components/dialog.js';
-import {CONTRIBUTORS_OPTOUT} from '../../const.js';
+import {CONTRIBUTORS_OPTOUT, DONATION_SERVICES} from '../../const.js';
+import {DBUS_SPECS, inspirationLinks} from '../../shared/credits.js';
 
 const GIT_REPO_URL = 'https://github.com/nexaknight/BetterTrayIcons';
 
 const GITHUB_API_REPO_URL = GIT_REPO_URL.replace('github.com/', 'api.github.com/repos/');
 
 const LICENSE_URL = 'https://github.com/nexaknight/BetterTrayIcons/blob/main/LICENSE';
-
-const SPONSOR_URL = 'https://github.com/sponsors/nexaknight';
 
 const TRANSLATE_URL = 'https://github.com/nexaknight/BetterTrayIcons/wiki/Translation-Guidelines';
 
@@ -31,6 +31,8 @@ const ABOUT_ROW_ICON_SIZE_PX = 16;
 
 const ABOUT_INLINE_ICON_SIZE_PX = 18;
 
+const LINK_ICON_NAME = 'bti-link-symbolic';
+
 const MAX_CONTRIBUTORS = 5;
 
 const CONTRIBUTOR_AVATAR_SIZE_PX = 56;
@@ -38,6 +40,8 @@ const CONTRIBUTOR_AVATAR_SIZE_PX = 56;
 const SHOW_MORE_ICON_SIZE_PX = 48;
 
 const ABOUT_LOGO_SIZE_PX = 160;
+
+const LINK_DIALOG_WIDTH_PX = 500;
 
 const CHANGELOG_PAGE_SIZE = 5;
 
@@ -114,14 +118,7 @@ export class AboutPage extends Adw.PreferencesPage {
         });
         infoGroup.add(changelogRow);
 
-        const donationRow = createActionRow({
-            title: _('Sponsor'),
-            subtitle: _('Support development.'),
-            prefixWidget: this._createIcon('bti-heart-symbolic', ABOUT_ROW_ICON_SIZE_PX),
-            suffixWidgets: [this._createIcon('bti-link-symbolic', ABOUT_INLINE_ICON_SIZE_PX)],
-            onActivate: () => _openUri(this.get_root(), SPONSOR_URL),
-        });
-        infoGroup.add(donationRow);
+        infoGroup.add(this._createDonationsRow());
 
         const contributorsGroup = new Adw.PreferencesGroup({title: _('Contributors')});
         this.add(contributorsGroup);
@@ -132,6 +129,7 @@ export class AboutPage extends Adw.PreferencesPage {
             title: _('Legal'),
         });
 
+        legalGroup.add(this._createCreditsRow());
         legalGroup.add(createActionRow({
             title: _('License'),
             prefixWidget: this._createIcon('bti-license-symbolic', ABOUT_ROW_ICON_SIZE_PX),
@@ -144,11 +142,87 @@ export class AboutPage extends Adw.PreferencesPage {
             {wrap: true, xalign: 0, margin_top: 12, margin_bottom: 12, margin_start: 12, margin_end: 12}
         );
         legalGroup.add(disclaimerLabel);
+        legalGroup.add(this._buildFooter());
         this.add(legalGroup);
+    }
 
-        const creditsGroup = new Adw.PreferencesGroup();
-        this.add(creditsGroup);
+    _createDonationsRow() {
+        const {expander, setRows} = createExpanderSection({
+            title: _('Sponsor'),
+            subtitle: _('Support development.'),
+        });
+        expander.add_prefix(this._createIcon('bti-heart-symbolic', ABOUT_ROW_ICON_SIZE_PX));
+        setRows(_donationLinks(this._metadata.donations).map(({name, url, iconName}) => createActionRow({
+            title: name,
+            subtitle: url,
+            prefixWidget: this._createIcon(iconName, ABOUT_ROW_ICON_SIZE_PX),
+            suffixWidgets: [this._createIcon(LINK_ICON_NAME, ABOUT_INLINE_ICON_SIZE_PX)],
+            onActivate: () => _openUri(this.get_root(), url),
+        })));
+        return expander;
+    }
 
+    _createCreditsRow() {
+        const {expander, setRows} = createExpanderSection({title: _('Credits')});
+        expander.add_prefix(this._createIcon('bti-star-symbolic', ABOUT_ROW_ICON_SIZE_PX));
+        setRows([
+            createActionRow({
+                title: _('Icons and Emojis'),
+                prefixWidget: this._createIcon('bti-grid-symbolic', ABOUT_ROW_ICON_SIZE_PX),
+                onActivate: () => this._showIconAndEmojiCredits(),
+            }),
+            createActionRow({
+                title: _('D-Bus Interfaces'),
+                prefixWidget: this._createIcon('bti-code-symbolic', ABOUT_ROW_ICON_SIZE_PX),
+                onActivate: () => this._showLinkDialog(_('D-Bus Interfaces'),
+                    _('The specifications behind the interface files BTI implements.'), DBUS_SPECS),
+            }),
+            createActionRow({
+                title: _('Inspiration'),
+                prefixWidget: this._createIcon('bti-users-symbolic', ABOUT_ROW_ICON_SIZE_PX),
+                onActivate: () => this._showLinkDialog(_('Inspiration'),
+                    _('Projects BTI learned from.'), inspirationLinks(_)),
+            }),
+        ]);
+        return expander;
+    }
+
+    async _showIconAndEmojiCredits() {
+        const files = ['icons', 'emoji'].map(dir => this._assetsDir.get_child(dir).get_child('CREDITS.md'));
+        let texts;
+        try {
+            texts = await Promise.all(files.map(file => readFileText(file, this._cancellable)));
+        } catch (e) {
+            if (isCancelledError(e))
+                return;
+            error('Failed to read the icon and emoji credits', e);
+            return;
+        }
+        const {groups, present} = buildGroupDialog({
+            title: _('Icons and Emojis'),
+            width: CHANGELOG_DIALOG_WIDTH_PX,
+            tabs: [_('Icons'), _('Emojis')],
+        });
+        texts.forEach((text, i) => groups[i].add(createMarkdownView(text)));
+        present(this.get_root());
+    }
+
+    _showLinkDialog(title, description, links) {
+        const {group, present} = buildGroupDialog({title, width: LINK_DIALOG_WIDTH_PX});
+        group.description = description;
+        for (const {name, url, about} of links) {
+            group.add(createActionRow({
+                title: name,
+                subtitle: about ?? url,
+                prefixWidget: this._createIcon(url.includes('github.com') ? 'bti-github-symbolic' : LINK_ICON_NAME, ABOUT_ROW_ICON_SIZE_PX),
+                suffixWidgets: [this._createIcon(LINK_ICON_NAME, ABOUT_INLINE_ICON_SIZE_PX)],
+                onActivate: () => _openUri(this.get_root(), url),
+            }));
+        }
+        present(this.get_root());
+    }
+
+    _buildFooter() {
         const footerBox = createBox({
             orientation: 'vertical',
             spacing: 12,
@@ -174,14 +248,13 @@ export class AboutPage extends Adw.PreferencesPage {
         footerBox.append(logo);
         footerBox.append(fallbackLabel);
 
-        creditsGroup.add(footerBox);
-
         // Reading and rasterizing the logo is the expensive part of this
         // page, so defer it until the page is shown.
         const mapId = this.connect('map', () => {
             this.disconnect(mapId);
             bindLogoToTheme(logo, fallbackLabel, this._assetsDir, 'logo.svg');
         });
+        return footerBox;
     }
 
     _createIcon(iconName, size, props = {}) {
@@ -371,37 +444,34 @@ function _appendRelease(list, release, withSeparator) {
         list.append(new Gtk.Separator({margin_start: 12, margin_end: 12}));
 
     const name = GLib.markup_escape_text(String(release.name || release.tag_name || ''), -1);
-    list.append(createLabel(
-        `<span size="x-large" weight="bold">${name}</span>\n${_markdownToPango(release.body)}`,
-        [],
-        {
-            use_markup: true,
-            wrap: true,
-            xalign: 0,
-            focusable: false,
-            margin_top: 12, margin_bottom: 12,
-            margin_start: 12, margin_end: 12,
-        }
-    ));
+    list.append(createMarkdownView(release.body, `<span size="x-large" weight="bold">${name}</span>`));
 }
 
-// Release bodies are markdown, only the subset release-please emits gets
-// converted. Each line is escaped first so a body can't break out into
-// markup the GtkLabel would refuse to render.
-function _markdownToPango(markdown) {
-    // Headings need the inline pass too, release-please puts the compare
-    // link right inside the version heading.
-    const inline = text => text
-        .replace(/^(\s*)[*+-]\s+/, '$1• ')
-        .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>')
-        .replace(/\[([^\]]+)\]\((https?:\/\/[^()\s]+)\)/g, '<a href="$2">$1</a>');
-    return String(markdown ?? '').replace(/\r/g, '').split('\n').map(line => {
-        const escaped = GLib.markup_escape_text(line, -1);
-        const heading = escaped.match(/^#{1,6}\s+(.*)/);
-        if (heading)
-            return `<span weight="bold" size="large">${inline(heading[1])}</span>`;
-        return inline(escaped);
-    }).join('\n').trim();
+// Each service takes one handle or a list of them, custom takes full URLs.
+function _donationLinks(donations) {
+    return Object.entries(donations)
+        .flatMap(([key, value]) => [value].flat().map(entry => _donationLink(key, entry)))
+        .filter(Boolean);
+}
+
+function _donationLink(key, entry) {
+    if (key === 'custom')
+        return _customDonationLink(entry);
+    const service = DONATION_SERVICES[key];
+    if (!service)
+        return null;
+    return {
+        name: service.name,
+        url: `${service.baseUrl}/${encodeURIComponent(entry)}`,
+        iconName: service.iconName ?? LINK_ICON_NAME,
+    };
+}
+
+function _customDonationLink(url) {
+    const host = GLib.Uri.parse(url, GLib.UriFlags.NONE).get_host();
+    const service = Object.values(DONATION_SERVICES)
+        .find(({baseUrl}) => GLib.Uri.parse(baseUrl, GLib.UriFlags.NONE).get_host() === host);
+    return {name: service?.name ?? host, url, iconName: service?.iconName ?? LINK_ICON_NAME};
 }
 
 function _openUri(parent, uri) {
