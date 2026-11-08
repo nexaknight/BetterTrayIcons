@@ -83,6 +83,7 @@ export class DraggableTrayIcon extends GObject.Object {
         copy.set_child(new St.Icon({
             gicon: icon.gicon,
             icon_size: icon.icon_size,
+            visible: icon.visible,
             style: icon.get_style(),
         }));
         return copy;
@@ -191,7 +192,7 @@ export function findIcon(actor) {
     return null;
 }
 
-function isDragEnabledFromSettings(settings) {
+export function isDragEnabledFromSettings(settings) {
     return DRAG_SETTING_KEYS.some(k => settings.get_string(k) === 'drag-drop');
 }
 

@@ -69,7 +69,12 @@ export function connectColorSetChanges(settings, run) {
 }
 
 export function refreshTrayStyle(actor, iconActor, settings) {
-    iconActor?.set_icon_size(settings.get_int('icon-size'));
+    if (iconActor) {
+        const size = settings.get_int('icon-size');
+        iconActor.icon_size = size;
+        // St reads an icon_size of 0 as the theme size, so a 0 px icon hides.
+        iconActor.visible = size > 0;
+    }
 
     const {enableCustom, baseStyle, hoverStyle} = trayIconStyleFor(actor, settings);
     applyIconChrome(actor, iconActor, settings, enableCustom);

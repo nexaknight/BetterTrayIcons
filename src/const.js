@@ -15,9 +15,8 @@ export const DEFAULT_PILL_RADIUS_PX = 50;
 // Touch has no buttons, so it binds under its own name next to left/middle/right.
 export const TOUCH_BINDING = 'tap';
 
-// Spinner bounds the schema does not carry. It names a minimum and no maximum,
-// so a spinner sized off the schema alone would offer a two billion pixel icon.
-export const ICON_SIZE_RANGE_PX = Object.freeze({min: 16, max: 40, step: 1});
+// The schema range carries no step, the spinners take all three from here
+export const ICON_SIZE_RANGE_PX = Object.freeze({min: 0, max: 40, step: 1});
 
 export const BORDER_RADIUS_MAX_PX = 50;
 

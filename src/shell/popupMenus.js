@@ -136,13 +136,12 @@ export function destroyMenuSafely(menu) {
         menu.close(POPUP_ANIMATION_NONE);
 
     Main.panel.menuManager.removeMenu(menu);
-
-    // On 51 destroy leaves the menu's key controller on the source actor, and
-    // our popup icons all share one dummy cursor.
-    if (menu._keyController)
-        menu.sourceActor?.remove_action(menu._keyController);
-
     menu.destroy();
+
+    // Early 51 builds leave the menu's key controller on the source actor,
+    // later ones drop it in destroy, and our popup icons all share one dummy cursor
+    const keyController = menu._keyController;
+    keyController?.get_actor()?.remove_action(keyController);
 }
 
 const _flyoutMenus = [];

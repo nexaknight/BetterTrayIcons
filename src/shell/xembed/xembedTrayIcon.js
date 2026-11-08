@@ -1,9 +1,11 @@
 import Clutter from 'gi://Clutter';
 import GLib from 'gi://GLib';
+import Mtk from 'gi://Mtk';
 import St from 'gi://St';
 
 import {displayAppName, getAppConfigMap, getAppConfigValue, updateAppConfig, reseedIfForgotten} from '../../shared/appConfig.js';
 import {configuredIcon} from '../icons/iconResolver.js';
+import {setIconContent} from '../icons/iconContent.js';
 import {clearIds, disconnectSignal, disconnectAll, disposeAll, removeTimer, ruleDispatcher} from '../../shared/lifecycle.js';
 import {DRAG_SETTING_KEYS, setupIconDragSource, syncDragEnabled} from '../features/dragAndDrop.js';
 import {applyTitle, createTrayActor, syncTooltip} from '../features/tooltip.js';
@@ -24,6 +26,8 @@ const XEMBED_EXCLUDED_STYLE_KEYS = new Set([
 const XEMBED_STYLE_KEYS = TRAY_STYLE_KEYS.filter(key => !XEMBED_EXCLUDED_STYLE_KEYS.has(key));
 
 const RIGHT_MOUSE_BUTTON = 3;
+
+const MIN_EMBED_WINDOW_PX = 1;
 
 let _wrapperSerial = 0;
 
@@ -58,6 +62,15 @@ export class XEmbedTrayIcon {
 
         this._iconBox = new St.Widget({layout_manager: new Clutter.BinLayout()});
         this._iconBox.add_child(rawIcon);
+        // The embed moves wherever X needs its window, this clone keeps
+        // showing the icon in its slot
+        rawIcon.opacity = 0;
+        this._iconView = new Clutter.Clone({
+            source: rawIcon,
+            x_align: Clutter.ActorAlign.CENTER,
+            y_align: Clutter.ActorAlign.CENTER,
+        });
+        this._iconBox.add_child(this._iconView);
         this.actor.set_child(this._iconBox);
         this._customIcon = null;
         this._customIconValue = null;
@@ -84,6 +97,7 @@ export class XEmbedTrayIcon {
         this._actorSignals.push(
             this.actor.connect('button-press-event', () => {
                 this.actor.add_style_pseudo_class('active');
+                this._syncEmbedPosition();
                 return Clutter.EVENT_PROPAGATE;
             }),
             this.actor.connect('button-release-event', (_a, event) => {
@@ -99,6 +113,8 @@ export class XEmbedTrayIcon {
                 return Clutter.EVENT_PROPAGATE;
             }),
             this.actor.connect('notify::hover', () => {
+                if (this.actor.hover)
+                    this._syncEmbedPosition();
                 syncHoverStyle(this.actor);
                 syncTooltip(this.actor, this._tooltip, this._settings);
             })
@@ -168,21 +184,54 @@ export class XEmbedTrayIcon {
         });
     }
 
+    // The shell hands X the icon's stage position, but XWayland reads X
+    // positions in scaled pixels. Above 100 % the embed window, and the menu
+    // the app opens next to it, land at a fraction of the icon's position.
+    // Source: https://gitlab.gnome.org/GNOME/gnome-shell/-/blob/main/src/shell-tray-icon.c
+    _syncEmbedPosition() {
+        const window = this._icon.source?.meta_window;
+        if (!window)
+            return;
+        const [stageX, stageY] = this._icon.get_transformed_position();
+        const [width, height] = this._icon.get_transformed_size();
+        const slot = new Mtk.Rectangle({
+            x: Math.round(stageX - this._icon.translation_x),
+            y: Math.round(stageY - this._icon.translation_y),
+            width: Math.round(width),
+            height: Math.round(height),
+        });
+        const target = window.stage_to_protocol_rect(slot);
+        const offsetX = target.x - slot.x;
+        const offsetY = target.y - slot.y;
+        const isInPlace = offsetX === this._icon.translation_x && offsetY === this._icon.translation_y;
+        if (isInPlace)
+            return;
+        this._icon.set_translation(offsetX, offsetY, 0);
+        // The shell passes the position on to X from its allocate
+        this._icon.queue_relayout();
+    }
+
     _applyIconSize() {
         const size = this._settings.get_int('icon-size');
+        // X answers a 0x0 window with BadValue, and that error aborts the
+        // shell. The window keeps one pixel and hides instead.
+        const windowSize = Math.max(size, MIN_EMBED_WINDOW_PX);
         this._icon.set({
-            width: size,
-            height: size,
+            width: windowSize,
+            height: windowSize,
+            visible: size > 0,
             x_align: Clutter.ActorAlign.CENTER,
             y_align: Clutter.ActorAlign.CENTER,
         });
-        if (this._customIcon)
+        this._iconView.visible = size > 0 && !this._customIcon;
+        if (this._customIcon) {
             this._customIcon.icon_size = size;
+            this._customIcon.visible = size > 0;
+        }
     }
 
-    // An XEmbed window paints itself, so a custom icon has to cover it. The
-    // window stays allocated at opacity 0 to keep click forwarding and the
-    // app's idea of an embedded icon alive.
+    // A custom icon takes the clone's place. The embed stays allocated to
+    // keep click forwarding and the app's idea of an embedded icon alive.
     _applyCustomIcon() {
         const value = getAppConfigValue(this._settings, this.appId, 'custom_icon');
         if (value === this._customIconValue)
@@ -190,17 +239,15 @@ export class XEmbedTrayIcon {
         this._customIconValue = value;
 
         disposeAll(this, 'destroy', '_customIcon');
-        this._icon.opacity = value ? 0 : 255;
-        if (!value)
-            return;
-
-        this._customIcon = new St.Icon({
-            gicon: configuredIcon(value, this._settings).gicon,
-            icon_size: this._settings.get_int('icon-size'),
-            x_align: Clutter.ActorAlign.CENTER,
-            y_align: Clutter.ActorAlign.CENTER,
-        });
-        this._iconBox.add_child(this._customIcon);
+        if (value) {
+            this._customIcon = new St.Icon({
+                x_align: Clutter.ActorAlign.CENTER,
+                y_align: Clutter.ActorAlign.CENTER,
+            });
+            setIconContent(this._customIcon, configuredIcon(value, this._settings));
+            this._iconBox.add_child(this._customIcon);
+        }
+        this._applyIconSize();
     }
 
     _updateStyle() {
