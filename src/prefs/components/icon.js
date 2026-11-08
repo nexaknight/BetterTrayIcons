@@ -11,6 +11,7 @@ import {EmojiPaintable} from './emoji.js';
 
 export const NEXT_ICON_NAME = 'bti-next-symbolic';
 export const GEAR_ICON_NAME = 'bti-gear-symbolic';
+export const RESET_ICON_NAME = 'bti-reset-symbolic';
 
 // Past the raster sizes a symbolic icon ships in, so the scalable directory is
 // the only zero-distance match (gtkicontheme.c compare_dir_size_matches).
@@ -55,6 +56,10 @@ export function applyPathIcon(image, value, settings, options = {}) {
 }
 
 export function prefsSymbolicTint(settings) {
+    // Without a custom style the tray paints white for its dark panel, which
+    // vanishes on a light prefs row
+    if (!settings.get_boolean('enable-custom-icon-style'))
+        return prefsForegroundColor();
     return symbolicTint(settings, {
         accent: Adw.StyleManager.get_default().get_accent_color_rgba().to_string(),
         light: editsLightSet(settings),

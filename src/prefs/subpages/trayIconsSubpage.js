@@ -47,6 +47,7 @@ export default class TrayIconsSubpage extends Adw.NavigationPage {
             watch: TRAY_ICON_STYLE_KEYS,
             render: buildTrayPreview,
             splitKey: 'icon-color-split',
+            customStyleKey: 'enable-custom-icon-style',
         });
         page.add(previewGroup);
 
@@ -65,6 +66,7 @@ export default class TrayIconsSubpage extends Adw.NavigationPage {
             ...ICON_SIZE_RANGE_PX,
         }));
 
+        const isCustomStyleOn = () => this._settings.get_boolean('enable-custom-icon-style');
         const isPanelMode = () => PANEL_DISPLAY_MODES.includes(this._settings.get_string('display-mode'));
         // Quick Settings paints an opaque menu, a blur behind the rows has
         // nothing to blur
@@ -93,12 +95,12 @@ export default class TrayIconsSubpage extends Adw.NavigationPage {
         page.add(shapeGroup);
 
         bindGroupsVisible(this, this._settings, [colorGroup],
-            () => this._settings.get_boolean('enable-custom-icon-style'), 'enable-custom-icon-style');
+            isCustomStyleOn, 'enable-custom-icon-style');
 
         // Quick Settings rows take the menu item style, only the icon tint
         // carries over, so the box controls and their guides go.
         bindGroupsVisible(this, this._settings, [spacingGroup, shapeGroup],
-            () => this._settings.get_boolean('enable-custom-icon-style') && isPanelMode(),
+            () => isCustomStyleOn() && isPanelMode(),
             'enable-custom-icon-style', 'display-mode');
         [previewGroup.header_suffix, ...boxColorRows].forEach(widget =>
             bindVisibility(this._settings, 'display-mode', widget, PANEL_DISPLAY_MODES));

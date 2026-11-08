@@ -22,6 +22,7 @@ MacTahoe and Adwaita, and `emblem-favorite-symbolic` was missing from Adwaita.
 - `bti-color` ← Lucide `palette`
 - `bti-copy` ← Lucide `copy`
 - `bti-download` ← Lucide `archive-restore`
+- `bti-edit` ← Lucide `pencil`
 - `bti-ellipsis-vertical` ← Lucide `ellipsis-vertical`
 - `bti-export` ← Lucide `file-output`
 - `bti-flag` ← Lucide `flag`

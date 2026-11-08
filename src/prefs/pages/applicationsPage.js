@@ -12,9 +12,9 @@ import AppDialog from '../dialogs/appDialog.js';
 import {GONE_ICON_NAME, probeGoneApps} from '../appPresence.js';
 import {createButton, createIconButton, createMenuButton} from '../components/button.js';
 import {createImage} from '../components/image.js';
-import {createBadgeBox, setBadges} from '../components/badge.js';
-import {applyIconPreview, applyResolvedIcon, devicePixelSize, prefsSymbolicTint, resolveAppIcon, themeIconFile, tintSource, watchShownIcons, NEXT_ICON_NAME} from '../components/icon.js';
-import {createActionRow, createWrapActionRow} from '../components/row.js';
+import {createBadgeLine, setBadges} from '../components/badge.js';
+import {applyIconPreview, applyResolvedIcon, devicePixelSize, prefsSymbolicTint, resolveAppIcon, themeIconFile, tintSource, watchShownIcons, NEXT_ICON_NAME, RESET_ICON_NAME} from '../components/icon.js';
+import {createActionRow, createBadgedActionRow} from '../components/row.js';
 import {addToast} from '../components/sidebar.js';
 import {showConfirmationDialog} from '../components/dialog.js';
 import {TokenSearch} from '../components/search.js';
@@ -109,7 +109,7 @@ export class ApplicationsPage extends Adw.PreferencesPage {
                 label: _('Forget All Apps'),
                 onActivate: () => this._confirmForgetAll(),
             }, {
-                iconName: 'bti-reset-symbolic',
+                iconName: RESET_ICON_NAME,
                 label: _('Reset All Apps'),
                 onActivate: () => this._confirmResetAll(),
             }],
@@ -152,8 +152,13 @@ export class ApplicationsPage extends Adw.PreferencesPage {
         const isShown = this._settings.get_boolean(FILTER_KEY);
         this._filterRevealer.reveal_child = isShown;
         this._syncFilterGroup();
-        if (!isShown)
+        if (!isShown) {
             this._search.clear();
+            return;
+        }
+        // A toggle on the visible page means someone is about to type
+        if (this.get_mapped())
+            this._search.grab_focus();
     }
 
     _syncFilterGroup() {
@@ -189,7 +194,7 @@ export class ApplicationsPage extends Adw.PreferencesPage {
     // instead of an empty page. The generation counter drops an overtaken
     // probe rather than rendering it over a newer list.
     _buildUI() {
-        const gen = ++this._buildGeneration;
+        const generation = ++this._buildGeneration;
         const apps = getAppConfigs(this._settings);
         apps.sort((a, b) => displayAppName(a, a.id)
             .localeCompare(displayAppName(b, b.id), undefined, {sensitivity: 'base'}));
@@ -197,10 +202,10 @@ export class ApplicationsPage extends Adw.PreferencesPage {
         Promise.all([probeIconPaths(apps), readShownIcons()]).then(async ([iconPaths, shown]) => {
             this._shownIcons = shown;
             const tintedIcons = await this._tintIcons(apps, iconPaths);
-            if (gen !== this._buildGeneration)
+            if (generation !== this._buildGeneration)
                 return;
             this._replaceAppList(apps, iconPaths, tintedIcons);
-            this._markGoneApps(apps, gen);
+            this._markGoneApps(apps, generation);
         });
     }
 
@@ -216,36 +221,6 @@ export class ApplicationsPage extends Adw.PreferencesPage {
         const themeKey = themeProbeKey(app);
         return resolveAppIcon(app, this._shownIcons[app.id], iconPaths.get(app.cached_icon_path),
             themeKey ? iconPaths.get(themeKey) : null);
-    }
-
-    // Probed after the list is up, a slow disk delays the mark, not the page
-    _markGoneApps(apps, gen) {
-        this._goneIds = new Set();
-        probeGoneApps(apps, this._shownIcons).then(gone => {
-            if (gen !== this._buildGeneration)
-                return;
-            this._goneIds = gone;
-            // Any other badge describes how the app was installed, which no
-            // longer holds once it is gone
-            for (const appId of gone) {
-                const entry = this._appRows.get(appId);
-                entry.image._btiPendingIcon = GONE_ICON_NAME;
-                entry.image.set_from_icon_name(GONE_ICON_NAME);
-                entry.badges = [{text: _('Not Installed'), variant: 'info'}];
-                setBadges(entry.badgeBox, entry.badges);
-            }
-            this._refreshFilter();
-        });
-    }
-
-    // A status flip touches one row, so only that row's image is redrawn.
-    _applyShownIcons(shown) {
-        const previous = this._shownIcons;
-        this._shownIcons = shown;
-        for (const [appId, {image, app}] of this._appRows) {
-            if (image && JSON.stringify(previous[appId]) !== JSON.stringify(shown[appId]))
-                applyIconPreview(image, this._resolveFor(app, this._iconPaths), this._settings);
-        }
     }
 
     // The new list takes the focus before the old one goes. Removing a focused
@@ -267,15 +242,8 @@ export class ApplicationsPage extends Adw.PreferencesPage {
         return rows.findIndex(row => focus === row || focus?.is_ancestor(row));
     }
 
-    _focusRowNear(index) {
-        const rows = [...this._appRows.values()].map(entry => entry.row);
-        const shown = rows.slice(index).find(row => row.visible) ?? rows.findLast(row => row.visible);
-        shown?.grab_focus();
-    }
-
     _renderApps(apps, iconPaths, tintedIcons) {
         this._iconPaths = iconPaths;
-        this._tintedIcons = tintedIcons;
         this._appRows.clear();
 
         this._appsGroup = new Adw.PreferencesGroup({
@@ -301,21 +269,21 @@ export class ApplicationsPage extends Adw.PreferencesPage {
         });
 
         const hasLegacy = apps.some(a => isLegacyAppId(a.id));
+        if (!hasLegacy)
+            return;
 
-        if (hasLegacy) {
-            const cleanupButton = createButton({
-                label: _('Clean Up'),
-                cssClasses: ['suggested-action'],
-                valign: 'center',
-            });
-            cleanupButton.connect('clicked', () => this._cleanupLegacyIds(apps));
-            this._appsGroup.add(createActionRow({
-                title: _('Clean Up Legacy IDs'),
-                subtitle: _('Remove leftovers from earlier versions.'),
-                suffixWidgets: [cleanupButton],
-                activatable: true,
-            }));
-        }
+        const cleanupButton = createButton({
+            label: _('Clean Up'),
+            cssClasses: ['suggested-action'],
+            valign: 'center',
+        });
+        cleanupButton.connect('clicked', () => this._cleanupLegacyIds(apps));
+        this._appsGroup.add(createActionRow({
+            title: _('Clean Up Legacy IDs'),
+            subtitle: _('Remove leftovers from earlier versions.'),
+            suffixWidgets: [cleanupButton],
+            activatable: true,
+        }));
     }
 
     _createAppEntry(app, iconPaths, tintedIcons, useSymbolic) {
@@ -328,14 +296,14 @@ export class ApplicationsPage extends Adw.PreferencesPage {
 
         const badges = appBadges(app);
         // Built even without badges, the presence probe can fill it later
-        const badgeBox = createBadgeBox(badges);
+        const badgeBox = createBadgeLine(badges);
         this._settings.bind(BADGES_KEY, badgeBox, 'visible', Gio.SettingsBindFlags.GET);
         const title = displayAppName(app, app.id) || _('Unknown App');
-        const row = createWrapActionRow({
+        const row = createBadgedActionRow({
             title,
             subtitle: `${_('ID')}: ${app.id}`,
             prefixWidget: iconImage,
-            wrapWidget: badgeBox,
+            badgeLine: badgeBox,
             suffixWidgets: hiddenMark,
             suffixIcon: NEXT_ICON_NAME,
             onActivate: () => this._openAppConfiguration(app, row),
@@ -380,6 +348,43 @@ export class ApplicationsPage extends Adw.PreferencesPage {
 
     _cleanupLegacyIds(apps) {
         this._deleteAppConfigsStaggered(apps.filter(a => isLegacyAppId(a.id)).map(a => a.id));
+    }
+
+    _focusRowNear(index) {
+        const rows = [...this._appRows.values()].map(entry => entry.row);
+        const shown = rows.slice(index).find(row => row.visible) ?? rows.findLast(row => row.visible);
+        shown?.grab_focus();
+    }
+
+    // Probed after the list is up, a slow disk delays the mark, not the page
+    _markGoneApps(apps, generation) {
+        this._goneIds = new Set();
+        probeGoneApps(apps, this._shownIcons).then(gone => {
+            if (generation !== this._buildGeneration)
+                return;
+            this._goneIds = gone;
+            // Any other badge describes how the app was installed, which no
+            // longer holds once it is gone
+            for (const appId of gone) {
+                const entry = this._appRows.get(appId);
+                entry.image._btiPendingIcon = GONE_ICON_NAME;
+                entry.image.set_from_icon_name(GONE_ICON_NAME);
+                entry.badges = [{text: _('Not Installed'), variant: 'info'}];
+                setBadges(entry.badgeBox, entry.badges);
+            }
+            this._refreshFilter();
+        });
+    }
+
+    // A status flip touches one row, so only that row's image is redrawn.
+    _applyShownIcons(shown) {
+        const previous = this._shownIcons;
+        this._shownIcons = shown;
+        for (const [appId, {image, app}] of this._appRows) {
+            const hasChanged = JSON.stringify(previous[appId]) !== JSON.stringify(shown[appId]);
+            if (image && hasChanged)
+                applyIconPreview(image, this._resolveFor(app, this._iconPaths), this._settings);
+        }
     }
 
     _confirmForgetAll() {

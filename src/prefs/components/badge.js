@@ -6,6 +6,7 @@ import {ensurePrefsCss} from './text.js';
 const BADGE_GAP_PX = 6;
 
 // Adw.WrapBox aligns a line from 0 (start) to 1 (end).
+const WRAP_BOX_ALIGN_START = 0;
 const WRAP_BOX_ALIGN_END = 1;
 
 // Adw.SwitchRow and friends put their own control in as the first suffix, so
@@ -38,6 +39,23 @@ export function createBadgeBox(badges) {
     });
     setBadges(box, badges);
     return box;
+}
+
+// A line under a row's text. It keeps one badge's height while empty, so rows
+// with and without badges stay the same height.
+export function createBadgeLine(badges) {
+    const box = createBadgeBox(badges);
+    box.align = WRAP_BOX_ALIGN_START;
+    box.halign = Gtk.Align.START;
+    box.height_request = badgeHeight();
+    return box;
+}
+
+let _badgeHeight = 0;
+function badgeHeight() {
+    if (!_badgeHeight)
+        [, _badgeHeight] = createBadge({text: 'X'}).measure(Gtk.Orientation.VERTICAL, -1);
+    return _badgeHeight;
 }
 
 export function setBadges(box, badges) {

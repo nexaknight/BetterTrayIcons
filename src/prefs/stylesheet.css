@@ -14,6 +14,34 @@
     color: @accent_color;
 }
 
+/* The tint is Adw.Banner's, its color at 30% over the background, with
+   #7d7d83 as its neutral. The variant classes carry a prefix because
+   libadwaita's own .warning and friends recolor the text. */
+.bti-alert {
+    --bti-alert-color: #7d7d83;
+    padding: 9px 14px;
+    border-radius: 12px;
+    font-weight: bold;
+    line-height: 21px;
+    background-color: color-mix(in srgb, var(--bti-alert-color) 30%, transparent);
+}
+
+.bti-alert-info {
+    --bti-alert-color: @accent_bg_color;
+}
+
+.bti-alert-success {
+    --bti-alert-color: @success_bg_color;
+}
+
+.bti-alert-warning {
+    --bti-alert-color: @warning_bg_color;
+}
+
+.bti-alert-error {
+    --bti-alert-color: @error_bg_color;
+}
+
 /* Every grid row is exactly ROW_HEIGHT_PX in iconEmojiPicker.js, the scroll
    position maps to a row by that height alone. */
 .bti-picker-grid,
@@ -265,6 +293,23 @@ menubutton.bti-help-compact > button {
     min-width: 24px;
     min-height: 24px;
     padding: 0;
+}
+
+/* The help popover takes the website demo's look from
+   page/styles/prefs/_buttons.scss and page/styles/prefs/_popovers.scss.
+   The 6px margin is the demo's gap to the button and sits on both sides
+   because the popover flips above when there is no room below. */
+popover.bti-help-popover > contents {
+    margin: 6px 0;
+    padding: 12px 22px;
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px alpha(black, 0.267);
+}
+
+popover.bti-help-popover label {
+    font-size: 15px;
+    line-height: 21px;
 }
 
 /* Item metrics of the stock popover.menu, for menus built from our own widgets. */

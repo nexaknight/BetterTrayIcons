@@ -39,8 +39,8 @@ export async function probeGoneApps(apps, shownIcons) {
 function _hasAnchor(app) {
     if (app.is_wine || app.is_proton || app.is_foreign)
         return false;
-    return app.packaging === 'flatpak' || app.packaging === 'snap' ||
-        (!app.packaging && DESKTOP_ID_RE.test(_baseId(app)));
+    const isUnpackagedDesktopId = !app.packaging && DESKTOP_ID_RE.test(_baseId(app));
+    return app.packaging === 'flatpak' || app.packaging === 'snap' || isUnpackagedDesktopId;
 }
 
 function _baseId(app) {

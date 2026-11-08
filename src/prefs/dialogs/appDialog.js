@@ -8,10 +8,10 @@ import {themeProbeKey} from '../../shared/iconLoading.js';
 import {clearIds, connectScoped, debounceTo, removeTimer} from '../../shared/lifecycle.js';
 import {createButton, createIconButton} from '../components/button.js';
 import {createImage} from '../components/image.js';
-import {createCappedBanner, ENTRY_DEBOUNCE_MS, pinDialogWidth, showConfirmationDialog} from '../components/dialog.js';
-import {applyIconPreview, resolveAppIcon, watchShownIcons, NEXT_ICON_NAME} from '../components/icon.js';
+import {createAlert, ENTRY_DEBOUNCE_MS, pinDialogWidth, showConfirmationDialog} from '../components/dialog.js';
+import {applyIconPreview, resolveAppIcon, watchShownIcons, NEXT_ICON_NAME, RESET_ICON_NAME} from '../components/icon.js';
 import {GONE_ICON_NAME} from '../appPresence.js';
-import {createActionRow, createToggleGroup, createWrapControlsRow} from '../components/row.js';
+import {createActionRow, createAdjustmentSpinRow, createEntryRow, createToggleGroup, createValueSwitchRow, createWrapControlsRow} from '../components/row.js';
 import {buildPrefsWidget} from '../components/page.js';
 import IconEmojiPicker from '../components/iconEmojiPicker.js';
 import {setIconSubtitle} from '../components/emoji.js';
@@ -38,8 +38,8 @@ export default class AppDialog extends Adw.Dialog {
         this._onForget = onForget;
         this._isGone = isGone;
         this._debounceId = 0;
-        this._suppressNameNotify = false;
-        this._suppressPositionNotify = false;
+        this._isNameNotifySuppressed = false;
+        this._isPositionNotifySuppressed = false;
         this._shownIcon = null;
 
         this._buildUI();
@@ -66,11 +66,9 @@ export default class AppDialog extends Adw.Dialog {
 
         if (this._data.is_wine || this._data.is_proton) {
             const flavor = this._data.is_proton ? _('Proton') : _('Wine');
-            const noticeGroup = new Adw.PreferencesGroup();
-            noticeGroup.add(createCappedBanner(
+            page.add(createAlert(
                 `${flavor}: ${_('This app draws its tray icon itself via XEmbed. Custom icon and scroll settings do not apply here.')}`,
-                {revealed: true}));
-            page.add(noticeGroup);
+                {variant: 'warning'}));
         }
 
         const group = new Adw.PreferencesGroup({
@@ -81,27 +79,25 @@ export default class AppDialog extends Adw.Dialog {
 
         group.add(this._buildNameRow());
 
-        const hideRow = new Adw.SwitchRow({
+        group.add(createValueSwitchRow({
             title: _('Hide Icon'),
             subtitle: _('Don’t show this icon in the tray.'),
             active: this._data.is_hidden === true,
-        });
+            onToggle: isHidden => this._updateValue('is_hidden', isHidden),
+        }));
 
-        hideRow.connect('notify::active', () => {
-            this._updateValue('is_hidden', hideRow.active);
-        });
-        group.add(hideRow);
-
+        const canScroll = !(this._data.is_xembed || this._data.is_background_proxy || this._data.is_foreign);
         if (!this._data.is_foreign)
             group.add(this._buildWhenInFrontRow());
-        if (!(this._data.is_xembed || this._data.is_background_proxy || this._data.is_foreign))
+        if (canScroll)
             group.add(this._buildScrollRow());
 
         group.add(this._buildPositionRow());
 
         // A foreign item is drawn by the extension that handed it in, so an icon
         // of ours would never reach it.
-        if (!(this._data.is_wine || this._data.is_proton || this._data.is_foreign)) {
+        const canTakeCustomIcon = !(this._data.is_wine || this._data.is_proton || this._data.is_foreign);
+        if (canTakeCustomIcon) {
             group.add(this._buildCustomIconRow());
             // States and badges come from SNI and LauncherEntry, and an XEmbed
             // item has neither the properties nor a resolvable desktop id, so
@@ -113,43 +109,40 @@ export default class AppDialog extends Adw.Dialog {
             }
         }
 
-        this._buildDangerGroup(page);
+        this._addDangerGroup(page);
     }
 
     _buildNameRow() {
         const defaultName = defaultAppName(this._data, this._appId);
-        const nameRow = new Adw.EntryRow({
+        const nameRow = createEntryRow({
             title: _('Name'),
             text: this._data.custom_title || defaultName,
-            show_apply_button: false,
+            resetText: defaultName,
+            onReset: () => {
+                this._updateValue('custom_title', null);
+                // Without this, notify::text schedules a debounced write that
+                // re-persists the field as a custom_title and undoes the reset.
+                this._isNameNotifySuppressed = true;
+                nameRow.text = defaultName;
+                this._isNameNotifySuppressed = false;
+                clearIds(this, removeTimer, '_debounceId');
+            },
         });
-
-        const resetNameButton = createIconButton('bti-reset-symbolic', {
-            tooltip: _('Reset name'),
-            visible: !!this._data.custom_title,
-        });
-
-        resetNameButton.connect('clicked', () => {
-            this._updateValue('custom_title', null);
-            // Without this, notify::text schedules a debounced write that
-            // re-persists the field as a custom_title and undoes the reset.
-            this._suppressNameNotify = true;
-            nameRow.text = defaultName;
-            this._suppressNameNotify = false;
-            clearIds(this, removeTimer, '_debounceId');
-            resetNameButton.visible = false;
-        });
-
-        nameRow.add_suffix(resetNameButton);
 
         this._nameRow = nameRow;
         nameRow.connect('notify::text', () => {
-            if (this._suppressNameNotify)
+            if (this._isNameNotifySuppressed)
                 return;
             debounceTo(this, '_debounceId', ENTRY_DEBOUNCE_MS, () => this._updateValue('custom_title', nameRow.text));
-            resetNameButton.visible = true;
         });
         return nameRow;
+    }
+
+    _flushPendingName() {
+        if (!this._debounceId)
+            return;
+        clearIds(this, removeTimer, '_debounceId');
+        this._updateValue('custom_title', this._nameRow.text);
     }
 
     _buildWhenInFrontRow() {
@@ -199,17 +192,15 @@ export default class AppDialog extends Adw.Dialog {
     // Goes through setAppPriorities like drag and scroll do. Writing a raw
     // priority instead would take PRIORITY_STEP clicks to move one slot.
     _buildPositionRow() {
-        this._positionRow = new Adw.SpinRow({
-            title: _('Position'),
-            adjustment: new Gtk.Adjustment({lower: 1, upper: 1, step_increment: 1, value: 1}),
-        });
+        this._positionAdjustment = new Gtk.Adjustment({lower: 1, upper: 1, step_increment: 1, value: 1});
+        this._positionRow = createAdjustmentSpinRow({title: _('Position'), adjustment: this._positionAdjustment});
 
-        this._positionRow.connect('notify::value', async () => {
-            if (this._suppressPositionNotify)
+        this._positionAdjustment.connect('value-changed', async () => {
+            if (this._isPositionNotifySuppressed)
                 return;
             const order = await this._positionOrder();
             const from = order.indexOf(this._appId);
-            const to = this._positionRow.value - 1;
+            const to = this._positionAdjustment.value - 1;
             if (from === -1 || from === to)
                 return;
             order.splice(to, 0, ...order.splice(from, 1));
@@ -219,21 +210,6 @@ export default class AppDialog extends Adw.Dialog {
         this._syncPositionRow();
 
         return this._positionRow;
-    }
-
-    // The config also holds closed and uninstalled apps, so its numbers drift
-    // from what the panel shows.
-    async _positionOrder() {
-        return await readVisibleOrder() ?? orderedAppIds(this._settings);
-    }
-
-    // Forgetting a foreign item that still stands would take a name and a slot
-    // from its owner, and a hidden one is only put away with the owner still
-    // there. Once the owner is gone for good nobody else can clear the entry.
-    async _syncForeignDanger(group) {
-        group.visible = false;
-        const order = await this._positionOrder();
-        group.visible = !this._data.is_hidden && !order.includes(this._appId);
     }
 
     async _syncPositionRow() {
@@ -254,10 +230,16 @@ export default class AppDialog extends Adw.Dialog {
                 .replace('%2', String(order.length));
         }
 
-        this._suppressPositionNotify = true;
-        this._positionRow.adjustment.set_upper(Math.max(order.length, 1));
-        this._positionRow.adjustment.set_value(isAbsent ? 1 : index + 1);
-        this._suppressPositionNotify = false;
+        this._isPositionNotifySuppressed = true;
+        this._positionAdjustment.set_upper(Math.max(order.length, 1));
+        this._positionAdjustment.set_value(isAbsent ? 1 : index + 1);
+        this._isPositionNotifySuppressed = false;
+    }
+
+    // The config also holds closed and uninstalled apps, so its numbers drift
+    // from what the panel shows.
+    async _positionOrder() {
+        return await readVisibleOrder() ?? orderedAppIds(this._settings);
     }
 
     _buildCustomIconRow() {
@@ -270,7 +252,7 @@ export default class AppDialog extends Adw.Dialog {
         else
             applyIconPreview(iconImage, iconResult, this._settings);
 
-        const resetButton = createIconButton('bti-reset-symbolic', {
+        const resetButton = createIconButton(RESET_ICON_NAME, {
             tooltip: _('Reset icon'),
             visible: !!this._data.custom_icon,
         });
@@ -323,7 +305,7 @@ export default class AppDialog extends Adw.Dialog {
         });
     }
 
-    _buildDangerGroup(page) {
+    _addDangerGroup(page) {
         const dangerGroup = new Adw.PreferencesGroup({title: _('Danger Zone')});
         page.add(dangerGroup);
         if (this._data.is_foreign)
@@ -359,6 +341,15 @@ export default class AppDialog extends Adw.Dialog {
         }));
     }
 
+    // Forgetting a foreign item that still stands would take a name and a slot
+    // from its owner, and a hidden one is only put away with the owner still
+    // there. Once the owner is gone for good nobody else can clear the entry.
+    async _syncForeignDanger(group) {
+        group.visible = false;
+        const order = await this._positionOrder();
+        group.visible = !this._data.is_hidden && !order.includes(this._appId);
+    }
+
     _refreshFromBlob() {
         const fresh = getAppConfigMap(this._settings)[this._appId];
         if (!fresh)
@@ -389,13 +380,6 @@ export default class AppDialog extends Adw.Dialog {
     _themeHit() {
         const key = themeProbeKey(this._data);
         return key ? this._iconPaths.get(key) : null;
-    }
-
-    _flushPendingName() {
-        if (!this._debounceId)
-            return;
-        clearIds(this, removeTimer, '_debounceId');
-        this._updateValue('custom_title', this._nameRow.text);
     }
 }
 

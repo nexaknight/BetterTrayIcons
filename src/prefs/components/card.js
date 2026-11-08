@@ -5,7 +5,6 @@ import Gtk from 'gi://Gtk';
 import Pango from 'gi://Pango';
 
 import {watchKeys} from '../../shared/lifecycle.js';
-import {createHelpButton} from './button.js';
 import {createBox, createLabel, ensurePrefsCss} from './text.js';
 
 const CARD_WIDTH_PX = 110;
@@ -29,7 +28,6 @@ const CARD_CAPTION_TOP_PX = 10;
 const CARD_CAPTION_BOTTOM_PX = 6;
 const CARD_CAPTION_SIDE_PX = 8;
 const STAGED_CAPTION_GAP_PX = 8;
-const CHOICE_HELP_GAP_PX = 4;
 
 const CARD_ROW_GAP_PX = 12;
 const CARD_ROW_MARGIN_PX = 4;
@@ -49,15 +47,7 @@ export function createCardPicker({title, description = '', settings, key, option
         preview: option.preview,
         bleed,
         title: option.label,
-        help: option.help,
     })]));
-
-    // A help button is taller than a title, every title line takes its height
-    // so the stages in the row stay level.
-    if (options.some(option => option.help)) {
-        const titleLines = new Gtk.SizeGroup({mode: Gtk.SizeGroupMode.VERTICAL});
-        choices.forEach(choice => titleLines.add_widget(choice.titleLine));
-    }
 
     const [first, ...rest] = [...choices.values()].map(choice => choice.button);
     rest.forEach(button => button.set_group(first));
@@ -76,9 +66,7 @@ export function createCardPicker({title, description = '', settings, key, option
     return group;
 }
 
-// The title line sits outside the toggle, so a help button next to the title
-// is never a button inside a button. The stage wears the card ring.
-function _createChoiceCard({preview, bleed, title, help}) {
+function _createChoiceCard({preview, bleed, title}) {
     const stage = createBox({
         vexpand: true,
         cssClasses: bleed ? ['bti-card-stage', 'bleed'] : ['bti-card-stage'],
@@ -99,11 +87,6 @@ function _createChoiceCard({preview, bleed, title, help}) {
     pick.connect('released', () => button.set_active(true));
     caption.add_controller(pick);
 
-    const titleLine = createBox({orientation: 'horizontal', spacing: CHOICE_HELP_GAP_PX, halign: 'center'});
-    titleLine.append(caption);
-    if (help)
-        titleLine.append(createHelpButton(help, {compact: true}));
-
     const card = new Gtk.Box({
         layout_manager: new ShrinkingCardLayout({
             orientation: Gtk.Orientation.VERTICAL,
@@ -113,8 +96,8 @@ function _createChoiceCard({preview, bleed, title, help}) {
         css_classes: ['bti-choice-card'],
     });
     card.append(button);
-    card.append(titleLine);
-    return {card, button, titleLine};
+    card.append(caption);
+    return {card, button};
 }
 
 // Asks for the full card width but settles for the floor, so a strip that
@@ -123,10 +106,10 @@ const ShrinkingCardLayout = GObject.registerClass(
     {GTypeName: 'BetterTrayIconsShrinkingCardLayout'},
     class ShrinkingCardLayout extends Gtk.BoxLayout {
         vfunc_measure(widget, orientation, forSize) {
-            const [min, nat] = super.vfunc_measure(widget, orientation, forSize);
+            const [min, natural] = super.vfunc_measure(widget, orientation, forSize);
             if (orientation === Gtk.Orientation.VERTICAL)
-                return [min, nat, -1, -1];
-            return [Math.max(min, STAGED_CARD_MIN_WIDTH_PX), Math.max(nat, STAGED_CARD_WIDTH_PX), -1, -1];
+                return [min, natural, -1, -1];
+            return [Math.max(min, STAGED_CARD_MIN_WIDTH_PX), Math.max(natural, STAGED_CARD_WIDTH_PX), -1, -1];
         }
     });
 
@@ -225,12 +208,12 @@ const CardStrip = GObject.registerClass(
         }
 
         vfunc_measure(orientation, forSize) {
-            const [min, nat] = super.vfunc_measure(orientation, forSize);
+            const [min, natural] = super.vfunc_measure(orientation, forSize);
             if (orientation === Gtk.Orientation.HORIZONTAL || forSize < 0)
-                return [min, nat, -1, -1];
+                return [min, natural, -1, -1];
             const [contentMin] = this.child.measure(Gtk.Orientation.HORIZONTAL, -1);
             const room = contentMin > forSize ? CARD_ROW_SCROLLBAR_ROOM_PX : 0;
-            return [min + room, nat + room, -1, -1];
+            return [min + room, natural + room, -1, -1];
         }
     });
 
@@ -244,9 +227,9 @@ function _scrollWheelSideways(scroller) {
     });
     controller.connect('scroll', (_controller, _dx, dy) => {
         const adjustment = scroller.hadjustment;
-        const atStart = adjustment.value <= adjustment.lower;
-        const atEnd = adjustment.value >= adjustment.upper - adjustment.page_size;
-        const isPastEnd = (dy > 0 && atEnd) || (dy < 0 && atStart);
+        const isAtStart = adjustment.value <= adjustment.lower;
+        const isAtEnd = adjustment.value >= adjustment.upper - adjustment.page_size;
+        const isPastEnd = (dy > 0 && isAtEnd) || (dy < 0 && isAtStart);
         if (dy === 0 || isPastEnd)
             return Gdk.EVENT_PROPAGATE;
         const step = controller.get_unit() === Gdk.ScrollUnit.WHEEL

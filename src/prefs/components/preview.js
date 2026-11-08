@@ -1,3 +1,4 @@
+import Gio from 'gi://Gio';
 import Gtk from 'gi://Gtk';
 import Gdk from 'gi://Gdk';
 import Adw from 'gi://Adw';
@@ -67,11 +68,12 @@ const PreviewStage = GObject.registerClass({GTypeName: 'BetterTrayIconsPreviewSt
         }
     });
 
-export function createPreviewGroup({settings, watch, render, splitKey, stageHeight = PREVIEW_STAGE_HEIGHT_PX.panel}) {
+export function createPreviewGroup({settings, watch, render, splitKey, customStyleKey, stageHeight = PREVIEW_STAGE_HEIGHT_PX.panel}) {
     ensurePrefsCss();
     const toggles = new Gtk.Box({spacing: 4});
     toggles.append(createGuideToggle(settings, 'padding', _('Measure the padding while hovering the preview.')));
     toggles.append(createGuideToggle(settings, 'margin', _('Measure the margin while hovering the preview.')));
+    settings.bind(customStyleKey, toggles, 'sensitive', Gio.SettingsBindFlags.GET);
     const group = new Adw.PreferencesGroup({title: _('Preview'), header_suffix: toggles});
     const stage = new PreviewStage(stageHeight);
     group.add(stage);

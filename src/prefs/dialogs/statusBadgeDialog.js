@@ -9,10 +9,10 @@ import {connectScoped} from '../../shared/lifecycle.js';
 import {attachBadge} from '../components/badge.js';
 import {createButton, createIconButton} from '../components/button.js';
 import {createImage} from '../components/image.js';
-import {createCappedBanner, buildDialogShell, pinDialogWidth, buildGroupDialog} from '../components/dialog.js';
+import {createAlert, buildDialogShell, pinDialogWidth, buildGroupDialog} from '../components/dialog.js';
 import {createColorSwatch} from '../components/color.js';
-import {applyIconPreview, NEXT_ICON_NAME} from '../components/icon.js';
-import {createActionRow, createExpanderSection} from '../components/row.js';
+import {applyIconPreview, NEXT_ICON_NAME, RESET_ICON_NAME} from '../components/icon.js';
+import {createActionRow, createAdjustmentSpinRow, createEntryRow, createExpanderSection, createValueSwitchRow} from '../components/row.js';
 import IconEmojiPicker from '../components/iconEmojiPicker.js';
 import {setIconSubtitle} from '../components/emoji.js';
 import {BADGE_POSITIONS, BADGE_DEFAULT_COLOR, BADGE_DEFAULT_TEXT_COLOR} from '../../const.js';
@@ -41,7 +41,7 @@ export default class StatusBadgeDialog extends Adw.Dialog {
         this._settings = settings;
         this._appId = appId;
         this._data = appData;
-        this._suppressUnreadNotify = false;
+        this._isUnreadNotifySuppressed = false;
 
         this._buildUI();
         pinDialogWidth(this, STATUS_BADGE_DIALOG_WIDTH_PX);
@@ -62,21 +62,21 @@ export default class StatusBadgeDialog extends Adw.Dialog {
         // A proxy has no state or icon signal a dot could follow, only the
         // LauncherEntry count, so its subtitle must not promise more.
         const isProxy = this._data.is_background_proxy === true;
-        const unreadRow = new Adw.SwitchRow({
+        const unreadRow = createValueSwitchRow({
             title: _('Badges'),
             subtitle: isProxy
                 ? _('Shows the unread count when the app sends one.')
                 : _('Shows a badge on state changes, with the count when the app sends one.'),
             active: this._data.unread_badge === true,
+            onToggle: isBadgeOn => {
+                if (this._isUnreadNotifySuppressed)
+                    return;
+                this._data.unread_badge = isBadgeOn || undefined;
+                setAppConfigValue(this._settings, this._appId, 'unread_badge', isBadgeOn || null);
+                this._syncSections(isBadgeOn);
+            },
         });
         attachBadge(unreadRow, {text: _('Experimental')});
-        unreadRow.connect('notify::active', () => {
-            if (this._suppressUnreadNotify)
-                return;
-            this._data.unread_badge = unreadRow.active || undefined;
-            setAppConfigValue(this._settings, this._appId, 'unread_badge', unreadRow.active || null);
-            this._syncSections(unreadRow.active);
-        });
         this._unreadRow = unreadRow;
         switchGroup.add(unreadRow);
 
@@ -91,11 +91,9 @@ export default class StatusBadgeDialog extends Adw.Dialog {
 
         this._stateGroup = null;
         if (isProxy) {
-            const noticeGroup = new Adw.PreferencesGroup();
-            noticeGroup.add(createCappedBanner(
+            page.add(createAlert(
                 _('Status icons cannot work here: the app has no tray icon and never reports a status, its icon comes from its desktop entry.'),
-                {revealed: true}));
-            page.add(noticeGroup);
+                {variant: 'warning'}));
         } else {
             this._stateGroup = new Adw.PreferencesGroup();
             page.add(this._stateGroup);
@@ -165,34 +163,26 @@ export default class StatusBadgeDialog extends Adw.Dialog {
     }
 
     _buildRadiusRow() {
-        const row = new Adw.SpinRow({
-            title: _('Corner Radius (px)'),
-            subtitle: _('0 is square, high is round.'),
-            adjustment: new Gtk.Adjustment({
-                lower: 0, upper: BADGE_MAX_RADIUS_PX, step_increment: 1,
-                // Unset renders as a full circle, so preselect the roundest value.
-                value: this._badgeStyle().radius ?? BADGE_MAX_RADIUS_PX,
-            }),
+        const adjustment = new Gtk.Adjustment({
+            lower: 0, upper: BADGE_MAX_RADIUS_PX, step_increment: 1,
+            // Unset renders as a full circle, so preselect the roundest value.
+            value: this._badgeStyle().radius ?? BADGE_MAX_RADIUS_PX,
         });
-        row.connect('notify::value', () => {
-            this._setBadgeStyleField('radius', row.value < BADGE_MAX_RADIUS_PX ? row.value : null);
+        adjustment.connect('value-changed', () => {
+            this._setBadgeStyleField('radius', adjustment.value < BADGE_MAX_RADIUS_PX ? adjustment.value : null);
         });
-        return row;
+        return createAdjustmentSpinRow({title: _('Corner Radius (px)'), subtitle: _('0 is square, high is round.'), adjustment});
     }
 
     _buildSizeRow() {
-        const row = new Adw.SpinRow({
-            title: _('Size'),
-            subtitle: _('0 uses the automatic size.'),
-            adjustment: new Gtk.Adjustment({
-                lower: 0, upper: BADGE_MAX_SIZE_PX, step_increment: 1,
-                value: this._badgeStyle().size ?? 0,
-            }),
+        const adjustment = new Gtk.Adjustment({
+            lower: 0, upper: BADGE_MAX_SIZE_PX, step_increment: 1,
+            value: this._badgeStyle().size ?? 0,
         });
-        row.connect('notify::value', () => {
-            this._setBadgeStyleField('size', row.value > 0 ? row.value : null);
+        adjustment.connect('value-changed', () => {
+            this._setBadgeStyleField('size', adjustment.value > 0 ? adjustment.value : null);
         });
-        return row;
+        return createAdjustmentSpinRow({title: _('Size'), subtitle: _('0 uses the automatic size.'), adjustment});
     }
 
     // Hand-wired because badge_style is a per-app blob field, not a GSettings
@@ -224,15 +214,14 @@ export default class StatusBadgeDialog extends Adw.Dialog {
             width: ACCENT_DIALOG_WIDTH_PX,
             groupTitle: title,
         });
-        const row = new Adw.SwitchRow({
+        group.add(createValueSwitchRow({
             title: _('Use Accent Color'),
             active: this._badgeStyle()[accentField] === true,
-        });
-        row.connect('notify::active', () => {
-            this._setBadgeStyleField(accentField, row.active || null);
-            onChange();
-        });
-        group.add(row);
+            onToggle: isAccent => {
+                this._setBadgeStyleField(accentField, isAccent || null);
+                onChange();
+            },
+        }));
         present(this);
     }
 
@@ -261,10 +250,7 @@ export default class StatusBadgeDialog extends Adw.Dialog {
             return;
         }
 
-        const entryRow = new Adw.EntryRow({
-            title: _('State name, e.g. state-error'),
-            show_apply_button: true,
-        });
+        const entryRow = createEntryRow({title: _('State name, e.g. state-error'), showApplyButton: true});
         entryRow.connect('apply', () => this._addState(entryRow.text));
 
         this._addStateEntryRow = entryRow;
@@ -272,14 +258,36 @@ export default class StatusBadgeDialog extends Adw.Dialog {
         entryRow.grab_focus();
     }
 
+    _addState(rawName) {
+        const name = rawName.trim();
+        if (!name) {
+            this._addStateEntryRow = null;
+            this._rebuildStateRows();
+            return;
+        }
+
+        if (sameStateKey(name, ATTENTION_STATE_KEY) || RESERVED_OBJECT_KEYS.has(name)) {
+            this._toast(_('This name is not allowed.'));
+            return;
+        }
+
+        if (findStateIconEntry(this._data.state_icons, name)) {
+            this._toast(_('This state already exists.'));
+            return;
+        }
+
+        this._addStateEntryRow = null;
+        this._setStateIcon(name, null);
+        this._openStatePicker(name, this._stateRows.get(name));
+    }
+
     _rebuildStateRows() {
         const rows = [this._buildStateRow(ATTENTION_STATE_KEY)];
         if (this._addStateEntryRow)
             rows.push(this._addStateEntryRow);
-        const names = this._listStateNames();
-        const stateRows = names.map(name => this._buildStateRow(name));
-        this._stateRows = new Map(names.map((name, i) => [name, stateRows[i]]));
-        rows.push(...stateRows);
+        const namedRows = this._listStateNames().map(name => [name, this._buildStateRow(name)]);
+        this._stateRows = new Map(namedRows);
+        rows.push(...namedRows.map(([, row]) => row));
 
         this._stateSection.setRows(rows);
     }
@@ -317,7 +325,7 @@ export default class StatusBadgeDialog extends Adw.Dialog {
         if (mapped) {
             // Observed states keep their row through seen_icons. Manual
             // entries would lose theirs, so a reset only nulls their icon.
-            suffixWidgets.push(createIconButton('bti-reset-symbolic', {
+            suffixWidgets.push(createIconButton(RESET_ICON_NAME, {
                 tooltip: _('Reset icon'),
                 onClick: () => {
                     if (isObserved)
@@ -413,9 +421,9 @@ export default class StatusBadgeDialog extends Adw.Dialog {
         // switch decides which section the next toggle writes from.
         const isBadgeOn = this._data.unread_badge === true;
         if (this._unreadRow.active !== isBadgeOn) {
-            this._suppressUnreadNotify = true;
+            this._isUnreadNotifySuppressed = true;
             this._unreadRow.active = isBadgeOn;
-            this._suppressUnreadNotify = false;
+            this._isUnreadNotifySuppressed = false;
             this._syncSections(isBadgeOn);
         }
     }
@@ -427,29 +435,6 @@ export default class StatusBadgeDialog extends Adw.Dialog {
 
     _seenIcons() {
         return Array.isArray(this._data.seen_icons) ? this._data.seen_icons : [];
-    }
-
-    _addState(rawName) {
-        const name = rawName.trim();
-        if (!name) {
-            this._addStateEntryRow = null;
-            this._rebuildStateRows();
-            return;
-        }
-
-        if (sameStateKey(name, ATTENTION_STATE_KEY) || RESERVED_OBJECT_KEYS.has(name)) {
-            this._toast(_('This name is not allowed.'));
-            return;
-        }
-
-        if (findStateIconEntry(this._data.state_icons, name)) {
-            this._toast(_('This state already exists.'));
-            return;
-        }
-
-        this._addStateEntryRow = null;
-        this._setStateIcon(name, null);
-        this._openStatePicker(name, this._stateRows.get(name));
     }
 
     _toast(title) {

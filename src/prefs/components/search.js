@@ -55,6 +55,11 @@ export class TokenSearch extends Gtk.Box {
         this._suggestions.present();
     }
 
+    // The bar itself takes no focus, the text inside it does
+    vfunc_grab_focus() {
+        return this._text.grab_focus();
+    }
+
     setOptions(options) {
         this._options = options;
         this._syncSuggestions();

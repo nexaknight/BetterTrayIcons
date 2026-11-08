@@ -13,7 +13,7 @@ import {attachBadge, createBadgeBox} from './badge.js';
 import {createBoundToggleButton, createDialogGearButton, createHelpButton, createIconButton} from './button.js';
 import {createColorButton, editedColorKey, editedColorUsesAccent, watchColorKey} from './color.js';
 import {buildGroupDialog} from './dialog.js';
-import {applyPathIcon, NEXT_ICON_NAME} from './icon.js';
+import {applyPathIcon, NEXT_ICON_NAME, RESET_ICON_NAME} from './icon.js';
 import IconEmojiPicker from './iconEmojiPicker.js';
 import {setIconSubtitle} from './emoji.js';
 import {pushSubpage} from './sidebar.js';
@@ -29,6 +29,11 @@ const ROW_ICON_SIZE_PX = 24;
 
 const RANGE_SCALE_WIDTH_PX = 160;
 
+// Room for two digits even when the range starts at a single one, the
+// position row grows its upper bound after it is built.
+const SPIN_MIN_WIDTH_CHARS = 2;
+const SPIN_TEXT_XALIGN_END = 1;
+
 const STYLE_DIALOG_WIDTH_PX = 420;
 
 const WRAP_CONTROLS_MAX_FRACTION = 0.6;
@@ -36,6 +41,11 @@ const WRAP_ROW_H_GAP_PX = 12;
 const WRAP_ROW_V_GAP_PX = 8;
 const WRAP_ROW_SIDE_PX = 12;
 const WRAP_ROW_HELP_GAP_PX = 12;
+const WRAP_ROW_V_MARGIN_PX = 10;
+const WRAP_CONTROLS_SPACING_PX = 12;
+
+// Adwaita's pencil has no property, only this style class
+const ENTRY_EDIT_ICON_CLASS = 'edit-icon';
 
 export function addConfigRows(group, settings, specs) {
     for (const spec of specs)
@@ -77,17 +87,24 @@ function _createWrapRow(title, subtitle, controls, help, options) {
     return new Adw.PreferencesRow({child: _createWrapBox(title, subtitle, controls, help, options), activatable: false});
 }
 
-// Like createActionRow, but the wrapping widget sits beside the text and moves
-// under it once the row gets too narrow, the same switch the select rows use.
-export function createWrapActionRow({title, subtitle = '', prefixWidget = null, wrapWidget, suffixWidgets = [], suffixIcon = null, onActivate}) {
-    const content = new Gtk.Box({spacing: WRAP_ROW_H_GAP_PX, margin_start: WRAP_ROW_SIDE_PX, margin_end: WRAP_ROW_SIDE_PX});
+// Like createActionRow, with the badge line as a third line under the text.
+// The line keeps its height while empty, see createBadgeLine, so the rows of
+// a list stay the same height with and without badges.
+export function createBadgedActionRow({title, subtitle = '', prefixWidget = null, badgeLine, suffixWidgets = [], suffixIcon = null, onActivate}) {
+    const content = new Gtk.Box({
+        spacing: WRAP_ROW_H_GAP_PX,
+        margin_top: WRAP_ROW_V_MARGIN_PX,
+        margin_bottom: WRAP_ROW_V_MARGIN_PX,
+        margin_start: WRAP_ROW_SIDE_PX,
+        margin_end: WRAP_ROW_SIDE_PX,
+    });
     if (prefixWidget)
         content.append(_centered(prefixWidget));
-    const wrap = _createWrapBox(title, subtitle, [wrapWidget], null, {dropAlign: Gtk.Align.START, keepTextWhole: true});
-    wrap.hexpand = true;
-    wrap.margin_start = 0;
-    wrap.margin_end = 0;
-    content.append(wrap);
+    const titles = _createTitles(title, subtitle, null);
+    titles.hexpand = true;
+    badgeLine.margin_top = WRAP_ROW_V_GAP_PX;
+    titles.append(badgeLine);
+    content.append(titles);
     suffixWidgets.forEach(widget => content.append(_centered(widget)));
     if (suffixIcon)
         content.append(new Gtk.Image({icon_name: suffixIcon, valign: Gtk.Align.CENTER}));
@@ -106,7 +123,28 @@ export function createWrapActionRow({title, subtitle = '', prefixWidget = null, 
 
 // A stretching box hands the slider the full width once the controls drop
 // below the title, a start-aligned one keeps them under the text.
-function _createWrapBox(title, subtitle, controls, help, {stretch = false, dropAlign = Gtk.Align.END, keepTextWhole = false} = {}) {
+function _createWrapBox(title, subtitle, controls, help, {stretch = false, keepTextWhole = false} = {}) {
+    const titles = _createTitles(title, subtitle, help);
+    const controlsBox = new Gtk.Box({
+        spacing: WRAP_CONTROLS_SPACING_PX,
+        halign: stretch ? Gtk.Align.FILL : Gtk.Align.END,
+        valign: Gtk.Align.CENTER,
+    });
+    controls.forEach(widget => controlsBox.append(widget));
+
+    const box = new Gtk.Box({
+        layout_manager: new WrapRowLayout(keepTextWhole),
+        margin_top: WRAP_ROW_V_MARGIN_PX,
+        margin_bottom: WRAP_ROW_V_MARGIN_PX,
+        margin_start: WRAP_ROW_SIDE_PX,
+        margin_end: WRAP_ROW_SIDE_PX,
+    });
+    box.append(titles);
+    box.append(controlsBox);
+    return box;
+}
+
+function _createTitles(title, subtitle, help) {
     const titles = new Gtk.Box({
         orientation: Gtk.Orientation.VERTICAL,
         valign: Gtk.Align.CENTER,
@@ -132,24 +170,7 @@ function _createWrapBox(title, subtitle, controls, help, {stretch = false, dropA
             css_classes: ['caption', 'dimmed'],
         }));
     }
-
-    const controlsBox = new Gtk.Box({
-        spacing: 12,
-        halign: stretch ? Gtk.Align.FILL : dropAlign,
-        valign: Gtk.Align.CENTER,
-    });
-    controls.forEach(widget => controlsBox.append(widget));
-
-    const box = new Gtk.Box({
-        layout_manager: new WrapRowLayout(keepTextWhole),
-        margin_top: 10,
-        margin_bottom: 10,
-        margin_start: WRAP_ROW_SIDE_PX,
-        margin_end: WRAP_ROW_SIDE_PX,
-    });
-    box.append(titles);
-    box.append(controlsBox);
-    return box;
+    return titles;
 }
 
 // A wrap box wraps as soon as the unwrapped title stops fitting, so a long
@@ -213,27 +234,47 @@ const WrapRowLayout = GObject.registerClass({GTypeName: 'BetterTrayIconsWrapRowL
         }
 
         _dropsBelow(titles, controlsWidth, width) {
-            const [titlesMin] = titles.measure(Gtk.Orientation.HORIZONTAL, -1);
-            const controlsTooWide = controlsWidth > width * WRAP_CONTROLS_MAX_FRACTION;
-            const titlesWouldCrush = width - controlsWidth - WRAP_ROW_H_GAP_PX < titlesMin;
-            const [, titlesNatural] = titles.measure(Gtk.Orientation.HORIZONTAL, -1);
-            const textWouldWrap = this._keepTextWhole && controlsWidth > 0 &&
+            const [titlesMin, titlesNatural] = titles.measure(Gtk.Orientation.HORIZONTAL, -1);
+            const areControlsTooWide = controlsWidth > width * WRAP_CONTROLS_MAX_FRACTION;
+            const willCrushTitles = width - controlsWidth - WRAP_ROW_H_GAP_PX < titlesMin;
+            const willWrapText = this._keepTextWhole && controlsWidth > 0 &&
                 width - controlsWidth - WRAP_ROW_H_GAP_PX < titlesNatural;
-            return controlsTooWide || titlesWouldCrush || textWouldWrap;
+            return areControlsTooWide || willCrushTitles || willWrapText;
         }
     });
 
 // A caller that names no bounds takes the schema's, so the two cannot drift.
 export function createSpinRow({title, subtitle = '', settings, key, min, max, step = 1, help = null}) {
     const {min: lower = 0, max: upper} = min === undefined ? _schemaRange(settings, key) : {min, max};
-    const row = new Adw.SpinRow({
-        title,
-        subtitle,
-        adjustment: new Gtk.Adjustment({lower, upper, step_increment: step}),
+    const adjustment = new Gtk.Adjustment({lower, upper, step_increment: step});
+    settings.bind(key, adjustment, 'value', Gio.SettingsBindFlags.DEFAULT);
+    return createAdjustmentSpinRow({title, subtitle, adjustment, help});
+}
+
+function _schemaRange(settings, key) {
+    const [, [min, max]] = settings.settings_schema.get_key(key).get_range().recursiveUnpack();
+    return {min, max};
+}
+
+// Adw.SpinRow draws loose text between two round buttons, the plain spin
+// button keeps Adwaita's single rounded pill.
+export function createAdjustmentSpinRow({title, subtitle = '', adjustment, help = null}) {
+    return createActionRow({title, subtitle, suffixWidgets: [_createSpinButton(title, adjustment)], help});
+}
+
+// A fixed field keeps the pill still while the digit count changes, the
+// number hugs the right edge and a new digit grows to the left.
+function _createSpinButton(title, adjustment) {
+    const widthChars = Math.max(SPIN_MIN_WIDTH_CHARS, String(adjustment.upper).length);
+    const spinButton = new Gtk.SpinButton({
+        adjustment,
+        numeric: true,
+        valign: Gtk.Align.CENTER,
+        width_chars: widthChars,
+        xalign: SPIN_TEXT_XALIGN_END,
     });
-    settings.bind(key, row, 'value', Gio.SettingsBindFlags.DEFAULT);
-    _addHelp(row, help);
-    return row;
+    spinButton.update_property([Gtk.AccessibleProperty.LABEL], [title]);
+    return spinButton;
 }
 
 // One adjustment drives the slider and the number, so each follows the other at
@@ -252,14 +293,7 @@ export function createRangeRow({title, subtitle = '', settings, key, min = 0, ma
     });
     scale.update_property([Gtk.AccessibleProperty.LABEL], [title]);
 
-    const number = new Gtk.SpinButton({adjustment, numeric: true, valign: Gtk.Align.CENTER});
-    number.update_property([Gtk.AccessibleProperty.LABEL], [title]);
-    return _createWrapRow(title, subtitle, [scale, number], null, {stretch: true});
-}
-
-function _schemaRange(settings, key) {
-    const [, [min, max]] = settings.settings_schema.get_key(key).get_range().recursiveUnpack();
-    return {min, max};
+    return _createWrapRow(title, subtitle, [scale, _createSpinButton(title, adjustment)], null, {stretch: true});
 }
 
 export function createSegmentedRow({title, subtitle = '', settings, key, options, values, negate = null, help = null}) {
@@ -304,9 +338,9 @@ function _createNegateButton(settings, {key, iconName, tooltip}, group, options)
     const button = createBoundToggleButton(settings, key, {iconName, tooltip});
 
     const sync = () => {
-        const negated = settings.get_boolean(key);
+        const isNegated = settings.get_boolean(key);
         options.forEach((label, i) => {
-            group.get_toggle(i).label = negated ? `-${label}` : label;
+            group.get_toggle(i).label = isNegated ? `-${label}` : label;
         });
     };
     watchKeys(group, settings, [key], sync);
@@ -355,6 +389,13 @@ export function createSwitchRow({title, subtitle = '', settings, key, help = nul
     const row = new Adw.SwitchRow({title, subtitle});
     settings.bind(key, row, 'active', Gio.SettingsBindFlags.DEFAULT);
     _addHelp(row, help);
+    return row;
+}
+
+// For a value stored outside GSettings, the caller writes it on each toggle
+export function createValueSwitchRow({title, subtitle = '', active, onToggle}) {
+    const row = new Adw.SwitchRow({title, subtitle, active});
+    row.connect('notify::active', () => onToggle(row.active));
     return row;
 }
 
@@ -468,6 +509,34 @@ export function createActionRow({
     _addHelp(row, help);
 
     return row;
+}
+
+// A reset takes the place of Adwaita's pencil, so the row hints at one
+// thing at a time. At resetText it goes insensitive instead of away, so the
+// row never loses its hint.
+export function createEntryRow({title, text = '', showApplyButton = false, resetText = '', onReset = null}) {
+    const row = new Adw.EntryRow({title, text, show_apply_button: showApplyButton});
+    if (!onReset)
+        return row;
+
+    _findDescendant(row, ENTRY_EDIT_ICON_CLASS).visible = false;
+    const resetButton = createIconButton(RESET_ICON_NAME, {tooltip: _('Reset'), onClick: onReset});
+    const syncResetButton = () => {
+        resetButton.sensitive = row.text !== resetText;
+    };
+    syncResetButton();
+    row.connect('notify::text', syncResetButton);
+    row.add_suffix(resetButton);
+    return row;
+}
+
+function _findDescendant(widget, cssClass) {
+    for (const child of getChildren(widget)) {
+        const match = child.has_css_class(cssClass) ? child : _findDescendant(child, cssClass);
+        if (match)
+            return match;
+    }
+    return null;
 }
 
 // Leads the suffixes where a gear would sit, so the switches of a group stay

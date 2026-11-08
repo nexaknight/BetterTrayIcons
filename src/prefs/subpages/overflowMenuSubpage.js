@@ -44,7 +44,7 @@ export default class OverflowMenuSubpage extends Adw.NavigationPage {
 
     _init(window, settings) {
         super._init({
-            title: _('Overflow Container'),
+            title: _('Overflow Menu'),
             tag: 'overflow_menu_settings',
         });
 
@@ -64,6 +64,7 @@ export default class OverflowMenuSubpage extends Adw.NavigationPage {
             watch: [...OVERFLOW_STYLE_KEYS, ...TRAY_ICON_STYLE_KEYS],
             render: buildOverflowPreview,
             splitKey: 'overflow-container-color-split',
+            customStyleKey: 'enable-custom-overflow-style',
             stageHeight: PREVIEW_STAGE_HEIGHT_PX.popup,
         }));
 
