@@ -171,11 +171,8 @@ export class GeneralPage extends Adw.PreferencesPage {
         group.add(createActionRow({
             title: _('Cloud Sync'),
             subtitle: _('Keep settings in sync via a shared file.'),
-            headerSuffix: createIconButton('bti-sync-symbolic', {
-                flat: false,
-                tooltip: _('Configure'),
-                onClick: () => this._openSyncDialog(),
-            }),
+            suffixIcon: 'bti-sync-symbolic',
+            onActivate: () => this._openSyncDialog(),
         }));
     }
 

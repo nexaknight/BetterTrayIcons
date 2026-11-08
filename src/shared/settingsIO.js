@@ -258,6 +258,7 @@ export async function deleteBackup(path) {
     } catch { /* gone or never existed */ }
 }
 
+// Resolves to false when the file already holds these settings.
 async function _writeSettingsFile(settings, path, merge) {
     const data = _exportSettingsToJSON(settings, await readOwnVersion());
     const onDisk = await _readSettingsFile(path).catch(() => null);
@@ -269,15 +270,22 @@ async function _writeSettingsFile(settings, path, merge) {
     // it would spend a backup on an identical file and stamp its own host into
     // _meta, so the sync dialog credits this machine for settings it received.
     if (onDisk && _holdsSameSettings(onDisk, data))
-        return;
+        return false;
 
-    await _writeBackup(path, settings.get_int('max-backups'));
+    const maxBackups = settings.get_int('max-backups');
+    const hadFile = await _writeBackup(path, maxBackups);
     const encoded = new TextEncoder().encode(JSON.stringify(data, null, 2));
 
     if (path.endsWith('.gz'))
         await _writeCompressed(path, encoded);
     else
         await _writeBytes(path, encoded);
+
+    // The first write keeps a copy of itself so the history starts with the
+    // initial push instead of an empty list
+    if (!hadFile)
+        await _writeBackup(path, maxBackups);
+    return true;
 }
 
 function _writeBytes(path, bytes) {
@@ -373,6 +381,7 @@ function _collapseIconPaths(config, homeDir) {
 
 // Every backup gets its own name instead of shifting slots. Shell and prefs
 // can write at the same time, and interleaved shifts lost whole generations.
+// Resolves to false when there was no file to back up.
 async function _writeBackup(path, maxBackups) {
     const mainFile = Gio.File.new_for_path(path);
     let content;
@@ -381,7 +390,7 @@ async function _writeBackup(path, maxBackups) {
     } catch (e) {
         if (!e.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.NOT_FOUND))
             error(`Backup read failed: ${e.message}`, e);
-        return;
+        return false;
     }
 
     try {
@@ -394,11 +403,12 @@ async function _writeBackup(path, maxBackups) {
             await _writeCompressed(backupPath, content);
     } catch (e) {
         error(`Backup compression failed: ${e.message}`, e);
-        return;
+        return true;
     }
 
     const backups = await listBackups(path);
     await Promise.all(backups.slice(maxBackups).map(b => deleteBackup(b.path)));
+    return true;
 }
 
 async function _writeCompressed(path, content) {

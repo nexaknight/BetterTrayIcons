@@ -1,15 +1,16 @@
 import Adw from 'gi://Adw';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
+import Gtk from 'gi://Gtk';
 import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
 import {error} from '../../shared/logging.js';
 import {readFileText, fileExists, isCancelledError} from '../../shared/asyncIo.js';
 import {saveSettingsToFile, loadSettingsFromFile, deleteBackup, listBackups, isOwnSyncSource, readOwnVersion} from '../../shared/settingsIO.js';
 import {clearIds, connectScoped, debounceTo, removeTimer} from '../../shared/lifecycle.js';
-import {createButton, createIconButton} from '../components/button.js';
+import {createIconButton} from '../components/button.js';
 import {createImage} from '../components/image.js';
-import {createSwitchRow, createSpinRow, createActionRow, createExpanderSection} from '../components/row.js';
+import {createSwitchRow, createSpinRow, createActionRow, createEntryRow, createExpanderSection} from '../components/row.js';
 import {ENTRY_DEBOUNCE_MS, buildDialogShell, pinDialogWidth, showConfirmationDialog} from '../components/dialog.js';
 
 const SYNC_DIALOG_WIDTH_PX = 460;
@@ -19,6 +20,10 @@ const BACKUP_COUNT_MAX = 50;
 
 const TIMESTAMP_FORMAT = '%Y-%m-%d %H:%M';
 const TIMESTAMP_FORMAT_WITH_SECONDS = '%Y-%m-%d %H:%M:%S';
+
+const PUSH_ICON_NAME = 'bti-push-symbolic';
+const PULL_ICON_NAME = 'bti-pull-symbolic';
+const HEADER_BUTTON_SPACING_PX = 4;
 
 export function openSyncDialog(parentWindow, settings, openJsonFileChooser) {
     const {toolbarView, page, toast} = buildDialogShell({toast: true});
@@ -33,24 +38,22 @@ export function openSyncDialog(parentWindow, settings, openJsonFileChooser) {
     const cancellable = new Gio.Cancellable();
     dialog.connect('closed', () => cancellable.cancel());
 
-    let refreshAll = () => {};
-
+    const refreshNow = () => refreshAll({immediate: true});
     const file = _buildSyncLocationGroup(page, settings, openJsonFileChooser, cancellable);
     const auto = _buildAutoSyncGroup(page, settings, file.pathRow, cancellable);
-    const actions = _buildActionsGroup(page, file.pathRow, settings, dialog, toast, () => refreshAll({immediate: true}), cancellable);
-    const backups = _buildBackupHistoryGroup(page, file.pathRow, dialog, toast, settings, () => refreshAll({immediate: true}), cancellable);
+    const backups = _buildBackupHistoryGroup(page, file.pathRow, dialog, toast, settings, refreshNow, cancellable);
 
     const doRefresh = () => {
         file.refreshStatus();
         auto.refreshStatus();
-        actions.refreshButtons();
+        backups.refreshSyncButtons();
         backups.refresh();
     };
 
     // Typing in the path row fires per keystroke and each probe below can
     // stat a remote mount, so one shared debounce covers them all.
     const timers = {refresh: 0, initial: 0};
-    refreshAll = ({immediate = false} = {}) => {
+    const refreshAll = ({immediate = false} = {}) => {
         if (immediate) {
             clearIds(timers, removeTimer, 'refresh');
             doRefresh();
@@ -62,12 +65,12 @@ export function openSyncDialog(parentWindow, settings, openJsonFileChooser) {
     dialog.connect('closed', () => clearIds(timers, removeTimer, 'refresh', 'initial'));
 
     file.pathRow.connect('notify::text', () => refreshAll());
-    connectScoped(dialog, settings, 'changed::enable-auto-sync', () => refreshAll({immediate: true}), 'closed');
+    connectScoped(dialog, settings, 'changed::enable-auto-sync', refreshNow, 'closed');
     connectScoped(dialog, settings, 'changed::max-backups', () => backups.refresh(), 'closed');
 
     timers.initial = GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
         timers.initial = 0;
-        refreshAll({immediate: true});
+        refreshNow();
         return GLib.SOURCE_REMOVE;
     });
 
@@ -81,10 +84,7 @@ function _buildSyncLocationGroup(page, settings, openJsonFileChooser, cancellabl
     });
     page.add(group);
 
-    const pathRow = new Adw.EntryRow({
-        title: _('File'),
-        show_apply_button: true,
-    });
+    const pathRow = createEntryRow({title: _('File'), showApplyButton: true});
 
     settings.bind('sync-file-path', pathRow, 'text', Gio.SettingsBindFlags.DEFAULT);
 
@@ -113,14 +113,13 @@ function _buildSyncLocationGroup(page, settings, openJsonFileChooser, cancellabl
 
     const refreshStatus = () => {
         const path = pathRow.text;
+        warningIcon.set_visible(false);
         if (!path) {
             statusRow.set_subtitle(_('No file selected'));
-            warningIcon.set_visible(false);
             return;
         }
 
         statusRow.set_subtitle(_('Checking…'));
-        warningIcon.set_visible(false);
         _probeSyncFile(path, statusRow, warningIcon, cancellable);
     };
 
@@ -151,12 +150,12 @@ async function _probeSyncFile(path, statusRow, warningIcon, cancellable) {
         if (isCancelledError(e))
             return;
         warningIcon.set_visible(true);
-        statusRow.set_subtitle(mtime ? mtime.format(TIMESTAMP_FORMAT_WITH_SECONDS) : _('Unknown'));
+        statusRow.set_subtitle(mtime ? mtime.to_local().format(TIMESTAMP_FORMAT_WITH_SECONDS) : _('Unknown'));
     }
 }
 
 function _formatSyncStatus(mtime, meta, ownVersion) {
-    const timeText = mtime ? mtime.format(TIMESTAMP_FORMAT) : _('Unknown');
+    const timeText = mtime ? mtime.to_local().format(TIMESTAMP_FORMAT) : _('Unknown');
     if (!meta || !meta.source)
         return timeText;
     const origin = isOwnSyncSource(meta) ? _('this device') : meta.source;
@@ -168,12 +167,13 @@ function _formatSyncStatus(mtime, meta, ownVersion) {
 }
 
 function _buildAutoSyncGroup(page, settings, pathRow, cancellable) {
-    const group = new Adw.PreferencesGroup({title: _('Auto-Sync')});
+    const group = new Adw.PreferencesGroup();
     page.add(group);
 
+    const idleSubtitle = _('Push on change, pull on remote update.');
     const row = createSwitchRow({
-        title: _('Enable'),
-        subtitle: _('Push on change, pull on remote update.'),
+        title: _('Sync Settings Automatically'),
+        subtitle: idleSubtitle,
         settings,
         key: 'enable-auto-sync',
     });
@@ -189,7 +189,7 @@ function _buildAutoSyncGroup(page, settings, pathRow, cancellable) {
 
     const refreshStatus = () => {
         if (!settings.get_boolean('enable-auto-sync')) {
-            row.set_subtitle(_('Push on change, pull on remote update.'));
+            row.set_subtitle(idleSubtitle);
             return;
         }
         const path = pathRow.text;
@@ -205,92 +205,9 @@ function _buildAutoSyncGroup(page, settings, pathRow, cancellable) {
     return {refreshStatus};
 }
 
-function _buildActionsGroup(page, pathRow, settings, dialog, toast, onAfterAction, cancellable) {
-    const group = new Adw.PreferencesGroup({title: _('Manual Sync')});
-    page.add(group);
-
-    const pushButton = _buildActionRow(group, {
-        title: _('Push to File'),
-        buttonLabel: _('Push'),
-        onClick: () => {
-            const path = pathRow.get_text();
-            if (!path)
-                return;
-            _runSyncOperation(() => saveSettingsToFile(settings, path, {merge: true}), toast, onAfterAction, {
-                successMessage: _('Settings pushed'), failurePrefix: _('Push failed'),
-            });
-        },
-    });
-
-    const pullButton = _buildActionRow(group, {
-        title: _('Pull from File'),
-        buttonLabel: _('Pull'),
-        onClick: () => {
-            const path = pathRow.get_text();
-            if (!path)
-                return;
-            _confirmAndRunSync(dialog, toast, onAfterAction, {
-                heading: _('Pull from file?'),
-                body: _('App settings are merged; other settings are taken from the file.'),
-                confirmLabel: _('Pull'),
-                op: () => loadSettingsFromFile(settings, path, {merge: true}),
-                successMessage: _('Settings pulled'), failurePrefix: _('Pull failed'),
-            });
-        },
-    });
-
-    const refreshButtons = () => {
-        const path = pathRow.text;
-        pushButton.sensitive = !!path;
-        pullButton.sensitive = false;
-        if (!path)
-            return;
-        _checkExistsAsync(path, cancellable, exists => {
-            pullButton.sensitive = exists;
-        });
-    };
-
-    return {refreshButtons};
-}
-
-function _buildActionRow(group, {title, buttonLabel, onClick}) {
-    const button = createButton({label: buttonLabel, valign: 'center'});
-    button.connect('clicked', onClick);
-    group.add(createActionRow({title, suffixWidgets: [button]}));
-    return button;
-}
-
-async function _checkExistsAsync(path, cancellable, onResult) {
-    try {
-        onResult(await fileExists(path, cancellable));
-    } catch {
-        // Cancelled
-    }
-}
-
-async function _runSyncOperation(op, toast, onAfter, {successMessage, failurePrefix}) {
-    try {
-        await op();
-        toast.add_toast(new Adw.Toast({title: successMessage}));
-        onAfter();
-    } catch (e) {
-        error(`${failurePrefix}: ${e.message}`);
-        toast.add_toast(new Adw.Toast({title: `${failurePrefix}: ${e.message}`}));
-    }
-}
-
-function _confirmAndRunSync(dialog, toast, onAfterAction, {heading, body, confirmLabel, op, successMessage, failurePrefix}) {
-    showConfirmationDialog(dialog, {
-        title: heading,
-        message: body,
-        confirmLabel,
-        destructive: true,
-        onConfirm: () => _runSyncOperation(op, toast, onAfterAction, {successMessage, failurePrefix}),
-    });
-}
-
 function _buildBackupHistoryGroup(page, pathRow, dialog, toast, settings, onAfterAction, cancellable) {
-    const group = new Adw.PreferencesGroup();
+    const syncButtons = _buildSyncButtons({pathRow, settings, dialog, toast, onAfterAction, cancellable});
+    const group = new Adw.PreferencesGroup({header_suffix: syncButtons.box});
     page.add(group);
 
     const {expander, setRows} = createExpanderSection({
@@ -319,8 +236,8 @@ function _buildBackupHistoryGroup(page, pathRow, dialog, toast, settings, onAfte
         }
 
         listBackups(base).then(backups => {
-            // A newer refresh or a closed dialog superseded this one.
-            if (generation !== refreshGeneration || cancellable.is_cancelled())
+            const isSuperseded = generation !== refreshGeneration || cancellable.is_cancelled();
+            if (isSuperseded)
                 return;
 
             setRows(backups.map(b => _buildBackupRow({
@@ -335,15 +252,68 @@ function _buildBackupHistoryGroup(page, pathRow, dialog, toast, settings, onAfte
 
             expander.sensitive = true;
             expander.subtitle = `${backups.length} ${_('available')}`;
-        }).catch(() => {});
+        });
     };
 
-    return {refresh};
+    return {refresh, refreshSyncButtons: syncButtons.refresh};
+}
+
+function _buildSyncButtons({pathRow, settings, dialog, toast, onAfterAction, cancellable}) {
+    // Sensitivity trails the path row by the refresh debounce, so a click
+    // right after clearing the path still lands here with no file.
+    const hasPath = () => pathRow.text !== '';
+
+    const pushButton = createIconButton(PUSH_ICON_NAME, {
+        circular: false,
+        sensitive: false,
+        tooltip: _('Push to File'),
+        onClick: () => {
+            if (!hasPath())
+                return;
+            _runSyncOperation(() => saveSettingsToFile(settings, pathRow.text, {merge: true}), toast, onAfterAction, {
+                successMessage: written => written ? _('Settings pushed') : _('Nothing new to push'),
+                failurePrefix: _('Push failed'),
+            });
+        },
+    });
+
+    const pullButton = createIconButton(PULL_ICON_NAME, {
+        circular: false,
+        sensitive: false,
+        tooltip: _('Pull from File'),
+        onClick: () => {
+            if (!hasPath())
+                return;
+            _confirmAndRunSync(dialog, toast, onAfterAction, {
+                heading: _('Pull from file?'),
+                body: _('App settings are merged; other settings are taken from the file.'),
+                confirmLabel: _('Pull'),
+                op: () => loadSettingsFromFile(settings, pathRow.text, {merge: true}),
+                successMessage: () => _('Settings pulled'), failurePrefix: _('Pull failed'),
+            });
+        },
+    });
+
+    const box = new Gtk.Box({spacing: HEADER_BUTTON_SPACING_PX});
+    box.append(pushButton);
+    box.append(pullButton);
+
+    const refresh = () => {
+        pushButton.sensitive = hasPath();
+        pullButton.sensitive = false;
+        if (!hasPath())
+            return;
+        _checkExistsAsync(pathRow.text, cancellable, exists => {
+            pullButton.sensitive = exists;
+        });
+    };
+
+    return {box, refresh};
 }
 
 function _buildBackupRow({path, index, mtime, dialog, toast, settings, onAfterAction}) {
     const label = mtime
-        ? `${_('Backup')} ${index} · ${mtime.format(TIMESTAMP_FORMAT)}`
+        ? `${_('Backup')} ${index} · ${mtime.to_local().format(TIMESTAMP_FORMAT)}`
         : `${_('Backup')} ${index}`;
 
     const deleteButton = createIconButton('bti-trash-symbolic', {
@@ -352,7 +322,7 @@ function _buildBackupRow({path, index, mtime, dialog, toast, settings, onAfterAc
         onClick: () => _confirmAndRunSync(dialog, toast, onAfterAction, {
             heading: _('Delete this backup?'), body: _('The backup file will be permanently removed.'), confirmLabel: _('Delete'),
             op: () => deleteBackup(path),
-            successMessage: _('Backup deleted'), failurePrefix: _('Delete failed'),
+            successMessage: () => _('Backup deleted'), failurePrefix: _('Delete failed'),
         }),
     });
 
@@ -362,9 +332,38 @@ function _buildBackupRow({path, index, mtime, dialog, toast, settings, onAfterAc
         onClick: () => _confirmAndRunSync(dialog, toast, onAfterAction, {
             heading: _('Restore this backup?'), body: _('Local settings will be overwritten.'), confirmLabel: _('Restore'),
             op: () => loadSettingsFromFile(settings, path),
-            successMessage: _('Backup restored'), failurePrefix: _('Restore failed'),
+            successMessage: () => _('Backup restored'), failurePrefix: _('Restore failed'),
         }),
     });
 
     return createActionRow({title: label, suffixWidgets: [deleteButton, restoreButton]});
+}
+
+async function _checkExistsAsync(path, cancellable, onResult) {
+    try {
+        onResult(await fileExists(path, cancellable));
+    } catch {
+        // Only a cancel throws, and the dialog is gone by then.
+    }
+}
+
+async function _runSyncOperation(op, toast, onAfter, {successMessage, failurePrefix}) {
+    try {
+        const result = await op();
+        toast.add_toast(new Adw.Toast({title: successMessage(result)}));
+        onAfter();
+    } catch (e) {
+        error(`${failurePrefix}: ${e.message}`);
+        toast.add_toast(new Adw.Toast({title: `${failurePrefix}: ${e.message}`}));
+    }
+}
+
+function _confirmAndRunSync(dialog, toast, onAfterAction, {heading, body, confirmLabel, op, successMessage, failurePrefix}) {
+    showConfirmationDialog(dialog, {
+        title: heading,
+        message: body,
+        confirmLabel,
+        destructive: true,
+        onConfirm: () => _runSyncOperation(op, toast, onAfterAction, {successMessage, failurePrefix}),
+    });
 }

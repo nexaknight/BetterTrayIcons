@@ -47,6 +47,8 @@ MacTahoe and Adwaita, and `emblem-favorite-symbolic` was missing from Adwaita.
 - `bti-plane` ← Lucide `plane`
 - `bti-previous` ← Lucide `chevron-left`
 - `bti-properties` ← Lucide `sliders-horizontal`
+- `bti-pull` ← Lucide `download`
+- `bti-push` ← Lucide `upload`
 - `bti-reset` ← Lucide `rotate-ccw`
 - `bti-search` ← Lucide `search`
 - `bti-select` ← Lucide `check`
