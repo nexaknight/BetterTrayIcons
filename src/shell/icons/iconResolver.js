@@ -36,6 +36,7 @@ import {fileExists, isBoundedRegularFile, readFileBytesCapped} from '../../share
 import {warnOnce} from '../../shared/logging.js';
 import {getItemAddress, refreshPropertyOnProxy, refreshStringOnProxy} from '../dbusCalls.js';
 import {getProcessInfo} from '../identity/processIdentity.js';
+import {findHostPath} from '../identity/packaging.js';
 import {unreadBadge, unreadTargets} from '../features/launcherEntries.js';
 import {sessionUsesLightStyle} from '../trayStyle.js';
 import {stageScaleFactor} from '../actorPlacement.js';
@@ -108,10 +109,11 @@ export async function identifyApp(proxy, busName, settings, onRekey) {
         seed.packaging = packaging.kind;
     updateAppConfig(settings, appId, seed);
 
-    return {appId, seed, processName, pid: processInfo?.pid};
+    return {appId, seed, processName, pid: processInfo?.pid, packaging};
 }
 
-export async function resolveTrayIcon(proxy, settings, appId, lastPixmapHash = null, pid = null, tint = null) {
+// The owner is the pid and packaging identifyApp found
+export async function resolveTrayIcon(proxy, settings, appId, lastPixmapHash, owner, tint) {
     const [rawStatus, detectedName, overlayName] = await Promise.all([
         refreshStringOnProxy(proxy, 'Status'),
         refreshStringOnProxy(proxy, 'IconName'),
@@ -119,7 +121,7 @@ export async function resolveTrayIcon(proxy, settings, appId, lastPixmapHash = n
     ]);
     const status = rawStatus ?? 'Passive';
 
-    const resolved = await _resolveIcon(proxy, settings, appId, lastPixmapHash, status, detectedName, pid, tint);
+    const resolved = await _resolveIcon(proxy, settings, appId, lastPixmapHash, status, detectedName, owner, tint);
     return {..._applyOverlayEmblem(resolved, overlayName), status};
 }
 
@@ -137,7 +139,8 @@ function _applyOverlayEmblem(resolved, overlayName) {
     return {...resolved, gicon: emblemed, iconName: null};
 }
 
-async function _resolveIcon(proxy, settings, appId, lastPixmapHash, status, detectedName, pid, tint) {
+async function _resolveIcon(proxy, settings, appId, lastPixmapHash, status, detectedName, owner, tint) {
+    const {pid, packaging} = owner;
     const generation = _generation;
     let attentionName = null;
     if (status === 'NeedsAttention')
@@ -171,11 +174,11 @@ async function _resolveIcon(proxy, settings, appId, lastPixmapHash, status, dete
             if (hasAlert)
                 badge = {text: null};
             else if (isCounterClass)
-                badge = await _contentAlertBadge(proxy, settings, appId, detectedName);
+                badge = await _contentAlertBadge(proxy, settings, appId, detectedName, packaging);
         }
         isAlertCovered = badge !== null;
     } else if (isCounterClass) {
-        await _rememberRestingContent(proxy, settings, appId, detectedName);
+        await _rememberRestingContent(proxy, settings, appId, detectedName, packaging);
     }
 
     const stateIcons = customIcon
@@ -206,7 +209,7 @@ async function _resolveIcon(proxy, settings, appId, lastPixmapHash, status, dete
     // Apps also put relative paths here, not just names.
     const isThemeName = !!iconName && !iconName.includes('/');
 
-    detected.iconThemePath = await refreshStringOnProxy(proxy, 'IconThemePath');
+    detected.iconThemePath = await _appThemePath(proxy, packaging);
     const iconThemePath = detected.iconThemePath;
 
     // A -mono asset name hides a base the theme may carry, and a themed icon
@@ -219,7 +222,7 @@ async function _resolveIcon(proxy, settings, appId, lastPixmapHash, status, dete
 
     const fileIconResult = async path => {
         const file = Gio.File.new_for_path(path);
-        _snapshotIconToCache(settings, appId, file, generation).catch(() => {});
+        _snapshotIconToCache(settings, appId, file, generation);
         const tinted = await _tinted(path, settings, tint);
         return {gicon: tinted ?? new Gio.FileIcon({file}), iconName: null, detected, badge, shownIcon: path};
     };
@@ -280,19 +283,17 @@ async function _resolveIcon(proxy, settings, appId, lastPixmapHash, status, dete
         warnOnce(`pixmap:${appId ?? pid}`, `Pixmap of '${appId ?? pid}' failed to render: ${e.message}`);
     }
 
-    if (isThemeName) {
-        const themed = _themedIconFromName(iconName, settings, false);
-        if (themed)
-            return {...themed, detected, badge};
-    }
-
-    const appIcon = _appIcon(pid);
+    const appIcon = _appIcon(pid, packaging);
     if (appIcon) {
         const file = appIcon.get_file?.();
         if (file)
-            _snapshotIconToCache(settings, appId, file, generation).catch(() => {});
+            _snapshotIconToCache(settings, appId, file, generation);
         return {gicon: appIcon, iconName: null, detected, badge, shownIcon: file?.get_path() ?? appIcon.get_names?.()[0]};
     }
+
+    // Lists image-missing last, the name still wins once a theme carries it
+    if (isThemeName)
+        return {..._themedIconFromName(iconName, settings, false), detected, badge};
 
     warnOnce(`no-icon:${appId ?? pid}`,
         `Nothing renders for '${appId ?? pid}': IconName='${detectedName ?? ''}' IconThemePath='${iconThemePath ?? ''}', showing image-missing`);
@@ -301,8 +302,8 @@ async function _resolveIcon(proxy, settings, appId, lastPixmapHash, status, dete
 
 // Seeding takes whatever is on screen, so an app that boots into its unread
 // image reads inverted until the resting state is redefined in the prefs.
-async function _contentAlertBadge(proxy, settings, appId, detectedName) {
-    const contentHash = await _liveIconContentHash(proxy, settings, detectedName);
+async function _contentAlertBadge(proxy, settings, appId, detectedName, packaging) {
+    const contentHash = await _liveIconContentHash(proxy, settings, detectedName, packaging);
     if (contentHash === null)
         return null;
     // Read fresh after the await, two resolves can overlap and one deciding on
@@ -320,19 +321,19 @@ async function _contentAlertBadge(proxy, settings, appId, detectedName) {
 // stays untouched while the badge is off.
 const _restingContentHash = new Map();
 
-async function _rememberRestingContent(proxy, settings, appId, detectedName) {
+async function _rememberRestingContent(proxy, settings, appId, detectedName, packaging) {
     if (!appId || _restingContentHash.has(appId))
         return;
-    const hash = await _liveIconContentHash(proxy, settings, detectedName);
+    const hash = await _liveIconContentHash(proxy, settings, detectedName, packaging);
     if (hash !== null)
         _restingContentHash.set(appId, hash);
 }
 
-async function _liveIconContentHash(proxy, settings, detectedName) {
+async function _liveIconContentHash(proxy, settings, detectedName, packaging) {
     if (detectedName) {
         const path = detectedName.startsWith('/')
             ? detectedName
-            : await _appThemeIconPath(proxy, settings, detectedName);
+            : await _appThemeIconPath(proxy, settings, detectedName, packaging);
         if (!path || !await _isIconFile(path))
             return null;
         const bytes = await readFileBytesCapped(Gio.File.new_for_path(path), ICON_FILE_MAX_BYTES);
@@ -351,18 +352,26 @@ function _isIconFile(path) {
     return isBoundedRegularFile(path, ICON_FILE_MAX_BYTES);
 }
 
-async function _appThemeIconPath(proxy, settings, iconName) {
-    const themePath = await refreshStringOnProxy(proxy, 'IconThemePath');
+async function _appThemeIconPath(proxy, settings, iconName, packaging) {
+    const themePath = await _appThemePath(proxy, packaging);
     if (!themePath)
         return null;
     return findIconInThemeAsync(iconName, themePath, {targetSize: _deviceIconSize(settings)});
 }
 
-// Only apps with a window are found here, a tray-only daemon is not.
-function _appIcon(pid) {
-    if (!pid)
-        return null;
-    return Shell.WindowTracker.get_default().get_app_from_pid(pid)?.get_icon();
+async function _appThemePath(proxy, packaging) {
+    const themePath = await refreshStringOnProxy(proxy, 'IconThemePath');
+    return await findHostPath(themePath, packaging) ?? themePath;
+}
+
+// The window tracker only knows apps with a window. A flatpak's desktop id
+// is its app id, so a tray-only flatpak still gets the launcher's icon.
+function _appIcon(pid, packaging) {
+    const windowApp = pid ? Shell.WindowTracker.get_default().get_app_from_pid(pid) : null;
+    const flatpakApp = packaging?.kind === 'flatpak'
+        ? Shell.AppSystem.get_default().lookup_app(`${packaging.id}.desktop`)
+        : null;
+    return (windowApp ?? flatpakApp)?.get_icon() ?? null;
 }
 
 // St rasterizes at ceil(scale factor x resource scale), and on a fractional
@@ -435,7 +444,7 @@ function _tinted(path, settings, tint) {
         {size: _deviceIconSize(settings)});
 }
 
-async function _configuredIconAsync(value, settings, tint = null) {
+async function _configuredIconAsync(value, settings, tint) {
     const exists = value.startsWith('/') ? await fileExists(value) : null;
     if (exists) {
         const gicon = await _tinted(value, settings, tint);

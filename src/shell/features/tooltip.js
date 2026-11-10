@@ -1,11 +1,14 @@
 import St from 'gi://St';
 import Clutter from 'gi://Clutter';
+import GObject from 'gi://GObject';
+import Graphene from 'gi://Graphene';
 import Pango from 'gi://Pango';
 import GLib from 'gi://GLib';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
 import {clearIds, removeTimer} from '../../shared/lifecycle.js';
 import {isDisposed, trackDisposal} from '../disposal.js';
+import {panelCopies} from '../panelCopies.js';
 
 // Tray titles are app-provided and unbounded, so a long one would stretch
 // the tooltip across the panel and off the monitor.
@@ -15,14 +18,55 @@ const TOOLTIP_GAP_PX = 5;
 
 const TOOLTIP_FADE_MS = 200;
 
+// Centered so the painted pill has the same box in the panel, the drawer and
+// the popup. In a panel it still takes pointer events over the full bar
+// height, so a click on the screen edge above or below the pill lands.
+const TrayActor = GObject.registerClass({GTypeName: 'BetterTrayIconsTrayActor'},
+    class TrayActor extends St.Bin {
+        vfunc_pick(pickContext) {
+            super.vfunc_pick(pickContext);
+            const span = this._barSpan();
+            if (span)
+                this.pick_box(pickContext, new Clutter.ActorBox({x1: 0, y1: span[0], x2: this.width, y2: span[1]}));
+        }
+
+        // Clutter culls the pick by the paint volume, so it has to reach the
+        // bar edges too
+        vfunc_get_paint_volume(volume) {
+            if (!super.vfunc_get_paint_volume(volume))
+                return false;
+            const span = this._barSpan();
+            if (!span)
+                return true;
+            const origin = volume.get_origin();
+            const top = Math.min(origin.y, span[0]);
+            const bottom = Math.max(origin.y + volume.get_height(), span[1]);
+            volume.set_origin(new Graphene.Point3D({x: origin.x, y: top, z: origin.z}));
+            volume.set_height(bottom - top);
+            return true;
+        }
+
+        // The panel's top and bottom in our own coordinates. A vertical
+        // panel's full height is the whole screen column, so it has none.
+        _barSpan() {
+            const panel = this.reactive ? panelCopies().find(copy => copy.contains(this))?.panel : null;
+            if (!panel || panel.width <= panel.height)
+                return null;
+            const [panelX, panelY] = panel.get_transformed_position();
+            const [, , top] = this.transform_stage_point(panelX, panelY);
+            const [, , bottom] = this.transform_stage_point(panelX, panelY + panel.height);
+            return [top, bottom];
+        }
+    });
+
 export function createTrayActor(settings) {
-    const actor = trackDisposal(new St.Bin({
+    const actor = trackDisposal(new TrayActor({
         reactive: true,
         can_focus: true,
         track_hover: true,
         y_expand: true,
         x_expand: false,
-        y_align: Clutter.ActorAlign.FILL,
+        y_align: Clutter.ActorAlign.CENTER,
         x_align: Clutter.ActorAlign.CENTER,
     }));
 
@@ -47,6 +91,9 @@ export function applyTitle(actor, tooltip, settings, title) {
     actor.accessible_name = show && title ? title : '';
     if (tooltip)
         tooltip.text = title;
+    // A Background Apps row labels itself with the title
+    actor._trayTitle = title;
+    actor._trayTitleChanged?.();
 }
 
 export class Tooltip {

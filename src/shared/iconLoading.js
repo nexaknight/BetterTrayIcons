@@ -40,6 +40,64 @@ const ICON_THEME_TREE_MAX_DEPTH = 4;
 // /123/16x16/ yields both, and scaled dirs (16x16@2x) have to match too.
 const ICON_THEME_SIZE_RE = /\/(\d+)(?:x\d+)?(?:@\d+x?)?(?=\/)/g;
 
+// An SVG scales to any size, so it ranks below an exact raster match at 0 and
+// above an off-by-one. Without a target size every candidate ties.
+const SVG_SIZE_SCORE = 0.5;
+const NO_TARGET_SIZE_SCORE = 1;
+
+const BUNDLED_ICON_PREFIX = 'bti-';
+const BUNDLED_ICON_DIR = Gio.File.new_for_uri(import.meta.url)
+    .resolve_relative_path('../../../assets/icons/hicolor/scalable/actions');
+
+// Below this HSV saturation a declared color counts as neutral and follows the
+// tint, brand colors sit well above the line.
+const TINT_SAT_THRESHOLD = 0.25;
+
+// `color` is in here because it is what currentColor resolves to, and the KDE
+// convention keeps every chromatic value there.
+const DECLARED_COLOR_RE = /(?:fill|stroke|stop-color|color)\s*[:=]\s*["']?\s*(#[0-9a-f]{3,8}|rgba?\([^)]*\))/gi;
+
+// KDE paints an ordinary icon part with the text class and keeps the semantic
+// ones (PositiveText, NegativeText) for status, so only the text one may take
+// the tint. Papirus files a brand color under it, so it comes first.
+const COLOR_SCHEME_PREFIX = 'ColorScheme-';
+const COLOR_SCHEME_TEXT_CLASS = `${COLOR_SCHEME_PREFIX}Text`;
+const COLOR_SCHEME_TEXT_RE = new RegExp(
+    `\\.${COLOR_SCHEME_TEXT_CLASS}\\s*\\{[^}]*?color\\s*:\\s*(#[0-9a-f]{3,8}|rgba?\\([^)]*\\))`, 'i');
+
+// GtkSvg drops a rule it cannot parse and it has no attribute selectors, so
+// the elements those rules used to reach carry a marker class instead.
+const TINT_FILL_CLASS = 'bti-tint-fill';
+const TINT_INHERIT_CLASS = 'bti-tint-inherit';
+const TINT_NO_FILL_CLASS = 'bti-tint-no-fill';
+const TINT_STROKE_CLASS = 'bti-tint-stroke';
+
+// Both toolkits classify by file name alone (st-icon-theme.c
+// icon_uri_is_symbolic), so a mono icon under a plain name renders black.
+// Matching none of the three leaves grayscale logos with their own paint.
+const MONO_NAME_RE = new RegExp(`-(${MONO_VARIANT_PATTERN})\\.svg$`, 'i');
+const MONO_DIR_RE = new RegExp(`/(${MONO_VARIANT_PATTERN})/`);
+const MONO_CLASS_RE = new RegExp(
+    `currentColor|${COLOR_SCHEME_PREFIX}|class\\s*=\\s*["'](?:fg|foreground|success|warning|error)`, 'i');
+
+const DEFAULT_TINT_COLOR = '#ffffff';
+
+const TINT_CACHE_MAX = 128;
+const _tintCache = new Map();
+
+// Comments, CDATA and processing instructions are matched so a `<` inside one
+// never reads as a tag, and quoted values keep a `>` from ending the tag.
+const SVG_NODE_RE =
+    /<!--[\s\S]*?-->|<!\[CDATA\[[\s\S]*?\]\]>|<\?[\s\S]*?\?>|<!DOCTYPE(?:[^<>[]|\[[\s\S]*?\])*>|<(\/?)([A-Za-z_][^\s/>]*)((?:[^>"']|"[^"]*"|'[^']*')*)>/g;
+
+const SVG_ATTR_RE = /([A-Za-z_][\w.:-]*)\s*=\s*(?:"([^"]*)"|'([^']*)')/g;
+
+const STYLE_PAINT_RE = /(?:^|;)\s*(fill|stroke)\s*:\s*([^;]*?)\s*(?:!important\s*)?(?=;|$)/gi;
+
+const CLASS_ATTR_RE = /(?<![\w.:-])class\s*=\s*(["'])([^"']*)\1/;
+
+let _cacheDirPath = null;
+
 // Prefetched so no widget build stats. Theme lookups ride in the same map
 // under themeProbeKey, false in there means probed and missed.
 export async function probeIconPaths(configs, cancellable = null) {
@@ -83,11 +141,12 @@ export function resolveIcon(config, hasThemeIcon = null, cachedPathExists = null
 
     const iconName = config.detected_icon;
     const isThemed = !!iconName && !iconName.startsWith('/') && !!hasThemeIcon?.(iconName);
+    const isThemedMonoAsset = isThemed && MONO_ASSET_SUFFIX_RE.test(iconName);
 
     // Same order as the tray, the app's own theme dir beats the system theme
     // unless a -mono asset name lets the system theme supply the base. The
     // cached snapshot of that file is a .png, which the tint would skip.
-    if (themeHit && !(isThemed && MONO_ASSET_SUFFIX_RE.test(iconName)))
+    if (themeHit && !isThemedMonoAsset)
         return {type: 'file', value: themeHit};
 
     // A resolvable name beats any cached copy. The theme recolors it for light
@@ -122,7 +181,8 @@ export function emojiText(value) {
     if (!match)
         return null;
     const codepoints = match[1].split('-').map(hex => parseInt(hex, 16));
-    const isInvalid = cp => cp > MAX_CODEPOINT || (cp >= SURROGATE_FIRST && cp <= SURROGATE_LAST);
+    const isInvalid = codepoint => codepoint > MAX_CODEPOINT ||
+        (codepoint >= SURROGATE_FIRST && codepoint <= SURROGATE_LAST);
     return codepoints.some(isInvalid) ? null : String.fromCodePoint(...codepoints);
 }
 
@@ -178,11 +238,6 @@ async function _findIconInThemeTree(dir, wanted, targetSize, cancellable) {
     return best;
 }
 
-// An SVG scales to any size, so it ranks below an exact raster match at 0 and
-// above an off-by-one. Without a target size every candidate ties.
-const SVG_SIZE_SCORE = 0.5;
-const NO_TARGET_SIZE_SCORE = 1;
-
 function _sizeDistance(path, targetSize) {
     if (path.endsWith('.svg'))
         return SVG_SIZE_SCORE;
@@ -195,10 +250,6 @@ function _sizeDistance(path, targetSize) {
 export function themedIcon(name) {
     return new Gio.ThemedIcon({name});
 }
-
-const BUNDLED_ICON_PREFIX = 'bti-';
-const BUNDLED_ICON_DIR = Gio.File.new_for_uri(import.meta.url)
-    .resolve_relative_path('../../../assets/icons/hicolor/scalable/actions');
 
 // The shell's icon theme never sees the bundled files, only the prefs add
 // them to theirs
@@ -216,29 +267,6 @@ export function pathOrThemedIcon(value, exists) {
     return themedIcon(value);
 }
 
-// Below this HSV saturation a declared color counts as neutral and follows the
-// tint, brand colors sit well above the line.
-const TINT_SAT_THRESHOLD = 0.25;
-
-// `color` is in here because it is what currentColor resolves to, and the KDE
-// convention keeps every chromatic value there.
-const DECLARED_COLOR_RE = /(?:fill|stroke|stop-color|color)\s*[:=]\s*["']?\s*(#[0-9a-f]{3,8}|rgba?\([^)]*\))/gi;
-
-// KDE paints an ordinary icon part with the text class and keeps the semantic
-// ones (PositiveText, NegativeText) for status, so only the text one may take
-// the tint. Papirus files a brand color under it, so it comes first.
-const COLOR_SCHEME_PREFIX = 'ColorScheme-';
-const COLOR_SCHEME_TEXT_CLASS = `${COLOR_SCHEME_PREFIX}Text`;
-const COLOR_SCHEME_TEXT_RE = new RegExp(
-    `\\.${COLOR_SCHEME_TEXT_CLASS}\\s*\\{[^}]*?color\\s*:\\s*(#[0-9a-f]{3,8}|rgba?\\([^)]*\\))`, 'i');
-
-// GtkSvg drops a rule it cannot parse and it has no attribute selectors, so
-// the elements those rules used to reach carry a marker class instead.
-const TINT_FILL_CLASS = 'bti-tint-fill';
-const TINT_INHERIT_CLASS = 'bti-tint-inherit';
-const TINT_NO_FILL_CLASS = 'bti-tint-no-fill';
-const TINT_STROKE_CLASS = 'bti-tint-stroke';
-
 // Only parts naming no color take the tint, and without the inherit rule the
 // children of a `<g fill>` group lose their own.
 const _tintColoredCss = (color, neutralText) =>
@@ -255,19 +283,9 @@ const _tintMonoCss = color =>
     `.${TINT_NO_FILL_CLASS}{fill:none!important}` +
     `.${TINT_STROKE_CLASS}{stroke:${color}!important}`;
 
-// Both toolkits classify by file name alone (st-icon-theme.c
-// icon_uri_is_symbolic), so a mono icon under a plain name renders black.
-// Matching none of the three leaves grayscale logos with their own paint.
-const MONO_NAME_RE = new RegExp(`-(${MONO_VARIANT_PATTERN})\\.svg$`, 'i');
-const MONO_DIR_RE = new RegExp(`/(${MONO_VARIANT_PATTERN})/`);
-const MONO_CLASS_RE = new RegExp(
-    `currentColor|${COLOR_SCHEME_PREFIX}|class\\s*=\\s*["'](?:fg|foreground|success|warning|error)`, 'i');
-
 function _wantsTint(path, text) {
     return MONO_NAME_RE.test(path) || MONO_DIR_RE.test(path) || MONO_CLASS_RE.test(text);
 }
-
-const DEFAULT_TINT_COLOR = '#ffffff';
 
 // The accent has to come from the caller, St resolves it from a theme node and
 // GTK from Adw, and a stale icon-color would win over it otherwise.
@@ -279,9 +297,6 @@ export function symbolicTint(settings, {accent = null, light = false} = {}) {
         return accent;
     return value;
 }
-
-const TINT_CACHE_MAX = 128;
-const _tintCache = new Map();
 
 // size is in DEVICE pixels, 0 leaves the file's own size alone.
 export async function tintedSymbolicIcon(value, tint, {size = 0, lookupThemeFile = null, cancellable = null} = {}) {
@@ -353,17 +368,6 @@ function _retintNeutrals(text, color) {
     return text.replace(DECLARED_COLOR_RE, (declaration, value) =>
         isChromatic(parseRgb(value)) ? declaration : declaration.replace(value, color));
 }
-
-// Comments, CDATA and processing instructions are matched so a `<` inside one
-// never reads as a tag, and quoted values keep a `>` from ending the tag.
-const SVG_NODE_RE =
-    /<!--[\s\S]*?-->|<!\[CDATA\[[\s\S]*?\]\]>|<\?[\s\S]*?\?>|<!DOCTYPE(?:[^<>[]|\[[\s\S]*?\])*>|<(\/?)([A-Za-z_][^\s/>]*)((?:[^>"']|"[^"]*"|'[^']*')*)>/g;
-
-const SVG_ATTR_RE = /([A-Za-z_][\w.:-]*)\s*=\s*(?:"([^"]*)"|'([^']*)')/g;
-
-const STYLE_PAINT_RE = /(?:^|;)\s*(fill|stroke)\s*:\s*([^;]*?)\s*(?:!important\s*)?(?=;|$)/gi;
-
-const CLASS_ATTR_RE = /(?<![\w.:-])class\s*=\s*(["'])([^"']*)\1/;
 
 function _markTintTargets(text, chroma) {
     const fillHolders = [];
@@ -546,8 +550,6 @@ export function buildSymbolicCandidates(name, useSymbolic) {
     const variants = MONO_ICON_SUFFIXES.map(suffix => `${name}${suffix}`);
     return useSymbolic ? [...variants, name] : [name, ...variants];
 }
-
-let _cacheDirPath = null;
 
 export async function writeCachedIcon(appId, pngBytes) {
     const path = _cachedIconPath(appId);

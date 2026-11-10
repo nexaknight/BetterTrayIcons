@@ -72,52 +72,20 @@ export function buildQuickSettingsScene(menuStyle = null) {
         margin_bottom: MENU_EDGE_PX,
         margin_end: MENU_END_PX,
     };
-    let stage;
-    if (menuStyle === 'popup') {
-        stage = new Gtk.Box({layout_manager: new SidePopupLayout(apps), ...stageProps});
+    const isSidePopup = menuStyle === 'popup';
+    const stage = isSidePopup
+        ? new Gtk.Box({layout_manager: new SidePopupLayout(apps), ...stageProps})
+        : new Gtk.Box({spacing: MENU_GAP_PX, ...stageProps});
+    if (isSidePopup) {
         const popup = _createLines(POPUP_LINES, {cssClasses: ['bti-scene-popup']});
         popup.width_request = SIDE_POPUP_WIDTH_PX;
         stage.append(popup);
-    } else {
-        stage = new Gtk.Box({spacing: MENU_GAP_PX, ...stageProps});
     }
     stage.append(menu);
     screen.append(stage);
 
     return screen;
 }
-
-// The side popup opens left of Quick Settings, level with the middle of the
-// Background Apps list as the real one opens beside its row.
-const SidePopupLayout = GObject.registerClass(
-    {GTypeName: 'BetterTrayIconsSidePopupLayout'},
-    class SidePopupLayout extends Gtk.LayoutManager {
-        _init(anchor) {
-            super._init();
-            this._anchor = anchor;
-        }
-
-        vfunc_measure(widget, orientation, _forSize) {
-            const [popup, menu] = edgeChildren(widget);
-            const [popupMin, popupNat] = popup.measure(orientation, -1);
-            const [menuMin, menuNat] = menu.measure(orientation, -1);
-            if (orientation === Gtk.Orientation.HORIZONTAL)
-                return [popupMin + MENU_GAP_PX + menuMin, popupNat + MENU_GAP_PX + menuNat, -1, -1];
-            return [Math.max(popupMin, menuMin), Math.max(popupNat, menuNat), -1, -1];
-        }
-
-        vfunc_allocate(widget, width, height, _baseline) {
-            const [popup, menu] = edgeChildren(widget);
-            const [, popupWidth] = popup.measure(Gtk.Orientation.HORIZONTAL, -1);
-            const [, popupHeight] = popup.measure(Gtk.Orientation.VERTICAL, popupWidth);
-            const menuX = popupWidth + MENU_GAP_PX;
-            menu.allocate(width - menuX, height, -1, translateTo(menuX, 0));
-
-            const [, anchor] = this._anchor.compute_bounds(widget);
-            const y = anchor.get_y() + (anchor.get_height() - popupHeight) / 2;
-            popup.allocate(popupWidth, popupHeight, -1, translateTo(0, Math.round(y)));
-        }
-    });
 
 function _createButtons() {
     const row = new Gtk.CenterBox();
@@ -155,8 +123,8 @@ function _createBackgroundApps(isUnfolded) {
         margin_end: APPS_PADDING_PX,
     });
     content.append(_createLine({halign: 'start', width_request: HEADER_WIDTH_PX}));
-    const rows = isUnfolded ? UNFOLDED_APP_ROWS : APP_ROWS;
-    for (let i = 0; i < rows; i++) {
+    const rowCount = isUnfolded ? UNFOLDED_APP_ROWS : APP_ROWS;
+    for (let i = 0; i < rowCount; i++) {
         content.append(_createAppRow());
         if (isUnfolded && i === 0)
             content.append(_createLines(SUB_LINES, {cssClasses: ['bti-scene-qs-inline']}));
@@ -173,6 +141,38 @@ function _createAppRow() {
     row.append(_createLine({hexpand: true, valign: 'center'}));
     return row;
 }
+
+// The side popup opens left of Quick Settings, level with the middle of the
+// Background Apps list as the real one opens beside its row.
+const SidePopupLayout = GObject.registerClass(
+    {GTypeName: 'BetterTrayIconsSidePopupLayout'},
+    class SidePopupLayout extends Gtk.LayoutManager {
+        _init(anchor) {
+            super._init();
+            this._anchor = anchor;
+        }
+
+        vfunc_measure(widget, orientation, _forSize) {
+            const [popup, menu] = edgeChildren(widget);
+            const [popupMin, popupNat] = popup.measure(orientation, -1);
+            const [menuMin, menuNat] = menu.measure(orientation, -1);
+            if (orientation === Gtk.Orientation.HORIZONTAL)
+                return [popupMin + MENU_GAP_PX + menuMin, popupNat + MENU_GAP_PX + menuNat, -1, -1];
+            return [Math.max(popupMin, menuMin), Math.max(popupNat, menuNat), -1, -1];
+        }
+
+        vfunc_allocate(widget, width, height, _baseline) {
+            const [popup, menu] = edgeChildren(widget);
+            const [, popupWidth] = popup.measure(Gtk.Orientation.HORIZONTAL, -1);
+            const [, popupHeight] = popup.measure(Gtk.Orientation.VERTICAL, popupWidth);
+            const menuX = popupWidth + MENU_GAP_PX;
+            menu.allocate(width - menuX, height, -1, translateTo(menuX, 0));
+
+            const [, anchor] = this._anchor.compute_bounds(widget);
+            const y = anchor.get_y() + (anchor.get_height() - popupHeight) / 2;
+            popup.allocate(popupWidth, popupHeight, -1, translateTo(0, Math.round(y)));
+        }
+    });
 
 function _createLines(count, boxProps) {
     const box = createBox({spacing: MENU_GAP_PX, ...boxProps});

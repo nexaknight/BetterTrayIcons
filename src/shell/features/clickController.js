@@ -16,6 +16,8 @@ const MIDDLE_MOUSE_BUTTON = 2;
 
 const RIGHT_MOUSE_BUTTON = 3;
 
+export const TRAY_ACTION_PREFIX = 'tray';
+
 export class ClickController {
     constructor(actor, settings, keyPrefix, onAction, options = {}) {
         this._actor = actor;
@@ -135,11 +137,10 @@ export class ClickController {
     _onRelease(actor, event, binding = _bindingOf(event.get_button())) {
         this._state.buttonDown = false;
 
+        // Asks the pick instead of the allocation, a panel icon takes clicks
+        // over the full bar height
         const [x, y] = event.get_coords();
-        const [success, localX, localY] = actor.transform_stage_point(x, y);
-        const isInsideWidth = localX >= 0 && localX < actor.width;
-        const isInsideHeight = localY >= 0 && localY < actor.height;
-        const isInside = success && isInsideWidth && isInsideHeight;
+        const isInside = actor.contains(global.stage.get_actor_at_pos(Clutter.PickMode.REACTIVE, x, y));
 
         const count = this._state.clickCount;
 
@@ -245,6 +246,16 @@ function _bindingOf(button) {
     if (button === RIGHT_MOUSE_BUTTON)
         return 'right';
     return 'left';
+}
+
+export function bindTrayClicks(actor, settings, draggable, onAction) {
+    const controller = new ClickController(actor, settings, TRAY_ACTION_PREFIX, onAction, {propagateEvent: true});
+    draggable.setClickController(controller);
+    return controller;
+}
+
+export function dragThreshold() {
+    return _gestureSetting('dnd_drag_threshold', DND_DRAG_THRESHOLD_PX);
 }
 
 // Clutter.Settings.get_default is gone on mutter 51, the context getter

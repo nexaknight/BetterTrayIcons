@@ -4,6 +4,7 @@ import Gio from 'gi://Gio';
 import {warnOnce} from './logging.js';
 import {deleteCachedIcon} from './iconLoading.js';
 import {readFileBytes} from './asyncIo.js';
+import {clearIds, connectScoped, debounceTo, disposeAll, removeTimer} from './lifecycle.js';
 
 // Gaps of 10 leave room for manual reorder edits between drags.
 const PRIORITY_STEP = 10;
@@ -11,7 +12,10 @@ const PRIORITY_STEP = 10;
 const FNV_OFFSET_BASIS = 0x811c9dc5;
 const FNV_PRIME = 0x01000193;
 
-const RUNTIME_DIR_MODE = 0o700;
+export const WHEN_IN_FRONT_NONE = 'none';
+export const WHEN_IN_FRONT_MINIMIZE = 'minimize';
+
+export const SCROLL_ACTION_DEFAULT = 'default';
 
 // The shell writes these itself while it identifies apps and resolves their
 // icons, so they move without the user touching anything. Off the sync path
@@ -317,6 +321,11 @@ export function getAppConfigValue(settings, appId, key, defaultValue = null, map
     return defaultValue;
 }
 
+// Configs from before the close option carry a minimize-only boolean
+export function whenInFrontOf(entry) {
+    return entry?.when_in_front ?? (entry?.minimize_when_focused === true ? WHEN_IN_FRONT_MINIMIZE : WHEN_IN_FRONT_NONE);
+}
+
 export function setAppConfigValue(settings, appId, key, value) {
     if (!appId)
         return;
@@ -461,37 +470,141 @@ export function byPriorityThenAppId(a, b) {
     return b.priority - a.priority || (a.appId ?? '').localeCompare(b.appId ?? '');
 }
 
+const RUNTIME_DIR = GLib.build_filenamev([GLib.get_user_runtime_dir(), 'bettertrayicons']);
+
 // The config blob lists closed and uninstalled apps, so numbering from it
 // would not match the panel.
-const VISIBLE_ORDER_PATH = GLib.build_filenamev(
-    [GLib.get_user_runtime_dir(), 'bettertrayicons', 'visible-order.json']);
+const VISIBLE_ORDER_PATH = GLib.build_filenamev([RUNTIME_DIR, 'visible-order.json']);
+
+// detected_icon is the calm baseline the alert check compares against, so
+// what a running item shows right now travels here instead.
+export const SHOWN_ICONS_PATH = GLib.build_filenamev([RUNTIME_DIR, 'shown-icons.json']);
+
+// The prefs show the all-monitors switch only while the shell has a panel
+// on a second monitor to mirror onto.
+const SECONDARY_PANELS_PATH = GLib.build_filenamev([RUNTIME_DIR, 'secondary-panels.json']);
+// A replace lands as a burst of monitor events with a gap where the file is
+// gone or empty, reading too early flips the watchers back and forth
+const RUNTIME_READ_SETTLE_MS = 150;
 
 export async function readVisibleOrder() {
+    const ids = await _readRuntimeJson(VISIBLE_ORDER_PATH);
+    return Array.isArray(ids) && ids.length ? ids : null;
+}
+
+export function publishVisibleOrder(appIds) {
+    _publishRuntimeJson(VISIBLE_ORDER_PATH, appIds);
+}
+
+export function clearVisibleOrder() {
+    _deleteRuntimeFile(VISIBLE_ORDER_PATH);
+}
+
+export async function readShownIcons() {
+    return await _readRuntimeJson(SHOWN_ICONS_PATH) ?? {};
+}
+
+export function publishShownIcons(iconsByAppId) {
+    _publishRuntimeJson(SHOWN_ICONS_PATH, iconsByAppId);
+}
+
+export function clearShownIcons() {
+    _deleteRuntimeFile(SHOWN_ICONS_PATH);
+}
+
+export function publishSecondaryPanels(hasSecondary) {
+    _publishRuntimeJson(SECONDARY_PANELS_PATH, hasSecondary);
+}
+
+export function clearSecondaryPanels() {
+    _deleteRuntimeFile(SECONDARY_PANELS_PATH);
+}
+
+export function watchSecondaryPanels(widget, onChange) {
+    watchRuntimeFile(widget, SECONDARY_PANELS_PATH,
+        async () => await _readRuntimeJson(SECONDARY_PANELS_PATH) === true, onChange);
+}
+
+// The shell replaces the file whole and deletes it on disable, a missing file
+// reads as nothing running.
+export function watchRuntimeFile(widget, path, read, onChange, event = null) {
+    const monitorProp = `_runtimeMonitor:${path}`;
+    const timerProp = `_runtimeReadId:${path}`;
+    widget[monitorProp] = Gio.File.new_for_path(path).monitor_file(Gio.FileMonitorFlags.NONE, null);
+    connectScoped(widget, widget[monitorProp], 'changed',
+        () => debounceTo(widget, timerProp, RUNTIME_READ_SETTLE_MS, () => read().then(onChange)), event);
+    widget.connect(event ?? 'destroy', () => {
+        disposeAll(widget, 'cancel', monitorProp);
+        clearIds(widget, removeTimer, timerProp);
+    });
+    read().then(onChange);
+}
+
+async function _readRuntimeJson(path) {
     try {
-        const bytes = await readFileBytes(Gio.File.new_for_path(VISIBLE_ORDER_PATH));
-        const ids = JSON.parse(new TextDecoder().decode(bytes));
-        return Array.isArray(ids) && ids.length ? ids : null;
+        const bytes = await readFileBytes(Gio.File.new_for_path(path));
+        return JSON.parse(new TextDecoder().decode(bytes));
     } catch {
         return null;
     }
 }
 
-export function publishVisibleOrder(appIds) {
-    GLib.mkdir_with_parents(GLib.path_get_dirname(VISIBLE_ORDER_PATH), RUNTIME_DIR_MODE);
-    Gio.File.new_for_path(VISIBLE_ORDER_PATH).replace_contents_bytes_async(
-        new GLib.Bytes(new TextEncoder().encode(JSON.stringify(appIds))),
-        null, false, Gio.FileCreateFlags.REPLACE_DESTINATION, null,
-        (file, res) => {
-            try {
-                file.replace_contents_finish(res);
-            } catch { /* runtime dir gone, prefs fall back to config order */ }
-        });
+let _isRuntimeDirMade = false;
+
+// Every rewrite wakes each prefs watcher and flickers what it shows, so the
+// same content is not written twice
+const _lastPublished = new Map();
+
+// A disable deletes what the next enable writes again. Each path runs its
+// writes and deletes in call order, so a late delete never wipes a new file.
+const _runtimeFileQueues = new Map();
+
+function _publishRuntimeJson(path, value) {
+    const json = JSON.stringify(value);
+    if (_lastPublished.get(path) === json)
+        return;
+    _lastPublished.set(path, json);
+    _queueRuntimeFileOp(path, async () => {
+        try {
+            await _makeRuntimeDir();
+            await Gio.File.new_for_path(path).replace_contents_async(
+                new GLib.Bytes(new TextEncoder().encode(json)),
+                null, false, Gio.FileCreateFlags.REPLACE_DESTINATION, null);
+        } catch {
+            // Runtime dir gone, prefs fall back to the config meanwhile and
+            // the next publish makes the folder again
+            _isRuntimeDirMade = false;
+            if (_lastPublished.get(path) === json)
+                _lastPublished.delete(path);
+        }
+    });
 }
 
-export function clearVisibleOrder() {
+// XDG_RUNTIME_DIR is 0700 by spec, so the folder needs no mode of its own
+async function _makeRuntimeDir() {
+    if (_isRuntimeDirMade)
+        return;
     try {
-        Gio.File.new_for_path(VISIBLE_ORDER_PATH).delete(null);
-    } catch { /* never written */ }
+        await Gio.File.new_for_path(RUNTIME_DIR).make_directory_async(GLib.PRIORITY_DEFAULT, null);
+    } catch (e) {
+        if (!e.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.EXISTS))
+            throw e;
+    }
+    _isRuntimeDirMade = true;
+}
+
+function _deleteRuntimeFile(path) {
+    _lastPublished.delete(path);
+    _queueRuntimeFileOp(path, async () => {
+        try {
+            await Gio.File.new_for_path(path).delete_async(GLib.PRIORITY_DEFAULT, null);
+        } catch { /* never written */ }
+    });
+}
+
+function _queueRuntimeFileOp(path, op) {
+    const previous = _runtimeFileQueues.get(path) ?? Promise.resolve();
+    _runtimeFileQueues.set(path, previous.then(op));
 }
 
 export function orderedAppIds(settings) {

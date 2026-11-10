@@ -4,6 +4,7 @@ import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import {gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
 
 import {moveActorToIndex} from '../actorPlacement.js';
+import {mainPanelBoxes} from '../panelCopies.js';
 
 const TRAY_ROLE = 'bti-tray';
 
@@ -31,20 +32,16 @@ export const TrayButton = GObject.registerClass({GTypeName: 'BetterTrayIconsTray
 
 // The shell refuses a second registration for the same role, so a later
 // position change moves the container the way the panel's own _addToPanelBox
-// does.
-export function placeIndicatorInPanel(trayButton, settings) {
+// does. A mirror on another monitor's panel only ever moves.
+export function placeIndicatorInPanel(trayButton, settings, copy = null) {
     const boxName = settings.get_string('tray-position');
     const order = settings.get_int('tray-order');
 
-    if (Main.panel.statusArea[TRAY_ROLE] !== trayButton) {
+    if (!copy && Main.panel.statusArea[TRAY_ROLE] !== trayButton) {
         Main.panel.addToStatusArea(TRAY_ROLE, trayButton, order, boxName);
         return;
     }
 
-    const boxes = {
-        left: Main.panel._leftBox,
-        center: Main.panel._centerBox,
-        right: Main.panel._rightBox,
-    };
-    moveActorToIndex(trayButton.container, boxes[boxName] ?? Main.panel._rightBox, order);
+    const boxes = copy?.boxes ?? mainPanelBoxes();
+    moveActorToIndex(trayButton.container, boxes[boxName] ?? boxes.right, order);
 }

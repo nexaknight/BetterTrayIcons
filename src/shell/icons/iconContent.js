@@ -17,8 +17,9 @@ const BADGE_TEXT_PADDING_X_PX = 3;
 const EMOJI_GLYPH_ICON_RATIO = 0.83;
 
 export function attachStatusIcon(actor) {
+    // No system-status-icon class, the theme pads it under #panel only and
+    // the icon would sit wider in the panel than in the popup.
     const icon = new St.Icon({
-        style_class: 'system-status-icon',
         x_align: Clutter.ActorAlign.CENTER,
         y_align: Clutter.ActorAlign.CENTER,
     });

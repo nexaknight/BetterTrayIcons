@@ -312,7 +312,8 @@ export class SniWatcher {
                     itemId => this._onItemDestroyed(itemId),
                     actor => this._indicator._handleIconClick(actor),
                     forwardDragStateToIndicator(this._indicator),
-                    () => this._indicator.queueUpdateLayout()
+                    () => this._indicator.queueUpdateLayout(),
+                    () => this._indicator.queueShownIconsPublish()
                 );
 
                 item.id = id;

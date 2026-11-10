@@ -1,4 +1,6 @@
-import {readProcFile} from '../../shared/asyncIo.js';
+import GLib from 'gi://GLib';
+
+import {fileExists, readProcFile} from '../../shared/asyncIo.js';
 
 const APPIMAGE_VERSION_TOKEN_RE = /^v?\d/;
 
@@ -18,6 +20,18 @@ const SNAP_CGROUP_RE = /\/snap\.([^./]+)\./;
 const FLATPAK_CGROUP_RE = /\/app-flatpak-(.+)-\d+\.scope/;
 
 const FLATPAK_INFO_NAME_RE = /^name=(.+)$/m;
+
+// A flatpak sees its own deployment at /app. On the host that tree sits in
+// the per-user or the system installation, whichever holds the app.
+const FLATPAK_APP_MOUNT = '/app/';
+const FLATPAK_INSTALLATIONS = [`${GLib.get_user_data_dir()}/flatpak`, '/var/lib/flatpak'];
+
+// Launchers start an app in a scope named after its desktop id and its first
+// pid, and every helper process the app spawns stays in that scope.
+const APP_SCOPE_RE = /\/app-(?:gnome-|flatpak-)?(.+)-(\d+)\.scope$/m;
+
+// The session id is the fourth field after the command name in /proc/<pid>/stat
+const STAT_SESSION_FIELD = 3;
 
 // systemd escapes anything outside [A-Za-z0-9:_.] in a unit name, so an app id
 // carrying a dash arrives as \x2d.
@@ -54,6 +68,38 @@ export async function resolvePackaging({pid, binaryPath = null, appImageName = n
     // native, and its sandbox manifest still names it.
     const sandboxed = await _flatpakIdFromSandbox(pid);
     return sandboxed ? {kind: 'flatpak', id: sandboxed} : null;
+}
+
+// Apps like Dropbox name an IconThemePath under /app, a folder only their
+// sandbox has
+export async function findHostPath(path, packaging) {
+    if (packaging?.kind !== 'flatpak' || !path?.startsWith(FLATPAK_APP_MOUNT))
+        return null;
+    const inApp = path.slice(FLATPAK_APP_MOUNT.length);
+    const candidates = FLATPAK_INSTALLATIONS.map(root =>
+        `${root}/app/${packaging.id}/current/active/files/${inApp}`);
+    const found = await Promise.all(candidates.map(candidate => fileExists(candidate)));
+    return candidates[found.indexOf(true)] ?? null;
+}
+
+export async function scopeDesktopId(pid) {
+    const cgroup = await readProcFile(pid, 'cgroup');
+    const scope = cgroup?.match(APP_SCOPE_RE);
+    if (!scope)
+        return null;
+    if (await _isStartedFromTerminalIn(pid, Number(scope[2]), cgroup))
+        return null;
+    return `${_unescapeUnitName(scope[1])}.desktop`;
+}
+
+// A terminal built into an app, VS Code's for one, runs its shell in the app's
+// scope as a session of its own. What that shell starts is not the app.
+async function _isStartedFromTerminalIn(pid, scopePid, cgroup) {
+    const stat = await readProcFile(pid, 'stat');
+    const session = Number(stat?.slice(stat.lastIndexOf(')') + 2).split(' ')[STAT_SESSION_FIELD]);
+    if (!session || session === pid || session === scopePid)
+        return false;
+    return await readProcFile(session, 'cgroup') === cgroup;
 }
 
 // The first token always stays, names like 4K-Video-Downloader start with a

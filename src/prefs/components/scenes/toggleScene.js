@@ -47,7 +47,8 @@ function _bindToggleClicks(settings, toggle) {
     let isOpen = false;
     click.connect('released', () => {
         isOpen = !isOpen;
-        if (!settings.get_boolean(toggleIconKey(settings, 'toggle-icon-rotate'))) {
+        const isRotating = settings.get_boolean(toggleIconKey(settings, 'toggle-icon-rotate'));
+        if (!isRotating) {
             toggle.icon_name = toggleIconName(settings, isOpen ? 'toggle-icon-active-name' : 'toggle-icon-name');
             return;
         }
@@ -57,20 +58,6 @@ function _bindToggleClicks(settings, toggle) {
             toggle.remove_css_class('open');
     });
     toggle.add_controller(click);
-}
-
-function _toggleOpenCss(settings, scopeClass) {
-    const key = name => toggleIconKey(settings, name);
-    if (!settings.get_boolean(key('toggle-icon-rotate')))
-        return '';
-    const selector = `.${scopeClass}-toggle`;
-    const degrees = Number.parseInt(settings.get_string(key('toggle-icon-rotate-angle')), 10);
-    const angle = settings.get_boolean(key('toggle-icon-rotate-reverse')) ? -degrees : degrees;
-    const transition = settings.get_boolean(key('toggle-icon-rotate-animate'))
-        ? ` ${selector} { transition: -gtk-icon-transform ${settings.get_int(key('toggle-icon-rotate-duration'))}ms ease-out` +
-            ` ${settings.get_int(key('toggle-icon-rotate-delay'))}ms; }`
-        : '';
-    return `${transition} ${selector}.open { -gtk-icon-transform: rotate(${angle}deg); }`;
 }
 
 function _toggleCss(settings, scopeClass) {
@@ -91,6 +78,20 @@ function _toggleCss(settings, scopeClass) {
     }
 
     return `${selector} { ${stockIconStyle(stockForeground(settings, 'toggle-icon-color-split'))} }`;
+}
+
+function _toggleOpenCss(settings, scopeClass) {
+    const keyFor = name => toggleIconKey(settings, name);
+    if (!settings.get_boolean(keyFor('toggle-icon-rotate')))
+        return '';
+    const selector = `.${scopeClass}-toggle`;
+    const degrees = Number.parseInt(settings.get_string(keyFor('toggle-icon-rotate-angle')), 10);
+    const angle = settings.get_boolean(keyFor('toggle-icon-rotate-reverse')) ? -degrees : degrees;
+    const transition = settings.get_boolean(keyFor('toggle-icon-rotate-animate'))
+        ? ` ${selector} { transition: -gtk-icon-transform ${settings.get_int(keyFor('toggle-icon-rotate-duration'))}ms ease-out` +
+            ` ${settings.get_int(keyFor('toggle-icon-rotate-delay'))}ms; }`
+        : '';
+    return `${transition} ${selector}.open { -gtk-icon-transform: rotate(${angle}deg); }`;
 }
 
 function _toggleInheritsIconStyle(settings) {

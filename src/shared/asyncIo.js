@@ -13,7 +13,8 @@ promisify(Gio.File.prototype,
     'query_info_async',
     'read_async',
     'replace_async',
-    'delete_async');
+    'delete_async',
+    'make_directory_async');
 promisify(Gio.FileEnumerator.prototype, 'next_files_async', 'close_async');
 promisify(Gio.InputStream.prototype, 'read_bytes_async');
 promisify(Gio.OutputStream.prototype, 'splice_async');

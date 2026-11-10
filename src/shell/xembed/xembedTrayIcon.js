@@ -9,10 +9,11 @@ import {setIconContent} from '../icons/iconContent.js';
 import {clearIds, disconnectSignal, disconnectAll, disposeAll, removeTimer, ruleDispatcher} from '../../shared/lifecycle.js';
 import {DRAG_SETTING_KEYS, setupIconDragSource, syncDragEnabled} from '../features/dragAndDrop.js';
 import {applyTitle, createTrayActor, syncTooltip} from '../features/tooltip.js';
-import {applyPanelClasses, connectColorSetChanges, syncHoverStyle, trayIconStyleFor} from '../trayStyle.js';
+import {applyIconChrome, connectColorSetChanges, syncHoverStyle, trayIconStyleFor} from '../trayStyle.js';
 import {connectSurfaceChanges} from '../actorPlacement.js';
 import {isDisposed} from '../disposal.js';
-import {deriveAppMeta} from './wineIdentity.js';
+import {deriveAppMeta, prefixWindowsInFront} from './wineIdentity.js';
+import {inFrontWindowActionFor} from '../features/launcherEntries.js';
 import {TRAY_STYLE_KEYS} from '../../const.js';
 import {withLightTwins} from '../../shared/colorVariant.js';
 
@@ -52,6 +53,7 @@ export class XEmbedTrayIcon {
 
         this.appId = meta.appId;
         this._metaTitle = meta.title;
+        this._wineKey = meta.wineKey;
         this.id = `xembed:${this.appId ?? 'unknown'}:${rawIcon.pid}:${++_wrapperSerial}`;
 
         const {actor, tooltip} = createTrayActor(this._settings);
@@ -59,6 +61,10 @@ export class XEmbedTrayIcon {
         this._tooltip = tooltip;
         this.actor._appId = this.appId;
         this.actor._isXembed = true;
+        this.actor._trayAction = (action, event, anchor = this.actor) => this._forwardRowClick(action, event, anchor);
+        // The menu lives in the Win32 app, a row hands the click on to it
+        this.actor._trayFillMenu = () => false;
+        this.actor._trayRestyle = () => this._updateStyle();
 
         this._iconBox = new St.Widget({layout_manager: new Clutter.BinLayout()});
         this._iconBox.add_child(rawIcon);
@@ -165,12 +171,22 @@ export class XEmbedTrayIcon {
         });
     }
 
+    // The embedded window only understands pointer clicks, a key press on a
+    // Background Apps row has nothing to forward.
+    _forwardRowClick(action, event, anchor) {
+        const type = event?.type();
+        if (type !== Clutter.EventType.BUTTON_PRESS && type !== Clutter.EventType.BUTTON_RELEASE)
+            return;
+        this._forwardClick(event, action === 'menu');
+        this._onAfterClick(anchor);
+    }
+
     // Right click waits for an idle so Mutter has released its implicit grabs
     // before Wine raises its context menu. That covers the click race on X11,
     // not the XWayland XGrabPointer issue.
     _forwardClick(event, isRightClick) {
         if (!isRightClick) {
-            this._icon.click(event);
+            this._forwardLeftClick(event);
             return;
         }
         // Clutter recycles event objects, so copy before deferring.
@@ -209,6 +225,32 @@ export class XEmbedTrayIcon {
         this._icon.set_translation(offsetX, offsetY, 0);
         // The shell passes the position on to X from its allocate
         this._icon.queue_relayout();
+    }
+
+    _forwardLeftClick(event) {
+        const inFrontAction = inFrontWindowActionFor(this._settings, this.appId);
+        if (!inFrontAction || event.get_button() !== Clutter.BUTTON_PRIMARY) {
+            this._icon.click(event);
+            return;
+        }
+        const eventCopy = event.copy();
+        this._windowsInFront().then(windows => {
+            if (this._isDestroyed)
+                return;
+            const frontWindow = global.display.focus_window;
+            if (windows?.includes(frontWindow))
+                inFrontAction(windows, frontWindow);
+            else
+                this._icon.click(eventCopy);
+        });
+    }
+
+    // A Wine tray mostly belongs to a helper process, so its windows come
+    // through the prefix. Any other X11 tray app owns its windows itself.
+    _windowsInFront() {
+        if (this._wineKey)
+            return prefixWindowsInFront(this._wineKey, this._icon.pid, null);
+        return Promise.resolve(global.display.list_all_windows().filter(window => window.get_pid() === this._icon.pid));
     }
 
     _applyIconSize() {
@@ -255,7 +297,7 @@ export class XEmbedTrayIcon {
             return;
 
         const {enableCustom, baseStyle, hoverStyle} = trayIconStyleFor(this.actor, this._settings, {withColors: false});
-        applyPanelClasses(this.actor, null, enableCustom);
+        applyIconChrome(this.actor, this._settings, enableCustom);
 
         this.actor._baseStyle = baseStyle;
         this.actor._hoverStyle = hoverStyle;

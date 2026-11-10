@@ -2,10 +2,10 @@ import Adw from 'gi://Adw';
 import GObject from 'gi://GObject';
 import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
-import {ACTION_DROPDOWN_WIDTH_PX, createComplexActionRow, createComboRow, createActionRow} from '../components/row.js';
+import {ACTION_DROPDOWN_WIDTH_PX, PANEL_DISPLAY_MODES, bindVisibility, createComplexActionRow, createComboRow, createActionRow} from '../components/row.js';
 import {createResetButton} from '../components/page.js';
 import {GEAR_ICON_NAME} from '../components/icon.js';
-import {createIconButton} from '../components/button.js';
+import {createHelpButton, createIconButton} from '../components/button.js';
 import ConfigDialog from '../dialogs/configDialog.js';
 import {TOUCH_BINDING} from '../../const.js';
 
@@ -44,7 +44,7 @@ export class ActionPage extends Adw.PreferencesPage {
             _('Toggle Menu'),
             _('Cycle Icons'),
             _('Action Menu'),
-            _('Open Settings'),
+            _('Open BTI Settings'),
             _('None'),
         ];
         this._toggleValues = ['toggle', 'cycle', 'action-menu', 'prefs', 'nothing'];
@@ -74,7 +74,6 @@ export class ActionPage extends Adw.PreferencesPage {
     _createTrayClickGroup() {
         const group = new Adw.PreferencesGroup({
             title: _('Tray Icon Clicks'),
-            description: _('Open the gear for double-click and long-press.'),
         });
         this.add(group);
 
@@ -86,6 +85,9 @@ export class ActionPage extends Adw.PreferencesPage {
             longValues: this._trayLongValues,
         });
 
+        // Only Quick Settings puts the icons in a list that scrolls
+        const scrollHelp = createHelpButton(_('Forward to the App sends your mouse wheel to the app behind the icon. Apps that support it react, for example by switching devices or changing the volume. Most apps take the wheel and do nothing with it.\n\nIn Background Apps mode the wheel then no longer scrolls the Quick Settings list while the pointer is over such an icon, because the event goes to the app. To keep the list scrolling, set this to None and pick Forward only for the apps that use it, in their own settings under Applications.'), {compact: true});
+        bindVisibility(this._settings, 'display-mode', scrollHelp, 'background-apps');
         group.add(createComboRow({
             title: _('Scroll'),
             settings: this._settings,
@@ -93,12 +95,14 @@ export class ActionPage extends Adw.PreferencesPage {
             options: [_('Forward to the App'), _('None')],
             values: ['forward', 'nothing'],
             width: ACTION_DROPDOWN_WIDTH_PX,
+            help: scrollHelp,
         }));
     }
 
     _createToggleClickGroup() {
         const group = new Adw.PreferencesGroup({title: _('Toggle Button Clicks')});
         this.add(group);
+        bindVisibility(this._settings, 'display-mode', group, PANEL_DISPLAY_MODES);
 
         this._addClickRows(group, {
             keyPrefix: 'toggle-action',
@@ -117,14 +121,17 @@ export class ActionPage extends Adw.PreferencesPage {
             values: ['cycle', 'nothing'],
         }));
 
-        group.add(createComboRow({
+        // The drawer is no menu, the action menu is the only one left to pick
+        const hoverRow = createComboRow({
             title: _('Menu on Hover'),
-            subtitle: _('Which menu opens when you hover the toggle button'),
+            subtitle: _('Which menu opens when you move onto the toggle button while another panel menu is open'),
             settings: this._settings,
             key: 'toggle-hover-menu',
             options: [_('Overflow Popup'), _('Action Menu')],
             values: ['overflow', 'action-menu'],
-        }));
+        });
+        bindVisibility(this._settings, 'display-mode', hoverRow, 'popup');
+        group.add(hoverRow);
     }
 
     _addClickRows(group, {keyPrefix, options, values, longOptions, longValues}) {

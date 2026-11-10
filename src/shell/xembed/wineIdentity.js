@@ -26,7 +26,7 @@ export async function deriveAppMeta(rawIcon, cancellable) {
     const wmClass = safeProp(rawIcon, 'wm_class');
     const cleanWmClass = wmClass.replace(APP_ID_EXE_SUFFIX_RE, '');
     const xTitle = safeProp(rawIcon, 'title');
-    const identity = await gatherWineIdentity(rawIcon, cancellable);
+    const identity = await gatherWineIdentity(rawIcon.pid, cancellable);
 
     const isSteamWmClass = STEAM_APP_WMCLASS_RE.test(wmClass);
     const isPlaceholderWmClass = PLACEHOLDER_WMCLASS_RE.test(wmClass);
@@ -54,15 +54,53 @@ export async function deriveAppMeta(rawIcon, cancellable) {
         wmName || identity.launcherName || xTitle || identity.prefixId || cleanWmClass;
 
     const appId = sanitizeAppId(candidate);
-    return {appId, isWine, isProton, title};
+    return {appId, isWine, isProton, title, wineKey: identity.steamAppId ?? identity.prefixId};
+}
+
+async function gatherWineIdentity(startPid, cancellable) {
+    const identity = await walkWineIdentity(startPid, cancellable);
+
+    // Pressure-vessel runs Wine in its own pid namespace, so the pid X11
+    // reports doesn't exist on the host and the walk sees nothing.
+    if (!identity.isWine && !identity.steamAppId && !identity.prefixId)
+        await adoptNamespacedIdentity(identity, startPid, cancellable);
+
+    return identity;
+}
+
+// Wine's tray icon belongs to the prefix's explorer.exe, so the app behind it
+// is found through the prefix its windows run in. Null when the focused
+// window runs elsewhere or several processes share the prefix, then nothing
+// tells whose icon was clicked.
+export async function prefixWindowsInFront(wineKey, trayPid, cancellable) {
+    const focused = global.display.focus_window;
+    if (!wineKey || !focused)
+        return null;
+
+    const windows = global.display.list_all_windows().filter(window => window.get_pid() !== trayPid);
+    const pids = [...new Set(windows.map(window => window.get_pid()))];
+    const keys = await Promise.all(pids.map(pid => wineKeyForPid(pid, cancellable)));
+    const prefixPids = pids.filter((_pid, i) => keys[i] === wineKey);
+
+    if (prefixPids.length !== 1 || focused.get_pid() !== prefixPids[0])
+        return null;
+    return windows.filter(window => window.get_pid() === prefixPids[0]);
+}
+
+// Mutter reads an X11 window's pid through XRes, which reports the host pid,
+// so the namespace lookup the tray pid needs never applies here.
+async function wineKeyForPid(pid, cancellable) {
+    const identity = await walkWineIdentity(pid, cancellable);
+    return identity.steamAppId ?? identity.prefixId ??
+        (identity.isWine ? DEFAULT_WINE_PREFIX_ID : null);
 }
 
 // Environ is inherited across fork(), so the parent chain reaches the Proton
 // launcher even when a wineserver helper registered the icon.
-async function gatherWineIdentity(rawIcon, cancellable) {
+async function walkWineIdentity(startPid, cancellable) {
     const identity = newIdentity();
 
-    let pid = rawIcon.pid;
+    let pid = startPid;
     /* eslint-disable no-await-in-loop */
     for (let depth = 0; depth < PROC_WALK_MAX_DEPTH && pid && pid !== 1; depth++) {
         mergeEnvIdentity(identity, await readEnviron(pid, cancellable));
@@ -76,12 +114,6 @@ async function gatherWineIdentity(rawIcon, cancellable) {
         pid = await readPpid(pid, cancellable);
     }
     /* eslint-enable no-await-in-loop */
-
-    // Pressure-vessel runs Wine in its own pid namespace, so the pid X11
-    // reports doesn't exist on the host and the walk above sees nothing.
-    if (!identity.isWine && !identity.steamAppId && !identity.prefixId)
-        await adoptNamespacedIdentity(identity, rawIcon.pid, cancellable);
-
     return identity;
 }
 

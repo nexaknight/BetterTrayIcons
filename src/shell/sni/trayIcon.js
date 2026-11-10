@@ -15,20 +15,23 @@ import {
     formatAppName,
     isVolatileIconName,
     unreadBadgeEnabled,
+    SCROLL_ACTION_DEFAULT,
 } from '../../shared/appConfig.js';
 import {clearIds, debounceTo, disconnectSignal, disconnectAll, disposeAll, removeTimer, ruleDispatcher} from '../../shared/lifecycle.js';
 import {getItemAddress, refreshPropertyOnProxy, refreshStringOnProxy} from '../dbusCalls.js';
 import {identifyApp, resolveTrayIcon} from '../icons/iconResolver.js';
 import {pickDisplayTitle} from '../identity/appId.js';
 import {forgetItem} from '../identity/itemSplit.js';
+import {scopeDesktopId} from '../identity/packaging.js';
 import {attachStatusIcon, setBadgeContent, setIconContent} from '../icons/iconContent.js';
 import {connectColorSetChanges, refreshTrayStyle, syncHoverStyle} from '../trayStyle.js';
 import {connectSurfaceChanges} from '../actorPlacement.js';
 import {isDisposed, trackDisposal} from '../disposal.js';
-import {createPanelMenu, menuAnchorFor, menuManagerFor, destroyMenuSafely, POPUP_ANIMATION_NONE} from '../popupMenus.js';
-import {addUnreadListener, raiseApp, runningApp, unreadTargets} from '../features/launcherEntries.js';
+import {createPanelMenu, menuAnchorFor, menuManagerFor, panelMenuManagerFor, destroyMenuSafely, keepsOverflowOpen, releaseMenuGrabs, restoreMenuGrabs, restoreMenuGrabsOnFocus, POPUP_ANIMATION_NONE} from '../popupMenus.js';
+import {addUnreadListener, inFrontActionFor, raiseApp, runningApp, unreadTargets} from '../features/launcherEntries.js';
 import {DBusMenuClient} from './dbusMenuClient.js';
-import {ClickController} from '../features/clickController.js';
+import {RemoteMenuPlacement} from './remoteMenuPlacement.js';
+import {bindTrayClicks} from '../features/clickController.js';
 import {DRAG_SETTING_KEYS, setupIconDragSource, syncDragEnabled} from '../features/dragAndDrop.js';
 import {applyTitle, createTrayActor, syncTooltip} from '../features/tooltip.js';
 import {TRAY_STYLE_KEYS} from '../../const.js';
@@ -47,6 +50,9 @@ const MENU_DROP_DELAY_MS = 0;
 
 const SCROLL_ACTION_FORWARD = 'forward';
 
+// Never launched, the activation token only needs an app info with a name
+const PLACEHOLDER_COMMAND_LINE = 'true';
+
 // The color keys decide the tint that goes into a symbolic icon's bytes,
 // which no restyle can change.
 const ICON_RESOLVE_KEYS = Object.freeze([
@@ -57,7 +63,7 @@ const ICON_RESOLVE_KEYS = Object.freeze([
 ]);
 
 export class TrayIcon {
-    constructor(menuInterfaceXml, busName, objectPath, settings, proxy, onReady, onDestroy, onCloseMenu, onDragStateChange = null, onStatusChange) {
+    constructor(menuInterfaceXml, busName, objectPath, settings, proxy, onReady, onDestroy, onCloseMenu, onDragStateChange = null, onStatusChange, onShownIconChange) {
         this._menuInterfaceXml = menuInterfaceXml;
         this.busName = busName;
         this._objectPath = objectPath;
@@ -68,6 +74,7 @@ export class TrayIcon {
         this._onCloseMenu = onCloseMenu;
         this._onDragStateChange = onDragStateChange;
         this._onStatusChange = onStatusChange;
+        this._onShownIconChange = onShownIconChange;
 
         this.id = getItemAddress(busName, objectPath);
         this.appId = null;
@@ -90,13 +97,16 @@ export class TrayIcon {
         this._menu = null;
         this._menuDropId = 0;
         this._activateId = 0;
+        this._scopeDesktopId = null;
         this._acceptsActivationToken = true;
         this._menuClient = null;
+        this._remoteMenuPlacement = null;
         this._tooltip = null;
         this._clickController = null;
-        this._lastCloseTime = 0;
+        this._lastClose = {anchor: null, time: 0};
         this._scrollCarryX = 0;
         this._scrollCarryY = 0;
+        this._acceptsScroll = true;
 
         this._setup();
     }
@@ -110,6 +120,7 @@ export class TrayIcon {
         try {
             const identity = await identifyApp(this._proxy, this.busName, this._settings,
                 appId => this._rekey(appId));
+            this._scopeDesktopId = await scopeDesktopId(identity.pid);
             if (this._isDestroyed) {
                 forgetItem(this.id);
                 return;
@@ -120,6 +131,7 @@ export class TrayIcon {
             this.appId ??= identity.appId;
             this._identitySeed = identity.seed;
             this._pid = identity.pid;
+            this._packaging = identity.packaging;
             this._processName = identity.processName;
             this.actor._appId = this.appId;
 
@@ -293,15 +305,15 @@ export class TrayIcon {
             onForwardedDragStateChange: this._onDragStateChange,
         });
 
-        this._clickController = new ClickController(
-            this.actor,
-            this._settings,
-            'tray',
-            action => this._executeAction(action),
-            {propagateEvent: true}
-        );
+        // A Background Apps row runs the same paths as a click on the icon.
+        // A mirror on another monitor's panel passes its own item, the menu
+        // and the popup that closes after the click are that item's.
+        this.actor._trayAction = (action, _event, anchor) => this._executeAction(action, anchor);
+        this.actor._trayFillMenu = menu => this._fillMenu(menu);
+        this.actor._trayRestyle = () => refreshTrayStyle(this.actor, this._iconActor, this._settings);
 
-        this._draggable.setClickController(this._clickController);
+        this._clickController = bindTrayClicks(this.actor, this._settings, this._draggable,
+            action => this._executeAction(action));
 
         this.actor.connect('scroll-event', (_actor, event) => this._onScroll(event));
 
@@ -309,17 +321,26 @@ export class TrayIcon {
     }
 
     // Clutter sends a smooth and a discrete event per notch, reading both
-    // would double every step.
+    // would double every step. The discrete one still stops here, a list
+    // holding the icon would scroll on it.
     _onScroll(event) {
-        if (this._settings.get_string('tray-action-scroll') !== SCROLL_ACTION_FORWARD)
+        const isForwarding = this._acceptsScroll && this._scrollAction() === SCROLL_ACTION_FORWARD;
+        if (!isForwarding)
             return Clutter.EVENT_PROPAGATE;
         if (event.get_scroll_direction() !== Clutter.ScrollDirection.SMOOTH)
-            return Clutter.EVENT_PROPAGATE;
+            return Clutter.EVENT_STOP;
 
         const [dx, dy] = event.get_scroll_delta();
         this._scrollCarryX = this._sendScroll(this._scrollCarryX + dx, 'horizontal');
         this._scrollCarryY = this._sendScroll(this._scrollCarryY + dy, 'vertical');
         return Clutter.EVENT_STOP;
+    }
+
+    // Most items take Scroll and do nothing with it, so only the user knows
+    // which app uses the wheel. The app's own pick beats the global one.
+    _scrollAction() {
+        const ownAction = getAppConfigValue(this._settings, this.appId, 'scroll_action', SCROLL_ACTION_DEFAULT);
+        return ownAction === SCROLL_ACTION_DEFAULT ? this._settings.get_string('tray-action-scroll') : ownAction;
     }
 
     _sendScroll(accumulated, orientation) {
@@ -328,13 +349,16 @@ export class TrayIcon {
             return accumulated;
 
         this._proxy.ScrollRemote(steps, orientation, (_result, err) => {
-            if (err)
-                warnOnce(`Scroll:${this.appId}`, `${this.id} does not answer Scroll: ${err.message}`);
+            if (!err)
+                return;
+            warnOnce(`Scroll:${this.appId}`, `${this.id} does not answer Scroll: ${err.message}`);
+            if (err.matches(Gio.DBusError, Gio.DBusError.UNKNOWN_METHOD))
+                this._acceptsScroll = false;
         });
         return accumulated - steps;
     }
 
-    _executeAction(action) {
+    _executeAction(action, anchor = this.actor) {
         // 'drag-drop' is a config marker, not a click action. The drag starts
         // on mouse motion, so there's nothing to fire on long-press release.
         if (this._isDestroyed || action === 'nothing' || action === 'drag-drop')
@@ -342,59 +366,75 @@ export class TrayIcon {
 
         switch (action) {
         case 'activate':
-            this._activate();
+            this._activate(anchor);
             break;
         case 'secondary':
-            this._fireAndClose('SecondaryActivateRemote');
+            this._fireAndClose('SecondaryActivateRemote', anchor);
             break;
-        case 'menu':
+        case 'menu': {
             // The click that closes a popup also fires here, which would
-            // toggle it right back on.
-            if (GLib.get_monotonic_time() - this._lastCloseTime < MENU_REOPEN_GUARD_MS * 1000)
-                return;
-            this._contextMenu();
+            // toggle it right back on. A click on another panel is a new one.
+            const isClosingClick = this._lastClose.anchor === anchor &&
+                GLib.get_monotonic_time() - this._lastClose.time < MENU_REOPEN_GUARD_MS * GLib.TIME_SPAN_MILLISECOND;
+            if (!isClosingClick)
+                this._contextMenu(anchor);
             break;
+        }
         }
     }
 
     // Activate on an item whose window sits on another workspace did nothing
     // visible, so raise through the shell instead. A focused app still gets
     // the Activate, tray apps toggle their window on it.
-    _activate() {
+    _activate(anchor) {
         const app = runningApp({
             pid: this._pid,
             appId: this.appId,
             packagingKind: getAppConfigValue(this._settings, this.appId, 'packaging'),
+            scopeDesktopId: this._scopeDesktopId,
         });
         if (!app) {
-            this._fireAndClose('ActivateRemote');
+            this._releaseMenuFocus(anchor);
+            debounceTo(this, '_activateId', 0, () => this._fireAndClose('ActivateRemote', anchor, null, true));
             return;
         }
         if (app !== Shell.WindowTracker.get_default().focus_app) {
-            this._onCloseMenu(this.actor);
+            this._onCloseMenu(anchor);
             raiseApp(app);
             return;
         }
-        const shouldMinimize = this._settings.get_boolean('minimize-when-focused') ||
-            getAppConfigValue(this._settings, this.appId, 'minimize_when_focused', false);
-        if (shouldMinimize) {
-            this._onCloseMenu(this.actor);
-            app.get_windows().forEach(window => window.minimize());
+        const inFrontAction = inFrontActionFor(this._settings, this.appId);
+        if (inFrontAction) {
+            this._onCloseMenu(anchor);
+            inFrontAction(app);
             return;
         }
-        // The app gets keyboard focus back from the popup grab only on the
-        // next turn, and without it reads the Activate as show, not toggle.
-        const menu = Main.panel.menuManager.activeMenu;
-        if (menu?.box.contains(this.actor))
-            menu.close(POPUP_ANIMATION_NONE);
-        debounceTo(this, '_activateId', 0, () => this._fireAndClose('ActivateRemote'));
+        this._releaseMenuFocus(anchor);
+        debounceTo(this, '_activateId', 0, () => this._fireAndClose('ActivateRemote', anchor, app));
+    }
+
+    // The app gets the keyboard from the popup grab, without it a toggling app
+    // reads the Activate as show and a new window cannot take focus. Quick
+    // Settings holds its item menus beside its box, not in it.
+    _releaseMenuFocus(anchor) {
+        const managers = anchor._trayGrabManagers?.() ?? [Main.panel.menuManager];
+        if (!managers[0].activeMenu?.actor.contains(anchor))
+            return;
+        releaseMenuGrabs(managers);
     }
 
     // Items without Activate answer UnknownMethod, the click did nothing
     // and closing would gain nothing, so the close waits for the reply.
-    _fireAndClose(method) {
-        this._provideActivationToken();
+    _fireAndClose(method, anchor, app = null, opensWindow = false) {
+        this._provideActivationToken(app);
         this._proxy[method](0, 0, (_result, err) => {
+            // A closing menu pops its grab, so it has to be back before the
+            // close. Only a menu that stays open waits for the new window.
+            const awaitsWindow = opensWindow && !err && keepsOverflowOpen(this._settings);
+            if (awaitsWindow)
+                restoreMenuGrabsOnFocus();
+            else
+                restoreMenuGrabs();
             if (this._isDestroyed)
                 return;
             const isFailureKept = err && this._settings.get_boolean('keep-popup-on-failed-click');
@@ -404,20 +444,25 @@ export class TrayIcon {
             }
             // With keep-popup-after-click this reopens the popup the
             // focused-app path closed before the Activate.
-            if (isFailureKept && !this._settings.get_boolean('keep-popup-after-click'))
+            // A mirror taken down meanwhile leaves no popup to close
+            if (isDisposed(anchor) || (isFailureKept && !keepsOverflowOpen(this._settings)))
                 return;
-            this._onCloseMenu(this.actor);
+            this._onCloseMenu(anchor);
         });
     }
 
     // On Wayland an app can only focus the window it shows with an activation
     // token. Bus calls stay in order, so the token lands before the Activate.
-    _provideActivationToken() {
+    _provideActivationToken(app) {
         if (!this._acceptsActivationToken)
             return;
 
         const context = global.create_app_launch_context(global.display.get_current_time_roundtrip(), -1);
-        const token = context.get_startup_notify_id(null, []);
+        // Mutter 49.0 reads the app info's name without a null check and the
+        // shell segfaults, so the token always gets one
+        const appInfo = app?.get_app_info() ??
+            Gio.AppInfo.create_from_commandline(PLACEHOLDER_COMMAND_LINE, this.id, Gio.AppInfoCreateFlags.NONE);
+        const token = context.get_startup_notify_id(appInfo, []);
         this._proxy.ProvideXdgActivationTokenRemote(token, (_result, err) => {
             if (!err)
                 return;
@@ -443,12 +488,12 @@ export class TrayIcon {
         // parks the icon on a stale status or pixmap.
         const generation = ++this._updateGen;
 
-        const {gicon, iconName, detected, status, pixmapHash, unchanged, badge} = await resolveTrayIcon(
+        const {gicon, iconName, emoji, detected, status, pixmapHash, unchanged, badge, shownIcon} = await resolveTrayIcon(
             this._proxy,
             this._settings,
             this.appId,
             this._pixmapHash,
-            this._pid,
+            {pid: this._pid, packaging: this._packaging},
             this._iconTint()
         );
 
@@ -469,8 +514,10 @@ export class TrayIcon {
             this._onStatusChange();
         }
 
-        if (!unchanged)
-            setIconContent(this._iconActor, gicon, iconName || 'image-missing');
+        if (!unchanged) {
+            setIconContent(this._iconActor, {gicon, iconName: iconName || 'image-missing', emoji});
+            this._publishShownIcon(shownIcon ?? entry?.cached_icon_path, detected.iconName);
+        }
         // Also on unchanged frames, a count change reuses the cached pixmap.
         setBadgeContent(this.actor, this._settings, badge,
             badge ? entry?.badge_style : null);
@@ -486,6 +533,16 @@ export class TrayIcon {
                 updateData.icon_theme_path = detected.iconThemePath;
             updateAppConfig(this._settings, this.appId, updateData);
         }
+    }
+
+    // A pixmap has no name, so it goes out as the cached copy the shell keeps
+    // for the prefs anyway.
+    _publishShownIcon(icon, state) {
+        const shown = icon ? {icon, state: state ?? null} : null;
+        if (JSON.stringify(shown) === JSON.stringify(this.actor._shownIcon ?? null))
+            return;
+        this.actor._shownIcon = shown;
+        this._onShownIconChange();
     }
 
     // St resolves the accent keyword and the panel default that settings
@@ -551,7 +608,7 @@ export class TrayIcon {
         this._menuPath = path;
     }
 
-    async _contextMenu() {
+    async _contextMenu(anchor) {
         if (this._isMenuLoading)
             return;
         if (this._menu?.isOpen) {
@@ -559,40 +616,76 @@ export class TrayIcon {
             return;
         }
 
-        if (!this._menuPath) {
-            this._fallbackToRemoteContextMenu();
-            return;
-        }
-
         this._isMenuLoading = true;
         try {
+            // The path can arrive after the item registered
+            if (!this._menuPath)
+                await this._updateMenuPath();
+            if (this._isDestroyed || isDisposed(anchor))
+                return;
+            if (!this._menuPath) {
+                this._fallbackToRemoteContextMenu(anchor, 'no menu path');
+                return;
+            }
+
             await this._ensureMenuClient();
-            if (this._isDestroyed)
+            if (this._isDestroyed || isDisposed(anchor))
                 return;
 
-            this._createMenu();
-            await this._menuClient.buildMenu(this._menu);
-            if (this._isDestroyed) {
+            await this._buildMenu(anchor);
+            if (this._isDestroyed || isDisposed(anchor)) {
                 this._disposeMenu();
                 return;
             }
 
-            this._presentMenu();
+            this._presentMenu(anchor);
         } catch (e) {
-            warn(`Failed to open context menu for ${this.id}: ${e.message}`);
             this._disposeMenu();
             // An app can advertise a menu path and still serve a menu we
             // cannot build, its own ContextMenu still works.
-            this._fallbackToRemoteContextMenu();
+            this._fallbackToRemoteContextMenu(anchor, `menu failed to build, ${e.message}`);
         } finally {
             this._isMenuLoading = false;
         }
     }
 
-    _fallbackToRemoteContextMenu() {
+    // An inline Background Apps menu is built here but owned by its row
+    async _fillMenu(menu) {
+        if (!this._menuPath)
+            return false;
+        await this._ensureMenuClient();
+        await this._menuClient.buildMenu(menu);
+        if (menu.isEmpty() && await this._menuClient?.waitForLayout()) {
+            menu.removeAll();
+            await this._menuClient?.buildMenu(menu);
+        }
+        return !menu.isEmpty();
+    }
+
+    // A menu still empty on its first build often gets its layout a moment later
+    async _buildMenu(anchor) {
+        this._createMenu(anchor);
+        await this._menuClient.buildMenu(this._menu);
+        if (!this._menu.isEmpty() || !await this._menuClient?.waitForLayout())
+            return;
+        if (this._isDestroyed || isDisposed(anchor))
+            return;
+        this._createMenu(anchor);
+        await this._menuClient.buildMenu(this._menu);
+    }
+
+    // The app draws this menu itself, so a report of a centred or missing menu
+    // needs the reason in the journal
+    _fallbackToRemoteContextMenu(anchor, reason) {
         if (!this._proxy)
             return;
+        warn(`${this.id} (${this.appId}) shows its own menu, ${reason}`);
         const [x, y] = global.get_pointer();
+        disposeAll(this, 'cancel', '_remoteMenuPlacement');
+        if (this._pid)
+            this._remoteMenuPlacement = new RemoteMenuPlacement(this._pid, anchor);
+        // Shell menus sit above every app window and would hide the app's menu
+        panelMenuManagerFor(anchor).activeMenu?.close();
         this._proxy.ContextMenuRemote(x, y);
     }
 
@@ -604,7 +697,7 @@ export class TrayIcon {
             this._menuPath,
             this._menuInterfaceXml,
             this._settings,
-            this._onCloseMenu
+            menu => this._onCloseMenu(menu._trayAnchor ?? this.actor)
         );
         try {
             await this._menuClient.init();
@@ -616,21 +709,22 @@ export class TrayIcon {
         }
     }
 
-    _createMenu() {
+    _createMenu(anchor) {
         this._disposeMenu();
 
-        this._menu = createPanelMenu(menuAnchorFor(this.actor));
+        this._menu = createPanelMenu(menuAnchorFor(anchor));
+        this._menu._trayAnchor = anchor;
         trackDisposal(this._menu.actor);
 
         // An auto-hiding panel only stays put while menuManager.activeMenu is
         // set, held by this menu or by the open popup underneath.
-        menuManagerFor(this.actor, this._settings).addMenu(this._menu);
+        menuManagerFor(anchor, this._settings).addMenu(this._menu);
 
         this._menu.connect('open-state-changed', (menu, isOpen) => {
             if (isOpen)
                 return;
 
-            this._lastCloseTime = GLib.get_monotonic_time();
+            this._lastClose = {anchor, time: GLib.get_monotonic_time()};
 
             // A closed menu stays registered and still answers the manager's hover
             // switch, which reopens this stale copy instead of rebuilding it.
@@ -647,12 +741,12 @@ export class TrayIcon {
         this._menu = null;
     }
 
-    _presentMenu() {
+    _presentMenu(anchor) {
         // An app serving an empty menu would get a blank popup
         // instead of its own ContextMenu.
         if (this._menu.isEmpty()) {
             this._disposeMenu();
-            this._fallbackToRemoteContextMenu();
+            this._fallbackToRemoteContextMenu(anchor, 'empty menu layout');
             return;
         }
 
@@ -678,6 +772,7 @@ export class TrayIcon {
 
         this._disposeMenu();
         disposeAll(this, 'destroy', '_menuClient');
+        disposeAll(this, 'cancel', '_remoteMenuPlacement');
 
         if (!isDisposed(this.actor))
             this.actor.destroy();

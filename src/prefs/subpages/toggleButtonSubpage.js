@@ -3,30 +3,26 @@ import Gio from 'gi://Gio';
 import GObject from 'gi://GObject';
 import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
-import {connectScoped} from '../../shared/lifecycle.js';
+import {watchKeys} from '../../shared/lifecycle.js';
+import {DRAWER_TOGGLE_ICON_KEYS, TOGGLE_ICON_KEYS, drawerToggleIconKey} from '../../shared/toggleIconKeys.js';
 
-import {createSpinRow, createSegmentedRow, createIconPickerRow, createSwitchRow, bindGroupsVisible, createIconColorRows, createExpanderSection, createColorSetRow} from '../components/row.js';
+import {createRangeRow, createSegmentedRow, createIconEmojiPickerRow, createSwitchRow, bindGroupsVisible, bindVisibility, createIconColorRows, createExpanderSection, createColorSetRow} from '../components/row.js';
 import {buildPrefsWidget} from '../components/page.js';
 import {createSpacingGroup, createCustomStyleSwitchGroup, createShapeGroup} from '../components/group.js';
 import {createDialogGearButton} from '../components/button.js';
 import {createPreviewGroup} from '../components/preview.js';
 import {buildTogglePreview} from '../components/scenes/toggleScene.js';
-import IconPickerDialog from '../components/picker.js';
 import ConfigDialog from '../dialogs/configDialog.js';
 import {spacingLinkKey} from '../components/spacing.js';
 import {TRAY_ICON_STYLE_KEYS} from './trayIconsSubpage.js';
+import {ICON_SIZE_RANGE_PX} from '../../const.js';
 import {withLightTwins} from '../../shared/colorVariant.js';
 
 export const TOGGLE_STYLE_KEYS = Object.freeze([
+    'toggle-blur',
     'toggle-position',
-    'toggle-icon-name',
-    'toggle-icon-active-name',
-    'toggle-icon-rotate',
-    'toggle-icon-rotate-angle',
-    'toggle-icon-rotate-reverse',
-    'toggle-icon-rotate-animate',
-    'toggle-icon-rotate-duration',
-    'toggle-icon-rotate-delay',
+    ...TOGGLE_ICON_KEYS,
+    ...DRAWER_TOGGLE_ICON_KEYS,
     'toggle-icon-size',
     'toggle-padding-top',
     'toggle-padding-bottom',
@@ -54,13 +50,14 @@ export const TOGGLE_STYLE_KEYS = Object.freeze([
 ]);
 
 const TOGGLE_ICON_SIZE_MIN_PX = 8;
-const TOGGLE_ICON_SIZE_MAX_PX = 64;
 
 const ROTATE_TIMING_STEP_MS = 50;
 
 const ROTATE_ANIMATION_KEYS = ['toggle-icon-rotate', 'toggle-icon-rotate-animate'];
 
 const RECOMMENDED_TOGGLE_ICONS = [
+    'bti-previous-symbolic',
+    'bti-next-symbolic',
     'view-grid-symbolic',
     'view-app-grid-symbolic',
     'start-here-symbolic',
@@ -115,9 +112,10 @@ export default class ToggleButtonSubpage extends Adw.NavigationPage {
         // Inherit mode paints with the tray icon keys, so those repaint too.
         page.add(createPreviewGroup({
             settings: this._settings,
-            watch: [...TOGGLE_STYLE_KEYS, ...TRAY_ICON_STYLE_KEYS],
+            watch: [...TOGGLE_STYLE_KEYS, ...TRAY_ICON_STYLE_KEYS, 'visible-icon-limit', 'display-mode'],
             render: buildTogglePreview,
             splitKey: 'toggle-icon-color-split',
+            customStyleKey: 'enable-custom-toggle-style',
         }));
 
         this._buildIconGroup(page);
@@ -125,6 +123,7 @@ export default class ToggleButtonSubpage extends Adw.NavigationPage {
         page.add(createCustomStyleSwitchGroup({
             settings: this._settings,
             key: 'enable-custom-toggle-style',
+            blurKey: 'toggle-blur',
         }));
         this._buildStyleGroups(page);
     }
@@ -133,46 +132,54 @@ export default class ToggleButtonSubpage extends Adw.NavigationPage {
         const group = new Adw.PreferencesGroup({title: _('Icon')});
         page.add(group);
 
-        const {expander, setRows} = createExpanderSection({
-            title: _('Icon'),
+        const popupExpander = this._createIconExpander({
+            keyFor: key => key,
             subtitle: _('One icon per overflow menu state.'),
-            headerSuffix: createDialogGearButton({
-                window: this._window,
-                settings: this._settings,
-                DialogClass: ConfigDialog,
-                dialogData: this._iconDialogData(),
-            }),
+            closedTitle: _('Menu Closed'),
+            openTitle: _('Menu Open'),
         });
+        const drawerExpander = this._createIconExpander({
+            keyFor: drawerToggleIconKey,
+            subtitle: _('One icon per drawer state.'),
+            closedTitle: _('Drawer Closed'),
+            openTitle: _('Drawer Open'),
+        });
+        bindVisibility(this._settings, 'display-mode', popupExpander, ['popup', 'background-apps']);
+        bindVisibility(this._settings, 'display-mode', drawerExpander, 'drawer');
+        group.add(popupExpander);
+        group.add(drawerExpander);
 
-        const openRow = this._createIconRow(_('Menu Open'), 'toggle-icon-active-name');
-        this._settings.bind('toggle-icon-rotate', openRow, 'visible',
-            Gio.SettingsBindFlags.GET | Gio.SettingsBindFlags.INVERT_BOOLEAN);
-
-        setRows([this._createIconRow(_('Menu Closed'), 'toggle-icon-name'), openRow]);
-        group.add(expander);
-
-        group.add(createSpinRow({
+        group.add(createRangeRow({
             title: _('Size (px)'),
             settings: this._settings,
             key: 'toggle-icon-size',
             min: TOGGLE_ICON_SIZE_MIN_PX,
-            max: TOGGLE_ICON_SIZE_MAX_PX,
+            max: ICON_SIZE_RANGE_PX.max,
         }));
     }
 
-    _createIconRow(title, key) {
-        return createIconPickerRow({
-            title,
-            settings: this._settings,
-            key,
-            window: this._window,
-            PickerClass: IconPickerDialog,
-            icons: RECOMMENDED_TOGGLE_ICONS,
-            showCustom: false,
+    _createIconExpander({keyFor, subtitle, closedTitle, openTitle}) {
+        const {expander, setRows} = createExpanderSection({
+            title: _('Icon'),
+            subtitle,
+            headerSuffix: createDialogGearButton({
+                window: this._window,
+                settings: this._settings,
+                DialogClass: ConfigDialog,
+                dialogData: this._iconDialogData(keyFor),
+            }),
         });
+
+        const openRow = this._createIconRow(openTitle, keyFor('toggle-icon-active-name'));
+        this._settings.bind(keyFor('toggle-icon-rotate'), openRow, 'visible',
+            Gio.SettingsBindFlags.GET | Gio.SettingsBindFlags.INVERT_BOOLEAN);
+
+        setRows([this._createIconRow(closedTitle, keyFor('toggle-icon-name')), openRow]);
+        return expander;
     }
 
-    _iconDialogData() {
+    _iconDialogData(keyFor) {
+        const animationKeys = ROTATE_ANIMATION_KEYS.map(keyFor);
         return {
             pageTitle: _('Icon'),
             groups: [{
@@ -181,17 +188,17 @@ export default class ToggleButtonSubpage extends Adw.NavigationPage {
                         type: 'switch',
                         title: _('Rotate While Open'),
                         subtitle: _('Turn the icon instead of swapping it for a second one.'),
-                        key: 'toggle-icon-rotate',
+                        key: keyFor('toggle-icon-rotate'),
                     },
                     {
                         type: 'segmented',
                         title: _('Angle'),
-                        key: 'toggle-icon-rotate-angle',
+                        key: keyFor('toggle-icon-rotate-angle'),
                         options: ['90°', '180°', '270°'],
                         values: ['90', '180', '270'],
-                        visibleByKey: 'toggle-icon-rotate',
+                        visibleByKey: keyFor('toggle-icon-rotate'),
                         negate: {
-                            key: 'toggle-icon-rotate-reverse',
+                            key: keyFor('toggle-icon-rotate-reverse'),
                             iconName: 'bti-swap-symbolic',
                             tooltip: _('Reverse the turning direction'),
                         },
@@ -200,40 +207,60 @@ export default class ToggleButtonSubpage extends Adw.NavigationPage {
                         type: 'switch',
                         title: _('Animate Rotation'),
                         subtitle: _('Off turns the icon in one jump.'),
-                        key: 'toggle-icon-rotate-animate',
-                        visibleByKey: 'toggle-icon-rotate',
+                        key: keyFor('toggle-icon-rotate-animate'),
+                        visibleByKey: keyFor('toggle-icon-rotate'),
                     },
                     {
                         type: 'spin',
                         title: _('Duration (ms)'),
-                        key: 'toggle-icon-rotate-duration',
+                        key: keyFor('toggle-icon-rotate-duration'),
                         step: ROTATE_TIMING_STEP_MS,
-                        visibleByKey: ROTATE_ANIMATION_KEYS,
+                        visibleByKey: animationKeys,
                     },
                     {
                         type: 'spin',
                         title: _('Delay (ms)'),
-                        key: 'toggle-icon-rotate-delay',
+                        key: keyFor('toggle-icon-rotate-delay'),
                         step: ROTATE_TIMING_STEP_MS,
-                        visibleByKey: ROTATE_ANIMATION_KEYS,
+                        visibleByKey: animationKeys,
                     },
                 ],
             }],
         };
     }
 
+    _createIconRow(title, key) {
+        return createIconEmojiPickerRow({
+            title,
+            settings: this._settings,
+            key,
+            icons: RECOMMENDED_TOGGLE_ICONS,
+            showCustom: false,
+            showEmoji: false,
+            showPacks: false,
+        });
+    }
+
     _buildPositionGroup(page) {
         const group = new Adw.PreferencesGroup({title: _('Position')});
         page.add(group);
 
-        group.add(createSegmentedRow({
+        const sideRow = createSegmentedRow({
             title: _('Side'),
-            subtitle: _('Relative to the tray icons.'),
             settings: this._settings,
             key: 'toggle-position',
             options: [_('Left'), _('Right')],
             values: ['left', 'right'],
-        }));
+        });
+        const syncSide = () => {
+            const hasPanelIcons = this._settings.get_int('visible-icon-limit') > 0;
+            sideRow.sensitive = hasPanelIcons;
+            sideRow.subtitle = hasPanelIcons
+                ? _('Relative to the tray icons.')
+                : _('No icons stay in the panel, so there is no side to pick.');
+        };
+        watchKeys(this, this._settings, ['visible-icon-limit'], syncSide);
+        group.add(sideRow);
     }
 
     _buildStyleGroups(page) {
@@ -274,8 +301,7 @@ export default class ToggleButtonSubpage extends Adw.NavigationPage {
             if (!canInherit())
                 this._settings.set_boolean('toggle-inherit-icon-style', false);
         };
-        connectScoped(this, this._settings, 'changed::enable-custom-icon-style', dropInheritWithoutSource);
-        dropInheritWithoutSource();
+        watchKeys(this, this._settings, ['enable-custom-icon-style'], dropInheritWithoutSource);
 
         bindGroupsVisible(this, this._settings, [inheritGroup],
             () => isCustomStyleOn() && canInherit(),

@@ -8,22 +8,27 @@ import {error, warn, warnOnce, clearWarnedOnce} from './src/shared/logging.js';
 import {readFileText, isCancelledError} from './src/shared/asyncIo.js';
 import {importSettingsFromJSON, probeImportIconPaths, saveSettingsToFile, isOwnSyncSource} from './src/shared/settingsIO.js';
 import {clearIds, debounceTo, disconnectSignal, disconnectAll, disposeAll, removeTimer} from './src/shared/lifecycle.js';
-import {clearSeenCache, userConfigSignature} from './src/shared/appConfig.js';
-import {clearDetachedMenuManager, clearFlyoutMenus} from './src/shell/popupMenus.js';
+import {clearSeenCache, clearVisibleOrder, publishVisibleOrder, userConfigSignature, WHEN_IN_FRONT_MINIMIZE, WHEN_IN_FRONT_NONE} from './src/shared/appConfig.js';
+import {clearDetachedMenuManager, clearFlyoutMenus, restoreMenuGrabs} from './src/shell/popupMenus.js';
 import {placeIndicatorInPanel, TrayButton} from './src/shell/components/trayButton.js';
 import {clearIconCaches} from './src/shell/icons/iconResolver.js';
 import {enableLauncherEntries, disableLauncherEntries} from './src/shell/features/launcherEntries.js';
 import {clearItemSplits} from './src/shell/identity/itemSplit.js';
 import {clearMenuProxyClass} from './src/shell/sni/dbusMenuClient.js';
+import {disablePanelCopies, enablePanelCopies} from './src/shell/panelCopies.js';
 
 import {ApiHub} from './src/shell/api/apiHub.js';
 import {PanelGuest} from './src/shell/api/panelGuest.js';
 import {PanelIndicator} from './src/shell/components/panelIndicator.js';
+import {BackgroundAppsHost} from './src/shell/components/backgroundAppsHost.js';
+import {TraySink} from './src/shell/components/traySink.js';
+import {TrayMirrors} from './src/shell/components/trayMirror.js';
 import {SniWatcher} from './src/shell/sni/sniWatcher.js';
 import {XEmbedTrayBridge} from './src/shell/xembed/xembedBridge.js';
 import {BackgroundApps} from './src/shell/features/backgroundApps.js';
 import {BackgroundAppsProxyWatcher} from './src/shell/backgroundAppsProxy/backgroundAppsProxyWatcher.js';
 import {loadInterfaces} from './src/shell/dbusCalls.js';
+import {DISPLAY_MODE} from './src/const.js';
 
 // Prevents reading a sync file mid-write.
 const AUTO_SYNC_DEBOUNCE_MS = 1000;
@@ -31,6 +36,8 @@ const AUTO_SYNC_DEBOUNCE_MS = 1000;
 const AUTO_PUSH_DEBOUNCE_MS = 2000;
 
 const PREFS_WM_CLASS = 'org.gnome.Shell.Extensions';
+
+const LEGACY_MINIMIZE_KEY = 'minimize-when-focused';
 
 export default class BetterTrayIconsExtension extends Extension {
     enable() {
@@ -65,10 +72,11 @@ export default class BetterTrayIconsExtension extends Extension {
         disconnectSignal(this, this._fileMonitor, '_fileMonitorSignalId');
 
         disposeAll(this, 'cancel', '_fileMonitor', '_syncCancellable');
-        disposeAll(this, 'disable', '_backgroundAppsProxyWatcher', '_backgroundApps', '_xembedBridge', '_sniWatcher');
-        // The indicator first, a parent destroying its children never reaches its
-        // own destroy() override.
-        disposeAll(this, 'destroy', '_indicator', '_trayButton');
+        restoreMenuGrabs();
+        disposeAll(this, 'disable', '_xembedBridge', '_sniWatcher');
+        this._teardownRenderer();
+        disablePanelCopies();
+        disposeAll(this, 'destroy', '_traySink');
         disableLauncherEntries();
         clearFlyoutMenus();
         clearDetachedMenuManager();
@@ -91,6 +99,7 @@ export default class BetterTrayIconsExtension extends Extension {
                 return;
 
             this._settings = this.getSettings();
+            migrateMinimizeWhenFocused(this._settings);
 
             this._settingsSignals = [];
 
@@ -101,29 +110,21 @@ export default class BetterTrayIconsExtension extends Extension {
                 this._setupAutoPush();
             });
 
-            this._indicator = new PanelIndicator(this._settings, () => this.openPreferences());
-            this._trayButton = new TrayButton(this._indicator);
-            placeIndicatorInPanel(this._trayButton, this._settings);
-
-            this._connectSettings(['tray-order', 'tray-position'], () => {
-                placeIndicatorInPanel(this._trayButton, this._settings);
+            enablePanelCopies();
+            this._traySink = new TraySink();
+            this._buildRenderer();
+            this._connectSettings(['display-mode'], () => {
+                this._teardownRenderer();
+                this._buildRenderer();
             });
-
-            this.api.placeForeignItems();
 
             enableLauncherEntries();
 
-            this._sniWatcher = new SniWatcher(interfaces, this._indicator, this._settings);
+            this._sniWatcher = new SniWatcher(interfaces, this._traySink, this._settings);
             this._sniWatcher.enable();
 
-            this._xembedBridge = new XEmbedTrayBridge(this._settings, this._indicator);
+            this._xembedBridge = new XEmbedTrayBridge(this._settings, this._traySink);
             this._xembedBridge.enable();
-
-            this._backgroundApps = new BackgroundApps(this._settings);
-            this._backgroundApps.enable();
-
-            this._backgroundAppsProxyWatcher = new BackgroundAppsProxyWatcher(this._settings, this._indicator);
-            this._backgroundAppsProxyWatcher.enable();
         } catch (e) {
             // The idle_add puts this outside the shell's own enable error
             // handling, so nothing else would tear down what got built
@@ -131,6 +132,52 @@ export default class BetterTrayIconsExtension extends Extension {
             error(`Fatal Error during enable: ${e.message}`, e);
             this.disable();
         }
+    }
+
+    // Only one renderer exists at a time. The Background Apps host stands in
+    // for the menu that lists those apps, so the switch hiding it and the
+    // proxy icons duplicating it belong to the panel renderer alone.
+    _buildRenderer() {
+        this._rendererSignals = [];
+
+        if (this._settings.get_string('display-mode') === DISPLAY_MODE.BACKGROUND_APPS) {
+            this._backgroundAppsHost = new BackgroundAppsHost(this._settings, () => this.openPreferences());
+            this._traySink.setRenderer(this._backgroundAppsHost);
+            return;
+        }
+
+        this._indicator = new PanelIndicator(this._settings, () => this.openPreferences());
+        this._indicator.connect('layout-changed', (_indicator, appIds) => publishVisibleOrder(appIds));
+        this._trayButton = new TrayButton(this._indicator);
+        placeIndicatorInPanel(this._trayButton, this._settings);
+        this._trayMirrors = new TrayMirrors(this._settings, this._trayButton, this._indicator, () => this.openPreferences());
+
+        for (const key of ['tray-order', 'tray-position']) {
+            this._rendererSignals.push(this._settings.connect(`changed::${key}`,
+                () => placeIndicatorInPanel(this._trayButton, this._settings)));
+        }
+
+        this.api.placeForeignItems();
+        this._traySink.setRenderer(this._indicator);
+
+        this._backgroundApps = new BackgroundApps(this._settings);
+        this._backgroundApps.enable();
+
+        this._backgroundAppsProxyWatcher = new BackgroundAppsProxyWatcher(this._settings, this._indicator);
+        this._backgroundAppsProxyWatcher.enable();
+    }
+
+    _teardownRenderer() {
+        restoreMenuGrabs();
+        disconnectAll(this, this._settings, '_rendererSignals');
+        disposeAll(this, 'disable', '_backgroundAppsProxyWatcher', '_backgroundApps');
+        // Before the sink takes the items back, a wrapper must not outlive its source
+        disposeAll(this, 'destroy', '_trayMirrors');
+        this._traySink?.setRenderer(null);
+        // The indicator first, a parent destroying its children never reaches its
+        // own destroy() override.
+        disposeAll(this, 'destroy', '_indicator', '_trayButton', '_backgroundAppsHost');
+        clearVisibleOrder();
     }
 
     // A second call throws 'Already showing a prefs dialog' at a reply handler
@@ -254,4 +301,14 @@ export default class BetterTrayIconsExtension extends Extension {
         for (const key of keys)
             this._settingsSignals.push(this._settings.connect(`changed::${key}`, handler));
     }
+}
+
+// The reset makes this a one-shot, a later pick of Per App would otherwise
+// flip back to minimize on the next enable.
+function migrateMinimizeWhenFocused(settings) {
+    if (!settings.get_boolean(LEGACY_MINIMIZE_KEY))
+        return;
+    if (settings.get_string('when-in-front') === WHEN_IN_FRONT_NONE)
+        settings.set_string('when-in-front', WHEN_IN_FRONT_MINIMIZE);
+    settings.reset(LEGACY_MINIMIZE_KEY);
 }

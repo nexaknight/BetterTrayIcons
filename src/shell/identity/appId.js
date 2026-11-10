@@ -32,6 +32,10 @@ const PACKAGING_ID_SEPARATOR = '-';
 // another charge level would otherwise mint a fresh id.
 const STATEFUL_ICON_NAME_RE = /^(battery|network)[-_]/i;
 
+const LEGACY_GENERIC_ID_RE = /chrome_status_icon|status_icon|indicator|^state-|^libappindicator|^task-|^app$/;
+
+const LEGACY_GENERIC_ICON_NAME_RE = /^state-|^sync-|^image-missing$|panel/;
+
 export function sanitizeAppId(raw) {
     if (typeof raw !== 'string')
         return null;
@@ -165,24 +169,9 @@ function _shortHash(value) {
 }
 
 function _legacyIsGenericId(id) {
-    if (!id)
-        return true;
-    const lower = id.toLowerCase();
-    return lower.includes('chrome_status_icon') ||
-        lower.includes('status_icon') ||
-        lower.includes('indicator') ||
-        lower.startsWith('state-') ||
-        lower.startsWith('libappindicator') ||
-        lower.startsWith('task-') ||
-        lower === 'app';
+    return !id || LEGACY_GENERIC_ID_RE.test(id.toLowerCase());
 }
 
 function _legacyIsGenericIconName(name) {
-    if (!name)
-        return true;
-    const lower = name.toLowerCase();
-    return lower.startsWith('state-') ||
-        lower.startsWith('sync-') ||
-        lower === 'image-missing' ||
-        lower.includes('panel');
+    return LEGACY_GENERIC_ICON_NAME_RE.test(name.toLowerCase());
 }

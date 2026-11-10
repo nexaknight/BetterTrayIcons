@@ -1,14 +1,16 @@
 import St from 'gi://St';
 import Clutter from 'gi://Clutter';
-import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 import {gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
 
 import {clearIds, debounceTo, disposeAll, removeTimer} from '../../shared/lifecycle.js';
+import {bundledOrThemedIcon} from '../../shared/iconLoading.js';
+import {toggleIconKey, toggleIconName} from '../../shared/toggleIconKeys.js';
 import {isDisposed, trackDisposal} from '../disposal.js';
-import {computeToggleStyle, applyPanelClasses, motionAllowed} from '../trayStyle.js';
-import {createPanelMenu, destroyMenuSafely, POPUP_ANIMATION_NONE} from '../popupMenus.js';
+import {computeToggleStyle, applyPanelClasses, motionAllowed, syncBackgroundBlur} from '../trayStyle.js';
+import {createPanelMenu, destroyMenuSafely, panelMenuManagerFor, POPUP_ANIMATION_NONE} from '../popupMenus.js';
 import {ClickController} from '../features/clickController.js';
+import {DISPLAY_MODE} from '../../const.js';
 
 const HOVER_MENU_ACTION = 'action-menu';
 const SCROLL_ACTION_CYCLE = 'cycle';
@@ -18,13 +20,14 @@ export class ToggleButton {
         this._settings = settings;
         this._openPreferences = openPreferences;
         this._cycleIcons = cycleIcons;
-        this._overflowMenu = null;
+        this._overflow = null;
         this._actionMenu = null;
         this._actionMenuOverflowItem = null;
+        this._manager = null;
         this._hoverOrderId = 0;
 
         this._icon = new St.Icon({
-            icon_name: this._settings.get_string('toggle-icon-name'),
+            gicon: this._iconFor('toggle-icon-name'),
             style_class: 'system-status-icon',
         });
         this._icon.set_pivot_point(0.5, 0.5);
@@ -57,13 +60,14 @@ export class ToggleButton {
         );
     }
 
-    setOverflowMenu(overflowMenu) {
-        this._overflowMenu = overflowMenu;
+    setOverflow(overflow) {
+        this._overflow = overflow;
     }
 
     updateStyle() {
         const isCustomToggleStyleOn = this._settings.get_boolean('enable-custom-toggle-style');
         applyPanelClasses(this.actor, this._icon, isCustomToggleStyleOn);
+        syncBackgroundBlur(this.actor, isCustomToggleStyleOn ? this._settings.get_int('toggle-blur') : 0);
 
         const style = computeToggleStyle(this._settings);
         this._baseStyle = style.baseStyle;
@@ -79,7 +83,7 @@ export class ToggleButton {
     }
 
     updateState() {
-        const isMenuOpen = this._overflowMenu.isOpen;
+        const isMenuOpen = this._overflow.isOpen;
         const isHover = this.actor.hover;
         const isActive = isMenuOpen || isHover;
 
@@ -100,12 +104,10 @@ export class ToggleButton {
     }
 
     _applyIconState(isMenuOpen) {
-        const rotate = this._settings.get_boolean('toggle-icon-rotate');
-        const iconName = this._iconNameFor(isMenuOpen && !rotate
-            ? 'toggle-icon-active-name'
-            : 'toggle-icon-name');
-        if (this._icon.icon_name !== iconName)
-            this._icon.icon_name = iconName;
+        const rotate = this._settings.get_boolean(this._key('toggle-icon-rotate'));
+        const gicon = this._iconFor(isMenuOpen && !rotate ? 'toggle-icon-active-name' : 'toggle-icon-name');
+        if (!this._icon.gicon.equal(gicon))
+            this._icon.gicon = gicon;
 
         const angle = isMenuOpen && rotate ? this._rotationAngle() : 0;
         // Hover fires while the turn is still running, comparing against the
@@ -114,7 +116,7 @@ export class ToggleButton {
             return;
 
         this._iconAngle = angle;
-        if (!this._settings.get_boolean('toggle-icon-rotate-animate') || !motionAllowed()) {
+        if (!this._settings.get_boolean(this._key('toggle-icon-rotate-animate')) || !motionAllowed()) {
             // A turn already running would outlive the plain assignment and
             // leave the icon askew.
             this._icon.remove_transition('rotation-angle-z');
@@ -126,35 +128,38 @@ export class ToggleButton {
         // acceleration.
         this._icon.ease({
             rotation_angle_z: angle,
-            duration: this._settings.get_int('toggle-icon-rotate-duration'),
-            delay: this._settings.get_int('toggle-icon-rotate-delay'),
+            duration: this._settings.get_int(this._key('toggle-icon-rotate-duration')),
+            delay: this._settings.get_int(this._key('toggle-icon-rotate-delay')),
             mode: Clutter.AnimationMode.EASE_OUT_QUAD,
             animationRequired: true,
         });
     }
 
     _rotationAngle() {
-        const degrees = Number.parseInt(this._settings.get_string('toggle-icon-rotate-angle'), 10);
-        return this._settings.get_boolean('toggle-icon-rotate-reverse') ? -degrees : degrees;
+        const degrees = Number.parseInt(this._settings.get_string(this._key('toggle-icon-rotate-angle')), 10);
+        return this._settings.get_boolean(this._key('toggle-icon-rotate-reverse')) ? -degrees : degrees;
     }
 
-    _iconNameFor(key) {
-        return this._settings.get_string(key) ||
-            this._settings.get_default_value(key).unpack();
+    _key(key) {
+        return toggleIconKey(this._settings, key);
+    }
+
+    _iconFor(key) {
+        return bundledOrThemedIcon(toggleIconName(this._settings, key));
     }
 
     // Both menus share the toggle as source actor and the manager opens the
     // first match, so the order picks the hover menu. An open menu has to
     // come first too, otherwise hovering the toggle switches to its sibling.
     applyHoverMenuOrder() {
-        if (!this._overflowMenu.isAttached)
+        if (!this._overflow.isAttached)
             return;
 
         this._ensureActionMenu();
 
-        const manager = Main.panel.menuManager;
+        const manager = this._manager;
         const isActionOpen = this._actionMenu.isOpen;
-        const isOverflowOpen = this._overflowMenu.isOpen;
+        const isOverflowOpen = this._overflow.isOpen;
 
         // removeMenu on an open menu drops its modal grab, only the closed
         // one moves. Both open is the handover between them, the close that
@@ -163,8 +168,8 @@ export class ToggleButton {
             return;
 
         if (isActionOpen) {
-            this._overflowMenu.detachFromManager();
-            this._overflowMenu.attachToManager();
+            this._overflow.detachFromManager();
+            this._overflow.attachToManager();
             return;
         }
 
@@ -177,13 +182,13 @@ export class ToggleButton {
         const shouldActionGoFirst = this._settings.get_string('toggle-hover-menu') === HOVER_MENU_ACTION;
 
         manager.removeMenu(this._actionMenu);
-        this._overflowMenu.detachFromManager();
+        this._overflow.detachFromManager();
 
         if (shouldActionGoFirst) {
             manager.addMenu(this._actionMenu);
-            this._overflowMenu.attachToManager();
+            this._overflow.attachToManager();
         } else {
-            this._overflowMenu.attachToManager();
+            this._overflow.attachToManager();
             manager.addMenu(this._actionMenu);
         }
     }
@@ -222,7 +227,7 @@ export class ToggleButton {
 
     _executeAction(action) {
         const handlers = {
-            'toggle': () => this._overflowMenu.toggle(),
+            'toggle': () => this._overflow.toggle(),
             'cycle': () => this._cycleIcons(),
             'action-menu': () => this._openActionMenu(),
             'prefs': () => this._openPreferences(),
@@ -245,17 +250,21 @@ export class ToggleButton {
         this._actionMenu.connect('open-state-changed',
             (_menu, isOpen) => this.onMenuOpenStateChanged(isOpen));
 
-        Main.panel.menuManager.addMenu(this._actionMenu);
+        this._manager = panelMenuManagerFor(this.actor);
+        this._manager.addMenu(this._actionMenu);
 
-        this._actionMenuOverflowItem = new PopupMenu.PopupMenuItem(_('Open Overflow Menu'));
+        const openLabel = this._settings.get_string('display-mode') === DISPLAY_MODE.DRAWER
+            ? _('Open Drawer')
+            : _('Open Overflow Menu');
+        this._actionMenuOverflowItem = new PopupMenu.PopupMenuItem(openLabel);
         this._actionMenuOverflowItem.connect('activate', () => {
             this._actionMenu.close(POPUP_ANIMATION_NONE);
             if (this.actor.visible)
-                this._overflowMenu.open();
+                this._overflow.open();
         });
         this._actionMenu.addMenuItem(this._actionMenuOverflowItem);
 
-        const prefsItem = new PopupMenu.PopupMenuItem(_('Open Settings'));
+        const prefsItem = new PopupMenu.PopupMenuItem(_('Open BTI Settings'));
         prefsItem.connect('activate', () => {
             this._actionMenu.close(POPUP_ANIMATION_NONE);
             this._openPreferences();
@@ -275,6 +284,6 @@ export class ToggleButton {
             this.actor.destroy();
         this.actor = null;
         this._icon = null;
-        this._overflowMenu = null;
+        this._overflow = null;
     }
 }

@@ -18,6 +18,13 @@ export const TOUCH_BINDING = 'tap';
 // The schema range carries no step, the spinners take all three from here
 export const ICON_SIZE_RANGE_PX = Object.freeze({min: 0, max: 40, step: 1});
 
+// The display-mode choices in the schema
+export const DISPLAY_MODE = Object.freeze({
+    POPUP: 'popup',
+    DRAWER: 'drawer',
+    BACKGROUND_APPS: 'background-apps',
+});
+
 export const BORDER_RADIUS_MAX_PX = 50;
 
 export const BORDER_WIDTH_MAX_PX = 20;

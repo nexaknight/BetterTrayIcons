@@ -13,10 +13,10 @@ import {isInAnyPanel} from './panelCopies.js';
 
 const FALLBACK_ICON_COLOR = '#ffffff';
 
-// The theme's stock rules only match under #panel, so popup icons carry the
-// stock look inline. In the panel an inline style would override the theme's
-// own hover and active rules.
-const STOCK_POPUP_ICON_STYLE = `padding: ${DEFAULT_ICON_PADDING_PX}px; margin: 0px ${ICON_MARGIN_PX}px; ` +
+// One stock pill for panel, drawer and popup. The theme's panel-button rules
+// only match under #panel and draw their own frame there, so the look is set
+// inline everywhere.
+const STOCK_ICON_STYLE = `padding: ${DEFAULT_ICON_PADDING_PX}px; margin: 0px ${ICON_MARGIN_PX}px; ` +
     `border-radius: ${DEFAULT_PILL_RADIUS_PX}px; border: 0px; box-shadow: none;`;
 
 const COGL_CHANNEL_MAX = 255;
@@ -77,7 +77,7 @@ export function refreshTrayStyle(actor, iconActor, settings) {
     }
 
     const {enableCustom, baseStyle, hoverStyle} = trayIconStyleFor(actor, settings);
-    applyIconChrome(actor, iconActor, settings, enableCustom);
+    applyIconChrome(actor, settings, enableCustom);
 
     actor._baseStyle = baseStyle;
     actor._hoverStyle = hoverStyle;
@@ -87,9 +87,9 @@ export function refreshTrayStyle(actor, iconActor, settings) {
 // A Background Apps row lends its icon slot through _trayRowSlot. The row
 // draws its own surface, so there the icon keeps the stock look, takes only
 // the custom tint, and the blur sits behind the slot.
-export function applyIconChrome(actor, iconActor, settings, enableCustom) {
+export function applyIconChrome(actor, settings, enableCustom) {
     const rowSlot = actor._trayRowSlot;
-    applyPanelClasses(actor, iconActor, enableCustom && !rowSlot);
+    applyPanelClasses(actor, null, enableCustom && !rowSlot);
     const blur = enableCustom ? settings.get_int('icon-blur') : 0;
     syncBackgroundBlur(actor, rowSlot ? 0 : blur);
     if (rowSlot)
@@ -124,10 +124,10 @@ export function computeTrayIconStyle(settings, {withColors = true, light = false
         if (hoverColor)
             hoverStyle += ` color: ${hoverColor};`;
         hoverStyle += _hoverBorderCss(settings, 'icon', light);
-    } else if (!inPanel) {
-        const customPopupIsLight = _customPopupIsLight(settings, light);
+    } else {
+        const customPopupIsLight = inPanel ? null : _customPopupIsLight(settings, light);
         const onLight = customPopupIsLight ?? light;
-        baseStyle = STOCK_POPUP_ICON_STYLE;
+        baseStyle = STOCK_ICON_STYLE;
         if (withColors && customPopupIsLight !== null)
             baseStyle += ` color: ${onLight ? THEME_FOREGROUND.onLight : THEME_FOREGROUND.onDark};`;
         hoverStyle = `${baseStyle} background-color: ${
@@ -140,7 +140,7 @@ export function computeTrayIconStyle(settings, {withColors = true, light = false
 function computeRowIconStyle(settings, {withColors}) {
     const enableCustom = settings.get_boolean('enable-custom-icon-style');
     const color = enableCustom && withColors ? resolveColor(settings, 'icon-color', shellUsesLightStyle()) : '';
-    const baseStyle = color ? `${STOCK_POPUP_ICON_STYLE} color: ${color};` : STOCK_POPUP_ICON_STYLE;
+    const baseStyle = color ? `${STOCK_ICON_STYLE} color: ${color};` : STOCK_ICON_STYLE;
     return {enableCustom, baseStyle, hoverStyle: baseStyle};
 }
 

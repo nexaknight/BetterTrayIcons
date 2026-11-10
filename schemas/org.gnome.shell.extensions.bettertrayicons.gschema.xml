@@ -43,6 +43,11 @@
             <summary>Keep the overflow menu open when a click had no effect</summary>
         </key>
 
+        <key name="drawer-remember-state" type="b">
+            <default>false</default>
+            <summary>Keep the drawer open until the toggle button closes it</summary>
+        </key>
+
         <key name="enable-symbolic-icons" type="b">
             <default>false</default>
             <summary>Prefer monochrome symbolic icons when available</summary>
@@ -55,8 +60,19 @@
 
         <key name="minimize-when-focused" type="b">
             <default>false</default>
-            <summary>Minimize a focused app on an icon click instead of activating it</summary>
-            <description>Default for apps without their own Minimize When in Front setting.</description>
+            <summary>Deprecated, replaced by when-in-front</summary>
+            <description>Read once at enable and carried over to when-in-front.</description>
+        </key>
+
+        <key name="when-in-front" type="s">
+            <choices>
+                <choice value="none"/>
+                <choice value="minimize"/>
+                <choice value="close"/>
+            </choices>
+            <default>'none'</default>
+            <summary>What an icon click does to a focused app (none, minimize or close)</summary>
+            <description>'none' lets each app's own Click While in Front setting apply. Any other value applies to every app.</description>
         </key>
 
         <key name="hide-background-apps" type="b">
@@ -330,6 +346,36 @@
             <summary>Maximum columns in the grid overflow layout</summary>
         </key>
 
+        <key name="display-mode" type="s">
+            <choices>
+                <choice value="popup"/>
+                <choice value="drawer"/>
+                <choice value="background-apps"/>
+            </choices>
+            <default>'popup'</default>
+            <summary>Where tray items show up (panel with overflow popup, panel with a drawer, or rows in the Quick Settings Background Apps menu)</summary>
+        </key>
+
+        <key name="show-on-all-monitors" type="b">
+            <default>false</default>
+            <summary>Mirror the tray and the Quick Settings changes onto the panels Dash to Panel and Better Panel draw on other monitors</summary>
+        </key>
+
+        <key name="qs-visible-rows" type="i">
+            <range min="1" max="50"/>
+            <default>5</default>
+            <summary>Rows shown in the Background Apps list before it scrolls</summary>
+        </key>
+
+        <key name="qs-menu-style" type="s">
+            <choices>
+                <choice value="popup"/>
+                <choice value="inline"/>
+            </choices>
+            <default>'popup'</default>
+            <summary>How an item's menu opens in Quick Settings (side popup, or collapsible inside the list)</summary>
+        </key>
+
         <key name="tray-position" type="s">
             <default>'right'</default>
             <summary>Panel box for the tray (left, center, or right)</summary>
@@ -394,6 +440,55 @@
             <range min="0" max="5000"/>
             <default>0</default>
             <summary>Wait before the toggle button icon starts to turn, in milliseconds</summary>
+        </key>
+
+        <!-- The drawer keeps its own icon and turn, a mode switch leaves the
+             popup's alone. bti- names come from the bundled assets. -->
+        <key name="drawer-toggle-icon-name" type="s">
+            <default>'bti-previous-symbolic'</default>
+            <summary>Icon displayed on the toggle button in drawer mode</summary>
+        </key>
+
+        <key name="drawer-toggle-icon-active-name" type="s">
+            <default>'bti-previous-symbolic'</default>
+            <summary>Icon displayed on the toggle button while the drawer is open</summary>
+        </key>
+
+        <key name="drawer-toggle-icon-rotate" type="b">
+            <default>true</default>
+            <summary>Rotate the toggle button icon while the drawer is open instead of swapping it</summary>
+        </key>
+
+        <key name="drawer-toggle-icon-rotate-angle" type="s">
+            <choices>
+                <choice value="90"/>
+                <choice value="180"/>
+                <choice value="270"/>
+            </choices>
+            <default>'180'</default>
+            <summary>Rotation in degrees applied to the toggle button icon while the drawer is open</summary>
+        </key>
+
+        <key name="drawer-toggle-icon-rotate-reverse" type="b">
+            <default>false</default>
+            <summary>Turn the toggle button icon counter-clockwise instead of clockwise in drawer mode</summary>
+        </key>
+
+        <key name="drawer-toggle-icon-rotate-animate" type="b">
+            <default>false</default>
+            <summary>Animate the toggle button icon rotation in drawer mode instead of snapping to the angle</summary>
+        </key>
+
+        <key name="drawer-toggle-icon-rotate-duration" type="i">
+            <range min="0" max="5000"/>
+            <default>150</default>
+            <summary>How long the toggle button icon takes to turn in drawer mode, in milliseconds</summary>
+        </key>
+
+        <key name="drawer-toggle-icon-rotate-delay" type="i">
+            <range min="0" max="5000"/>
+            <default>0</default>
+            <summary>Wait before the toggle button icon starts to turn in drawer mode, in milliseconds</summary>
         </key>
 
         <key name="toggle-icon-size" type="i">
@@ -677,7 +772,7 @@
         </key>
 
         <key name="tray-action-scroll" type="s">
-            <default>'forward'</default>
+            <default>'nothing'</default>
             <summary>Scroll action on tray icons</summary>
         </key>
 

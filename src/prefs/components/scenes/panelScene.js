@@ -44,8 +44,10 @@ export function buildPanelBoxScene(settings, box, mode = null) {
         const group = createBox({orientation: 'horizontal', spacing: BAR_GAP_PX, valign: 'center'});
         for (const width of pills)
             group.append(createScenePill({width_request: width}));
-        if (name === box)
-            _placeTray(group, _createTray(settings, isDrawer, toggle => layout.setAnchor(screen, toggle)), settings);
+        if (name === box) {
+            const tray = _createTray(settings, isDrawer, toggle => layout.setAnchor(screen, toggle));
+            _placeTray(group, tray, settings);
+        }
         return group;
     });
     bar.set_start_widget(left);
@@ -58,22 +60,6 @@ export function buildPanelBoxScene(settings, box, mode = null) {
     screen.append(bar);
     screen.append(popup);
     return screen;
-}
-
-function _createOverflowDots(cssClass) {
-    const box = createBox({orientation: 'horizontal', spacing: DOT_GAP_PX, cssClasses: [cssClass]});
-    for (let i = 0; i < OVERFLOW_DOTS; i++)
-        box.append(createSceneDot('bti-scene-dot', DOT_PX));
-    return box;
-}
-
-// Position 0 puts the tray in front of what the box already holds, any
-// higher position after it.
-function _placeTray(group, tray, settings) {
-    const lastPill = group.get_last_child();
-    group.append(tray);
-    watchKeys(group, settings, ['tray-order'],
-        () => group.reorder_child_after(tray, settings.get_int('tray-order') === 0 ? null : lastPill));
 }
 
 function _createTray(settings, isDrawer, onToggle) {
@@ -96,6 +82,22 @@ function _createTray(settings, isDrawer, onToggle) {
     watchKeys(tray, settings, TRAY_KEYS, sync);
 
     return tray;
+}
+
+// Position 0 puts the tray in front of what the box already holds, any
+// higher position after it.
+function _placeTray(group, tray, settings) {
+    const lastPill = group.get_last_child();
+    group.append(tray);
+    watchKeys(group, settings, ['tray-order'],
+        () => group.reorder_child_after(tray, settings.get_int('tray-order') === 0 ? null : lastPill));
+}
+
+function _createOverflowDots(cssClass) {
+    const box = createBox({orientation: 'horizontal', spacing: DOT_GAP_PX, cssClasses: [cssClass]});
+    for (let i = 0; i < OVERFLOW_DOTS; i++)
+        box.append(createSceneDot('bti-scene-dot', DOT_PX));
+    return box;
 }
 
 // Hangs the overflow popup below the bar under the toggle, as the shell opens

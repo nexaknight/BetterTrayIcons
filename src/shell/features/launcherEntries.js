@@ -2,6 +2,7 @@ import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import Shell from 'gi://Shell';
 
+import {getAppConfigMap, whenInFrontOf, WHEN_IN_FRONT_MINIMIZE, WHEN_IN_FRONT_NONE} from '../../shared/appConfig.js';
 import {callDBusDaemon} from '../dbusCalls.js';
 
 // SNI has no unread-count property, apps bake the number into their icon pixmap.
@@ -10,6 +11,13 @@ const LAUNCHER_ENTRY_IFACE = 'com.canonical.Unity.LauncherEntry';
 const APP_URI_PREFIX = 'application://';
 
 const FLATPAK_APP_ID_PREFIX = 'flatpak-';
+
+// Close goes through the window's own close request, so the app can still
+// ask about unsaved work or hide itself to the tray.
+const IN_FRONT_ACTIONS = Object.freeze({
+    [WHEN_IN_FRONT_MINIMIZE]: windows => windows.forEach(window => window.minimize()),
+    close: (_windows, frontWindow) => frontWindow.delete(global.get_current_time()),
+});
 
 const PID_TARGET_PREFIX = 'pid:';
 const _pidTarget = pid => `${PID_TARGET_PREFIX}${pid}`;
@@ -77,8 +85,12 @@ export function unreadTargets({pid = null, appId = null, packagingKind = null} =
     return [...out];
 }
 
-export function runningApp({pid = null, appId = null, packagingKind = null} = {}) {
-    const app = _appFromPid(pid) ?? _runningByDesktopId(_flatpakDesktopId(appId, packagingKind));
+// A tray icon owned by a helper process has no window of its own, the
+// launcher scope it shares with the app still names the app.
+export function runningApp({pid = null, appId = null, packagingKind = null, scopeDesktopId = null} = {}) {
+    const app = _appFromPid(pid) ??
+        _runningByDesktopId(_flatpakDesktopId(appId, packagingKind)) ??
+        _runningByDesktopId(scopeDesktopId);
     return app?.get_n_windows() ? app : null;
 }
 
@@ -94,6 +106,30 @@ function _runningByDesktopId(desktopId) {
 // do nothing.
 export function raiseApp(app) {
     app.activate_full(-1, global.display.get_current_time_roundtrip());
+}
+
+// What a click does to an app already in front, null when the app keeps its
+// own click behavior. The General page value wins over the app's own.
+export function inFrontActionFor(settings, appId) {
+    const windowAction = inFrontWindowActionFor(settings, appId);
+    return windowAction && (app => windowAction(app.get_windows(), frontWindowOf(app)));
+}
+
+// For items with no Shell.App behind them, the caller finds the windows
+export function inFrontWindowActionFor(settings, appId) {
+    const forcedValue = settings.get_string('when-in-front');
+    const value = forcedValue === WHEN_IN_FRONT_NONE
+        ? whenInFrontOf(getAppConfigMap(settings)[appId])
+        : forcedValue;
+    return IN_FRONT_ACTIONS[value] ?? null;
+}
+
+// Close takes back only what Activate brought up. The shell sorts an app's
+// windows by user time, so the first one is the last the user touched.
+function frontWindowOf(app) {
+    const windows = app.get_windows();
+    const focused = global.display.focus_window;
+    return windows.includes(focused) ? focused : windows[0];
 }
 
 function _appFromPid(pid) {
