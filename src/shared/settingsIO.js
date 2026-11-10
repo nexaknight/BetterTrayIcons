@@ -26,6 +26,7 @@ const VALUE_FITS_TYPE = {
     b: value => typeof value === 'boolean',
     i: value => (value | 0) === value,
     s: value => typeof value === 'string',
+    as: value => Array.isArray(value) && value.every(item => typeof item === 'string'),
 };
 
 // Await this before importSettingsFromJSON, which has to stay synchronous so

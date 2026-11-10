@@ -81,9 +81,13 @@ export default class BetterTrayIconsExtension extends Extension {
     }
 
     async _realEnable() {
+        // A disable and a fresh enable during the load would leave this
+        // run's settings handlers behind, firing on a settings object that
+        // the next disable already dropped
+        const api = this.api;
         try {
             const interfaces = await loadInterfaces(this.dir);
-            if (!this.api)
+            if (this.api !== api)
                 return;
 
             this._settings = this.getSettings();
