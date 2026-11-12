@@ -7,11 +7,11 @@ import Adw from 'gi://Adw';
 import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
 import {accentValueKeeping, colorBehindAccent} from '../../shared/accentColor.js';
-import {COLOR_VARIANT_KEY} from '../../shared/colorVariant.js';
+import {COLOR_VARIANT_KEY, editedColorKey} from '../../shared/colorVariant.js';
 import {connectScoped, watchKeys} from '../../shared/lifecycle.js';
 import {attachBadge, createBadgeBox} from './badge.js';
 import {createBoundToggleButton, createDialogGearButton, createHelpButton, createIconButton} from './button.js';
-import {createColorButton, editedColorKey, editedColorUsesAccent, watchColorKey} from './color.js';
+import {createColorButton, editedColorUsesAccent, watchColorKey} from './color.js';
 import {buildGroupDialog} from './dialog.js';
 import {applyPathIcon, NEXT_ICON_NAME, RESET_ICON_NAME} from './icon.js';
 import IconEmojiPicker from './iconEmojiPicker.js';

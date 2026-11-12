@@ -130,6 +130,41 @@ async function _childDirs(root) {
     return found;
 }
 
+// Cursor themes carry an index.theme too, only icon themes list Directories,
+// so get_string throws for them.
+async function _readIndex(dirs) {
+    const files = await Promise.all(dirs.map(dir =>
+        readFileBytes(Gio.File.new_for_path(GLib.build_filenamev([dir, 'index.theme']))).catch(() => null)));
+    const bytes = files.find(Boolean);
+    if (!bytes)
+        return null;
+    const keyFile = new GLib.KeyFile();
+    try {
+        keyFile.load_from_bytes(new GLib.Bytes(bytes), GLib.KeyFileFlags.NONE);
+        keyFile.get_string(ICON_THEME_GROUP, 'Directories');
+        if (_readBoolean(keyFile, 'Hidden'))
+            return null;
+        return {name: keyFile.get_locale_string(ICON_THEME_GROUP, 'Name', null)};
+    } catch {
+        return null;
+    }
+}
+
+function _readBoolean(keyFile, key) {
+    try {
+        return keyFile.get_boolean(ICON_THEME_GROUP, key);
+    } catch {
+        return false;
+    }
+}
+
+// Plain order, localeCompare costs a frame or more on a pack this size.
+function _byCodeUnits(a, b) {
+    if (a === b)
+        return 0;
+    return a < b ? -1 : 1;
+}
+
 async function _scanPack(pack) {
     const scan = {candidates: new Map(), regular: new Set(), links: new Map(), best: new Map()};
     await Promise.all(pack.dirs.map(async dir => {
@@ -176,47 +211,36 @@ async function _settleWalkedCandidates(scan) {
     }));
 }
 
+// Follows a link chain through what the walk already saw, no disk access.
+// Null means the chain left the pack or broke, and only the disk can tell.
+function _resolveLocal(path, scan) {
+    let current = path;
+    for (let hop = 0; hop < MAX_LINK_HOPS; hop++) {
+        if (scan.regular.has(current))
+            return path;
+        current = scan.links.get(current);
+        if (!current)
+            return null;
+    }
+    return null;
+}
+
+async function _isReadableFile(path) {
+    try {
+        const info = await Gio.File.new_for_path(path).query_info_async(
+            'standard::type,access::can-read', Gio.FileQueryInfoFlags.NONE, GLib.PRIORITY_LOW, null);
+        return info.get_file_type() === Gio.FileType.REGULAR && info.get_attribute_boolean('access::can-read');
+    } catch {
+        return false;
+    }
+}
+
 function _offerBest(scan, name, path, score) {
     const current = scan.best.get(name);
     if (current && current.score >= score)
         return;
     const slash = path.lastIndexOf('/');
     scan.best.set(name, {folder: path.slice(0, slash), png: path.endsWith('.png'), score});
-}
-
-// Cursor themes carry an index.theme too, only icon themes list Directories,
-// so get_string throws for them.
-async function _readIndex(dirs) {
-    const files = await Promise.all(dirs.map(dir =>
-        readFileBytes(Gio.File.new_for_path(GLib.build_filenamev([dir, 'index.theme']))).catch(() => null)));
-    const bytes = files.find(Boolean);
-    if (!bytes)
-        return null;
-    const keyFile = new GLib.KeyFile();
-    try {
-        keyFile.load_from_bytes(new GLib.Bytes(bytes), GLib.KeyFileFlags.NONE);
-        keyFile.get_string(ICON_THEME_GROUP, 'Directories');
-        if (_readBoolean(keyFile, 'Hidden'))
-            return null;
-        return {name: keyFile.get_locale_string(ICON_THEME_GROUP, 'Name', null)};
-    } catch {
-        return null;
-    }
-}
-
-// Plain order, localeCompare costs a frame or more on a pack this size.
-function _byCodeUnits(a, b) {
-    if (a === b)
-        return 0;
-    return a < b ? -1 : 1;
-}
-
-function _readBoolean(keyFile, key) {
-    try {
-        return keyFile.get_boolean(ICON_THEME_GROUP, key);
-    } catch {
-        return false;
-    }
 }
 
 // GTK's own staleness rule, a cache older than its theme folder is ignored.
@@ -253,7 +277,7 @@ async function _linkedChildren(dir, prefix = '', depth = 0) {
     } catch {
         return linked;
     }
-    const nested = await Promise.all(subdirs.map(sub => _linkedChildren(dir, sub, depth + 1)));
+    const nested = await Promise.all(subdirs.map(subdir => _linkedChildren(dir, subdir, depth + 1)));
     nested.forEach(set => set.forEach(path => linked.add(path)));
     return linked;
 }
@@ -419,28 +443,4 @@ function _pixels(path) {
         return SCALABLE_SIZE;
     const size = path.match(SIZE_SEGMENT_RE);
     return size ? Number(size[1]) * Number(size[2] ?? 1) : 0;
-}
-
-// Follows a link chain through what the walk already saw, no disk access.
-// Null means the chain left the pack or broke, and only the disk can tell.
-function _resolveLocal(path, scan) {
-    let current = path;
-    for (let hop = 0; hop < MAX_LINK_HOPS; hop++) {
-        if (scan.regular.has(current))
-            return path;
-        current = scan.links.get(current);
-        if (!current)
-            return null;
-    }
-    return null;
-}
-
-async function _isReadableFile(path) {
-    try {
-        const info = await Gio.File.new_for_path(path).query_info_async(
-            'standard::type,access::can-read', Gio.FileQueryInfoFlags.NONE, GLib.PRIORITY_LOW, null);
-        return info.get_file_type() === Gio.FileType.REGULAR && info.get_attribute_boolean('access::can-read');
-    } catch {
-        return false;
-    }
 }

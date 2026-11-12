@@ -27,3 +27,11 @@ export function splitKeyFor(colorKey) {
 export function colorKeyFor(settings, key, light) {
     return light && settings.get_boolean(splitKeyFor(key)) ? lightTwin(key) : key;
 }
+
+export function editsLightSet(settings) {
+    return settings.get_string(COLOR_VARIANT_KEY) === 'light';
+}
+
+export function editedColorKey(settings, key) {
+    return colorKeyFor(settings, key, editsLightSet(settings));
+}

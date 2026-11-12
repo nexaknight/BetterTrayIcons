@@ -25,3 +25,4 @@ src/prefs/components/preview.js
 src/prefs/components/row.js
 src/prefs/components/search.js
 src/prefs/components/sidebar.js
+src/shared/credits.js

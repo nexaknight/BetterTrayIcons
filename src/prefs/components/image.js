@@ -28,6 +28,19 @@ const _frameRequests = new Map();
 const LOADS_PER_COLLECTION = 500;
 let _loadsSinceCollection = 0;
 
+export async function readIconTexture(path, size, cancellable = null) {
+    const file = Gio.File.new_for_path(path);
+    if (!GlyGtk4)
+        return Gdk.Texture.new_for_pixbuf(await readPixbufAtSize(file, size, cancellable));
+    _loadsSinceCollection++;
+    if (_loadsSinceCollection >= LOADS_PER_COLLECTION) {
+        _loadsSinceCollection = 0;
+        System.gc();
+    }
+    const image = await Gly.Loader.new(file).load_async(cancellable);
+    return GlyGtk4.frame_get_texture(await image.get_specific_frame_async(_frameRequest(size), cancellable));
+}
+
 function _frameRequest(size) {
     if (!_frameRequests.has(size)) {
         const request = new Gly.FrameRequest();
@@ -35,18 +48,6 @@ function _frameRequest(size) {
         _frameRequests.set(size, request);
     }
     return _frameRequests.get(size);
-}
-
-export async function readIconTexture(path, size, cancellable = null) {
-    const file = Gio.File.new_for_path(path);
-    if (!GlyGtk4)
-        return Gdk.Texture.new_for_pixbuf(await readPixbufAtSize(file, size, cancellable));
-    if (++_loadsSinceCollection >= LOADS_PER_COLLECTION) {
-        _loadsSinceCollection = 0;
-        System.gc();
-    }
-    const image = await Gly.Loader.new(file).load_async(cancellable);
-    return GlyGtk4.frame_get_texture(await image.get_specific_frame_async(_frameRequest(size), cancellable));
 }
 
 export function createPicture(params = {}) {

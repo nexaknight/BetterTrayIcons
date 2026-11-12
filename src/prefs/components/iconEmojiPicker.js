@@ -9,7 +9,7 @@ import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions
 
 import {disconnectSignal} from '../../shared/lifecycle.js';
 import {error} from '../../shared/logging.js';
-import {EMOJI_ICON_PREFIX, isEmojiIcon} from '../../shared/iconLoading.js';
+import {EMOJI_ICON_PREFIX, bundledOrThemedIcon, isEmojiIcon} from '../../shared/iconLoading.js';
 import {createBox, createLabel} from './text.js';
 import {createIconButton} from './button.js';
 import {createFileFilter, openFileChooser} from './dialog.js';
@@ -18,11 +18,11 @@ import {loadEmojiCatalog} from './emoji.js';
 import {applyPathIcon, prefsForegroundColor, themeIconFile} from './icon.js';
 import {isIconPackPath, listIconPacks, loadPackIcons, packIconIndex, packIconPath} from '../iconPacks.js';
 
-// A 36px cell with a 4px gap is one column. Thirteen of them set the popover
+// A 36px cell with a 4px gap is one column. Fourteen of them set the popover
 // width, and the nine emoji tabs share that width evenly.
 const CELL_SIZE_PX = 36;
 const COLUMN_WIDTH_PX = 40;
-const MAX_COLUMNS = 13;
+const MAX_COLUMNS = 14;
 const MIN_COLUMNS = 6;
 const RECENT_EMOJI_ROWS = 2;
 const RECENT_EMOJIS_MAX = MAX_COLUMNS * RECENT_EMOJI_ROWS;
@@ -41,6 +41,7 @@ const ROW_HEIGHT_PX = COLUMN_WIDTH_PX;
 const TITLE_BOTTOM_GAP_PX = 4;
 const CELL_MARGIN_PX = (ROW_HEIGHT_PX - CELL_SIZE_PX) / 2;
 const GRID_ICON_SIZE_PX = 24;
+const SEARCH_ICON_NAME = 'bti-search-symbolic';
 const ICONS_PER_FRAME = 26;
 const PACK_LOADS_PER_FRAME = 13;
 const SCROLL_SETTLE_US = 100 * 1000;
@@ -62,6 +63,9 @@ const TITLE_CELL_CLASSES = ['flat', 'bti-picker-cell'];
 const MODE_ICONS = 'icons';
 const MODE_EMOJI = 'emoji';
 const MODE_CUSTOM = 'custom';
+
+const RESULTS_GRID = 'grid';
+const RESULTS_EMPTY = 'empty';
 
 const SECTION_RECOMMENDED = 'recommended';
 const SECTION_SYMBOLIC = 'symbolic';
@@ -101,7 +105,7 @@ export default class IconEmojiPicker extends Gtk.Popover {
     }
 
     _init({settings, key = null, icons = [], current = null, onSelect = null, showCustom = true, showEmoji = true, showPacks = true}) {
-        super._init({css_classes: ['bti-icon-emoji-picker']});
+        super._init({css_classes: ['bti-icon-emoji-picker'], has_arrow: false});
 
         this._settings = settings;
         this._key = key;
@@ -178,11 +182,11 @@ export default class IconEmojiPicker extends Gtk.Popover {
     }
 
     _initialMode(modes) {
-        const has = name => modes.some(mode => mode.name === name);
-        if (isEmojiIcon(this._current) && has(MODE_EMOJI))
+        const hasMode = name => modes.some(mode => mode.name === name);
+        if (isEmojiIcon(this._current) && hasMode(MODE_EMOJI))
             return MODE_EMOJI;
         const isPackFile = this._showPacks && isIconPackPath(this._current);
-        if (this._current?.startsWith('/') && !isPackFile && has(MODE_CUSTOM))
+        if (this._current?.startsWith('/') && !isPackFile && hasMode(MODE_CUSTOM))
             return MODE_CUSTOM;
         return MODE_ICONS;
     }
@@ -421,8 +425,14 @@ class SectionGrid {
         this.widget = createBox({spacing: LAYOUT_GAP_PX});
         this._showTabs = showTabs;
         this._tabBar = createBox({orientation: 'horizontal', spacing: TAB_GAP_PX, homogeneous: true, hexpand: true, visible: showTabs});
-        this._searchEntry = new Gtk.SearchEntry({placeholder_text: searchPlaceholder, search_delay: 0});
-        this._searchEntry.connect('search-changed', entry => {
+        // A plain entry with the bundled glyph, Gtk.SearchEntry draws the
+        // theme's edit-find icon and some themes rotate or restyle it
+        this._searchEntry = new Gtk.Entry({
+            placeholder_text: searchPlaceholder,
+            primary_icon_gicon: bundledOrThemedIcon(SEARCH_ICON_NAME),
+            primary_icon_activatable: false,
+        });
+        this._searchEntry.connect('changed', entry => {
             this._query = entry.text.trim().toLowerCase();
             this._rebuild();
             // A new model keeps the old offset, the results start at the top
@@ -468,13 +478,13 @@ class SectionGrid {
         this._scroller.add_controller(wheel);
 
         this._results = new Gtk.Stack({vhomogeneous: false});
-        this._results.add_named(this._scroller, 'grid');
+        this._results.add_named(this._scroller, RESULTS_GRID);
         this._results.add_named(new Adw.StatusPage({
-            icon_name: 'bti-search-symbolic',
+            icon_name: SEARCH_ICON_NAME,
             title: emptyTitle,
             description: _('Try a different search term.'),
             css_classes: ['compact'],
-        }), 'empty');
+        }), RESULTS_EMPTY);
 
         this.widget.append(this._tabBar);
         this.widget.append(this._searchEntry);
@@ -518,16 +528,6 @@ class SectionGrid {
         this._searchModels.forEach(model => model.setColumns(columns));
     }
 
-    // A closed grid lets go of its cells and their pictures right away,
-    // the frame clock no longer ticks to finish its queue.
-    release() {
-        if (this._iconTickId)
-            this._grid.remove_tick_callback(this._iconTickId);
-        this._iconTickId = 0;
-        this._packLoads.forEach((_path, image) => this._forgetQueued(image));
-        this._grid.model = null;
-    }
-
     refresh() {
         this._model.items_changed(0, this._model.get_n_items(), this._model.get_n_items());
     }
@@ -563,6 +563,103 @@ class SectionGrid {
         });
     }
 
+    // Words match from their start, so cat skips communication and an
+    // icon's dashes count as word breaks.
+    _rebuild() {
+        const needle = ` ${this._query}`;
+        const segments = this._sections.map(section => ({
+            section,
+            matches: this._query ? _sectionMatches(section, needle) : null,
+        }));
+        for (const {section, matches} of segments)
+            this._tabs.get(section.id)?.set_sensitive((matches?.length ?? _sectionCount(section)) > 0);
+        if (!this._query) {
+            this._grid.model = this._fullSelection;
+            this._syncResults();
+            return;
+        }
+        const hidden = this._searchModels.find(model => model !== this._model);
+        hidden.replace(segments);
+        this._grid.model = new Gtk.NoSelection({model: hidden});
+        this._syncResults();
+    }
+
+    _syncResults() {
+        this._results.visible_child_name = this._model.get_n_items() > 0 ? RESULTS_GRID : RESULTS_EMPTY;
+        this._syncToScroll();
+    }
+
+    // The active tab is the section whose title last passed the top edge.
+    _syncToScroll() {
+        const rows = this._model.get_n_items() / this._model.columns;
+        if (rows === 0)
+            return;
+        const adjustment = this._scroller.get_vadjustment();
+        const isAtEnd = adjustment.value >= adjustment.upper - adjustment.page_size - 1;
+        const topRow = Math.floor(adjustment.value / ROW_HEIGHT_PX);
+        const row = isAtEnd ? rows - 1 : Math.min(topRow, rows - 1);
+        const section = this._model.sectionAt(row * this._model.columns);
+        const tab = section ? this._tabs.get(section.id) : null;
+        if (tab && !tab.active)
+            tab.active = true;
+    }
+
+    _createCellWidget() {
+        const content = this._kind === MODE_EMOJI
+            ? createLabel('', ['bti-picker-emoji'])
+            : createImage({
+                pixel_size: GRID_ICON_SIZE_PX,
+                width_request: GRID_ICON_SIZE_PX,
+                height_request: GRID_ICON_SIZE_PX,
+            });
+        // The button is the whole cell, a wrapper box per cell doubled what a
+        // freshly opened grid has to build in one frame.
+        const button = new Gtk.Button({
+            child: content,
+            width_request: CELL_SIZE_PX,
+            height_request: CELL_SIZE_PX,
+            halign: Gtk.Align.CENTER,
+            valign: Gtk.Align.CENTER,
+            margin_top: CELL_MARGIN_PX,
+            margin_bottom: CELL_MARGIN_PX,
+            overflow: Gtk.Overflow.VISIBLE,
+            css_classes: CELL_CLASSES,
+        });
+        button.connect('clicked', () => this._onPick(button._btiItem, button._btiSection));
+        button._btiContent = content;
+        return button;
+    }
+
+    _bindCell(listItem) {
+        const button = listItem.get_child();
+        const {section, index} = listItem.get_item();
+        listItem.focusable = false;
+        if (index === CELL_TITLE) {
+            this._showTitle(button, section.title);
+            return;
+        }
+        const item = index >= 0 ? _sectionItem(section, index) : null;
+        button.set_child(button._btiContent);
+        button.visible = item !== null;
+        if (item === null)
+            return;
+
+        button.can_target = true;
+        button._btiItem = item;
+        button._btiSection = section;
+        button.tooltip_text = item.name;
+        button.update_property([Gtk.AccessibleProperty.LABEL], [item.name]);
+        button.set_css_classes(item.value === this._current ? CURRENT_CELL_CLASSES : CELL_CLASSES);
+
+        const content = button._btiContent;
+        if (this._kind === MODE_EMOJI)
+            content.label = item.text;
+        else if (section.pack)
+            this._queuePackIcon(content, item.value);
+        else
+            this._queueNamedIcon(content, item.value);
+    }
+
     // Only a row's first cell ever holds a title, so its label is made on
     // first use and the cell turns into plain text.
     _showTitle(button, title) {
@@ -585,14 +682,6 @@ class SectionGrid {
         this._iconTickId ||= this._grid.add_tick_callback(() => this._runIconQueue());
     }
 
-    _forgetQueued(image) {
-        image._btiPackLoad?.cancel();
-        image._btiPackLoad = null;
-        this._packLoads.delete(image);
-        this._packIcons.delete(image);
-        this._namedIcons.delete(image);
-    }
-
     // GTK would decode a file icon on the main loop when first drawn. These
     // decode asynchronously, a few per frame once scrolling pauses, so a
     // flick starts no loads and a rebound cell cancels its own.
@@ -606,6 +695,14 @@ class SectionGrid {
         image.clear();
         this._packLoads.set(image, path);
         this._iconTickId ||= this._grid.add_tick_callback(() => this._runIconQueue());
+    }
+
+    _forgetQueued(image) {
+        image._btiPackLoad?.cancel();
+        image._btiPackLoad = null;
+        this._packLoads.delete(image);
+        this._packIcons.delete(image);
+        this._namedIcons.delete(image);
     }
 
     _runIconQueue() {
@@ -655,113 +752,16 @@ class SectionGrid {
             .finally(() => this._packLoadsInFlight--);
     }
 
-    // Words match from their start, so cat skips communication and an
-    // icon's dashes count as word breaks.
-    _rebuild() {
-        const needle = ` ${this._query}`;
-        const segments = this._sections.map(section => ({
-            section,
-            matches: this._query ? _sectionMatches(section, needle) : null,
-        }));
-        for (const {section, matches} of segments)
-            this._tabs.get(section.id)?.set_sensitive((matches?.length ?? _sectionCount(section)) > 0);
-        if (!this._query) {
-            this._grid.model = this._fullSelection;
-            this._syncResults();
-            return;
-        }
-        const hidden = this._searchModels.find(model => model !== this._model);
-        hidden.replace(segments);
-        this._grid.model = new Gtk.NoSelection({model: hidden});
-        this._syncResults();
-    }
-
-    _syncResults() {
-        this._results.visible_child_name = this._model.get_n_items() > 0 ? 'grid' : 'empty';
-        this._syncToScroll();
-    }
-
-    // The active tab is the section whose title last passed the top edge.
-    _syncToScroll() {
-        const rows = this._model.get_n_items() / this._model.columns;
-        if (rows === 0)
-            return;
-        const adjustment = this._scroller.get_vadjustment();
-        const isAtEnd = adjustment.value >= adjustment.upper - adjustment.page_size - 1;
-        const topRow = Math.floor(adjustment.value / ROW_HEIGHT_PX);
-        const row = isAtEnd ? rows - 1 : Math.min(topRow, rows - 1);
-        const section = this._model.sectionAt(row * this._model.columns);
-        const tab = section ? this._tabs.get(section.id) : null;
-        if (tab && !tab.active)
-            tab.active = true;
-    }
-
-    _createCellWidget() {
-        const content = this._kind === MODE_EMOJI
-            ? createLabel('', ['bti-picker-emoji'])
-            : createImage({
-                pixel_size: GRID_ICON_SIZE_PX,
-                width_request: GRID_ICON_SIZE_PX,
-                height_request: GRID_ICON_SIZE_PX,
-            });
-        // The button is the whole cell, a wrapper box per cell doubled what a
-        // freshly opened grid has to build in one frame.
-        const button = new Gtk.Button({
-            child: content,
-            width_request: CELL_SIZE_PX,
-            height_request: CELL_SIZE_PX,
-            halign: Gtk.Align.CENTER,
-            valign: Gtk.Align.CENTER,
-            margin_top: CELL_MARGIN_PX,
-            margin_bottom: CELL_MARGIN_PX,
-            overflow: Gtk.Overflow.VISIBLE,
-            css_classes: CELL_CLASSES,
-        });
-        button.connect('clicked', () => this._onPick(button._btiItem, button._btiSection));
-        button._btiContent = content;
-        return button;
-    }
-
-    _bindCell(listItem) {
-        const button = listItem.get_child();
-        const {section, index} = listItem.get_item();
-        listItem.focusable = false;
-        const item = index >= 0 ? _sectionItem(section, index) : null;
-        if (index === CELL_TITLE) {
-            this._showTitle(button, section.title);
-            return;
-        }
-        button.set_child(button._btiContent);
-        button.visible = item !== null;
-        if (item === null)
-            return;
-
-        button.can_target = true;
-        button._btiItem = item;
-        button._btiSection = section;
-        button.tooltip_text = item.name;
-        button.update_property([Gtk.AccessibleProperty.LABEL], [item.name]);
-        button.set_css_classes(item.value === this._current ? CURRENT_CELL_CLASSES : CELL_CLASSES);
-
-        const content = button._btiContent;
-        if (this._kind === MODE_EMOJI)
-            content.label = item.text;
-        else if (section.pack)
-            this._queuePackIcon(content, item.value);
-        else
-            this._queueNamedIcon(content, item.value);
+    // A closed grid lets go of its cells and their pictures right away,
+    // the frame clock no longer ticks to finish its queue.
+    release() {
+        if (this._iconTickId)
+            this._grid.remove_tick_callback(this._iconTickId);
+        this._iconTickId = 0;
+        this._packLoads.forEach((_path, image) => this._forgetQueued(image));
+        this._grid.model = null;
     }
 }
-
-const PickerCell = GObject.registerClass({
-    GTypeName: 'BetterTrayIconsPickerCell',
-}, class PickerCell extends GObject.Object {
-    _init(section, index) {
-        super._init();
-        this.section = section;
-        this.index = index;
-    }
-});
 
 // One entry per section with its search matches, a GObject only for a
 // position the grid asks for. Tens of thousands of stored cells made every
@@ -881,6 +881,16 @@ const CellModel = GObject.registerClass({
     }
 });
 
+const PickerCell = GObject.registerClass({
+    GTypeName: 'BetterTrayIconsPickerCell',
+}, class PickerCell extends GObject.Object {
+    _init(section, index) {
+        super._init();
+        this.section = section;
+        this.index = index;
+    }
+});
+
 // A title lives in one grid cell but reads across its whole row. It asks for
 // no width, so the column stays as wide as an icon, and draws past its edge
 // over the empty cells beside it, inset to line up with the centered buttons.
@@ -924,6 +934,47 @@ function _createTab({title, iconName}, group) {
 
 function _iconItem(name) {
     return {value: name, name, search: ` ${name.replace(/[-_.]/g, ' ')}`.toLowerCase()};
+}
+
+let _systemIconsCache = null;
+
+let _isThemeWatched = false;
+
+function _getSystemIcons() {
+    if (_systemIconsCache)
+        return _systemIconsCache;
+
+    const iconTheme = Gtk.IconTheme.get_for_display(Gdk.Display.get_default());
+    if (!_isThemeWatched) {
+        _isThemeWatched = true;
+        iconTheme.connect('changed', () => (_systemIconsCache = null));
+    }
+
+    const filtered = iconTheme.get_icon_names().filter(name => {
+        if (!name.endsWith('-symbolic'))
+            return false;
+        return !name.includes('night') && !name.includes('rtl') && !name.startsWith('adw-');
+    });
+
+    _systemIconsCache = [...new Set(filtered)].sort();
+    return _systemIconsCache;
+}
+
+// A name keeps syncing between machines, so it is stored whenever the active
+// theme resolves it to this same pack. Anything else stores the file path,
+// which the shell draws as a file icon.
+function _packIconValue(pack, item) {
+    const resolved = themeIconFile(item.name);
+    const isInsidePack = !!resolved && pack.dirs.some(dir => resolved.startsWith(`${dir}/`));
+    return isInsidePack ? item.name : item.value;
+}
+
+function _packSection(pack) {
+    return {
+        id: `${PACK_SECTION_PREFIX}${pack.id}`,
+        title: pack.name,
+        pack,
+    };
 }
 
 // Small sections keep one object per item. A pack keeps two string arrays,
@@ -988,44 +1039,4 @@ function _isSeparator(code) {
 
 function _foldCase(code) {
     return code >= UPPER_A_CODE && code <= UPPER_Z_CODE ? code + CASE_OFFSET : code;
-}
-
-function _packSection(pack) {
-    return {
-        id: `${PACK_SECTION_PREFIX}${pack.id}`,
-        title: pack.name,
-        pack,
-    };
-}
-
-// A name keeps syncing between machines, so it is stored whenever the active
-// theme resolves it to this same pack. Anything else stores the file path,
-// which the shell draws as a file icon.
-function _packIconValue(pack, item) {
-    const resolved = themeIconFile(item.name);
-    const isInsidePack = !!resolved && pack.dirs.some(dir => resolved.startsWith(`${dir}/`));
-    return isInsidePack ? item.name : item.value;
-}
-
-let _systemIconsCache = null;
-let _themeWatchConnected = false;
-
-function _getSystemIcons() {
-    if (_systemIconsCache)
-        return _systemIconsCache;
-
-    const iconTheme = Gtk.IconTheme.get_for_display(Gdk.Display.get_default());
-    if (!_themeWatchConnected) {
-        _themeWatchConnected = true;
-        iconTheme.connect('changed', () => (_systemIconsCache = null));
-    }
-
-    const filtered = iconTheme.get_icon_names().filter(name => {
-        if (!name.endsWith('-symbolic'))
-            return false;
-        return !name.includes('night') && !name.includes('rtl') && !name.startsWith('adw-');
-    });
-
-    _systemIconsCache = [...new Set(filtered)].sort();
-    return _systemIconsCache;
 }

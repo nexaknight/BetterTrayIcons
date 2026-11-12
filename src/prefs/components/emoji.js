@@ -21,6 +21,8 @@ const EMOJI_GLYPH_RATIO = 0.83;
 // A colour glyph ignores the paint, it only has to be a valid one.
 const GLYPH_PAINT = new Gdk.RGBA({red: 0, green: 0, blue: 0, alpha: 1});
 
+const FILE_EXTENSION_RE = /\.[^.]+$/;
+
 let _pangoContext = null;
 
 export const EmojiPaintable = GObject.registerClass({
@@ -95,7 +97,7 @@ function _setPackIconSubtitle(row, path) {
     packNameForPath(path).then(packName => {
         if (!packName || row._btiSubtitleValue !== path)
             return;
-        const iconName = GLib.path_get_basename(path).replace(/\.[^.]+$/, '');
+        const iconName = GLib.path_get_basename(path).replace(FILE_EXTENSION_RE, '');
         row.set_subtitle(`${iconName} (${packName})`);
     }).catch(() => {});
 }

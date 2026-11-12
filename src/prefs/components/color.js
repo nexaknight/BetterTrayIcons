@@ -4,7 +4,7 @@ import Adw from 'gi://Adw';
 
 import {connectScoped, watchKeys} from '../../shared/lifecycle.js';
 import {usesAccent} from '../../shared/accentColor.js';
-import {COLOR_VARIANT_KEY, colorKeyFor, lightTwin, splitKeyFor} from '../../shared/colorVariant.js';
+import {COLOR_VARIANT_KEY, editedColorKey, lightTwin, splitKeyFor} from '../../shared/colorVariant.js';
 
 const SWATCH_FALLBACK_COLOR = 'rgba(0,0,0,1)';
 
@@ -39,14 +39,6 @@ export function createColorSwatch({title, read, write, usingAccent}) {
     connectScoped(button, Adw.StyleManager.get_default(), 'notify::accent-color', sync);
 
     return {button, sync};
-}
-
-export function editedColorKey(settings, key) {
-    return colorKeyFor(settings, key, editsLightSet(settings));
-}
-
-export function editsLightSet(settings) {
-    return settings.get_string(COLOR_VARIANT_KEY) === 'light';
 }
 
 export function editedColorUsesAccent(settings, key) {

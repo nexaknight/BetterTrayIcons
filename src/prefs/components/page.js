@@ -4,6 +4,7 @@ import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions
 import {resetKeys} from '../../shared/settingsIO.js';
 import {createIconButton} from './button.js';
 import {buildDialogShell, showConfirmationDialog} from './dialog.js';
+import {RESET_ICON_NAME} from './icon.js';
 import {addToast, createSidebarToggle, popSubpage} from './sidebar.js';
 
 export function buildPrefsWidget(page, settings, keysToReset, {window = null} = {}) {
@@ -28,7 +29,7 @@ export function buildPrefsWidget(page, settings, keysToReset, {window = null} = 
 }
 
 export function createResetButton({settings, keys, window, includesSubpages = false}) {
-    const resetButton = createIconButton('bti-reset-symbolic', {
+    const resetButton = createIconButton(RESET_ICON_NAME, {
         circular: true,
         tooltip: _('Reset'),
         onClick: () => showConfirmationDialog(resetButton.get_root(), {

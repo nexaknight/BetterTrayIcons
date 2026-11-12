@@ -7,10 +7,10 @@ import Gsk from 'gi://Gsk';
 import {usesAccent} from '../../../shared/accentColor.js';
 import {boxGeometryCss, borderShorthand} from '../../../shared/boxStyle.js';
 import {THEME_FOREGROUND} from '../../../shared/colorContrast.js';
+import {editedColorKey, editsLightSet} from '../../../shared/colorVariant.js';
 import {
     DEFAULT_PILL_RADIUS_PX, DEFAULT_ICON_PADDING_PX, ICON_MARGIN_PX,
 } from '../../../const.js';
-import {editedColorKey, editsLightSet} from '../color.js';
 import {createBox} from '../text.js';
 
 export const PREVIEW_SAMPLE_ICONS = Object.freeze([

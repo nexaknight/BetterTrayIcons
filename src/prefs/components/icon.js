@@ -6,7 +6,7 @@ import Adw from 'gi://Adw';
 import {buildSymbolicCandidates, emojiText, isEmojiIcon, orderThemedNames, themedIcon, pathOrThemedIcon, probeIconPaths, resolveIcon, tintedSymbolicIcon, symbolicTint} from '../../shared/iconLoading.js';
 import {fileExists} from '../../shared/asyncIo.js';
 import {readShownIcons, SHOWN_ICONS_PATH, watchRuntimeFile} from '../../shared/appConfig.js';
-import {editsLightSet} from './color.js';
+import {editsLightSet} from '../../shared/colorVariant.js';
 import {EmojiPaintable} from './emoji.js';
 
 export const NEXT_ICON_NAME = 'bti-next-symbolic';
