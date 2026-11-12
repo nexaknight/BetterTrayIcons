@@ -13,7 +13,10 @@
   "conflicts": [
     "appindicatorsupport@rgcjonas.gmail.com",
     "ubuntu-appindicators@ubuntu.com",
-    "trayIconsReloaded@selfmade.pl"
+    "trayIconsReloaded@selfmade.pl",
+    "status-tray@keithvassallo.com",
+    "quick-settings-tray@soltros",
+    "mock-tray@kramo.page"
   ],
   "donations": {
     "github": "nexaknight",
