@@ -585,9 +585,6 @@ msgstr "不允许使用该名称。"
 msgid "This state already exists."
 msgstr "该状态已存在。"
 
-msgid "Overflow Container"
-msgstr "溢出容器"
-
 msgid "Overflow Layout"
 msgstr "溢出布局"
 
@@ -726,12 +723,6 @@ msgstr "本设备"
 msgid "from"
 msgstr "来自"
 
-msgid "Auto-Sync"
-msgstr "自动同步"
-
-msgid "Enable"
-msgstr "启用"
-
 msgid "Push on change, pull on remote update."
 msgstr "有更改时推送，远程有更新时拉取。"
 
@@ -747,14 +738,8 @@ msgstr "正在监视更改。"
 msgid "Waiting for the file."
 msgstr "正在等待文件出现。"
 
-msgid "Manual Sync"
-msgstr "手动同步"
-
 msgid "Push to File"
 msgstr "推送到文件"
-
-msgid "Push"
-msgstr "推送"
 
 msgid "Settings pushed"
 msgstr "设置已推送"

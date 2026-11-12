@@ -69,9 +69,6 @@ msgstr "Attenzione"
 msgid "Automatic"
 msgstr "Automatica"
 
-msgid "Auto-Sync"
-msgstr "Sincronizzazione automatica"
-
 msgid "Back"
 msgstr "Indietro"
 
@@ -209,9 +206,6 @@ msgstr "Doppio clic"
 
 msgid "Elements"
 msgstr "Elementi"
-
-msgid "Enable"
-msgstr "Abilita"
 
 msgid "Error loading data"
 msgstr "Errore nel caricamento dei dati"
@@ -372,9 +366,6 @@ msgstr "Tocco prolungato"
 msgid "Long Press"
 msgstr "Pressione prolungata"
 
-msgid "Manual Sync"
-msgstr "Sincronizzazione manuale"
-
 msgid "Margin"
 msgstr "Margine"
 
@@ -447,9 +438,6 @@ msgstr "Aprire l'ingranaggio per doppio clic e pressione prolungata."
 msgid "Order within the chosen box."
 msgstr "Ordine all'interno dell'area scelta."
 
-msgid "Overflow Container"
-msgstr "Contenitore di overflow"
-
 msgid "Overflow Layout"
 msgstr "Disposizione dell'overflow"
 
@@ -503,9 +491,6 @@ msgstr "Prelevare dal file?"
 
 msgid "Pull from File"
 msgstr "Preleva dal file"
-
-msgid "Push"
-msgstr "Invia"
 
 msgid "Push failed"
 msgstr "Invio non riuscito"

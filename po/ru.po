@@ -586,9 +586,6 @@ msgstr "Это название недопустимо."
 msgid "This state already exists."
 msgstr "Такое состояние уже существует."
 
-msgid "Overflow Container"
-msgstr "Контейнер меню скрытых значков"
-
 msgid "Overflow Layout"
 msgstr "Макет меню скрытых значков"
 
@@ -727,12 +724,6 @@ msgstr "этого устройства"
 msgid "from"
 msgstr "с"
 
-msgid "Auto-Sync"
-msgstr "Автосинхронизация"
-
-msgid "Enable"
-msgstr "Включить"
-
 msgid "Push on change, pull on remote update."
 msgstr "Отправляет при изменении и получает при обновлении удалённого файла."
 
@@ -748,14 +739,8 @@ msgstr "Отслеживание изменений."
 msgid "Waiting for the file."
 msgstr "Ожидание файла."
 
-msgid "Manual Sync"
-msgstr "Ручная синхронизация"
-
 msgid "Push to File"
 msgstr "Отправить в файл"
-
-msgid "Push"
-msgstr "Отправить"
 
 msgid "Settings pushed"
 msgstr "Настройки отправлены"

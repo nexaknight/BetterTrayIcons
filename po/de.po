@@ -12,8 +12,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-msgid "How many icons stay in the panel. Extra icons move to the overflow menu, and 0 moves them all."
-msgstr "Wie viele Icons im Panel bleiben. Zusätzliche Icons wandern ins Overflow-Menü, bei 0 alle."
+msgid "How many icons stay in the panel. The rest go to the drawer, at 0 every icon does."
+msgstr "Wie viele Icons im Panel bleiben. Der Rest wandert in die Schublade, bei 0 jedes Icon."
+
+msgid "How many icons stay in the panel. The rest go to the overflow menu, at 0 every icon does."
+msgstr "Wie viele Icons im Panel bleiben. Der Rest wandert ins Overflow-Menü, bei 0 wandern alle dorthin."
 
 msgid "About"
 msgstr "Über"
@@ -30,8 +33,8 @@ msgstr "Aktivieren"
 msgid "Add a state"
 msgstr "Zustand hinzufügen"
 
-msgid "A click on an app in front minimizes it instead of letting it hide itself to the tray, so it stays in the dock and taskbar. Apps that already toggle their window on a click lose that behavior."
-msgstr "Ein Klick auf eine App im Vordergrund minimiert sie, statt sie sich selbst in den Tray verstecken zu lassen. So bleibt sie im Dock und in der Taskleiste. Apps, die ihr Fenster bei einem Klick schon selbst ein- und ausblenden, verlieren dieses Verhalten."
+msgid "Many apps hide themselves to the tray when their icon is clicked a second time while they are in front. Some apps do not support that. This setting gives them a similar behavior.\n\n• Per App: set it for each app under Applications. Apps that already hide to the tray keep their own behavior.\n• Minimize: applies to every app. A second click minimizes the app, and it stays visible in the dock.\n• Close: closes the app’s window in front. Some apps quit entirely instead of staying in the tray, and unsaved work can be lost."
+msgstr "Viele Apps blenden sich in den Tray aus, wenn ihr Icon im Vordergrund ein zweites Mal angeklickt wird. Manche Apps unterstützen das nicht. Diese Einstellung gibt ihnen ein ähnliches Verhalten.\n\n• Pro App: Wird je App unter Anwendungen festgelegt. Apps, die sich bereits selbst in den Tray ausblenden, behalten ihr eigenes Verhalten.\n• Minimieren: Gilt für alle Apps. Ein zweiter Klick minimiert die App, sie bleibt im Dock sichtbar.\n• Schließen: Schließt das Fenster der App im Vordergrund. Manche Apps beenden sich dabei ganz, statt im Tray zu bleiben, und ungespeicherte Arbeit kann verloren gehen."
 
 msgid "Adds a tray icon for windowless background apps that lack one of their own."
 msgstr "Ergänzt ein Tray-Icon für fensterlose Hintergrund-Apps, die keines haben."
@@ -68,9 +71,6 @@ msgstr "Aufmerksamkeit"
 
 msgid "Automatic"
 msgstr "Automatisch"
-
-msgid "Auto-Sync"
-msgstr "Auto-Sync"
 
 msgid "Back"
 msgstr "Zurück"
@@ -168,6 +168,12 @@ msgstr "Kontaktiert api.github.com auf Anforderung."
 msgid "Contributors"
 msgstr "Mitwirkende"
 
+msgid "Copied"
+msgstr "Kopiert"
+
+msgid "Copy"
+msgstr "Kopieren"
+
 msgid "Corner Radius (px)"
 msgstr "Eckenradius (px)"
 
@@ -201,8 +207,8 @@ msgstr "Löscht alle gespeicherten Einstellungen dieser App."
 msgid "Detected Apps"
 msgstr "Erkannte Apps"
 
-msgid "Clicking the icon while the app is in front minimizes its windows."
-msgstr "Ein Klick auf das Icon minimiert die Fenster der App, wenn sie im Vordergrund ist."
+msgid "For apps that do not hide themselves when their icon is clicked while they are in front."
+msgstr "Für Apps, die sich bei einem Klick auf ihr Icon im Vordergrund nicht selbst ausblenden."
 
 msgid "Don’t show this icon in the tray."
 msgstr "Dieses Icon nicht im Tray anzeigen."
@@ -216,8 +222,8 @@ msgstr "Doppelklick"
 msgid "Elements"
 msgstr "Elemente"
 
-msgid "Enable"
-msgstr "Aktivieren"
+msgid "Sync Settings Automatically"
+msgstr "Einstellungen automatisch synchronisieren"
 
 msgid "Error loading data"
 msgstr "Fehler beim Laden"
@@ -237,9 +243,6 @@ msgstr "Änderungsprotokoll konnte nicht geladen werden: "
 msgid "File"
 msgstr "Datei"
 
-msgid "File Chooser"
-msgstr "Dateiauswahl"
-
 msgid "File is not valid JSON"
 msgstr "Datei ist kein gültiges JSON"
 
@@ -254,6 +257,15 @@ msgstr "App vergessen"
 
 msgid "Forward to the App"
 msgstr "An die App weitergeben"
+
+msgid "Forward"
+msgstr "Weitergeben"
+
+msgid "Forward sends the mouse wheel to the app. Default follows the Actions page."
+msgstr "Weitergeben schickt das Mausrad an die App. Standard folgt der Seite „Aktionen“."
+
+msgid "Forward to the App sends your mouse wheel to the app behind the icon. Apps that support it react, for example by switching devices or changing the volume. Most apps take the wheel and do nothing with it.\n\nIn Background Apps mode the wheel then no longer scrolls the Quick Settings list while the pointer is over such an icon, because the event goes to the app. To keep the list scrolling, set this to None and pick Forward only for the apps that use it, in their own settings under Applications."
+msgstr "„An die App weitergeben“ schickt das Mausrad an die App hinter dem Icon. Apps, die das unterstützen, reagieren darauf, zum Beispiel mit einem Gerätewechsel oder einer Lautstärkeänderung. Die meisten Apps nehmen das Mausrad an und machen nichts damit.\n\nIm Modus „Hintergrundanwendungen“ scrollt das Mausrad die Liste in den Schnelleinstellungen dann nicht mehr, solange der Zeiger über so einem Icon steht, weil das Ereignis an die App geht. Damit die Liste weiter scrollt, hier „Keine“ wählen und „Weitergeben“ nur für die Apps einstellen, die es nutzen, in deren eigenen Einstellungen unter „Anwendungen“."
 
 msgid "Stay Open When a Click Has No Effect"
 msgstr "Offen bleiben, wenn ein Klick keine Wirkung hat"
@@ -322,6 +334,9 @@ msgstr "Icongröße"
 msgid "Icons"
 msgstr "Icons"
 
+msgid "Icons and Emojis"
+msgstr "Icons und Emojis"
+
 msgid "ID"
 msgstr "ID"
 
@@ -345,6 +360,15 @@ msgstr "Stil von Tray-Icons übernehmen"
 
 msgid "Keep Overflow Menu Open"
 msgstr "Overflow-Menü offen lassen"
+
+msgid "Keep Quick Settings Open"
+msgstr "Schnelleinstellungen offen lassen"
+
+msgid "Quick Settings"
+msgstr "Schnelleinstellungen"
+
+msgid "Remember Drawer State"
+msgstr "Schubladenzustand merken"
 
 msgid "Keep settings in sync via a shared file."
 msgstr "Einstellungen über eine gemeinsame Datei synchron halten."
@@ -388,9 +412,6 @@ msgstr "Lange berühren"
 msgid "Long Press"
 msgstr "Lang drücken"
 
-msgid "Manual Sync"
-msgstr "Manueller Sync"
-
 msgid "Margin"
 msgstr "Außenabstand"
 
@@ -400,11 +421,14 @@ msgstr "Übernimmt das Aussehen der Tray-Icons. Blendet die Optionen darunter au
 msgid "Stays open after icon clicks and context menus alike."
 msgstr "Bleibt nach Icon-Klicks wie nach Kontextmenüs geöffnet."
 
+msgid "Stays open until the toggle button closes it."
+msgstr "Bleibt geöffnet, bis der Umschalt-Knopf sie schließt."
+
 msgid "Menu on Hover"
 msgstr "Menü bei Hover"
 
-msgid "Which menu opens when you hover the toggle button"
-msgstr "Welches Menü beim Überfahren des Umschalt-Knopfs geöffnet wird"
+msgid "Which menu opens when you move onto the toggle button while another panel menu is open"
+msgstr "Welches Menü aufgeht, wenn du bei offenem Panel-Menü auf den Umschalt-Knopf fährst"
 
 msgid "More colors"
 msgstr "Weitere Farben"
@@ -412,8 +436,20 @@ msgstr "Weitere Farben"
 msgid "Middle Click"
 msgstr "Mittelklick"
 
-msgid "Minimize When in Front"
-msgstr "Im Vordergrund minimieren"
+msgid "Minimize Action for Unsupported Apps"
+msgstr "Minimieren-Aktion für nicht unterstützte Apps"
+
+msgid "Per App"
+msgstr "Pro App"
+
+msgid "Default"
+msgstr "Standard"
+
+msgid "Minimize"
+msgstr "Minimieren"
+
+msgid "Close"
+msgstr "Schließen"
 
 msgid "Name"
 msgstr "Name"
@@ -457,17 +493,12 @@ msgstr "Auf GitHub öffnen"
 msgid "Open Overflow Menu"
 msgstr "Overflow-Menü öffnen"
 
-msgid "Open Settings"
-msgstr "Einstellungen öffnen"
+msgid "Open Drawer"
+msgstr "Schublade öffnen"
 
-msgid "Open the gear for double-click and long-press."
-msgstr "Über das Zahnrad: Doppelklick und Langdruck."
 
 msgid "Order within the chosen box."
 msgstr "Reihenfolge innerhalb der gewählten Box."
-
-msgid "Overflow Container"
-msgstr "Overflow-Container"
 
 msgid "Overflow Layout"
 msgstr "Overflow-Layout"
@@ -486,9 +517,6 @@ msgstr "Innenabstand"
 
 msgid "Panel Applet"
 msgstr "Panel-Applet"
-
-msgid "Panel Box"
-msgstr "Panel-Bereich"
 
 msgid "Placement"
 msgstr "Platzierung"
@@ -526,9 +554,6 @@ msgstr "Aus Datei pullen?"
 msgid "Pull from File"
 msgstr "Aus Datei pullen"
 
-msgid "Push"
-msgstr "Pushen"
-
 msgid "Push failed"
 msgstr "Pushen fehlgeschlagen"
 
@@ -552,6 +577,9 @@ msgstr "Empfohlen"
 
 msgid "Relative to the tray icons."
 msgstr "Relativ zu den Tray-Icons."
+
+msgid "No icons stay in the panel, so there is no side to pick."
+msgstr "Kein Icon bleibt im Panel, also gibt es keine Seite zu wählen."
 
 msgid "Remove"
 msgstr "Entfernen"
@@ -581,8 +609,8 @@ msgid "Restore"
 msgstr "Wiederherstellen"
 
 
-msgid "Reveal colors, padding and margin controls below."
-msgstr "Blendet Farben, Abstände und Ränder unten ein."
+msgid "Reveal the style controls below."
+msgstr "Blendet die Stil-Regler unten ein."
 
 msgid "Restore defaults and delete sync backups."
 msgstr "Standards wiederherstellen und Sync-Backups löschen."
@@ -608,9 +636,6 @@ msgstr "Speichern"
 msgid "Save settings as JSON or load them back."
 msgstr "Einstellungen als JSON speichern oder importieren."
 
-msgid "Schema key \"sync-file-path\" missing."
-msgstr "Schema-Schlüssel „sync-file-path“ fehlt."
-
 msgid "Scroll"
 msgstr "Scrollen"
 
@@ -632,14 +657,15 @@ msgstr "Zuerst einen Dateipfad festlegen."
 msgid "Settings"
 msgstr "Einstellungen"
 
-msgid "Settings persist after the app closes."
-msgstr "Einstellungen bleiben nach dem Schließen der App erhalten."
 
 msgid "Settings pulled"
 msgstr "Einstellungen geholt"
 
 msgid "Settings pushed"
 msgstr "Einstellungen gesendet"
+
+msgid "Nothing new to push"
+msgstr "Nichts Neues zu senden"
 
 msgid "Settings reset"
 msgstr "Einstellungen zurückgesetzt"
@@ -650,8 +676,8 @@ msgstr "Form"
 msgid "Show"
 msgstr "Anzeigen"
 
-msgid "Show icons from Wine and Proton apps."
-msgstr "Icons aus Wine- und Proton-Apps anzeigen."
+msgid "Show icons from Wine, Proton and other legacy X11 tray apps."
+msgstr "Icons aus Wine, Proton und anderen älteren X11-Tray-Apps anzeigen."
 
 msgid "Show Badges"
 msgstr "Badges anzeigen"
@@ -752,8 +778,8 @@ msgstr "Tray-Icons"
 msgid "Tray icons"
 msgstr "Tray-Icons"
 
-msgid "Tray icons are drawn by the app itself via XEmbed, so a custom icon cannot be applied."
-msgstr "Tray-Icons werden von der App selbst über XEmbed gezeichnet, daher kann kein eigenes Icon zugewiesen werden."
+msgid "This app draws its tray icon itself via XEmbed. Custom icon and scroll settings do not apply here."
+msgstr "Diese App zeichnet ihr Tray-Icon selbst über XEmbed. Eigenes Icon und Scroll-Einstellungen wirken hier nicht."
 
 msgid "Try a different search term."
 msgstr "Einen anderen Suchbegriff ausprobieren."
@@ -789,8 +815,6 @@ msgstr "Warten auf die Datei."
 msgid "Watching for changes."
 msgstr "Datei wird beobachtet."
 
-msgid "Which part of the panel holds the icons."
-msgstr "In welchem Bereich des Panels die Icons liegen."
 
 msgid "Wine"
 msgstr "Wine"
@@ -872,8 +896,8 @@ msgstr "Alle Apps zurücksetzen?"
 msgid "Reset these settings?"
 msgstr "Diese Einstellungen zurücksetzen?"
 
-msgid "Restores name, icon and status icons to defaults for every detected app. Their order is kept."
-msgstr "Stellt Name, Icon und Status-Icons für jede erkannte App auf Standard zurück. Die Reihenfolge bleibt erhalten."
+msgid "Restores every setting of every detected app to its default, name, icon, status icons and hiding included. Their order is kept."
+msgstr "Stellt alle Einstellungen jeder erkannten App auf Standard zurück, mit Name, Icon, Status-Icons und Ausblenden. Die Reihenfolge bleibt erhalten."
 
 msgid "Link: editing one side sets all four"
 msgstr "Verknüpfen: Eine Seite ändern setzt alle vier"
@@ -953,6 +977,15 @@ msgstr "Menü geschlossen"
 msgid "Menu Open"
 msgstr "Menü offen"
 
+msgid "One icon per drawer state."
+msgstr "Ein Icon je Zustand der Schublade."
+
+msgid "Drawer Closed"
+msgstr "Schublade geschlossen"
+
+msgid "Drawer Open"
+msgstr "Schublade offen"
+
 msgid "Rotate While Open"
 msgstr "Bei offenem Menü drehen"
 
@@ -977,9 +1010,6 @@ msgstr "Drehrichtung umkehren"
 msgid "Color Set"
 msgstr "Farbsatz"
 
-msgid "Which system style these colors apply to."
-msgstr "Für welchen Systemstil diese Farben gelten."
-
 msgid "Dark"
 msgstr "Dunkel"
 
@@ -1001,5 +1031,137 @@ msgstr "Version %s"
 msgid "an older version"
 msgstr "ältere Version"
 
-msgid "Turned on for every app on the General page."
-msgstr "Auf der Seite „Allgemein“ für alle Apps eingeschaltet."
+msgid "Set for every app on the General page."
+msgstr "Auf der Seite „Allgemein“ für alle Apps festgelegt."
+
+msgid "A side popup opens the menu next to Quick Settings. Inline unfolds it inside the list, right below the item."
+msgstr "Ein Seiten-Popup öffnet das Menü neben den Schnelleinstellungen. Eingebettet klappt es in der Liste direkt unter dem Eintrag auf."
+
+msgid "In Background Apps"
+msgstr "In Hintergrundanwendungen"
+
+msgid "Inline"
+msgstr "Eingebettet"
+
+msgid "Mode"
+msgstr "Modus"
+
+msgid "Not Installed"
+msgstr "Nicht installiert"
+
+msgid "Popup"
+msgstr "Popup"
+
+msgid "Drawer"
+msgstr "Schublade"
+
+msgid "Side Popup"
+msgstr "Seiten-Popup"
+
+
+msgid "Show on All Monitors"
+msgstr "Auf allen Bildschirmen anzeigen"
+
+msgid "Shows the tray on the panels Dash to Panel draws on your other monitors. One shared icon order on every panel. In Background Apps mode the list follows the Quick Settings you open."
+msgstr "Zeigt den Tray auch auf den Leisten, die Dash to Panel auf anderen Bildschirmen zeichnet. Eine gemeinsame Icon-Reihenfolge auf allen Panels. Im Modus „Hintergrundanwendungen“ folgt die Liste den Schnelleinstellungen, die du öffnest."
+
+msgid "Open BTI Settings"
+msgstr "BTI-Einstellungen öffnen"
+
+msgid "Background Blur"
+msgstr "Hintergrund-Unschärfe"
+
+msgid "Blurs what lies behind it."
+msgstr "Macht unscharf, was dahinter liegt."
+
+msgid "Credits"
+msgstr "Credits"
+
+msgid "D-Bus Interfaces"
+msgstr "D-Bus-Schnittstellen"
+
+msgid "Inspiration"
+msgstr "Inspiration"
+
+msgid "The specifications behind the interface files BTI implements."
+msgstr "Die Spezifikationen hinter den Schnittstellendateien, die BTI umsetzt."
+
+msgid "Projects BTI learned from."
+msgstr "Projekte, von denen BTI gelernt hat."
+
+msgid "• StatusNotifierItem and dbusmenu support in GNOME Shell\n• The interface specifications it links to"
+msgstr "• StatusNotifierItem- und dbusmenu-Unterstützung in GNOME Shell\n• Die Schnittstellen-Spezifikationen, auf die es verweist"
+
+msgid "• Inspiration for the overflow popup\n• Code studied as a reference"
+msgstr "• Anregung für das Overflow-Popup\n• Code als Referenz gelesen"
+
+msgid "• Tray icons for windowless background apps"
+msgstr "• Tray-Icons für fensterlose Hintergrund-Apps"
+
+msgid "• Cues for the layout of the About page"
+msgstr "• Anregungen für den Aufbau der Seite „Über“"
+
+msgid "How many tray items the Background Apps list shows before it scrolls."
+msgstr "Wie viele Tray-Einträge die Liste der Hintergrundanwendungen zeigt, bevor sie scrollt."
+
+msgid "Search"
+msgstr "Suche"
+
+msgid "Hide Search"
+msgstr "Suche ausblenden"
+
+msgid "More Actions"
+msgstr "Weitere Aktionen"
+
+msgid "Search apps"
+msgstr "Apps durchsuchen"
+
+msgid "No Matching Apps"
+msgstr "Keine passenden Apps"
+
+
+
+msgid "Emojis"
+msgstr "Emojis"
+
+msgid "Search emojis…"
+msgstr "Emojis suchen …"
+
+msgid "No Emojis Found"
+msgstr "Keine Emojis gefunden"
+
+msgid "Recent"
+msgstr "Zuletzt verwendet"
+
+msgid "Smileys & People"
+msgstr "Smileys & Personen"
+
+msgid "Animals & Nature"
+msgstr "Tiere & Natur"
+
+msgid "Food & Drink"
+msgstr "Essen & Trinken"
+
+msgid "Travel & Places"
+msgstr "Reisen & Orte"
+
+msgid "Activities"
+msgstr "Aktivitäten"
+
+msgid "Objects"
+msgstr "Objekte"
+
+msgid "Symbols"
+msgstr "Symbole"
+
+msgid "Flags"
+msgstr "Flaggen"
+
+msgid "Symbolic"
+msgstr "Symbolisch"
+
+msgid "Colored"
+msgstr "Farbig"
+
+msgid "Icon kind"
+msgstr "Symbolart"
