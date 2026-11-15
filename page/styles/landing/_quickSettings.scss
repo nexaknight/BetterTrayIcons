@@ -1,0 +1,270 @@
+@use '../mixins' as *;
+
+/* Sizes from gnome-shell data/theme/gnome-shell-sass/widgets/_quick-settings.scss
+   at the shell's 11pt base font, so 1em is 14.667px and an icon is 16px */
+.quick-settings {
+    --qs-icon-px: 16px;
+    position: absolute;
+    z-index: 20;
+    width: 400px;
+    max-width: calc(100% - 16px);
+    /* Quick Settings never scrolls, the Background Apps list does */
+    overflow: hidden;
+    @include column;
+    gap: 12px;
+    padding: 18px;
+    border-radius: 36px;
+    background: $shell-popup-bg;
+    color: #fff;
+    box-shadow: $shell-popup-shadow;
+    font: 14.667px/1.35 Inter, sans-serif;
+}
+.quick-settings[hidden] {
+    display: none;
+}
+.quick-settings button,
+.quick-settings a {
+    border: 0;
+    color: inherit;
+    font: inherit;
+    text-decoration: none;
+    cursor: pointer;
+}
+.quick-settings svg.bti {
+    @include size(var(--qs-icon-px));
+    flex-shrink: 0;
+}
+.qs-system {
+    display: flex;
+    gap: 12px;
+}
+.qs-round {
+    padding: 10.5px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: $shell-control-bg;
+}
+.qs-round.qs-end {
+    margin-left: auto;
+}
+.qs-slider-row {
+    @include row(6px);
+}
+.qs-volume-icon {
+    display: grid;
+    padding: 6px;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    color: inherit;
+    cursor: pointer;
+}
+/* The shell's .slider, a 0.5455em handle radius on its 4px bar */
+.qs-slider-row .pref-range-track {
+    --range-end: 8px;
+    --range-knob-size: 16px;
+    --range-trough: rgb(255 255 255 / 10%);
+    --range-fill: #{$shell-accent};
+    --range-knob: #e8e8e8;
+    --range-knob-shadow: none;
+    @include size(auto);
+    align-self: stretch;
+}
+.qs-slider-row .pref-range {
+    cursor: pointer;
+}
+.qs-slider-row .pref-range:hover {
+    --range-knob: #fff;
+}
+/* Equal columns whatever the label length, a long German title ellipsizes
+   instead of pushing the right column into the popup edge */
+.qs-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+.qs-tile {
+    @include row(9px);
+    min-height: 48px;
+    padding: 0 0 0 15px;
+    border-radius: 99px;
+    background: $shell-control-bg;
+    text-align: left;
+}
+.qs-tile[aria-pressed=true],
+.qs-tile.on {
+    background: $shell-accent;
+}
+.qs-tile:not(.has-menu) {
+    padding-right: 12px;
+}
+/* A tile with a menu holds two buttons, each half takes its own hover */
+.qs-tile.has-menu {
+    padding: 0;
+    gap: 0;
+}
+.qs-tile-main {
+    flex: 1;
+    min-width: 0;
+    align-self: stretch;
+    @include row(9px);
+    padding: 0 0 0 15px;
+    border-radius: 99px 0 0 99px;
+    background: none;
+    text-align: left;
+}
+.qs-tile-text {
+    flex: 1;
+    min-width: 0;
+    @include column;
+    line-height: 1.2;
+}
+.qs-tile-text strong,
+.qs-tile-text small {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+.qs-tile-text small {
+    font-size: 12px;
+    opacity: .8;
+}
+.quick-settings .qs-tile-arrow {
+    align-self: stretch;
+    display: grid;
+    place-items: center;
+    padding: 0 9px;
+    border-left: 1px solid #ffffff26;
+    border-radius: 0 99px 99px 0;
+    background: none;
+}
+.qs-tile-arrow svg.bti {
+    transition: transform .2s ease-out;
+}
+.qs-tile-arrow[aria-expanded=true] svg.bti,
+.qs-apps-toggle[aria-expanded=true] svg.bti {
+    transform: rotate(90deg);
+}
+.qs-apps-toggle {
+    width: 100%;
+    @include row;
+    justify-content: space-between;
+    min-height: 48px;
+    padding: 0 15px;
+    border-radius: 99px;
+    background: $shell-control-bg;
+}
+.qs-apps-menu,
+.qs-section-card {
+    padding: 12px;
+    border-radius: 24px;
+    background: #ffffff0f;
+}
+.qs-apps-menu {
+    margin-top: 12px;
+}
+.qs-apps-header {
+    @include row(12px);
+    padding-bottom: 12px;
+    font-size: 20px;
+}
+/* The header icon of _quick-settings.scss, transparentize(fg, 0.8) until active */
+.qs-apps-header-icon {
+    display: grid;
+    padding: 9px;
+    border-radius: 50%;
+    background: #ffffff33;
+}
+.quick-settings .qs-apps-header-icon svg.bti {
+    @include size(24px);
+}
+/* capAppsList in quickSettings.js sets both heights. The list reaches into
+   the section's right padding, so its bar sits at the section's inner edge
+   and the rows still end where the header does. */
+.qs-apps-list {
+    overflow-y: auto;
+    margin-right: -12px;
+    padding-right: 4px;
+    @include overlay-scrollbar(#ffffff40);
+}
+.qs-app-row,
+.qs-menu-item,
+.qs-section-row,
+.qs-section-settings {
+    width: 100%;
+    @include row(12px);
+    min-height: 37px;
+    padding: 0 12px;
+    border-radius: 12px;
+    background: none;
+    text-align: left;
+}
+/* A tray row, sized after the real Background Apps rows */
+.qs-app-row:not(.stock) {
+    min-height: 44px;
+    padding: 0 18px;
+}
+.qs-app-text {
+    @include column;
+    min-width: 0;
+}
+.qs-app-text strong {
+    font-weight: 700;
+}
+.qs-app-text small {
+    font-size: 12px;
+    line-height: 1.2;
+}
+/* The inline menu joins its row into one rounded card, bindCollapsibleLook
+   in src/shell/popupMenus.js */
+.qs-app-row.menu-open {
+    border-radius: 12px 12px 0 0;
+    background: $shell-control-bg;
+}
+.qs-inline-menu {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    @include overlay-scrollbar(#ffffff40);
+    padding: 4px 6px 6px;
+    border-radius: 0 0 12px 12px;
+    background: $shell-control-bg;
+}
+.qs-app-icon {
+    display: grid;
+}
+.quick-settings .qs-app-icon svg {
+    @include size(16px);
+}
+.qs-separator {
+    height: 1px;
+    margin: 6px 12px;
+    background: #ffffff1f;
+}
+/* GNOME's stock row, a 16px icon and the round button that quits the app */
+.qs-app-row.stock {
+    cursor: default;
+}
+.qs-app-row.stock > span:nth-child(2) {
+    flex: 1;
+}
+.quick-settings .qs-quit {
+    display: grid;
+    place-items: center;
+    padding: 6px;
+    border-radius: 50%;
+    background: $shell-control-bg;
+}
+/* An overlay tint over whatever background a control has, so one rule fits
+   plain, filled and accent controls and keeps their own radius. */
+.quick-settings {
+    --qs-hover: rgb(255 255 255 / 8%);
+    --qs-active: rgb(255 255 255 / 16%);
+}
+.quick-settings :is(button, a, .qs-app-row.stock):hover,
+.quick-settings :is(button, a):focus-visible {
+    background-image: linear-gradient(var(--qs-hover), var(--qs-hover));
+}
+.quick-settings :is(button, a):active {
+    background-image: linear-gradient(var(--qs-active), var(--qs-active));
+}

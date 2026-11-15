@@ -1,0 +1,32 @@
+@use '../mixins' as *;
+
+.qs-section {
+    grid-column: 1 / -1;
+    overflow: hidden;
+}
+.qs-apps-header-icon.active {
+    background: $shell-accent;
+}
+.qs-section-settings {
+    background: #ffffff14;
+}
+.qs-row-icon {
+    position: relative;
+    display: grid;
+}
+.quick-settings .qs-row-lock {
+    position: absolute;
+    right: -4px;
+    bottom: -2px;
+    @include size(8px);
+}
+.quick-settings .qs-row-check {
+    @include size(14px);
+}
+.qs-row-dim {
+    margin-left: auto;
+    opacity: .6;
+}
+.qs-section-row > svg.bti:last-child:not(.qs-row-check) {
+    margin-left: auto;
+}

@@ -1,0 +1,51 @@
+@use '../mixins' as *;
+
+.style-samples {
+    @include row(14px);
+    min-height: 58px;
+    margin-top: 18px;
+}
+.style-samples button {
+    padding: 0;
+    @include center;
+    border: 1px solid var(--line);
+    background: var(--wash);
+}
+.style-samples button:nth-child(1) {
+    @include size(58px);
+    border-radius: 12px;
+    color: #dbe8f5;
+}
+.style-samples button:nth-child(2) {
+    @include size(46px);
+    border-radius: 10px;
+    color: var(--ink);
+}
+.style-samples button:nth-child(3) {
+    @include size(34px);
+    border-radius: 50%;
+    background: var(--soft);
+    color: #5896da;
+}
+.style-samples button:nth-child(1) svg {
+    @include size(36px);
+}
+.style-samples button:nth-child(2) svg {
+    @include size(26px);
+}
+.style-samples button:nth-child(3) svg {
+    @include size(18px);
+}
+.style-samples button:hover {
+    border-color: var(--accent);
+}
+.style-samples button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
+.shortcut-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 20px;
+}

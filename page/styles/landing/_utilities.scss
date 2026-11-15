@@ -1,0 +1,39 @@
+@use '../mixins' as *;
+
+.wrap {
+    max-width: calc(1120px + 2 * var(--text-inset));
+    margin: 0 auto;
+    padding: 0 var(--text-inset);
+}
+.skip {
+    position: fixed;
+    top: -100px;
+    left: 20px;
+    z-index: 100;
+    background: var(--surface);
+    padding: 12px;
+}
+.skip:focus {
+    top: 10px;
+}
+/* Symbolic repo icons tinted through a mask so they follow currentColor,
+   the mask itself sits in sections/SiteHead.jsx */
+svg.bti {
+    background-color: currentColor;
+}
+svg.bti-emoji {
+    overflow: visible;
+}
+.ui-toolbar {
+    @include row(8px);
+    min-width: 0;
+    flex-shrink: 0;
+}
+.ui-toolbar-title {
+    font-weight: 700;
+    min-width: 0;
+}
+.ui-toolbar-start,
+.ui-toolbar-end {
+    @include row(8px);
+}

@@ -1,0 +1,132 @@
+@use '../mixins' as *;
+
+@font-face {
+    font-family: 'Adwaita Sans';
+    src: url('/assets/fonts/AdwaitaSans.ttf') format('truetype');
+    font-weight: 100 900;
+    font-display: swap;
+}
+.prefs-native {
+    width: 1000px;
+    height: 700px;
+    position: relative;
+    display: flex;
+    overflow: hidden;
+    border-radius: 14px;
+    background: var(--pref-window);
+    color: var(--pref-ink);
+    font: 15px/1.4 'Adwaita Sans',sans-serif;
+    font-synthesis: none;
+    text-align: left;
+    color-scheme: dark;
+}
+/* The outline sits over the window like GTK's, so the sidebar and the page
+   get the full window width to share */
+.prefs-native::after {
+    content: '';
+    @include cover;
+    z-index: 100;
+    border: 1px solid var(--pref-outline);
+    border-radius: inherit;
+    pointer-events: none;
+}
+.prefs-native * {
+    box-sizing: border-box;
+}
+.prefs-native :is(p,h1,h2,h3,button,input,select,output) {
+    font: inherit;
+    letter-spacing: normal;
+    line-height: 1.4;
+    margin: 0;
+}
+.prefs-native button {
+    border: 0;
+    padding: 0;
+    background: none;
+    color: inherit;
+    cursor: pointer;
+}
+/* Keyboard focus gets the hover tint instead of a ring, as an inset shadow so
+   it sits on any background and follows the element's own radius. prefs.js
+   marks the keyboard, a text field clicked with the mouse matches
+   :focus-visible too. */
+.prefs-native :focus,
+.prefs-native :focus-visible {
+    outline: none;
+}
+:root[data-input-mode=keyboard] .prefs-native :focus-visible {
+    box-shadow: inset 0 0 0 999px var(--pref-control-hover);
+}
+/* libadwaita's button.flat. Buttons with a fill of their own tint over the
+   fill in prefs/_buttons.scss, the preview's toggle hovers only through a
+   custom style. */
+.prefs-native button:not(:disabled, .pref-switch, .pref-small-button, .close, .active, .pref-preview-toggle):hover {
+    background-color: color-mix(in srgb, var(--pref-ink) 7%, transparent);
+}
+.prefs-native button:not(:disabled, .pref-switch, .pref-small-button, .close, .active, .pref-preview-toggle):active {
+    background-color: color-mix(in srgb, var(--pref-ink) 16%, transparent);
+}
+/* libadwaita's --disabled-opacity */
+.prefs-native button:disabled {
+    opacity: .5;
+    cursor: default;
+}
+@keyframes pref-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+.prefs-native {
+    --pref-ink: #fff;
+    --pref-ink-soft: #dedee0;
+    --pref-dim: #a4a4a8;
+    --pref-window: #222226;
+    --pref-sidebar: #2e2e32;
+    --pref-card: #333337;
+    --pref-popover: #36363a;
+    --pref-separator: #202024;
+    --pref-outline: color-mix(in srgb, var(--pref-ink) 14%, transparent);
+    --pref-accent: #5896da;
+    /* libadwaita's scale knob, grey on dark and white on light */
+    --pref-knob: #d2d2d2;
+    --pref-accent-text: #8eb7e5;
+    --pref-warning: #f8e45c;
+    --pref-success: #57e389;
+    /* libadwaita's warning bg color */
+    --pref-warning-bg: #cd9309;
+    --pref-success-bg: #26a269;
+    --pref-error-bg: #c01c28;
+    --pref-hover: rgb(255 255 255 / 10%);
+    --pref-row-hover: color-mix(in srgb, var(--pref-ink) 4%, transparent);
+    /* libadwaita's flat button tints, hover and keyboard focus share one */
+    --pref-control-hover: color-mix(in srgb, var(--pref-ink) 8%, transparent);
+    --pref-control-active: color-mix(in srgb, var(--pref-ink) 16%, transparent);
+}
+:root[data-theme=light] .prefs-native {
+    --pref-ink: rgb(0 0 6 / 80%);
+    --pref-ink-soft: rgb(0 0 6 / 80%);
+    --pref-dim: rgb(0 0 6 / 55%);
+    --pref-window: #fafafb;
+    --pref-sidebar: #ebebed;
+    --pref-card: #fff;
+    --pref-popover: #fff;
+    --pref-knob: #fff;
+    --pref-separator: rgb(0 0 6 / 7%);
+    --pref-accent-text: #0461be;
+    --pref-warning: #9c6e03;
+    --pref-success: #1b8553;
+    --pref-warning-bg: #e5a50a;
+    --pref-success-bg: #2ec27e;
+    --pref-error-bg: #e01b24;
+    --pref-hover: rgb(0 0 0 / 8%);
+    color-scheme: light;
+    --pref-outline: rgb(0 0 6 / 15%);
+}
+/* A list that scrolls inside its own box with the thin scrollbar, the
+   picker grid and the compatibility releases share it */
+.pref-scroll-list {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+    @include overlay-scrollbar(color-mix(in srgb, var(--pref-ink) 30%, transparent));
+}

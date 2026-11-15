@@ -1,0 +1,85 @@
+@use '../mixins' as *;
+
+.prefs-native .pref-choice {
+    display: block;
+    width: 100%;
+    border: 1.5px solid color-mix(in srgb, var(--pref-ink) 11%, transparent);
+    border-radius: 14px;
+    overflow: hidden;
+    text-align: left;
+    background: $stage-gradient;
+    min-height: 0;
+}
+.prefs-native .pref-choice:hover {
+    border-color: color-mix(in srgb, var(--pref-ink) 22%, transparent);
+}
+.pref-choice-scene {
+    height: 112px;
+    position: relative;
+    color: white;
+    box-shadow: inset 0 1px 0 #ffffff12;
+}
+/* .caption-heading, 9pt bold, one line that ends in an ellipsis. GTK widens
+   a card for its caption, here the caption may reach a few pixels into the
+   gap instead, so the strip keeps its 168px grid. */
+.pref-choice-caption {
+    flex: none;
+    max-width: calc(100% + 8px);
+    font-size: 12px;
+    font-weight: 700;
+    text-align: center;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.pref-choice-scene,
+.pref-choice-scene>span {
+    display: block;
+}
+.pref-choice-scene .pref-scene-box {
+    display: flex;
+}
+.pref-card-strip {
+    overflow-x: auto;
+    scrollbar-width: thin;
+}
+.pref-card-row {
+    display: flex;
+    gap: 12px;
+    justify-content: safe center;
+    padding: 4px;
+    width: max-content;
+    min-width: 100%;
+}
+.pref-choice-card {
+    flex: 0 1 168px;
+    min-width: 156px;
+    @include column;
+    gap: 8px;
+}
+.pref-choice-card:hover .pref-choice {
+    border-color: color-mix(in srgb, var(--pref-ink) 22%, transparent);
+}
+.prefs-native .pref-choice[aria-pressed=true],
+.pref-choice-card:hover .pref-choice[aria-pressed=true] {
+    border-color: var(--pref-accent);
+}
+.pref-choice-title {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+}
+.prefs-native .pref-choice:not(.bleed) .pref-choice-scene {
+    height: auto;
+    padding: 12px;
+}
+.pref-choice-scene>.pref-scene-popup {
+    position: absolute;
+    display: flex;
+    gap: 2px;
+    padding: 3px;
+    border-radius: 4px;
+    background: $scene-panel-bg;
+}

@@ -1,0 +1,217 @@
+@use '../mixins' as *;
+
+.pref-group {
+    margin-bottom: 30px;
+}
+.pref-group h3 {
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 22px;
+    margin: 0 0 11px;
+}
+.pref-group .pref-description {
+    color: var(--pref-dim);
+    font-size: 15px;
+    line-height: 21px;
+    margin-top: -7px;
+    margin-bottom: 12px;
+}
+.pref-list {
+    background: var(--pref-card);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 2px #0000000a;
+}
+/* Adw rows are 54px with the separator outside, the demo draws it as the
+   next row's top border. Text sits 6px from the suffixes, 12px from the
+   prefix. */
+.pref-row {
+    min-height: 54px;
+    @include row(6px);
+    padding: 8px 14px;
+    position: relative;
+}
+.pref-row>:first-child:not(.pref-row-copy, .pref-entry-row) {
+    margin-right: 6px;
+}
+.pref-row+.pref-row {
+    border-top: 1px solid var(--pref-separator);
+}
+.pref-row+.pref-row,
+.pref-expander+.pref-row,
+.pref-expander>.ui-expander-body>.pref-row {
+    min-height: 55px;
+}
+.pref-row-copy {
+    flex: 1;
+    min-width: 0;
+}
+/* Adw.ActionRow, the title ends in an ellipsis, the subtitle wraps and the
+   row grows. A long URL breaks anywhere, as Pango's WORD_CHAR does. */
+.pref-row-title {
+    display: block;
+    font-size: 15px;
+    line-height: 18px;
+    font-weight: 400;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+.pref-row-subtitle {
+    display: block;
+    color: var(--pref-dim);
+    font-size: 13px;
+    line-height: 15px;
+    margin-top: 3px;
+    overflow-wrap: anywhere;
+}
+.pref-row-suffix {
+    margin-left: auto;
+    @include row(6px);
+    flex-shrink: 0;
+}
+.prefs-native button.pref-row {
+    width: 100%;
+    padding: 8px 14px;
+    text-align: left;
+    border-radius: 0;
+}
+.pref-row>.pref-chevron {
+    @include size(16px);
+    margin-left: auto;
+}
+.pref-row-icon {
+    @include size(32px);
+    flex-shrink: 0;
+    @include center;
+}
+.pref-row-icon svg {
+    @include size(30px);
+}
+/* The icon picker rows preview at ROW_ICON_SIZE_PX of src/prefs/components/row.js */
+.pref-row[data-native-icon-picker]>.pref-row-icon,
+.pref-row[data-native-icon-picker]>.pref-row-icon svg {
+    @include size(24px);
+}
+/* The Proton and Not Running glyphs fill the row icon, ROW_ICON_PX in src/prefs/pages/applicationsPage.js */
+.prefs-native .pref-row-icon > .pref-icon {
+    @include size(32px);
+}
+/* row.activatable, which a row holding a switch is too, through
+   Adw.SwitchRow or its activatable_widget */
+.prefs-native button.pref-row:hover,
+.prefs-native button.pref-row:focus-visible,
+.prefs-native .pref-row:has(> .pref-row-suffix > .pref-switch:not(:disabled)):hover {
+    background: var(--pref-row-hover);
+}
+.prefs-native button.pref-row:active,
+.prefs-native .pref-row:has(> .pref-row-suffix > .pref-switch:not(:disabled)):active {
+    background: color-mix(in srgb, var(--pref-ink) 8%, transparent);
+}
+.pref-group-heading {
+    @include row;
+    justify-content: space-between;
+    margin-bottom: 11px;
+    height: 24px;
+}
+.pref-group-heading h3 {
+    margin: 0;
+}
+.pref-group-heading>div {
+    display: flex;
+    margin-left: auto;
+    gap: 4px;
+}
+.prefs-native .pref-group-heading button {
+    @include size(24px);
+    border-radius: 6px;
+}
+.pref-group-heading button.active {
+    color: #99bddf;
+}
+.pref-shortcut-target {
+    background: var(--pref-row-hover);
+}
+.prefs-native .pref-list {
+    container-type: inline-size;
+}
+.pref-row-title-line {
+    @include row(12px);
+}
+.pref-row-title-line .pref-row-title {
+    flex: 1;
+}
+/* WrapRowLayout and the app rows of createWrapActionRow keep 12px above and
+   below, a dropped control row sits 8px under the text and the subtitle is a
+   caption with no gap under the title */
+.pref-wrap-row,
+.prefs-native .pref-row[data-pref-app] {
+    padding-block: 12px;
+}
+.pref-wrap-row {
+    gap: 8px 12px;
+}
+.pref-wrap-row .pref-row-suffix {
+    gap: 12px;
+}
+.pref-wrap-row .pref-row-subtitle,
+.pref-row[data-pref-app] .pref-row-subtitle {
+    line-height: 17px;
+    margin-top: 0;
+}
+.pref-wrap-row .pref-row-suffix {
+    flex-wrap: nowrap;
+}
+.pref-wrap-row.stretch .pref-row-suffix {
+    flex: 0 1 auto;
+}
+.pref-wrap-row.insensitive {
+    opacity: .5;
+}
+@container (max-width: 640px) {
+    .prefs-native .pref-wrap-row.whole {
+        flex-wrap: wrap;
+    }
+    .prefs-native .pref-wrap-row.whole .pref-row-copy {
+        flex-basis: 100%;
+    }
+    .prefs-native .pref-wrap-row.whole .pref-row-suffix {
+        margin-left: auto;
+    }
+}
+/* WrapRowLayout drops the controls only when they don't fit beside the
+   text, a short dropdown stays on the title line */
+@container (max-width: 480px) {
+    .prefs-native .pref-wrap-row {
+        flex-wrap: wrap;
+    }
+    .prefs-native .pref-wrap-row .pref-row-copy {
+        flex: 1 1 160px;
+    }
+    .prefs-native .pref-wrap-row .pref-row-suffix {
+        margin-left: auto;
+    }
+    .prefs-native .pref-wrap-row.stretch .pref-row-suffix {
+        flex: 1 1 100%;
+    }
+    .prefs-native .pref-wrap-row .pref-select-wrap {
+        width: auto;
+        min-width: 0;
+        flex: 1;
+    }
+}
+.pref-empty-note {
+    text-align: center;
+    color: var(--pref-dim);
+    margin: 12px 0;
+}
+.pref-hidden-mark {
+    display: inline-flex;
+    opacity: .5;
+}
+.pref-state-icon {
+    @include size(24px);
+}
+.pref-group:has(.pref-spacing-cards) {
+    container-type: inline-size;
+}

@@ -1,0 +1,104 @@
+@use '../mixins' as *;
+
+.prefs-window-stage {
+    position: relative;
+    width: 100%;
+    max-width: 1000px;
+    margin: auto;
+    overflow: hidden;
+    border-radius: 14px;
+    box-shadow: 0 24px 60px #0005;
+    contain: layout style;
+}
+#prefs-mount {
+    width: 1000px;
+    height: 700px;
+    transform-origin: top left;
+}
+.pref-main {
+    flex: 1;
+    min-width: 0;
+    @include column;
+    background: var(--pref-window);
+}
+.pref-header {
+    height: 46px;
+    flex-shrink: 0;
+    position: relative;
+    @include center;
+    padding: 0 12px;
+    font-weight: 700;
+}
+.pref-header-title {
+    font-weight: 700;
+    line-height: 18px;
+}
+.pref-header-start {
+    position: absolute;
+    left: 7px;
+    display: flex;
+    gap: 6px;
+}
+.pref-header-end {
+    position: absolute;
+    right: 7px;
+    @include row(6px);
+}
+.pref-scroll {
+    overflow: auto;
+    flex: 1;
+}
+/* --clamp-start and --clamp-end come from components/clamp.js, the 12px is
+   the margin Adwaita puts around a preferences page's groups */
+.pref-body {
+    padding: 28px calc(var(--clamp-end) + 12px) 40px calc(var(--clamp-start) + 12px);
+}
+.pref-native-toast {
+    position: absolute;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 18px;
+    border-radius: 11px;
+    background: color-mix(in srgb, var(--pref-ink) 16%, transparent);
+    box-shadow: 0 4px 20px #0005;
+    max-width: 80%;
+    z-index: 30;
+    font-size: 14px;
+    white-space: nowrap;
+}
+.pref-native-toast[hidden] {
+    display: none;
+}
+.pref-main>.pref-about-banner {
+    position: relative;
+    flex: 0 0 46px;
+    @include center;
+    width: 100%;
+    padding: 0 122px!important;
+    margin: 0!important;
+    background: color-mix(in srgb, var(--pref-ink) 10%, transparent);
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 20px;
+    text-align: center;
+}
+.pref-main>.pref-about-banner[hidden] {
+    display: none;
+}
+.pref-main>.pref-about-banner a {
+    position: absolute;
+    right: 6px;
+    top: 6px;
+    margin: 0;
+    min-height: 34px;
+    border-radius: $control-radius;
+    padding: 6px 16px;
+    background: color-mix(in srgb, var(--pref-ink) 17%, transparent);
+    color: var(--pref-ink-soft);
+    font-size: 15px;
+    font-weight: 700;
+}
+.pref-main>.pref-about-banner a:hover {
+    background: color-mix(in srgb, var(--pref-ink) 22%, transparent);
+}

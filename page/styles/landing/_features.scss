@@ -1,0 +1,107 @@
+@use '../mixins' as *;
+
+.features-section {
+    padding-top: 75px;
+    padding-bottom: 100px;
+    scroll-margin-top: 35px;
+}
+.section-heading {
+    margin-bottom: 38px;
+}
+.section-heading>p {
+    max-width: 760px;
+    margin-top: 16px;
+    font-size: 16px;
+    line-height: 1.8;
+    color: var(--muted);
+}
+.feature-grid {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: 18px;
+}
+.feature {
+    --feature-padding: 18px;
+    --feature-copy-width: 440px;
+    --feature-icon-size: 35px;
+    position: relative;
+    background: var(--card-bg);
+    box-shadow: var(--card-shadow);
+    border-radius: var(--card-radius);
+    padding: var(--feature-padding);
+    overflow: hidden;
+}
+.feature h3 {
+    font-size: 24px;
+    letter-spacing: -.65px;
+    line-height: 1.4;
+    margin-bottom: 11px;
+    font-weight: 650;
+}
+.feature p {
+    font-size: 15px;
+    line-height: 1.8;
+    color: var(--muted);
+    max-width: var(--feature-copy-width);
+}
+.feature-large {
+    grid-row: span 2;
+    padding-bottom: 0;
+    @include column;
+    justify-content: space-between;
+}
+.feature-large h3 {
+    font-size: 29px;
+    line-height: 1.25;
+}
+.feature-large .feature-text {
+    padding-top: 5px;
+}
+.feature-icon {
+    position: absolute;
+    right: var(--feature-padding);
+    top: var(--feature-padding);
+    color: var(--accent);
+    @include size(var(--feature-icon-size));
+    border-radius: 10px;
+    background: var(--wash);
+    @include center;
+}
+/* A heading that wraps on a phone stays clear of the corner icon */
+.feature-icon+h3 {
+    padding-right: calc(var(--feature-icon-size) + 8px);
+}
+.feature-icon svg {
+    @include size(18px);
+}
+@media (max-width: $tablet-wide) {
+    .features-section {
+        padding-top: 50px;
+    }
+}
+@media (max-width: $tablet) {
+    .features-section {
+        padding-bottom: 65px;
+    }
+    .section-heading {
+        margin-bottom: 28px;
+    }
+    .section-heading>p {
+        margin-top: 14px;
+    }
+    .feature-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+    .feature-large {
+        grid-row: auto;
+    }
+}
+@media (max-width: $phone) {
+    .feature h3 {
+        font-size: 23px;
+    }
+    .feature p {
+        font-size: 14px;
+    }
+}

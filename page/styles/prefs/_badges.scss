@@ -1,0 +1,48 @@
+@use '../mixins' as *;
+
+.pref-spinner {
+    @include size(20px);
+    border: 2px solid color-mix(in srgb, var(--pref-ink) 13%, transparent);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: pref-spin 1s linear infinite;
+}
+$badge-line-height: 18px;
+$badge-pad-y: 1px;
+$badge-gap: 6px;
+
+.pref-badge {
+    padding: $badge-pad-y 8px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: $badge-line-height;
+    white-space: nowrap;
+    color: var(--pref-warning);
+    background: color-mix(in srgb, var(--pref-warning) 18%, transparent);
+}
+.pref-badge.info {
+    color: var(--pref-accent-text);
+    background: color-mix(in srgb, var(--pref-accent) 18%, transparent);
+}
+/* createBadgeLine in src/prefs/components/badge.js, a badge's height while
+   empty so the app rows stay one height */
+.pref-row-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $badge-gap;
+    min-height: $badge-line-height + 2 * $badge-pad-y;
+    margin-top: 8px;
+}
+.pref-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding-right: 0;
+}
+.prefs-native .pref-chip .pref-icon-button {
+    @include size(20px);
+}
+.pref-chip .pref-icon {
+    @include size(10px);
+}

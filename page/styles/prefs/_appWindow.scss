@@ -1,0 +1,89 @@
+@use '../mixins' as *;
+
+/* The sample app window borrows the prefs dialog shell, the host only drops
+   the window frame the prefs root draws */
+.prefs-native.app-window-host {
+    @include cover;
+    z-index: 25;
+    @include size(auto);
+    @include center;
+    padding: 24px;
+    border: 0;
+    border-radius: 0;
+    background: #0004;
+}
+.app-window {
+    --dialog-width: 420px;
+    max-height: 100%;
+}
+.app-window-title {
+    @include row(8px);
+    font-weight: 700;
+}
+.app-window-icon svg {
+    display: block;
+    @include size(20px);
+}
+/* components/pageDialog.js puts the landing page's own dialogs in the same
+   shell, over the whole page */
+.prefs-native.page-dialog-host {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    @include size(auto);
+    @include center;
+    padding: max(4px, calc(var(--fluid) * 24));
+    border: 0;
+    border-radius: 0;
+    background: #0008;
+}
+.page-dialog {
+    max-height: 100%;
+}
+.guide-dialog {
+    --dialog-width: 600px;
+}
+.surprise-dialog {
+    --dialog-width: 560px;
+    text-align: center;
+}
+.page-dialog .surprise-heading {
+    font-size: 22px;
+    margin-bottom: 8px;
+}
+/* The video's own box from the start, the digits pop inside it and the
+   iframe takes it over, so neither the dialog nor the page reflows */
+.page-dialog .surprise-stage {
+    @include center;
+    margin-top: 16px;
+    aspect-ratio: 16/9;
+    overflow: hidden;
+}
+.surprise-dialog .pref-dialog-body {
+    overflow-x: hidden;
+}
+.page-dialog .surprise-count {
+    font-size: 96px;
+    font-weight: 800;
+    line-height: 1;
+}
+.page-dialog .surprise-count.animated {
+    animation: surprise-pop 1s ease-out;
+}
+@keyframes surprise-pop {
+    from {
+        transform: scale(1.6);
+        opacity: 0;
+    }
+    to {
+        transform: none;
+        opacity: 1;
+    }
+}
+.surprise-video {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16/9;
+    border: 0;
+    border-radius: 12px;
+}

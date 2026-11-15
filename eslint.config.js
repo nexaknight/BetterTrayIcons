@@ -1,9 +1,10 @@
 import {defineConfig} from 'eslint/config';
 import gnome from 'eslint-config-gnome';
+import globals from 'globals';
 
 export default defineConfig([
     {
-        ignores: ['locale/'],
+        ignores: ['locale/', '_site/', 'page/node_modules/', 'page/.next/', 'page/out/', 'page/public/src/'],
     },
     gnome.configs.recommended,
     {
@@ -27,6 +28,12 @@ export default defineConfig([
             globals: {
                 global: 'readonly',
             },
+        },
+    },
+    {
+        files: ['page/public/**/*.js'],
+        languageOptions: {
+            globals: globals.browser,
         },
     },
 ]);

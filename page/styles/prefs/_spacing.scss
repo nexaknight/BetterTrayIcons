@@ -1,0 +1,146 @@
+@use '../mixins' as *;
+
+.pref-spacing-dial .top {
+    grid-area: 1/2;
+}
+.pref-spacing-dial .right {
+    grid-area: 2/3;
+}
+.pref-spacing-dial .bottom {
+    grid-area: 3/2;
+}
+.pref-spacing-dial .left {
+    grid-area: 2/1;
+}
+.pref-spacing-cards {
+    display: grid;
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    gap: 8px;
+}
+.pref-spacing-card {
+    position: relative;
+    padding: 10px;
+    min-height: 256px;
+    @include column;
+    gap: 14px;
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--pref-ink) 14%, transparent);
+}
+.pref-spacing-header {
+    height: 34px;
+    justify-content: space-between;
+}
+.pref-spacing-header>strong {
+    padding: 0;
+    font-size: 15px;
+    line-height: 20px;
+}
+.prefs-native .pref-spacing-header>.pref-icon-button {
+    position: static;
+    @include size(34px);
+    border-radius: $control-radius;
+    flex-shrink: 0;
+}
+.prefs-native .pref-spacing-header>.pref-icon-button.linked {
+    background: color-mix(in srgb, var(--pref-ink) 22%, transparent);
+}
+.pref-spacing-dial {
+    display: grid;
+    grid-template-columns: repeat(3,76px);
+    grid-template-rows: repeat(3,56px);
+    gap: 10px 6px;
+    justify-content: center;
+    align-content: center;
+    flex: 1;
+    margin: 0;
+}
+.pref-spacing-dial label {
+    @include column;
+    align-items: center;
+    gap: 5px;
+    color: var(--pref-dim);
+    font-size: 13px;
+    line-height: 17px;
+    text-align: center;
+}
+.pref-spacing-spin {
+    @include row;
+    flex-shrink: 0;
+    width: 76px;
+    height: 34px;
+    border-radius: $control-radius;
+    background: color-mix(in srgb, var(--pref-ink) 23%, transparent);
+    overflow: hidden;
+    color: var(--pref-ink-soft);
+}
+.pref-spacing-dial .pref-spacing-spin input {
+    appearance: textfield;
+    -moz-appearance: textfield;
+    width: 28px;
+    height: 34px;
+    min-width: 0;
+    padding: 0 4px;
+    margin: 0;
+    border: 0;
+    background: transparent;
+    border-radius: 0;
+    font-size: 15px;
+    line-height: 20px;
+    text-align: center;
+    color: var(--pref-ink-soft);
+}
+.pref-spacing-spin input::-webkit-inner-spin-button,
+.pref-spacing-spin input::-webkit-outer-spin-button {
+    appearance: none;
+    margin: 0;
+}
+.prefs-native .pref-spacing-spin button {
+    width: 24px;
+    height: 34px;
+    border-radius: 0;
+    border: 0;
+    border-left: 1px solid color-mix(in srgb, var(--pref-ink) 7%, transparent);
+    background: transparent;
+    line-height: 20px;
+    font-size: 17px;
+    font-weight: 400;
+    flex-shrink: 0;
+}
+.prefs-native .pref-spacing-spin button:is(:hover,:focus-visible) {
+    background: var(--pref-control-hover);
+}
+.prefs-native .pref-spacing-spin button:active {
+    background: var(--pref-control-active);
+}
+.pref-spacing-sketch {
+    display: block;
+    grid-area: 2/2;
+    position: relative;
+    align-self: center;
+    width: 76px;
+    height: 56px;
+    border: 1px solid color-mix(in srgb, var(--pref-ink) 25%, transparent);
+    border-radius: 8px;
+    padding: 9px;
+    background: transparent;
+}
+.pref-spacing-sketch i {
+    display: block;
+    @include size(100%);
+    border: 1px solid color-mix(in srgb, var(--pref-ink) 25%, transparent);
+    border-radius: 8px;
+    background: transparent;
+}
+.pref-spacing-sketch.margin {
+    border: 1px dashed #5896dab3;
+    background: #5896da1a;
+}
+.pref-spacing-sketch.padding i {
+    border: 1px dashed #5896dab3;
+    background: #5896da1a;
+}
+@container (max-width: 420px) {
+    .prefs-native .pref-spacing-cards {
+        grid-template-columns: 1fr;
+    }
+}

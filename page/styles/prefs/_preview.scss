@@ -1,0 +1,70 @@
+@use '../mixins' as *;
+
+.pref-preview-stage {
+    height: 104px;
+    border-radius: 12px;
+    background: $stage-gradient;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: inset 0 1px 0 #ffffff12;
+    color: #fff;
+    position: relative;
+}
+.pref-preview-stage.light {
+    background: linear-gradient(160deg,#5896da26,transparent 55%),linear-gradient(160deg,#f6f6f8,#e2e2e7);
+    color: #222226;
+}
+.pref-preview-stage.popup {
+    height: 160px;
+}
+.pref-preview-popup {
+    background: $shell-popup-bg;
+    border-radius: 14px;
+    padding: 8px;
+    display: grid;
+    grid-template-columns: repeat(4,32px);
+    gap: 6px;
+}
+.pref-preview-popup>span {
+    width: 32px;
+    height: 30px;
+    padding: 5px 6px;
+    @include center;
+}
+.pref-preview-popup.row {
+    display: flex;
+}
+/* The stock samples of src/prefs/components/scenes/sceneInk.js, padding
+   5px in a full pill and the icons 1px apart. A custom style replaces them
+   through trayTheme.js. */
+.pref-preview-stage>span:not(.pref-preview-popup) {
+    @include center;
+    padding: 5px;
+    margin: 0 1px;
+    border-radius: 50px;
+}
+.pref-preview-stage .pref-icon {
+    @include size(var(--preview-icon-px));
+}
+/* The guides keep clear of the landing's line-icon look for every svg */
+.pref-preview-stage .pref-guides {
+    @include cover;
+    @include size(100%);
+    overflow: visible;
+    stroke: none;
+    pointer-events: none;
+    font-family: Inter, sans-serif;
+}
+/* The glyph fills a square of the size key as GTK's pixel_size does, the
+   three dots span 1.5em so the font size makes them that wide */
+.prefs-native .pref-preview-toggle {
+    @include center;
+    padding: 5px;
+    border-radius: 50px;
+    background: none;
+    font-size: calc(var(--preview-toggle-px) / 1.5);
+}
+.pref-preview-toggle>* {
+    @include size(var(--preview-toggle-px));
+}

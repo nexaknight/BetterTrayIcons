@@ -1,0 +1,83 @@
+@use '../mixins' as *;
+
+.prefs-native .pref-icon {
+    display: inline-block;
+    @include size(16px);
+    flex-shrink: 0;
+    background-color: currentColor;
+    vertical-align: middle;
+}
+.prefs-native .pref-icon-button {
+    @include size(34px);
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+/* createIconButton with circular false */
+.prefs-native .pref-icon-button.square {
+    width: 36px;
+    height: 34px;
+    border-radius: 6px;
+}
+/* Adwaita's window control, a 24px circle inside a 34px button */
+.prefs-native .pref-icon-button.close {
+    padding: 5px;
+    background-clip: content-box;
+    background-color: color-mix(in srgb, var(--pref-ink) 11%, transparent);
+}
+.pref-icon-button.close .pref-icon {
+    @include size(12px);
+}
+.prefs-native .pref-small-button {
+    background: color-mix(in srgb, var(--pref-ink) 17%, transparent);
+    height: 34px;
+    padding: 0 10px;
+    border-radius: 8px;
+    font-weight: 700;
+}
+.prefs-native .pref-load-more {
+    display: block;
+    margin: 0 auto 12px;
+}
+.pref-small-button.destructive {
+    color: #ee777b;
+    background-color: #e6505a20;
+}
+.prefs-native .pref-icon-button.destructive {
+    color: #f77972;
+}
+.prefs-native .pref-icon-button.active {
+    background: color-mix(in srgb, var(--pref-accent) 30%, transparent);
+}
+.prefs-native .pref-help.compact {
+    @include size(24px);
+}
+.pref-help-popover {
+    max-width: 340px;
+}
+.pref-help-text {
+    padding: 6px 16px;
+    font-size: 15px;
+    line-height: 21px;
+    white-space: normal;
+}
+.prefs-native .pref-small-button.suggested {
+    background: var(--pref-accent);
+    color: #fff;
+}
+/* A raised button goes from 10% to 15% on hover and 30% pressed, a
+   suggested one lays 10% of its text color or a 20% shade over the accent */
+.prefs-native :is(.pref-small-button, .pref-icon-button.close, .pref-icon-button.active):not(:disabled):hover {
+    background-image: linear-gradient(color-mix(in srgb, var(--pref-ink) 5%, transparent) 0 0);
+}
+.prefs-native :is(.pref-small-button, .pref-icon-button.close, .pref-icon-button.active):not(:disabled):active {
+    background-image: linear-gradient(color-mix(in srgb, var(--pref-ink) 20%, transparent) 0 0);
+}
+.prefs-native .pref-small-button.suggested:not(:disabled):hover {
+    background-image: linear-gradient(color-mix(in srgb, currentColor 10%, transparent) 0 0);
+}
+.prefs-native .pref-small-button.suggested:not(:disabled):active {
+    background-image: linear-gradient(rgb(0 0 6 / 20%) 0 0);
+}

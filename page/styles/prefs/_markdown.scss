@@ -1,0 +1,160 @@
+@use '../mixins' as *;
+
+/* The spacing constants and style classes of src/prefs/components/markdown.js
+   and src/prefs/stylesheet.css */
+.pref-md-view {
+    @include column;
+    gap: 12px;
+    margin: max(4px, calc(var(--fluid) * 12));
+}
+.prefs-native .pref-md-text {
+    margin: 0;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    /* A GtkLabel spaces its lines by the font's own metrics */
+    line-height: normal;
+}
+.pref-md-x-large {
+    font-size: 1.44em;
+}
+.prefs-native .pref-md-text a {
+    color: var(--pref-accent-text);
+    /* GtkLabel underlines its links, landing/_base.scss strips every link's
+       underline with !important */
+    text-decoration: underline!important;
+}
+/* Rounded chip behind a code span, as the label's vfunc_snapshot draws it */
+.pref-md-chip {
+    padding: 1px 3px;
+    border-radius: 4px;
+    background: color-mix(in srgb, currentColor 12%, transparent);
+    font-family: monospace;
+    font-size: 90%;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+}
+.pref-md-scroller {
+    overflow-x: auto;
+}
+.pref-md-code {
+    border-radius: 8px;
+    background: color-mix(in srgb, currentColor 6%, transparent);
+}
+.pref-md-code-block {
+    margin: 0;
+    padding: 8px 12px;
+    font-family: monospace;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+.pref-md-scroller.pref-md-code {
+    position: relative;
+    overflow-x: visible;
+}
+/* The copy button sits in the block's corner, the text keeps clear of it */
+.pref-md-code .pref-md-code-block {
+    padding-right: 44px;
+}
+.prefs-native .pref-md-code .pref-md-copy {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+}
+.pref-md-quote {
+    @include column;
+    gap: 12px;
+    padding-left: 12px;
+    border-left: 2px solid color-mix(in srgb, currentColor 20%, transparent);
+}
+.pref-md-list {
+    @include column;
+    gap: 4px;
+}
+.pref-md-list-row {
+    display: flex;
+    gap: 6px;
+    margin-left: calc(var(--md-level) * 20px);
+}
+.pref-md-marker {
+    line-height: normal;
+}
+.pref-md-list-row .pref-md-text {
+    flex: 1;
+}
+.pref-md-table {
+    display: grid;
+    grid-template-columns: repeat(var(--md-columns), max-content);
+    gap: 4px 16px;
+}
+.pref-md-cell {
+    white-space: nowrap;
+}
+/* GtkSeparator paints libadwaita's border color, 15 % of the text color */
+.prefs-native .pref-md-rule,
+.prefs-native .pref-md-release-rule {
+    border: 0;
+    border-top: 1px solid color-mix(in srgb, currentColor 15%, transparent);
+    margin: 0;
+}
+.prefs-native .pref-md-release-rule {
+    margin: 0 12px;
+}
+/* AdwPreferencesPage clamps the dialog content to a narrower centered
+   column */
+.pref-changelog {
+    padding: 0 max(4px, calc(var(--fluid) * 27));
+}
+/* libadwaita's title-1 to title-4 and heading classes, scoped to outrank
+   the font reset on every prefs paragraph */
+.pref-md-view .pref-md-title-1 {
+    font-size: 181%;
+    font-weight: 800;
+}
+.pref-md-view .pref-md-title-2 {
+    font-size: 136%;
+    font-weight: 800;
+}
+.pref-md-view .pref-md-title-3 {
+    font-size: 136%;
+    font-weight: 700;
+}
+.pref-md-view .pref-md-title-4 {
+    font-size: 118%;
+    font-weight: 700;
+}
+.pref-md-view .pref-md-heading {
+    font-weight: 700;
+}
+/* HEADING_SPACE_PX, on top of the block gap */
+.pref-md-view .pref-md-title-1,
+.pref-md-view .pref-md-title-2 {
+    margin-top: 12px;
+}
+.pref-md-view .pref-md-title-3,
+.pref-md-view .pref-md-title-4 {
+    margin-top: 6px;
+}
+.pref-md-view > :first-child,
+.pref-md-quote > :first-child {
+    margin-top: 0;
+}
+/* libadwaita's caption and dimmed classes */
+.pref-md-code-lang {
+    display: block;
+    padding: 8px 12px 0;
+    font-size: 82%;
+    opacity: 0.55;
+}
+.pref-md-code-lang + .pref-md-code-block {
+    padding-top: 4px;
+}
+/* Inter ships no italic face and the prefs turn synthesis off, Pango slants
+   the upright face instead */
+.pref-md-view :is(i, em) {
+    font-synthesis: style;
+}
+.pref-md-image {
+    max-width: 100%;
+    height: auto;
+    vertical-align: middle;
+}

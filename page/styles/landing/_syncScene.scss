@@ -1,0 +1,235 @@
+@use '../mixins' as *;
+
+.feature-sync {
+    grid-column: 1/-1;
+}
+.feature-sync .button {
+    margin-top: 16px;
+}
+/* The scene sizes everything in cqw so it scales as one */
+.sync-scene {
+    --sync-loop: 8.4s;
+    /* Clears the icon in the card's corner */
+    margin-top: 44px;
+    position: relative;
+    width: 100%;
+    aspect-ratio: 100/32;
+    container-type: inline-size;
+}
+/* The card spans both grid columns and takes them over as a subgrid, so its
+   text ends where the content of the card above it ends */
+@media (min-width: $tablet + 1px) {
+    .feature-sync {
+        display: grid;
+        grid-template-columns: subgrid;
+        align-items: start;
+    }
+    .feature-sync>:is(h3, p, .button) {
+        grid-column: 1;
+        margin-right: var(--feature-padding);
+    }
+    .feature-sync p {
+        max-width: none;
+    }
+    .feature-sync .button {
+        justify-self: start;
+    }
+    /* The subgrid track runs to the card's padding edge, the scene ends
+       where the copy of the card above ends instead */
+    .sync-scene {
+        grid-column: 2;
+        grid-row: 1/span 3;
+        justify-self: end;
+        max-width: 380px;
+        margin-right: max(0px, calc(100% - var(--feature-padding) - var(--feature-copy-width)));
+    }
+}
+.sync-parts,
+.sync-device,
+.sync-line,
+.sync-folder,
+.sync-dot {
+    position: absolute;
+    display: block;
+}
+.sync-parts {
+    inset: 0;
+}
+.sync-device {
+    top: 6cqw;
+    width: 30cqw;
+}
+.sync-pc {
+    left: 0;
+}
+.sync-laptop {
+    right: 0;
+    top: 8cqw;
+}
+.sync-screen {
+    display: block;
+    height: 19cqw;
+    overflow: hidden;
+    border: .6cqw solid var(--muted);
+    border-radius: 1.5cqw;
+    background: var(--bg);
+}
+.sync-laptop .sync-screen {
+    height: 17cqw;
+    margin: 0 2cqw;
+}
+.sync-panel {
+    position: relative;
+    display: block;
+    height: 4.4cqw;
+    background: color-mix(in srgb, var(--ink) 12%, transparent);
+    color: var(--ink);
+}
+.sync-activities {
+    position: absolute;
+    left: 1.4cqw;
+    top: 1.5cqw;
+    width: 3.4cqw;
+    height: 1.4cqw;
+    border-radius: 1cqw;
+    background: color-mix(in srgb, var(--ink) 55%, transparent);
+}
+/* Whole pixels for the icon size and both rest positions, a mask drawn at
+   a fractional offset blurs and the same glyph looks smaller on one side */
+.sync-tray {
+    --tray-left: round(6cqw, 1px);
+    --tray-right: round(calc(100% - var(--tray-width) - 1.4cqw), 1px);
+    position: absolute;
+    top: round(.9cqw, 1px);
+    left: var(--tray-right);
+    @include row(1cqw);
+    height: 2.6cqw;
+}
+/* One loop in seconds. The PC moves its tray to the left box (0 to 0.36),
+   the dot carries the setting to the folder (0.48 to 1.32), rests inside it
+   (1.32 to 2.04) as if being stored, then goes on to the laptop (2.04 to
+   2.88), the laptop follows (3.00 to 3.36), both hold for one dot leg (3.36
+   to 4.20), then the same runs back from the laptop and the loop ends on the
+   same hold. */
+.sync-pc .sync-tray {
+    --tray-width: 14.4cqw;
+    animation: sync-pc-tray var(--sync-loop) ease-in-out infinite;
+}
+.sync-laptop .sync-tray {
+    --tray-width: 10.8cqw;
+    animation: sync-laptop-tray var(--sync-loop) ease-in-out infinite;
+}
+.sync-tray svg.bti {
+    width: round(2.6cqw, 1px);
+    height: round(2.6cqw, 1px);
+}
+.sync-dots {
+    width: 2.6cqw;
+    font-size: 1.4cqw;
+    line-height: 1;
+    letter-spacing: -.2cqw;
+    text-align: center;
+    color: var(--accent);
+}
+/* Neck as a centered stripe, foot as the bottom border */
+.sync-stand {
+    display: block;
+    width: 10cqw;
+    height: 4cqw;
+    margin: 0 auto;
+    border-bottom: .6cqw solid var(--muted);
+    background: linear-gradient(var(--muted) 0 0) center/1cqw 100% no-repeat;
+}
+.sync-base {
+    display: block;
+    height: 1.8cqw;
+    border-radius: 0 0 1.5cqw 1.5cqw;
+    background: var(--muted);
+}
+.sync-folder {
+    left: 50%;
+    top: 11cqw;
+    @include size(11cqw);
+    transform: translateX(-50%);
+    @include center;
+    border-radius: 3cqw;
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+    color: var(--accent);
+    animation: sync-folder var(--sync-loop) ease-in-out infinite;
+}
+.sync-folder svg.bti {
+    @include size(6cqw);
+}
+.sync-line {
+    top: 16.5cqw;
+    height: 0;
+    border-top: .5cqw dotted color-mix(in srgb, var(--muted) 70%, transparent);
+}
+.sync-line-left {
+    left: 32cqw;
+    width: 11.5cqw;
+}
+.sync-line-right {
+    left: 56.5cqw;
+    width: 11.5cqw;
+}
+.sync-dot {
+    top: -1.25cqw;
+    left: 0;
+    @include size(2cqw);
+    margin-left: -1cqw;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0;
+}
+.sync-line-left .sync-dot {
+    animation: sync-dot-left var(--sync-loop) linear infinite;
+}
+.sync-line-right .sync-dot {
+    animation: sync-dot-right var(--sync-loop) linear infinite;
+}
+@keyframes sync-pc-tray {
+    0%, 90%, 100% { left: var(--tray-right); }
+    4.29%, 85.71% { left: var(--tray-left); }
+}
+@keyframes sync-laptop-tray {
+    0%, 35.71%, 54.29%, 100% { left: var(--tray-right); }
+    40%, 50% { left: var(--tray-left); }
+}
+@keyframes sync-dot-left {
+    0%, 5.7% { left: 0; opacity: 0; }
+    5.71% { left: 0; opacity: 1; }
+    15.71% { left: 100%; opacity: 1; }
+    15.72%, 74.28% { left: 100%; opacity: 0; }
+    74.29% { left: 100%; opacity: 1; }
+    84.29% { left: 0; opacity: 1; }
+    84.3%, 100% { left: 0; opacity: 0; }
+}
+@keyframes sync-dot-right {
+    0%, 24.28% { left: 0; opacity: 0; }
+    24.29% { left: 0; opacity: 1; }
+    34.29% { left: 100%; opacity: 1; }
+    34.3%, 55.7% { left: 100%; opacity: 0; }
+    55.71% { left: 100%; opacity: 1; }
+    65.71% { left: 0; opacity: 1; }
+    65.72%, 100% { left: 0; opacity: 0; }
+}
+@keyframes sync-folder {
+    0%, 12.86%, 18.57%, 62.86%, 68.57%, 100% { transform: translateX(-50%) scale(1); }
+    15.71%, 65.71% { transform: translateX(-50%) scale(1.12); }
+}
+/* Without motion both devices show the synced state */
+@media (prefers-reduced-motion:reduce) {
+    .sync-scene .sync-parts * {
+        animation: none;
+    }
+    .sync-scene .sync-tray {
+        left: var(--tray-left);
+    }
+}
+@media (max-width: $tablet) {
+    .sync-scene {
+        max-width: 360px;
+        margin: 24px auto 0;
+    }
+}

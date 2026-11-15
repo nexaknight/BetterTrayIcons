@@ -6,3 +6,17 @@ schemas/gschemas.compiled
 *.swp
 *.swo
 .fallowrc.json
+_site/
+page/node_modules/
+page/.next/
+page/out/
+# page/dev.sh writes the build extras into public/ for next dev
+page/public/css/
+page/public/i18n/
+page/public/compat.json
+page/public/src/
+page/public/media/
+page/public/assets/icon.png
+page/public/assets/logo.svg
+page/public/assets/icons/
+page/public/assets/emoji/

@@ -1,0 +1,92 @@
+// Colors stay CSS custom properties in landing/base and prefs/base, the
+// runtime JS and the theme switch rewrite them. Sass only owns what never
+// changes at runtime.
+
+$phone-small: 400px;
+$phone: 500px;
+$tablet: 760px;
+$tablet-wide: 860px;
+$laptop: 1000px;
+$desktop: 1100px;
+
+$shell-popup-bg: #303030;
+$shell-accent: #3584e4;
+$scene-panel-bg: #23252f;
+$scrollbar-thumb: #77777b;
+// libadwaita's button radius, every demo control takes it
+$control-radius: 9px;
+$shell-popup-shadow: 0 8px 20px #0006;
+$shell-control-bg: #ffffff1a;
+$stage-gradient: linear-gradient(160deg,#5896da38,transparent 55%),linear-gradient(160deg,#30303a,#1d1d24);
+
+@mixin row($gap: null) {
+    display: flex;
+    align-items: center;
+    gap: $gap;
+}
+
+@mixin center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@mixin column {
+    display: flex;
+    flex-direction: column;
+}
+
+@mixin cover {
+    position: absolute;
+    inset: 0;
+}
+
+@mixin size($length) {
+    width: $length;
+    height: $length;
+}
+
+@mixin thin-scrollbar($thumb) {
+    scrollbar-width: thin;
+    scrollbar-color: $thumb transparent;
+}
+
+@mixin auto-scrollbar {
+    scrollbar-width: auto;
+    scrollbar-color: auto;
+}
+
+// libadwaita's overlay scrollbar. The gutter stays reserved, so the rows never
+// shift when the bar fades in or out. public/shared/overlayScrollbars.js sets
+// is-scrolling.
+@mixin overlay-scrollbar($thumb) {
+    --scrollbar-thumb: transparent;
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) transparent;
+    transition: --scrollbar-thumb 300ms ease-out 800ms;
+    &:hover,
+    &.is-scrolling {
+        --scrollbar-thumb: #{$thumb};
+        transition: none;
+    }
+    // A browser that draws classic scrollbars gets an 8px gutter, the size
+    // the picker grid leaves for it
+    @supports selector(::-webkit-scrollbar) {
+        @include auto-scrollbar;
+        &::-webkit-scrollbar {
+            @include size(8px);
+        }
+        &::-webkit-scrollbar-thumb {
+            background: var(--scrollbar-thumb);
+            border: 2px solid transparent;
+            border-radius: 99px;
+            background-clip: padding-box;
+            min-height: 24px;
+        }
+        &::-webkit-scrollbar-thumb:hover,
+        &::-webkit-scrollbar-thumb:active {
+            border-width: 1px;
+        }
+    }
+}

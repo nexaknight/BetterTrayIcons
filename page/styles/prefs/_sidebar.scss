@@ -1,0 +1,83 @@
+@use '../mixins' as *;
+
+.pref-sidebar {
+    width: clamp(180px, 25%, 280px);
+    /* AdwNavigationSplitView gives the sidebar whole pixels */
+    width: round(down, clamp(180px, 25%, 280px), 1px);
+    flex-shrink: 0;
+    background: var(--pref-sidebar);
+    border-right: 1px solid var(--pref-separator);
+    @include column;
+}
+.pref-sidebar-brand {
+    height: 76px;
+    flex-shrink: 0;
+    @include row(12px);
+    padding: 12px 14px 9px;
+}
+.pref-sidebar-brand img {
+    @include size(34px);
+}
+.pref-sidebar-brand strong {
+    font-weight: 700;
+    font-size: 15px;
+    display: block;
+}
+.pref-sidebar-brand small {
+    display: block;
+    font-size: 13px;
+    color: var(--pref-dim);
+    margin-top: 1px;
+}
+.pref-sidebar-nav {
+    @include column;
+    padding: 0 6px;
+    gap: 2px;
+}
+.prefs-native .pref-sidebar-nav button {
+    @include row(12px);
+    height: 36px;
+    padding: 0 15px;
+    border-radius: $control-radius;
+    text-align: left;
+    font-weight: 400;
+}
+.prefs-native .pref-sidebar-nav button:not(.active):hover,
+.prefs-native .pref-sidebar-nav button:not(.active):focus-visible {
+    background: color-mix(in srgb, var(--pref-ink) 7%, transparent);
+}
+.prefs-native .pref-sidebar-nav button.active {
+    background: color-mix(in srgb, var(--pref-ink) 15%, transparent);
+}
+.pref-sidebar-nav .pref-icon {
+    @include size(16px);
+}
+.pref-sidebar-brand-end {
+    margin-left: auto;
+}
+.prefs-native.collapsed .pref-sidebar {
+    position: absolute;
+    inset-block: 0;
+    left: 0;
+    z-index: 20;
+    width: min(280px, 100%);
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition: transform .2s ease-out, visibility .2s;
+    box-shadow: 0 0 12px #0004;
+}
+.prefs-native.settling .pref-sidebar {
+    transition: none;
+}
+.prefs-native.collapsed.sidebar-shown .pref-sidebar {
+    transform: none;
+    visibility: visible;
+}
+.pref-sidebar-shade {
+    @include cover;
+    z-index: 19;
+    background: #0003;
+}
+.pref-sidebar-shade[hidden] {
+    display: none;
+}

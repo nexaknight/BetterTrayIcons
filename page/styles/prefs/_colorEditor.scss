@@ -1,0 +1,93 @@
+@use '../mixins' as *;
+
+.pref-color-editor {
+    display: grid;
+    grid-template-columns: 14px 290px;
+    grid-template-rows: 34px 210px 16px;
+    gap: 12px;
+    justify-content: center;
+    padding: 6px 8px 14px;
+}
+.pref-color-editor-entry {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 12px;
+}
+.pref-color-editor-swatch {
+    flex: none;
+    @include size(34px);
+    border-radius: $control-radius;
+    background: linear-gradient(var(--editor-color), var(--editor-color)), repeating-conic-gradient(#999 0 25%, #666 0 50%) 0 0 / 12px 12px;
+}
+.prefs-native .pref-color-editor-entry .pref-input {
+    flex: 1;
+    height: 34px;
+    padding: 0 10px;
+    border-radius: $control-radius;
+    background: color-mix(in srgb, var(--pref-ink) 8%, transparent);
+    font-family: monospace;
+}
+.pref-color-editor-hue,
+.pref-color-editor-plane,
+.pref-color-editor-alpha {
+    position: relative;
+    touch-action: none;
+    cursor: crosshair;
+}
+.pref-color-editor-hue {
+    grid-area: 2 / 1;
+    border-radius: 7px;
+    background: linear-gradient(to bottom, red, yellow, lime, cyan, blue, magenta, red);
+}
+.pref-color-editor-plane {
+    grid-area: 2 / 2;
+    border-radius: 6px;
+    background: linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, var(--editor-hue));
+    overflow: hidden;
+}
+.pref-color-editor-alpha {
+    grid-area: 3 / 2;
+    border-radius: 8px;
+    background: linear-gradient(to right, transparent, var(--editor-opaque)), repeating-conic-gradient(#999 0 25%, #666 0 50%) 0 0 / 16px 16px;
+}
+.pref-color-editor-thumb {
+    position: absolute;
+    @include size(18px);
+    border: 2px solid #fff;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px #0008;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+.pref-color-editor-hue .pref-color-editor-thumb {
+    left: 50%;
+    top: var(--editor-hue-y);
+    background: var(--editor-hue);
+}
+.pref-color-editor-alpha .pref-color-editor-thumb {
+    left: var(--editor-alpha-x);
+    top: 50%;
+    background: var(--editor-color);
+}
+.pref-color-editor-cross-x,
+.pref-color-editor-cross-y {
+    position: absolute;
+    background: rgb(255 255 255 / 60%);
+    pointer-events: none;
+}
+.pref-color-editor-cross-x {
+    left: var(--editor-x);
+    top: 0;
+    bottom: 0;
+    width: 1px;
+}
+.pref-color-editor-cross-y {
+    top: var(--editor-y);
+    left: 0;
+    right: 0;
+    height: 1px;
+}
+.pref-color-editor [data-editor-control]:focus-visible {
+    outline: 0;
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--pref-accent) 60%, transparent);
+}

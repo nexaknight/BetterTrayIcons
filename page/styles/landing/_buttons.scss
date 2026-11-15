@@ -1,0 +1,113 @@
+@use '../mixins' as *;
+
+.button,
+.donate-button {
+    border-radius: $control-radius;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--button-bg);
+    transition: background-color .2s;
+}
+.button {
+    min-height: 34px;
+    gap: 8px;
+    padding: 0 17px;
+    border: 0;
+    font-size: 14px;
+    font-weight: 700;
+}
+.button:hover,
+.button:focus-visible,
+.donate-button:hover,
+.donate-button:focus-visible {
+    outline: 0;
+    background-color: var(--button-hover);
+}
+.button:active,
+.donate-button:active,
+.donate-menu[open] .donate-button {
+    background-color: var(--button-active);
+}
+.button svg,
+.donate-button svg {
+    @include size(16px);
+}
+/* .suggested-action, the accent with white text. Hover and press lay a
+   tint over the accent instead of swapping it. */
+.button.primary {
+    background-color: var(--accent);
+    color: #fff;
+}
+.button.primary:hover {
+    background-image: linear-gradient(rgb(255 255 255 / 10%), rgb(255 255 255 / 10%));
+}
+.button.primary:active {
+    background-image: linear-gradient(rgb(0 0 0 / 20%), rgb(0 0 0 / 20%));
+}
+.button .gnome-icon {
+    width: 16px;
+    height: 19px;
+    fill: currentColor;
+    stroke: none;
+}
+.button.compact {
+    min-height: 26px;
+    padding: 0 10px;
+    font-size: 13px;
+}
+@media (max-width: $tablet) {
+    .button {
+        font-size: 13px;
+        padding: 0 15px;
+    }
+}
+.donate-menu {
+    position: relative;
+    flex-shrink: 0;
+    text-align: left;
+}
+/* An icon-only button, the hero sits on the dark wallpaper in both themes */
+.donate-button {
+    display: flex;
+    @include size(34px);
+    color: #e6f2ff;
+    cursor: pointer;
+    list-style: none;
+}
+.donate-button::-webkit-details-marker {
+    display: none;
+}
+.donate-options {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 10px);
+    width: 224px;
+    padding: 6px;
+    border: 1px solid #ffffff20;
+    border-radius: 12px;
+    background: #182331;
+    box-shadow: 0 10px 30px #0006;
+    z-index: 12;
+    color: #e5edf7;
+}
+.donate-options a {
+    @include row(10px);
+    padding: 12px 10px;
+    border-radius: 7px;
+    font-size: 12px;
+    white-space: nowrap;
+}
+.donate-options a:hover {
+    background: #ffffff0d;
+}
+.donate-options a>span:last-child {
+    margin-left: auto;
+    color: #a5b8ca;
+}
+.donate-options svg {
+    @include size(20px);
+}
+.donate-options .coffee-icon {
+    color: #ffdd00;
+}

@@ -1,0 +1,203 @@
+@use '../mixins' as *;
+
+:root {
+    --bg: #101113;
+    --surface: #191b1f;
+    --ink: #eef0f4;
+    --muted: #a1a6b0;
+    --accent: #5896da;
+    --accent-dark: #75a9e4;
+    --line: #2a2e35;
+    --wash: #15181d;
+    --soft: #202630;
+    /* 0 on a 320px phone, 1px from the 1000px breakpoint up. The gutter and
+       the hero radius ride it, so a phone gets edge-to-edge sections while
+       the cards keep their corners. */
+    --fluid: clamp(0px, (100vw - 320px) / 680, 1px);
+    --gutter: calc(var(--fluid) * 32);
+    /* Loose text keeps clear of the screen edge when the cards reach it */
+    --text-inset: max(var(--gutter), 18px);
+    --radius: calc(var(--fluid) * 22);
+    /* libadwaita's card and button look */
+    --card-bg: rgb(255 255 255 / 8%);
+    --card-shadow: 0 0 0 1px rgb(255 255 255 / 8%);
+    --card-radius: 12px;
+    --tone-base: var(--bg);
+    --tone-raised: #1b1d21;
+    --tone-sunken: #0a0b0c;
+    --tone-line: rgb(255 255 255 / 7%);
+    --tone-wash: color-mix(in srgb, var(--accent) 7%, transparent);
+    --button-bg: color-mix(in srgb, currentColor 10%, transparent);
+    --button-hover: color-mix(in srgb, currentColor 15%, transparent);
+    --button-active: color-mix(in srgb, currentColor 30%, transparent);
+    --font: Inter,'Adwaita Sans',sans-serif;
+    scroll-behavior: smooth;
+    color-scheme: dark;
+}
+:root[data-theme=light] {
+    --bg: #f6f7f9;
+    --surface: #fff;
+    --ink: #20252d;
+    --muted: #5d6776;
+    --accent: #326db1;
+    --accent-dark: #265b98;
+    --line: #dce2eb;
+    --wash: #edf1f7;
+    --soft: #e4ebf5;
+    --card-bg: #fff;
+    --card-shadow: 0 0 0 1px rgb(0 0 0 / 3%), 0 1px 3px 1px rgb(0 0 0 / 7%), 0 2px 6px 2px rgb(0 0 0 / 3%);
+    --tone-raised: #eef0f4;
+    --tone-sunken: #e6e9ee;
+    --tone-line: rgb(0 0 0 / 8%);
+    color-scheme: light;
+}
+@font-face {
+    font-family: Inter;
+    src: url('/assets/fonts/Inter.ttf') format('truetype');
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+}
+* {
+    box-sizing: border-box;
+}
+/* Registered, so the overlay-scrollbar mixin can fade the thumb's color */
+@property --scrollbar-thumb {
+    syntax: '<color>';
+    inherits: true;
+    initial-value: transparent;
+}
+html {
+    @include thin-scrollbar($scrollbar-thumb);
+}
+body {
+    margin: 0;
+    /* The full-bleed section tones reach past .wrap */
+    overflow-x: clip;
+    background: var(--bg);
+    color: var(--ink);
+    font: 17px/1.6 var(--font);
+    -webkit-font-smoothing: antialiased;
+}
+button,
+input {
+    font: inherit;
+}
+button,
+a {
+    -webkit-tap-highlight-color: transparent;
+}
+button {
+    color: inherit;
+    cursor: pointer;
+}
+a {
+    color: inherit;
+}
+a,
+a:link,
+a:visited,
+a:hover,
+a:active {
+    text-decoration: none!important;
+}
+svg {
+    @include size(22px);
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    flex-shrink: 0;
+}
+/* Keyboard focus takes the grey tint the buttons use instead of a ring.
+   No specificity, so a control's own radius and focus rule win. */
+:where(button, a, input, summary):focus-visible {
+    outline: 0;
+    border-radius: 4px;
+    background-color: color-mix(in srgb, currentColor 15%, transparent);
+}
+::selection {
+    background: #234a76;
+    color: #f1f5fa;
+}
+h1,
+h2,
+h3,
+p {
+    margin: 0;
+}
+h1,
+h2,
+h3 {
+    font-family: var(--font);
+}
+h2 {
+    font-size: 42px;
+    letter-spacing: -1.8px;
+    line-height: 1.2;
+    font-weight: 600;
+}
+@media (max-width: $tablet) {
+    h2 {
+        font-size: 34px;
+        letter-spacing: -1.3px;
+    }
+}
+@media (prefers-reduced-motion:reduce) {
+    :root {
+        scroll-behavior: auto;
+    }
+    * {
+        transition: none!important;
+    }
+    *,
+    *::before,
+    *::after {
+        animation-duration: .01ms!important;
+        animation-iteration-count: 1!important;
+        transition-duration: .01ms!important;
+    }
+}
+@media (forced-colors:active) {
+    button,
+    a,
+    input,
+    summary {
+        forced-color-adjust: auto;
+    }
+    button:focus-visible,
+    a:focus-visible,
+    summary:focus-visible {
+        outline: 2px solid Highlight!important;
+    }
+}
+@supports selector(::-webkit-scrollbar) {
+    html {
+        @include auto-scrollbar;
+    }
+    ::-webkit-scrollbar {
+        @include size(12px);
+        background: transparent;
+    }
+    ::-webkit-scrollbar-track,
+    ::-webkit-scrollbar-corner {
+        background: transparent;
+    }
+    ::-webkit-scrollbar-button {
+        display: none;
+        @include size(0);
+    }
+    ::-webkit-scrollbar-thumb {
+        background: $scrollbar-thumb;
+        border: 4px solid transparent;
+        border-radius: 99px;
+        background-clip: padding-box;
+        min-height: 32px;
+    }
+    ::-webkit-scrollbar-thumb:hover,
+    ::-webkit-scrollbar-thumb:active {
+        border-width: 2px;
+        background-color: #99999d;
+    }
+}

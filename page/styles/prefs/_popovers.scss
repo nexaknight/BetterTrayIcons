@@ -1,0 +1,67 @@
+@use '../mixins' as *;
+
+.pref-dropdown-popover {
+    position: absolute;
+    z-index: 30;
+    padding: 6px;
+    background: var(--pref-popover);
+    border: 1px solid var(--pref-window)66;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px #0004;
+    overflow: auto;
+    max-height: 640px;
+    scrollbar-width: thin;
+}
+.prefs-native .pref-dropdown-popover button {
+    @include row;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    min-height: 36px;
+    padding: 7px 16px;
+    font-size: 15px;
+    font-weight: 400;
+    text-align: left;
+    line-height: 20px;
+    white-space: nowrap;
+    border-radius: 6px;
+}
+.pref-option-check {
+    font-size: 17px;
+    min-width: 17px;
+    line-height: 20px;
+}
+.pref-tooltip {
+    position: absolute;
+    z-index: 40;
+    border: 1px solid #ffffff32;
+    border-radius: 6px;
+    background: #09090b;
+    color: #f3f3f5;
+    font: 15px/20px 'Adwaita Sans',sans-serif;
+    padding: 3px 9px;
+    white-space: nowrap;
+    pointer-events: none;
+    box-shadow: 0 2px 4px #0003;
+    max-width: 560px;
+}
+.pref-tooltip[hidden] {
+    display: none;
+}
+.pref-tooltip.bti-global-tooltip {
+    position: fixed;
+    font: 14px/20px Inter,sans-serif;
+    max-width: min(560px,calc(100vw - 10px));
+    z-index: 100;
+}
+.prefs-native .pref-dropdown-popover {
+    color: var(--pref-ink);
+}
+/* Adwaita popover items take a background pill on hover and keyboard focus, no ring */
+.prefs-native .pref-dropdown-popover button:hover,
+.prefs-native .pref-dropdown-popover button:focus-visible {
+    background: var(--pref-hover);
+}
+.prefs-native .pref-menu button {
+    justify-content: flex-start;
+}

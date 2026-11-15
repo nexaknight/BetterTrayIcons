@@ -1,0 +1,497 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: BetterTrayIcons page\n"
+"Report-Msgid-Bugs-To: https://github.com/nexaknight/BetterTrayIcons/issues\n"
+"PO-Revision-Date: 2026-11-08 12:00+0100\n"
+"Last-Translator: nexaknight <info@nexaknight.com>\n"
+"Language-Team: German\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "%1 Background Apps"
+msgstr "%1 Hintergrundanwendungen"
+
+msgid "%1 menu"
+msgstr "Menü für %1"
+
+msgid "1 Background App"
+msgstr "1 Hintergrundanwendung"
+
+msgid "<strong>Automatic app detection</strong>: apps are listed as soon as they have been in the tray once. No tedious manual list. Adjust the settings per app whenever you need them."
+msgstr "<strong>Automatische App-Erkennung</strong>: Die Apps werden automatisch gelistet, sobald sie einmal im Tray waren. Kein mühseliges manuelles Auflisten. Pass die Einstellungen pro App an, sobald du sie brauchst."
+
+msgid "<strong>Background apps</strong>: hide them, put them in the tray, or move the tray in there."
+msgstr "<strong>Hintergrundanwendungen</strong>: Verstecke sie, platziere sie im Tray oder schiebe den Tray dort hinein."
+
+msgid "<strong>Clicks, touch and scroll</strong>: decide what each one does."
+msgstr "<strong>Klick, Touch und Scroll</strong>: Bestimme, was welcher Klick, Touch und Scroll macht."
+
+msgid "<strong>Custom styling</strong>: your desktop, your style. Better Tray Icons never gets in your way, design it the way you like it."
+msgstr "<strong>Eigenes Styling</strong>: Dein Desktop, dein Style. Better Tray Icons steht dir bei nichts im Weg, gestalte es so, wie es dir gefällt."
+
+msgid "<strong>Drag and drop</strong> reordering, wherever the icons are"
+msgstr "<strong>Drag and Drop</strong> zum Umsortieren, wo immer die Icons sind"
+
+msgid "<strong>Icon and emoji picker</strong>: pick other icons or even emojis for your apps or the toggle button. It is your design."
+msgstr "<strong>Icon- und Emoji-Auswahl</strong>: Wähle andere Icons oder sogar Emojis für die Anwendungen oder den Umschalt-Knopf. Es ist dein Design."
+
+msgid "<strong>Per-app overrides</strong> to rename, hide, reorder or replace any icon"
+msgstr "<strong>Einstellungen pro App</strong>, um jedes Icon umzubenennen, auszublenden, zu verschieben oder zu ersetzen"
+
+msgid "<strong>Scroll per app</strong>: scroll through the apps, and where an app supports it, its state or tray icon changes."
+msgstr "<strong>Scrollen pro App</strong>: Scroll durch die Apps, wenn sie es unterstützen, ändert sich der Status oder das Tray-Icon."
+
+msgid "<strong>Symbolic icon mode</strong> for a clean, native look where supported"
+msgstr "<strong>Symbolische Icons</strong> für einen schlichten, nativen Look, wo unterstützt"
+
+msgid "<strong>Sync between computers</strong>: keep your settings the same on all your devices. Whatever you change comes with you."
+msgstr "<strong>Sync zwischen Computern</strong>: Halte deine Einstellungen auf allen Geräten gleich. Egal was du änderst, es kommt mit."
+
+msgid "<strong>Three display modes</strong>: popup as a row or grid, folded into the panel, or simply inside Background Apps. You decide."
+msgstr "<strong>Drei Modi</strong>: Popup als Reihe oder Raster, eingeklappt im Panel oder einfach in den Hintergrundanwendungen. Du entscheidest."
+
+msgid "<strong>Tooltips</strong>: see which app that is, and give each one its own name."
+msgstr "<strong>Tooltips</strong>: Zeige an, welche App das ist, und gib jeder einen eigenen Namen."
+
+msgid "A desktop PC and a laptop keep their tray settings in sync through a shared folder"
+msgstr "Ein Desktop-PC und ein Laptop halten ihre Tray-Einstellungen über einen gemeinsamen Ordner synchron"
+
+msgid "A supported GNOME Shell version"
+msgstr "Eine unterstützte GNOME-Shell-Version"
+
+msgid "A surprise video"
+msgstr "Ein Überraschungsvideo"
+
+msgid "A Wayland session<small>X11 sessions are not supported.</small>"
+msgstr "Eine Wayland-Sitzung<small>X11-Sitzungen werden nicht unterstützt.</small>"
+
+msgid "About-page layout inspired by <a href=\"https://github.com/home-sweet-gnome/dash-to-panel\" target=\"_blank\" rel=\"noopener\">Dash to Panel</a> by Home Sweet GNOME."
+msgstr "Das Layout der Über-Seite ist von <a href=\"https://github.com/home-sweet-gnome/dash-to-panel\" target=\"_blank\" rel=\"noopener\">Dash to Panel</a> von Home Sweet GNOME inspiriert."
+
+msgid "Add custom color"
+msgstr "Eigene Farbe hinzufügen"
+
+msgid "All files are up to date"
+msgstr "Alle Dateien sind aktuell"
+
+msgid "All Networks"
+msgstr "Alle Netzwerke"
+
+msgid "Alpha"
+msgstr "Deckkraft"
+
+msgid "Balanced"
+msgstr "Ausgeglichen"
+
+msgid "Before you install"
+msgstr "Bevor du installierst"
+
+msgid "Better Tray Icons is a free, open source GNOME Shell extension that brings system tray icons back to the top panel on Wayland, with an overflow popup, per-app settings and sync."
+msgstr "Better Tray Icons ist eine freie, quelloffene GNOME-Shell-Erweiterung, die Tray-Icons unter Wayland zurück ins obere Panel bringt, mit Overflow-Popup, Einstellungen pro App und Sync."
+
+msgid "Better Tray Icons is available under the terms of the <a href=\"https://github.com/nexaknight/BetterTrayIcons/blob/main/LICENSE\" target=\"_blank\" rel=\"noopener\"><strong>GPL v3 or later</strong></a> license"
+msgstr "Better Tray Icons steht unter der Lizenz <a href=\"https://github.com/nexaknight/BetterTrayIcons/blob/main/LICENSE\" target=\"_blank\" rel=\"noopener\"><strong>GPL v3 oder neuer</strong></a>"
+
+msgid "Better Tray Icons | System tray icons for GNOME Shell"
+msgstr "Better Tray Icons | Tray-Icons für die GNOME Shell"
+
+msgid "Bluetooth Settings"
+msgstr "Bluetooth-Einstellungen"
+
+msgid "Bring <span class=\"highlight\">tray icons</span> back to GNOME"
+msgstr "Hol dir die <span class=\"highlight\">Tray‑Icons</span> zurück in GNOME"
+
+msgid "Build from source? <span>Installation Guide</span>"
+msgstr "Aus dem Quellcode bauen? <span>Installationsanleitung</span>"
+
+msgid "Cheat Code"
+msgstr "Cheat-Code"
+
+msgid "Check Compatibility"
+msgstr "Kompatibilität prüfen"
+
+msgid "Check for Updates…"
+msgstr "Nach Updates suchen …"
+
+msgid "Choose a sync file"
+msgstr "Sync-Datei auswählen"
+
+msgid "Choose what clicks do"
+msgstr "Leg fest, was Klicks tun"
+
+msgid "Click"
+msgstr "Klick"
+
+msgid "Close %1"
+msgstr "%1 schließen"
+
+msgid "Color"
+msgstr "Farbe"
+
+msgid "Configure Steam"
+msgstr "Steam einrichten"
+
+msgid "Configure Steam in the preferences"
+msgstr "Steam in den Einstellungen einrichten"
+
+msgid "Connected"
+msgstr "Verbunden"
+
+msgid "Could not load the guide."
+msgstr "Die Anleitung konnte nicht geladen werden."
+
+msgid "Could not load the release list, try again later."
+msgstr "Die Versionsliste konnte nicht geladen werden, versuch es später noch einmal."
+
+msgid "Could not reach GitHub, try again later."
+msgstr "GitHub ist nicht erreichbar, versuch es später noch einmal."
+
+msgid "Dark Style"
+msgstr "Dunkler Stil"
+
+msgid "DBus interface XML files come from the upstream specifications referenced by AppIndicator."
+msgstr "Die XML-Dateien der DBus-Schnittstellen stammen aus den Original-Spezifikationen, auf die AppIndicator verweist."
+
+msgid "Decrease"
+msgstr "Verringern"
+
+msgid "Developed by"
+msgstr "Entwickelt von"
+
+msgid "Disclaimer and credits"
+msgstr "Credits"
+
+msgid "Disconnect"
+msgstr "Trennen"
+
+msgid "Discord, Steam, Telegram, Signal and Nextcloud are back. Legacy X11 tray apps such as Wine and Proton games come along, and windowless background apps get an icon too."
+msgstr "Discord, Steam, Telegram, Signal und Nextcloud sind zurück. Alte X11-Tray-Apps wie Wine- und Proton-Spiele kommen mit, und fensterlose Hintergrundanwendungen bekommen auch ein Icon."
+
+msgid "Do Not Disturb"
+msgstr "Nicht stören"
+
+msgid "Donate"
+msgstr "Spenden"
+
+msgid "Double-click"
+msgstr "Doppelklick"
+
+msgid "Drag to reorder. Hold Alt and press an arrow key to reorder with the keyboard."
+msgstr "Zum Umsortieren ziehen. Mit gedrückter Alt-Taste und einer Pfeiltaste sortierst du per Tastatur um."
+
+msgid "Exit"
+msgstr "Beenden"
+
+msgid "Explore input settings"
+msgstr "Eingabe-Einstellungen ansehen"
+
+msgid "Export your settings to a file and import them on another computer. Or keep several computers in sync through a shared JSON file with automatic backups."
+msgstr "Exportiere deine Einstellungen in eine Datei und importiere sie auf einem anderen Computer. Oder halte mehrere Computer über eine gemeinsame JSON-Datei mit automatischen Backups synchron."
+
+msgid "Extension preference pages"
+msgstr "Einstellungsseiten der Erweiterung"
+
+msgid "Found a bug or have an idea? Open an issue or send a pull request on GitHub."
+msgstr "Einen Fehler gefunden oder eine Idee? Eröffne ein Issue oder schick einen Pull Request auf GitHub."
+
+msgid "Free and Open Source"
+msgstr "Frei und quelloffen"
+
+msgid "Free and open source, view on GitHub"
+msgstr "Frei und quelloffen, auf GitHub ansehen"
+
+msgid "Full control, tailored to your needs and your style. Tray icons have never been better."
+msgstr "Volle Kontrolle, individuell auf deine Bedürfnisse und deinen Style abgestimmt. Tray-Icons waren noch nie besser."
+
+msgid "Get Better Tray Icons"
+msgstr "Hol dir Better Tray Icons"
+
+msgid "Hide %1"
+msgstr "%1 ausblenden"
+
+msgid "How to Contribute"
+msgstr "Mitmachen"
+
+msgid "Hue"
+msgstr "Farbton"
+
+msgid "Increase"
+msgstr "Erhöhen"
+
+msgid "Inspired by <a href=\"https://github.com/ubuntu/gnome-shell-extension-appindicator\" target=\"_blank\" rel=\"noopener\">AppIndicator</a>, <a href=\"https://github.com/MartinPL/Tray-Icons-Reloaded\" target=\"_blank\" rel=\"noopener\">Tray Icons: Reloaded</a> by MartinPL and <a href=\"https://github.com/cassidyjames/background-app-icons\" target=\"_blank\" rel=\"noopener\">Background App Icons</a> by cassidyjames."
+msgstr "Inspiriert von <a href=\"https://github.com/ubuntu/gnome-shell-extension-appindicator\" target=\"_blank\" rel=\"noopener\">AppIndicator</a>, <a href=\"https://github.com/MartinPL/Tray-Icons-Reloaded\" target=\"_blank\" rel=\"noopener\">Tray Icons: Reloaded</a> von MartinPL und <a href=\"https://github.com/cassidyjames/background-app-icons\" target=\"_blank\" rel=\"noopener\">Background App Icons</a> von cassidyjames."
+
+msgid "Install Extension"
+msgstr "Erweiterung installieren"
+
+msgid "Install from GNOME Extensions"
+msgstr "Über GNOME Extensions installieren"
+
+msgid "Install the extension now and take back control of your tray icons."
+msgstr "Installier jetzt die Erweiterung und hol dir die Kontrolle über deine Tray-Icons zurück."
+
+msgid "Installation Guide"
+msgstr "Installationsanleitung"
+
+msgid "Interactive desktop landing page"
+msgstr "Interaktive Desktop-Startseite"
+
+msgid "Keep the panel tidy"
+msgstr "Halte das Panel aufgeräumt"
+
+msgid "LAN Settings"
+msgstr "LAN-Einstellungen"
+
+msgid "Latest release"
+msgstr "Neueste Version"
+
+msgid "Library"
+msgstr "Bibliothek"
+
+msgid "Load More"
+msgstr "Mehr laden"
+
+msgid "Loading releases…"
+msgstr "Versionen werden geladen …"
+
+msgid "Loading the guide…"
+msgstr "Anleitung wird geladen …"
+
+msgid "Lock"
+msgstr "Sperren"
+
+msgid "Long-press"
+msgstr "Lang drücken"
+
+msgid "Maintainer"
+msgstr "Maintainer"
+
+msgid "Monitoring backup schedule"
+msgstr "Backup-Zeitplan wird überwacht"
+
+msgid "Mouse, touch and scroll wheel, every input gets the action you want."
+msgstr "Maus, Touch und Scrollrad, jede Eingabe bekommt die Aktion, die du willst."
+
+msgid "Mute"
+msgstr "Stummschalten"
+
+msgid "Mute Notifications"
+msgstr "Benachrichtigungen stummschalten"
+
+msgid "New Group…"
+msgstr "Neue Gruppe …"
+
+msgid "New Message…"
+msgstr "Neue Nachricht …"
+
+msgid "NexaKnight knight logo"
+msgstr "Ritter-Logo von NexaKnight"
+
+msgid "NexaKnight on GitHub"
+msgstr "NexaKnight auf GitHub"
+
+msgid "Night Light"
+msgstr "Nachtlicht"
+
+msgid "Not Running"
+msgstr "Läuft nicht"
+
+msgid "Nothing new"
+msgstr "Nichts Neues"
+
+msgid "One tray extension at a time<small>Disable other tray or AppIndicator extensions first.</small>"
+msgstr "Nur eine Tray-Erweiterung gleichzeitig<small>Deaktiviere vorher andere Tray- oder AppIndicator-Erweiterungen.</small>"
+
+msgid "Open %1"
+msgstr "%1 öffnen"
+
+msgid "Open Double Click settings"
+msgstr "Doppelklick-Einstellungen öffnen"
+
+msgid "Open it on GitHub"
+msgstr "Auf GitHub öffnen"
+
+msgid "Open Left Click settings"
+msgstr "Linksklick-Einstellungen öffnen"
+
+msgid "Open Long Press settings"
+msgstr "Einstellungen für langes Drücken öffnen"
+
+msgid "Open Scroll settings"
+msgstr "Scroll-Einstellungen öffnen"
+
+msgid "Open Sync Folder"
+msgstr "Sync-Ordner öffnen"
+
+msgid "Open Sync Settings"
+msgstr "Sync-Einstellungen öffnen"
+
+msgid "Open Touch settings"
+msgstr "Touch-Einstellungen öffnen"
+
+msgid "Opens in a new tab"
+msgstr "Öffnet sich in einem neuen Tab"
+
+msgid "Overflow tray"
+msgstr "Overflow-Tray"
+
+msgid "Performance"
+msgstr "Leistung"
+
+msgid "Pick the version your desktop runs."
+msgstr "Wähl die Version deines Desktops."
+
+msgid "Play"
+msgstr "Abspielen"
+
+msgid "Power Mode"
+msgstr "Energiemodus"
+
+msgid "Power Off"
+msgstr "Ausschalten"
+
+msgid "Power Saver"
+msgstr "Energiesparen"
+
+msgid "Power Settings"
+msgstr "Energie-Einstellungen"
+
+msgid "Preference icons: <a href=\"https://github.com/lucide-icons/lucide\" target=\"_blank\" rel=\"noopener\">Lucide</a> (ISC), <a href=\"https://github.com/feathericons/feather\" target=\"_blank\" rel=\"noopener\">Feather</a> (MIT) by Cole Bemis and the Wine glyph from <a href=\"https://github.com/somepaulo/MoreWaita\" target=\"_blank\" rel=\"noopener\">MoreWaita</a> (GPL-3.0). <a href=\"#explore\" data-open-credits=\"\">Full credits and licenses</a>"
+msgstr "Icons der Einstellungen: <a href=\"https://github.com/lucide-icons/lucide\" target=\"_blank\" rel=\"noopener\">Lucide</a> (ISC), <a href=\"https://github.com/feathericons/feather\" target=\"_blank\" rel=\"noopener\">Feather</a> (MIT) von Cole Bemis und das Wine-Symbol aus <a href=\"https://github.com/somepaulo/MoreWaita\" target=\"_blank\" rel=\"noopener\">MoreWaita</a> (GPL-3.0). <a href=\"#explore\" data-open-credits=\"\">Credits und Lizenzen</a>"
+
+msgid "Preset colors"
+msgstr "Vorgegebene Farben"
+
+msgid "Project details"
+msgstr "Projektdetails"
+
+msgid "Provided “as is”, without warranty. The authors are not liable for damages."
+msgstr "Bereitgestellt „wie besehen“, ohne Gewährleistung. Die Autoren haften nicht für Schäden."
+
+msgid "Quick Connect…"
+msgstr "Schnellverbindung …"
+
+msgid "Quick settings"
+msgstr "Schnelleinstellungen"
+
+msgid "Quit %1"
+msgstr "%1 beenden"
+
+msgid "Releases for GNOME %1"
+msgstr "Versionen für GNOME %1"
+
+msgid "Rename an app, swap its icon or hide it. Adjust spacing, padding and colors to match your panel."
+msgstr "Benenne eine App um, tausch ihr Icon oder blende sie aus. Pass Abstände, Innenabstand und Farben an dein Panel an."
+
+msgid "Sample window"
+msgstr "Beispielfenster"
+
+msgid "Saturation and value"
+msgstr "Sättigung und Helligkeit"
+
+msgid "Select"
+msgstr "Auswählen"
+
+msgid "Set up each app"
+msgstr "Richte jede App ein"
+
+msgid "Settings exported"
+msgstr "Einstellungen exportiert"
+
+msgid "Settings imported"
+msgstr "Einstellungen importiert"
+
+msgid "Show %1"
+msgstr "%1 anzeigen"
+
+msgid "Show All Features"
+msgstr "Alle Funktionen anzeigen"
+
+msgid "Show desktop"
+msgstr "Schreibtisch anzeigen"
+
+msgid "Show miniature desktop"
+msgstr "Mini-Schreibtisch anzeigen"
+
+msgid "Show more tray icons"
+msgstr "Weitere Tray-Icons anzeigen"
+
+msgid "Show the icons you use every day and keep the rest one click away."
+msgstr "Zeig die Icons, die du täglich brauchst, und halte den Rest einen Klick entfernt."
+
+msgid "Skip to content"
+msgstr "Zum Inhalt springen"
+
+msgid "Stands in for the window of %1 on this page."
+msgstr "Steht auf dieser Seite für das Fenster von %1."
+
+msgid "Start Recording"
+msgstr "Aufnahme starten"
+
+msgid "Sync file path"
+msgstr "Pfad der Sync-Datei"
+
+msgid "Sync your setup"
+msgstr "Synchronisiere dein Setup"
+
+msgid "System menu"
+msgstr "Systemmenü"
+
+msgid "Take Screenshot"
+msgstr "Bildschirmfoto aufnehmen"
+
+msgid "The cheat code gets you nothing here, but there is a surprise for you anyway."
+msgstr "Der Cheat-Code bringt dir hier nichts, aber eine Überraschung gibt es trotzdem."
+
+msgid "The latest release no longer supports this GNOME version. The last release that did is %1."
+msgstr "Die neueste Version unterstützt diese GNOME-Version nicht mehr. Die letzte Version, die sie unterstützt hat, ist %1."
+
+msgid "This build: 49, 50 and 51."
+msgstr "Diese Version: 49, 50 und 51."
+
+msgid "Toggle miniature overflow"
+msgstr "Mini-Overflow umschalten"
+
+msgid "Too narrow, all icons go to the drawer."
+msgstr "Zu schmal, alle Icons landen in der Schublade."
+
+msgid "Too narrow, all icons go to the popup."
+msgstr "Zu schmal, alle Icons landen im Popup."
+
+msgid "Transparent"
+msgstr "Transparent"
+
+msgid "unreleased"
+msgstr "unveröffentlicht"
+
+msgid "Using <a href=\"https://flathub.org/apps/com.mattjakeman.ExtensionManager\" target=\"_blank\" rel=\"noopener\">Extension Manager</a>? Search for <strong>Better Tray Icons</strong>."
+msgstr "Du nutzt den <a href=\"https://flathub.org/apps/com.mattjakeman.ExtensionManager\" target=\"_blank\" rel=\"noopener\">Extension Manager</a>? Such nach <strong>Better Tray Icons</strong>."
+
+msgid "Volume"
+msgstr "Lautstärke"
+
+msgid "Wayland Only"
+msgstr "Nur Wayland"
+
+msgid "Wi-Fi"
+msgstr "WLAN"
+
+msgid "Wired"
+msgstr "Kabelgebunden"
+
+msgid "Workspace indicator"
+msgstr "Arbeitsflächen-Anzeige"
+
+msgid "Wow, you are creative"
+msgstr "Wow, du bist kreativ"
+
+msgid "You are all caught up."
+msgstr "Du bist auf dem neuesten Stand."
+
+msgid "Your GNOME version is supported by the latest release."
+msgstr "Deine GNOME-Version wird von der neuesten Version unterstützt."
+
+msgid "Your tray icons, back"
+msgstr "Deine Tray-Icons sind zurück"

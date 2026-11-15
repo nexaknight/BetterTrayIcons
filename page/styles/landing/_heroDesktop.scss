@@ -1,0 +1,123 @@
+@use '../mixins' as *;
+
+.hero .desktop-showcase {
+    border: 1px solid #ffffff1a;
+    border-radius: var(--radius);
+    scroll-margin-top: var(--gutter);
+    overflow: hidden;
+    text-align: left;
+    box-shadow: 0 22px 70px #0004;
+}
+.hero .landing-desktop {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    min-height: calc(100svh - 2 * var(--gutter));
+    @include column;
+    color: #f0f4fb;
+    background: #102038;
+}
+/* The demo window and the copy share the desktop below the panel. Popups,
+   Quick Settings and menus stack above it from their own z-index. */
+.hero-layout {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    @include row(40px);
+    padding: 24px 32px 32px;
+}
+.hero-demo {
+    flex: 1 1 1000px;
+    max-width: 1000px;
+    min-width: 0;
+}
+.landing-desktop[data-demo-side=right] .hero-demo {
+    order: 2;
+}
+.desktop-center {
+    flex: 1 1 300px;
+    min-width: 260px;
+    text-align: center;
+}
+.hero .desktop-center h1 {
+    margin: 0 auto 20px;
+    font-size: clamp(32px,3vw,52px);
+    font-weight: 600;
+    line-height: 1.16;
+    letter-spacing: -1.5px;
+    color: #f4f7fd;
+    text-shadow: 0 2px 25px #07142624;
+}
+.hero .desktop-center .highlight {
+    position: relative;
+    color: #79a9e1;
+}
+.hero .desktop-center .hero-copy {
+    max-width: 590px;
+    margin: 0 auto;
+    font-size: 16px;
+    line-height: 1.8;
+    color: #c6d4e7;
+}
+.hero .desktop-center .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 24px;
+}
+.hero .desktop-center .button {
+    font-size: 14px;
+}
+.hero .desktop-center .primary:hover {
+    background: #78aae4;
+}
+.hero .desktop-center .compatibility {
+    @include center;
+    gap: 9px;
+    margin-top: 20px;
+    font-size: 11px;
+    color: #abbcd2;
+}
+@media (max-width: $desktop) {
+    .hero-layout {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 32px;
+        padding: calc(var(--overflow-clearance, 0px) + 24px) 24px 24px;
+    }
+    .hero-demo {
+        flex: none;
+        width: 100%;
+        margin: 0 auto;
+    }
+    .hero-demo,
+    .landing-desktop[data-demo-side=right] .hero-demo {
+        order: 2;
+    }
+    .desktop-center {
+        flex: none;
+        min-width: 0;
+    }
+}
+@media (max-width: $phone) {
+    .hero-layout {
+        padding: calc(var(--overflow-clearance, 0px) + 16px) 12px 16px;
+    }
+    .hero .desktop-center h1 {
+        font-size: 30px;
+        letter-spacing: -1px;
+    }
+    .hero .desktop-center .hero-copy {
+        font-size: 14px;
+    }
+    .hero .desktop-center .hero-actions {
+        flex-direction: column;
+    }
+}
+@media (max-width: $phone-small) {
+    .hero-actions .primary {
+        min-width: 220px;
+    }
+}

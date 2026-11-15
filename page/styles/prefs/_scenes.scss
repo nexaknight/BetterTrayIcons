@@ -1,0 +1,192 @@
+@use '../mixins' as *;
+
+.pref-scene-bar {
+    height: 16px;
+    background: $scene-panel-bg;
+    border-block: 1px solid #ffffff14;
+    position: relative;
+    border-radius: 12px 12px 0 0;
+}
+.pref-scene-box {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    @include row(3px);
+}
+.pref-scene-box.left {
+    left: 10px;
+}
+.pref-scene-box.center {
+    left: 50%;
+    transform: translate(-50%,-50%);
+}
+.pref-scene-box.right {
+    right: 10px;
+}
+.pref-scene-pill {
+    height: 5px;
+    border-radius: 2px;
+    background: #ffffff8c;
+    display: block;
+}
+.pref-scene-tray {
+    @include row(2px);
+}
+.pref-scene-dot,
+.pref-scene-toggle {
+    display: block;
+    flex-shrink: 0;
+    @include size(6px);
+    border-radius: 50%;
+    background: #5896da;
+}
+.pref-scene-toggle {
+    background: none;
+    border: 1px solid #5896da;
+}
+/* buildLayoutThumbnail in src/prefs/components/scenes/layoutScene.js, a 66px
+   scene inside the card's 12px stage padding, four 14px icons 6px apart, two columns
+   in the grid, centered in a .bti-thumbnail-popup */
+.prefs-native .pref-choice-scene>.pref-layout-scene {
+    @include center;
+    height: 66px;
+    padding: 0;
+}
+.prefs-native .pref-layout-scene>.pref-preview-popup {
+    display: grid;
+    grid-template-columns: repeat(2,14px);
+    gap: 6px;
+    width: max-content;
+    padding: 8px;
+    border-radius: 14px;
+    background: $shell-popup-bg;
+    box-shadow: 0 8px 20px rgb(0 0 0 / 40%);
+    color: white;
+}
+.prefs-native .pref-layout-scene>.pref-preview-popup.row {
+    display: flex;
+}
+.pref-layout-scene .pref-preview-popup>span {
+    @include size(14px);
+    padding: 0;
+}
+.pref-layout-scene .pref-icon {
+    @include size(14px);
+}
+.pref-scene-popup {
+    top: 20px;
+}
+.pref-scene-popup.left {
+    left: 10px;
+}
+.pref-scene-popup.center {
+    left: 50%;
+    transform: translateX(-50%);
+}
+.pref-scene-popup.right {
+    right: 10px;
+}
+/* Unframed like the real drawer, the dots just continue the tray */
+.pref-scene-drawer {
+    display: flex;
+    gap: 2px;
+}
+/* The bti-scene-qs rules in stylesheet.css with the sizes of
+   src/prefs/components/scenes/quickSettingsScene.js. The menu fills the
+   screen below the bar with MENU_EDGE_PX above and below. */
+.pref-choice-scene>.pref-scene-qs {
+    position: absolute;
+    top: 20px;
+    bottom: 4px;
+    right: 8px;
+    width: 92px;
+    @include column;
+    gap: 3px;
+    padding: 5px;
+    border: 1px solid #ffffff14;
+    border-radius: 8px;
+    background: $scene-panel-bg;
+}
+.pref-choice-scene .pref-scene-qs-buttons {
+    display: flex;
+    justify-content: space-between;
+}
+.pref-choice-scene .pref-scene-qs-buttons>span {
+    display: flex;
+    gap: 3px;
+}
+.pref-scene-qs-button {
+    @include size(6px);
+    border-radius: 50%;
+    background: #ffffff4d;
+}
+.pref-scene-qs-slider {
+    display: block;
+    height: 4px;
+    border-radius: 2px;
+    background: #ffffff4d;
+}
+.pref-choice-scene .pref-scene-qs-tiles {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3px;
+}
+.pref-scene-qs-tiles i {
+    height: 6px;
+    border-radius: 3px;
+    background: #ffffff2e;
+}
+.pref-scene-qs-tiles i.on {
+    background: color-mix(in srgb, var(--pref-accent) 70%, transparent);
+}
+.pref-choice-scene .pref-scene-qs-apps {
+    position: relative;
+    flex: 1;
+    @include column;
+    gap: 2px;
+    padding: 3px;
+    border-radius: 3px;
+    background: #ffffff1f;
+}
+.pref-choice-scene .pref-scene-qs-row {
+    @include row(3px);
+}
+.pref-scene-qs-row .pref-scene-dot {
+    @include size(4px);
+}
+.pref-scene-line {
+    display: block;
+    height: 2px;
+    border-radius: 2px;
+    background: #ffffff8c;
+}
+.pref-scene-qs-row .pref-scene-line {
+    flex: 1;
+}
+.pref-scene-line.header {
+    align-self: flex-start;
+    width: 22px;
+}
+.pref-choice-scene .pref-scene-sub,
+.pref-choice-scene .pref-scene-side-popup {
+    @include column;
+    gap: 3px;
+}
+.pref-scene-sub {
+    margin-left: 6px;
+    padding: 3px;
+    border-radius: 3px;
+    background: #ffffff14;
+}
+/* MENU_GAP_PX left of the menu, past the list's padding and border */
+.pref-choice-scene .pref-scene-side-popup {
+    position: absolute;
+    top: 50%;
+    right: calc(100% + 9px);
+    width: 34px;
+    transform: translateY(-50%);
+    padding: 4px;
+    border: 1px solid #ffffff14;
+    border-radius: 6px;
+    background: $scene-panel-bg;
+}

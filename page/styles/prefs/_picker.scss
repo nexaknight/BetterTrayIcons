@@ -1,0 +1,182 @@
+@use '../mixins' as *;
+
+/* components/iconPicker.js, numbers from src/prefs/components/iconEmojiPicker.js.
+   A 36px cell in a 40px column, LAYOUT_GAP_PX 8, TAB_GAP_PX 4, CUSTOM_GAP_PX 12,
+   POPOVER_HEIGHT_PX 520 as the cap, the bti-picker rules of src/prefs/stylesheet.css */
+.prefs-native .pref-icon-picker {
+    height: min(536px, calc(100% - 96px));
+    padding: 8px;
+    border-radius: 15px;
+    @include column;
+    gap: 8px;
+    overflow: hidden;
+}
+/* The dropdown rules give every popover button a full-width row look, and
+   _popovers.scss loads after this file, so the reset needs the extra class */
+.prefs-native .pref-dropdown-popover.pref-icon-picker button {
+    min-height: 0;
+    padding: 0;
+    gap: 0;
+    justify-content: center;
+    font-size: inherit;
+    line-height: 1;
+}
+.pref-picker-stack,
+.pref-picker-pane,
+.pref-picker-grid-box {
+    flex: 1;
+    min-height: 0;
+    @include column;
+    gap: 8px;
+}
+.pref-picker-pane[hidden],
+.pref-picker-grid-box[hidden],
+.pref-picker-scroller[hidden],
+.pref-picker-tabs[hidden],
+.pref-picker-grid-box .pref-status-page[hidden] {
+    display: none;
+}
+/* libadwaita's toggle group, a 34px pill with 28px toggles as wide as their
+   label plus 8px a side, not homogeneous */
+.prefs-native .pref-picker-kinds {
+    flex: none;
+    align-self: center;
+    height: 34px;
+    padding: 3px;
+}
+.prefs-native .pref-icon-picker .pref-picker-kinds button {
+    flex-shrink: 0;
+    width: auto;
+    height: 28px;
+    min-height: 0;
+    white-space: nowrap;
+    padding: 0 8px;
+    min-width: 24px;
+    border-radius: 6px;
+    font-size: 14.667px;
+    font-weight: 700;
+    line-height: 28px;
+}
+.pref-picker-tabs,
+.pref-picker-footer {
+    display: flex;
+    gap: 4px;
+}
+.pref-picker-footer {
+    justify-content: center;
+    padding-top: 4px;
+}
+.prefs-native .pref-icon-picker .pref-picker-tab {
+    @include size(34px);
+    min-height: 0;
+    border-radius: $control-radius;
+}
+.pref-picker-tabs .pref-picker-tab {
+    flex: 1;
+}
+.prefs-native .pref-icon-picker .pref-picker-tab[aria-pressed=true] {
+    background: var(--pref-control-active);
+}
+.pref-picker-search-entry {
+    @include row(6px);
+    height: 34px;
+    padding: 0 9px;
+    border-radius: $control-radius;
+    background: color-mix(in srgb, var(--pref-ink) 10%, transparent);
+    color: var(--pref-dim);
+}
+.pref-picker-search-entry .pref-icon {
+    @include size(16px);
+}
+.pref-picker-search {
+    flex: 1;
+    color: var(--pref-ink);
+}
+.pref-picker-search::-webkit-search-cancel-button {
+    display: none;
+}
+/* The scrollbar takes the popover's right padding, so the 14 columns keep
+   their 560px whatever the browser's scrollbar */
+.pref-picker-scroller {
+    flex: 1;
+    min-height: 0;
+    overflow-x: hidden;
+    margin-right: -8px;
+}
+.pref-picker-grid {
+    display: grid;
+    grid-template-columns: repeat(14,40px);
+    grid-auto-rows: 40px;
+}
+/* SectionTitle, a heading label that ends on its row's bottom edge, inset
+   to line up with the centered cells */
+.prefs-native .pref-picker-title {
+    grid-column: 1 / -1;
+    align-self: end;
+    margin: 0 0 4px 2px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.2;
+    opacity: .55;
+}
+.prefs-native .pref-icon-picker .pref-picker-cell {
+    @include size(36px);
+    margin: 2px;
+    border-radius: 50%;
+}
+.prefs-native .pref-icon-picker .pref-picker-cell.current {
+    background: var(--pref-accent);
+    color: #fff;
+}
+.pref-picker-cell svg.bti {
+    @include size(20px);
+}
+.pref-picker-cell.colored {
+    color: var(--pref-accent-text);
+}
+/* About 22px on the 11pt base, a glyph as tall as the 24px icons */
+.pref-picker-emoji {
+    font-size: 22px;
+    line-height: 1;
+}
+.pref-picker-pane.custom {
+    justify-content: center;
+    align-items: center;
+    padding: 12px;
+    gap: 12px;
+}
+.pref-picker-preview svg {
+    @include size(64px);
+}
+.pref-picker-hint {
+    margin: 0;
+    font-size: 15px;
+    color: var(--pref-dim);
+    text-align: center;
+}
+.pref-picker-input {
+    @include row(12px);
+    width: 100%;
+}
+.pref-picker-input .pref-input {
+    flex: 1;
+    font-size: 15px;
+    height: 34px;
+    padding: 0 10px;
+    border-radius: $control-radius;
+    background: color-mix(in srgb, var(--pref-ink) 8%, transparent);
+}
+.prefs-native .pref-icon-picker .pref-picker-file {
+    @include size(34px);
+    border-radius: $control-radius;
+    background: color-mix(in srgb, var(--pref-ink) 10%, transparent);
+}
+.prefs-native .pref-icon-picker .pref-picker-apply {
+    @include size(34px);
+    border-radius: 50%;
+    background: var(--pref-accent);
+    color: #fff;
+}
+.pref-status-page.compact {
+    flex: 1;
+}

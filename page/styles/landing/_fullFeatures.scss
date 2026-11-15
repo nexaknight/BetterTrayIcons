@@ -1,0 +1,62 @@
+@use '../mixins' as *;
+
+.full-features {
+    margin-top: 18px;
+    border-radius: var(--card-radius);
+    background: var(--card-bg);
+    box-shadow: var(--card-shadow);
+    overflow: hidden;
+}
+.full-features-header {
+    @include row;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 21px 30px;
+    font-size: 16px;
+    font-weight: 600;
+}
+.full-features-header:focus-visible {
+    outline: 0;
+    background: var(--button-bg);
+}
+.full-features ul {
+    list-style: none;
+    margin: 0;
+    padding: 4px 30px 28px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 36px;
+    row-gap: 18px;
+}
+.full-features li {
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--muted);
+}
+.full-features li>svg {
+    @include size(17px);
+    margin-top: 3px;
+    color: var(--accent);
+}
+.full-features li strong {
+    color: var(--ink);
+    font-weight: 600;
+}
+@media (max-width: $tablet) {
+    .full-features ul {
+        grid-template-columns: 1fr;
+        padding: 4px 22px 24px;
+        row-gap: 14px;
+    }
+    .full-features-header {
+        padding: 20px 22px;
+    }
+}
+@media (max-width: $phone) {
+    .full-features li {
+        font-size: 13px;
+    }
+}

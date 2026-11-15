@@ -1,0 +1,110 @@
+@use '../mixins' as *;
+
+.pref-color-overlay {
+    @include cover;
+    z-index: 45;
+    background: #0006;
+    @include center;
+    padding: 8px;
+}
+.pref-color-chooser {
+    width: 484px;
+    max-width: 100%;
+    border: 1px solid #ffffff0f;
+    border-radius: 16px;
+    background: #242428;
+    box-shadow: 0 10px 35px #0005;
+    overflow: hidden;
+}
+.pref-color-toolbar {
+    position: relative;
+    height: 48px;
+    justify-content: center;
+}
+.pref-color-toolbar .ui-toolbar-start {
+    position: absolute;
+    left: 6px;
+}
+.pref-color-toolbar .ui-toolbar-end {
+    position: absolute;
+    right: 6px;
+}
+.prefs-native .pref-color-toolbar button {
+    height: 34px;
+    padding: 5px 17px;
+    background: #36363a;
+    border-radius: 10px;
+    font-size: 15px;
+    min-width: 0;
+}
+.prefs-native .pref-color-toolbar button.suggested {
+    background: #5896da;
+    color: #0c1929;
+}
+.pref-color-content {
+    padding: 6px 8px 10px;
+}
+.pref-palette-grid {
+    display: grid;
+    grid-template-columns: repeat(9,minmax(0,1fr));
+    grid-auto-rows: 32px;
+    gap: 2px 4px;
+}
+.prefs-native .pref-palette-cell {
+    position: relative;
+    min-width: 0;
+    width: 100%;
+    height: 32px;
+    overflow: hidden;
+    border: 0;
+    border-radius: 0;
+    background: repeating-conic-gradient(#777 0 25%,#aaa 0 50%) 0/12px 12px;
+    box-shadow: none;
+}
+.pref-palette-cell:before {
+    content: '';
+    @include cover;
+    background: var(--swatch);
+}
+.pref-palette-cell>span {
+    position: relative;
+    color: var(--check-color);
+    font-size: 17px;
+    line-height: 32px;
+}
+.prefs-native .pref-palette-cell:nth-child(-n+9) {
+    border-radius: 8px 8px 0 0;
+}
+.prefs-native .pref-palette-cell:nth-last-child(-n+9) {
+    border-radius: 0 0 8px 8px;
+}
+.prefs-native .pref-palette-cell:hover {
+    box-shadow: inset 0 0 0 2px #ffffff55;
+}
+.pref-color-content>p {
+    font-size: 15px;
+    margin: 10px 0;
+}
+.pref-custom-colors {
+    display: grid;
+    grid-template-columns: repeat(9,minmax(0,1fr));
+    gap: 4px;
+}
+.prefs-native .pref-custom-add {
+    height: 34px;
+    background: #353539;
+    border-radius: $control-radius 0 0 $control-radius;
+    font-size: 24px;
+    font-weight: 300;
+    line-height: 32px;
+}
+.prefs-native .pref-custom-colors .pref-palette-cell {
+    height: 34px;
+    border-radius: 0;
+}
+.pref-palette-cell[aria-pressed=true]>span {
+    text-shadow: 0 1px 1px #0009;
+}
+.prefs-native .pref-custom-colors .pref-palette-cell:last-child {
+    border-radius: 0 $control-radius $control-radius 0;
+}

@@ -1,0 +1,11 @@
+export const desktop = document.querySelector('#desktop');
+export const panel = document.querySelector('.panel');
+export const indicator = document.querySelector('#bti-indicator');
+export const inline = document.querySelector('#tray-inline');
+export const toggle = document.querySelector('#tray-toggle');
+export const overflow = document.querySelector('#overflow');
+export const overflowIcons = document.querySelector('#overflow-icons');
+export const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+export const drawer = document.querySelector('#tray-drawer');
+export const drawerIcons = document.querySelector('#tray-drawer-icons');
+export const systemIndicator = document.querySelector('#panel-system');

@@ -1,0 +1,15 @@
+{
+  "name": "bti-site",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "sh build.sh",
+    "dev": "sh dev.sh"
+  },
+  "dependencies": {
+    "next": "16.4.5",
+    "react": "19.2.1",
+    "react-dom": "19.2.1",
+    "sass": "1.93.2"
+  }
+}

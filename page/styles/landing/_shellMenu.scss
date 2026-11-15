@@ -1,0 +1,83 @@
+@use '../mixins' as *;
+
+.shell-menu {
+    position: absolute;
+    z-index: 30;
+    min-width: 200px;
+    max-width: 280px;
+    padding: 6px;
+    border-radius: 16px;
+    background: $shell-popup-bg;
+    color: #fff;
+    box-shadow: $shell-popup-shadow;
+    font: 14px/1.4 Inter, sans-serif;
+}
+.shell-menu-item {
+    @include row(8px);
+    width: 100%;
+    min-height: 34px;
+    padding: 6px 12px;
+    border: 0;
+    border-radius: 10px;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+.shell-menu-item:hover,
+.shell-menu-item:focus-visible {
+    background: #ffffff1a;
+    outline: none;
+}
+.shell-menu-item:active {
+    background: #ffffff26;
+}
+.shell-menu-item:disabled {
+    opacity: .5;
+    cursor: default;
+    background: none;
+}
+/* Only check items carry an ornament, as the shell hides it on plain items */
+.shell-menu-item:has(.shell-menu-ornament) {
+    padding-left: 6px;
+    gap: 6px;
+}
+.shell-menu-ornament {
+    width: 16px;
+    flex-shrink: 0;
+    text-align: center;
+}
+.shell-menu-separator {
+    height: 1px;
+    margin: 6px 12px;
+    background: #ffffff1a;
+}
+/* A Win32 app's own menu, which an XEmbed icon's right click brings up.
+   Windows draws it, so it keeps the Windows look on a GNOME desktop. */
+.shell-menu.win32 {
+    min-width: 160px;
+    padding: 2px;
+    border: 1px solid #a0a0a0;
+    border-radius: 0;
+    background: #f2f2f2;
+    color: #000;
+    box-shadow: 2px 2px 4px #00000059;
+    font: 12px/1.3 'Segoe UI', Tahoma, sans-serif;
+}
+.shell-menu.win32 .shell-menu-item {
+    min-height: 22px;
+    padding: 3px 24px 3px 26px;
+    border-radius: 0;
+}
+.shell-menu.win32 .shell-menu-item:hover,
+.shell-menu.win32 .shell-menu-item:focus-visible {
+    background: #91c9f7;
+}
+.shell-menu.win32 .shell-menu-ornament {
+    display: none;
+}
+.shell-menu.win32 .shell-menu-separator {
+    margin: 3px 2px;
+    background: #d7d7d7;
+}

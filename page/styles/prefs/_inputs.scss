@@ -1,0 +1,285 @@
+@use '../mixins' as *;
+
+/* libadwaita 1.9's switch, a 15% trough that goes 20% and 25% under the
+   pointer and the press, the knob turning white on either. A checked switch
+   lays 10% white or a 20% shade over the accent. */
+.prefs-native .pref-switch {
+    --switch-knob: var(--pref-knob);
+    width: 46px;
+    height: 26px;
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--pref-ink) 15%, transparent);
+    position: relative;
+    display: block;
+    flex-shrink: 0;
+}
+.prefs-native .pref-switch:after {
+    content: '';
+    position: absolute;
+    @include size(20px);
+    left: 3px;
+    top: 3px;
+    border-radius: 50%;
+    background: var(--switch-knob);
+    box-shadow: 0 1px 2px #0004;
+    transition: transform .15s;
+}
+.prefs-native .pref-switch:not(:disabled):is(:hover, :active) {
+    --switch-knob: #fff;
+}
+.prefs-native .pref-switch:not(:disabled, [aria-checked=true]):active {
+    background-color: color-mix(in srgb, var(--pref-ink) 25%, transparent);
+}
+.prefs-native .pref-switch[aria-checked=true] {
+    --switch-knob: #fff;
+    background: var(--pref-accent);
+}
+.prefs-native .pref-switch[aria-checked=true]:not(:disabled):active {
+    background-image: linear-gradient(rgb(0 0 6 / 20%) 0 0);
+}
+.prefs-native .pref-switch[aria-checked=true]:after {
+    transform: translateX(20px);
+}
+/* libadwaita 1.9's horizontal spinbutton, one 34px pill with a 9px radius,
+   the value field and two 33px buttons split by 1px rules. The field fits the
+   widest bound in 9px digits plus 12px and never drops below 40px. */
+.pref-stepper {
+    display: flex;
+    flex-shrink: 0;
+    height: 34px;
+    border-radius: $control-radius;
+    background: color-mix(in srgb, var(--pref-ink) 10%, transparent);
+}
+.prefs-native .pref-stepper button {
+    width: 33px;
+    border-left: 1px solid color-mix(in srgb, var(--pref-ink) 10%, transparent);
+    background: linear-gradient(currentColor, currentColor) center/10px 2px no-repeat;
+}
+.prefs-native .pref-stepper .pref-spin-up {
+    border-radius: 0 $control-radius $control-radius 0;
+    background-image: linear-gradient(currentColor, currentColor), linear-gradient(currentColor, currentColor);
+    background-size: 10px 2px, 2px 10px;
+}
+.prefs-native .pref-stepper button:not(:disabled):is(:hover,:focus-visible) {
+    background-color: var(--pref-control-hover);
+}
+.prefs-native .pref-stepper button:not(:disabled):active {
+    background-color: var(--pref-control-active);
+}
+.prefs-native .pref-stepper button:disabled {
+    color: color-mix(in srgb, var(--pref-ink) 50%, transparent);
+}
+.pref-segmented {
+    @include row(3px);
+    background: color-mix(in srgb, var(--pref-ink) 16%, transparent);
+    padding: 3px;
+    border-radius: $control-radius;
+}
+.prefs-native .pref-segmented button {
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 15px;
+    line-height: 20px;
+}
+.prefs-native .pref-segmented button:not([aria-pressed=true]):hover,
+.prefs-native .pref-segmented button:not([aria-pressed=true]):focus-visible {
+    background: var(--pref-control-hover);
+}
+.prefs-native .pref-segmented button:not([aria-pressed=true]):active {
+    background: var(--pref-control-active);
+}
+.prefs-native .pref-segmented button[aria-pressed=true] {
+    background: color-mix(in srgb, var(--pref-ink) 32%, transparent);
+    box-shadow: 0 1px 2px #0002;
+}
+.pref-select-wrap {
+    position: relative;
+    min-width: 240px;
+    width: 240px;
+    @include row;
+}
+/* createComboRow without a width, the dropdown takes its natural size */
+.pref-select-wrap.natural {
+    width: auto;
+    min-width: 0;
+}
+.pref-input {
+    background: none;
+    border: 0;
+    color: var(--pref-ink);
+    min-width: 0;
+    width: 100%;
+    outline: none;
+    padding: 0;
+}
+.pref-entry-row {
+    @include column;
+    align-items: start;
+    justify-content: center;
+    flex: 1;
+}
+.pref-entry-row label {
+    font-size: 13px;
+    line-height: 15px;
+    color: var(--pref-dim);
+}
+.pref-entry-row .pref-input {
+    height: 21px;
+}
+/* Adw.EntryRow packs its suffixes 6px apart and gives the pencil a 34px
+   slot, Adwaita drops the pencil while the entry has focus */
+.pref-entry-suffix {
+    @include row(6px);
+    flex-shrink: 0;
+}
+.pref-entry-edit {
+    margin: 0 9px;
+}
+.pref-row:focus-within .pref-entry-edit {
+    display: none;
+}
+/* Gtk.ColorDialogButton, the swatch sits 5px inside a 49x34 button */
+.pref-color {
+    width: 49px;
+    height: 34px;
+    border-radius: $control-radius;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+}
+.prefs-native .pref-select-trigger {
+    @include row;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    height: 34px;
+    border-radius: $control-radius;
+    padding: 5px 12px 5px 10px;
+    background: transparent;
+    font-size: 15px;
+    font-weight: 700;
+    text-align: left;
+}
+.prefs-native .pref-select-trigger:hover,
+.prefs-native .pref-select-trigger:focus-visible {
+    background: var(--pref-control-hover);
+}
+.prefs-native .pref-select-trigger:active,
+.prefs-native .pref-select-trigger[aria-expanded=true] {
+    background: var(--pref-control-active);
+}
+.pref-select-arrow {
+    @include size(0);
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid #d5d5d8;
+    flex-shrink: 0;
+}
+.prefs-native .pref-color {
+    position: relative;
+    background-color: color-mix(in srgb, var(--pref-ink) 10%, transparent);
+}
+.prefs-native .pref-color:not(:disabled):hover {
+    background-color: color-mix(in srgb, var(--pref-ink) 15%, transparent);
+}
+.prefs-native .pref-color>span {
+    position: absolute;
+    inset: 5px;
+    background: linear-gradient(var(--swatch), var(--swatch)), repeating-conic-gradient(#777 0 25%,var(--pref-dim) 0 50%) 0/12px 12px;
+    border-radius: 5px;
+}
+:root[data-theme=light] .prefs-native .pref-switch:after {
+    box-shadow: 0 1px 2px #0003;
+}
+/* libadwaita 1.9's GtkScale, 160px wide with 12px of room at each end, a 4px
+   trough, the accent fill up to the knob's center and a 20px knob. The input
+   pads by the end room minus half the knob, so the knob center travels from
+   12px to the width minus 12px, as GTK's does. */
+.pref-range-track {
+    --range-end: 12px;
+    --range-knob-size: 20px;
+    --range-trough: color-mix(in srgb, var(--pref-ink) 15%, transparent);
+    --range-fill: var(--pref-accent);
+    --range-knob: var(--pref-knob);
+    --range-knob-shadow: 0 1px 3px #0006;
+    --fill: calc((var(--value) - var(--min)) / (var(--max) - var(--min)));
+    position: relative;
+    display: block;
+    flex: 1 1 auto;
+    width: 160px;
+    min-width: 0;
+    height: 34px;
+}
+.pref-range-track::before,
+.pref-range-track::after {
+    content: '';
+    position: absolute;
+    left: var(--range-end);
+    top: calc(50% - 2px);
+    height: 4px;
+    border-radius: 2px;
+    pointer-events: none;
+}
+.pref-range-track::before {
+    right: var(--range-end);
+    background: var(--range-trough);
+}
+.pref-range-track::after {
+    width: calc((100% - 2 * var(--range-end)) * var(--fill));
+    background: var(--range-fill);
+}
+.pref-range {
+    position: relative;
+    z-index: 1;
+    display: block;
+    @include size(100%);
+    margin: 0;
+    padding: 0 calc(var(--range-end) - var(--range-knob-size) / 2);
+    background: none;
+    appearance: none;
+}
+.pref-range::-webkit-slider-runnable-track {
+    height: var(--range-knob-size);
+    background: none;
+}
+.pref-range::-moz-range-track {
+    background: none;
+}
+.pref-range::-webkit-slider-thumb {
+    @include size(var(--range-knob-size));
+    border-radius: 50%;
+    background: var(--range-knob);
+    box-shadow: var(--range-knob-shadow);
+    appearance: none;
+}
+/* GtkScale under the pointer or a drag, trough 15% to 20%, a 10% lighter
+   fill and a white knob */
+.prefs-native .pref-range-track:is(:hover, :active) {
+    --range-trough: color-mix(in srgb, var(--pref-ink) 20%, transparent);
+    --range-fill: color-mix(in srgb, white 10%, var(--pref-accent));
+    --range-knob: #fff;
+}
+.pref-range::-moz-range-thumb {
+    @include size(var(--range-knob-size));
+    border: 0;
+    border-radius: 50%;
+    background: var(--range-knob);
+    box-shadow: var(--range-knob-shadow);
+}
+.prefs-native .pref-spin-entry {
+    width: max(40px, calc(var(--spin-chars) * 9px + 12px));
+    padding: 0 6px;
+    border: 0;
+    border-radius: $control-radius 0 0 $control-radius;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    appearance: textfield;
+    -moz-appearance: textfield;
+}
+.prefs-native .pref-spin-entry::-webkit-inner-spin-button {
+    appearance: none;
+}

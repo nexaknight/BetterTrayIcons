@@ -2,7 +2,7 @@ UUID := BetterTrayIcons@nexaknight.com
 ZIP := $(UUID).shell-extension.zip
 INSTALL_DIR := $(HOME)/.local/share/gnome-shell/extensions/$(UUID)
 
-.PHONY: all install pack test clean uninstall help
+.PHONY: all install pack test clean uninstall help page
 
 all: help
 
@@ -13,6 +13,7 @@ help:
 	@echo "  make test       Run lint, schema and translation checks"
 	@echo "  make clean      Remove generated files"
 	@echo "  make uninstall  Remove the locally installed extension"
+	@echo "  make page       Build the Pages site into _site/"
 
 pack:
 	gnome-extensions pack \
@@ -32,6 +33,11 @@ install: pack
 test:
 	npm ci
 	npm test
+
+page:
+	npm ci --prefix page
+	sh page/build.sh _site
+	@echo "Preview with: python3 -m http.server --directory _site 3000"
 
 uninstall:
 	gnome-extensions uninstall $(UUID) || true

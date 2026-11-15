@@ -1,0 +1,145 @@
+@use '../mixins' as *;
+
+/* One fixed row, as the shell's top bar has, so tray spacing never moves
+   the activities pill, the clock or the system menu. The center box gives
+   way once a side needs its room instead of sliding under an open drawer. */
+.panel {
+    position: relative;
+    z-index: 10;
+    height: 38px;
+    display: grid;
+    grid-template-columns: minmax(max-content,1fr) auto minmax(max-content,1fr);
+    grid-template-rows: minmax(0,100%);
+    column-gap: 12px;
+    align-items: center;
+    padding: 0 18px;
+    background: #10151df2;
+    font-size: 10px;
+}
+.panel-box {
+    height: 100%;
+    @include row(12px);
+    white-space: nowrap;
+}
+.panel-left {
+    justify-self: start;
+}
+.panel-right {
+    justify-self: end;
+}
+.panel-date {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+.panel-system,
+.bti-indicator {
+    @include row;
+    height: 100%;
+}
+@media (max-width: $tablet) {
+    .panel {
+        padding: 0 12px;
+    }
+    .panel-box {
+        gap: 7px;
+    }
+    .panel[data-indicator-position=left] .activities {
+        display: none;
+    }
+}
+/* .system-status-icon and #panel in gnome-shell
+   data/theme/gnome-shell-sass/widgets/_panel.scss at the 11pt base font.
+   Inside the indicator the icons sit as far apart as two tray icons do,
+   so at rest the groups read as one row. */
+#desktop,
+#mini-native {
+    --panel-icon-padding: 6px;
+    --panel-icon-margin: 4px;
+}
+#desktop .panel-right,
+#desktop .bti-indicator,
+#desktop .tray-inline,
+#desktop .tray-drawer-icons {
+    gap: 0;
+}
+#desktop .tray-inline {
+    height: 100%;
+    align-items: stretch;
+}
+#desktop .panel .tray-icon,
+#desktop .panel .tray-toggle,
+#desktop .panel-system,
+#mini-native .mini-panel .tray-icon,
+#mini-native .mini-panel .tray-toggle,
+#mini-native .panel-system {
+    align-self: stretch;
+    @include size(auto);
+    margin: 2px var(--panel-icon-margin);
+    padding: 0 var(--panel-icon-padding);
+    border: 0;
+    border-radius: 99px;
+    background: transparent;
+    transform: none;
+    cursor: pointer;
+}
+#desktop .panel-system,
+#mini-native .panel-system {
+    gap: calc(2 * (var(--panel-icon-padding) + var(--panel-icon-margin)));
+    color: inherit;
+}
+#desktop .tray-drawer {
+    align-self: stretch;
+}
+#desktop .tray-drawer-icons {
+    align-items: stretch;
+}
+#desktop .panel .tray-icon:hover,
+#desktop .panel .tray-icon:focus-visible,
+#mini-native .mini-panel .tray-icon:hover,
+#mini-native .mini-panel .tray-icon:focus-visible,
+#mini-native .panel-system:hover,
+#desktop .panel-system:hover,
+#desktop .panel-system:focus-visible,
+#desktop .panel-system[aria-expanded=true] {
+    background: #ffffff1f;
+}
+/* The stock toggle, an St.Button with .panel-button in
+   src/shell/components/toggleButton.js. Its 3px transparent border keeps the
+   pill off the bar's edges, the icon's 6px padding and 4px margin sit inside
+   it. A custom style replaces all of it through public/shared/trayTheme.js. */
+#desktop .panel .tray-toggle,
+#mini-native .mini-panel .tray-toggle {
+    margin: 3px;
+    padding: 0 10px;
+    border-radius: 999px;
+}
+#desktop .panel .tray-toggle:hover,
+#desktop .panel .tray-toggle:focus-visible,
+#mini-native .mini-panel .tray-toggle:hover,
+#mini-native .mini-panel .tray-toggle:focus-visible {
+    background: rgb(255 255 255 / 17%);
+}
+#desktop .panel .tray-toggle[aria-expanded=true],
+#mini-native .mini-panel .tray-toggle[aria-expanded=true] {
+    background: rgb(255 255 255 / 28%);
+}
+#desktop .panel .tray-toggle[aria-expanded=true]:hover,
+#mini-native .mini-panel .tray-toggle[aria-expanded=true]:hover {
+    background: rgb(255 255 255 / 32%);
+}
+#desktop .panel-system .system-icon,
+#mini-native .panel-system .system-icon {
+    display: block;
+    @include size(16px);
+}
+/* A phone-sized desktop keeps every panel item by tightening the rhythm
+   evenly, so tray and system icons still read as one row */
+@media (max-width: $phone) {
+    #desktop {
+        --panel-icon-padding: 3px;
+        --panel-icon-margin: 1px;
+    }
+    #desktop .activities {
+        display: none;
+    }
+}

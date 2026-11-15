@@ -1,0 +1,38 @@
+@use '../mixins' as *;
+
+/* The popup and the panel menus open the same distance below the panel,
+   contextMenu.js reads the variable for the menus */
+#desktop {
+    --panel-menu-top: 46px;
+}
+/* Matches the extension's default icon size, padding and gaps */
+.overflow {
+    position: absolute;
+    z-index: 5;
+    top: var(--panel-menu-top);
+    left: 0;
+    width: max-content;
+    max-width: calc(100% - 24px);
+    padding: 8px;
+    border-radius: 24px;
+    background: $shell-popup-bg;
+    box-shadow: $shell-popup-shadow;
+}
+.overflow[hidden] {
+    display: none;
+}
+.overflow-icons {
+    display: grid;
+    grid-template-columns: repeat(4,32px);
+    grid-auto-rows: 30px;
+    gap: 6px;
+    justify-items: stretch;
+    align-items: stretch;
+}
+.overflow.row .overflow-icons {
+    grid-template-columns: repeat(6,32px);
+    justify-content: center;
+}
+.overflow-icons .tray-icon {
+    border-radius: 50px;
+}

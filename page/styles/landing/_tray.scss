@@ -1,0 +1,142 @@
+@use '../mixins' as *;
+
+.tray-inline {
+    display: flex;
+}
+.tray-icon {
+    border: 0;
+    border-radius: 7px;
+    @include center;
+    background: transparent;
+    position: relative;
+    color: var(--app-color,#fff);
+    transition: background .2s;
+    cursor: pointer;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
+.tray-icon:hover,
+.tray-icon:focus-visible {
+    background: #ffffff22;
+}
+.tray-icon:focus-visible {
+    outline-offset: 2px;
+}
+.tray-icon svg {
+    pointer-events: none;
+}
+.symbolic .tray-icon {
+    color: #eff3f9;
+}
+/* The ids outweigh #desktop .tray-icon svg in _desktop.scss */
+.bti-symbolic-twin,
+#desktop :is(.tray-icon, .qs-app-icon) .bti-symbolic-twin,
+#desktop.symbolic :is(.tray-icon, .qs-app-icon) .bti-image {
+    display: none;
+}
+#desktop.symbolic :is(.tray-icon, .qs-app-icon) .bti-symbolic-twin {
+    display: block;
+}
+.tray-toggle {
+    color: white;
+    @include center;
+    letter-spacing: 1px;
+    font-size: 12px;
+}
+.tray-toggle[hidden] {
+    display: none;
+}
+.tray-toggle .tray-toggle-icon {
+    display: block;
+    margin: auto;
+}
+.tray-toggle svg.tray-toggle-icon {
+    @include size(1.4em);
+}
+.bti-indicator[hidden] {
+    display: none;
+}
+.tray-drawer {
+    display: flex;
+    justify-content: flex-end;
+    align-self: center;
+    overflow: hidden;
+}
+.tray-drawer[data-edge=start] {
+    justify-content: flex-start;
+}
+.tray-drawer[hidden] {
+    display: none;
+}
+/* No frame, the real drawer's box takes no style unless custom style sets one */
+.tray-drawer-icons {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 6px;
+}
+body.tray-dragging,
+body.tray-dragging * {
+    cursor: pointer!important;
+    user-select: none!important;
+}
+.drag-ghost {
+    position: fixed;
+    z-index: 1000;
+    pointer-events: none;
+    margin: 0;
+    @include center;
+    width: 32px;
+    height: 30px;
+}
+.drag-ghost svg {
+    @include size(20px);
+}
+/* The bullet glyph sits below the middle of its line box, so the three dots
+   are drawn instead and the text only keeps its place for screen readers */
+.toggle-dots {
+    display: inline-block;
+    width: 1.5em;
+    height: 1em;
+    line-height: 1;
+    overflow: hidden;
+}
+.toggle-dots {
+    position: relative;
+    -webkit-text-fill-color: transparent;
+}
+.toggle-dots::before {
+    content: '';
+    @include cover;
+    width: 1.5em;
+    height: .5em;
+    margin: auto;
+    background: radial-gradient(circle .15em, currentColor 92%, transparent) 0 0/.5em .5em repeat-x;
+}
+/* landing/trayBadge.js sets size, color and radius inline like the shell does */
+.tray-badge {
+    position: absolute;
+    display: grid;
+    place-items: center;
+    box-sizing: border-box;
+    font-weight: 700;
+    line-height: 1.2;
+    pointer-events: none;
+}
+.tray-badge.bottom-right {
+    right: 2px;
+    bottom: 3px;
+}
+.tray-badge.bottom-left {
+    left: 2px;
+    bottom: 3px;
+}
+.tray-badge.top-right {
+    right: 2px;
+    top: 3px;
+}
+.tray-badge.top-left {
+    left: 2px;
+    top: 3px;
+}

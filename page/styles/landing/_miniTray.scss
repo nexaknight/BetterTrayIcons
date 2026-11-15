@@ -1,0 +1,122 @@
+@use '../mixins' as *;
+
+.real-tray {
+    position: relative;
+    margin: 32px -32px 0;
+    min-height: 0;
+    @include column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(145deg,var(--soft),var(--wash));
+}
+.mini-tray-viewport {
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+}
+.mini-native {
+    --mini-gap: 12px;
+    --mini-panel-height: 38px;
+    width: 491px;
+    height: 186px;
+    position: relative;
+    color: white;
+    transform-origin: top left;
+    font: 14px 'Adwaita Sans',sans-serif;
+}
+.mini-wallpaper {
+    @include cover;
+    background: radial-gradient(ellipse at 15% 120%,#6383a6,transparent 60%),linear-gradient(145deg,#112036,#263b54);
+}
+.mini-wallpaper:before {
+    content: '';
+    position: absolute;
+    width: 300px;
+    height: 240px;
+    left: 30px;
+    top: 90px;
+    background: linear-gradient(140deg,#607b9d,#122237);
+    border-radius: 50%;
+    transform: rotate(-25deg);
+}
+/* The bar sits at the bottom here, so the popup opens above it */
+#mini-native .overflow {
+    top: auto;
+    bottom: calc(var(--mini-gap) + var(--mini-panel-height) + var(--mini-gap));
+}
+.mini-panel {
+    --mini-panel-gap: 12px;
+    position: absolute;
+    left: 0;
+    right: var(--mini-gap);
+    bottom: var(--mini-gap);
+    height: var(--mini-panel-height);
+    @include row(var(--mini-panel-gap));
+    overflow: hidden;
+    border: 1px solid #ffffff14;
+    border-left: 0;
+    border-radius: 0 10px 10px 0;
+    background: #111720e8;
+    box-shadow: 0 4px 16px #0003;
+}
+.mini-tray-group,
+.mini-visible {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    height: 100%;
+    flex-shrink: 0;
+}
+.mini-tray-group {
+    margin-left: auto;
+}
+#mini-native .mini-tray-group + .panel-system {
+    flex-shrink: 0;
+    margin-left: calc(var(--panel-icon-margin) - var(--mini-panel-gap));
+}
+.mini-clock {
+    flex-shrink: 0;
+}
+.mini-panel .mini-show-desktop,
+.mini-panel .mini-show-desktop:hover,
+.mini-panel .mini-show-desktop:active,
+.mini-panel .mini-show-desktop:focus {
+    position: relative;
+    align-self: center;
+    /* 10px wide so the line sits right where the panel's 10px corner starts */
+    flex: 0 0 10px;
+    width: 10px;
+    height: var(--mini-panel-height);
+    min-height: 0;
+    margin: 0 0 0 10px;
+    padding: 0;
+    border: 0;
+    border-radius: 0 10px 10px 0;
+    /* A one screen pixel line through the miniature's scale. A border would
+       snap back to a whole layout pixel, a background keeps the fraction. */
+    --line-width: calc(1px / var(--mini-scale, 1));
+    background: linear-gradient(rgb(255 255 255 / 37%), rgb(255 255 255 / 37%)) calc(1px - var(--line-width)) 0 / var(--line-width) 100% no-repeat;
+    box-shadow: none;
+    opacity: 1;
+    outline-offset: -3px;
+}
+.mini-cursor {
+    position: absolute;
+    @include size(32px);
+    pointer-events: none;
+    z-index: 3;
+}
+.mini-cursor[hidden] {
+    display: none;
+}
+@media (max-width: $laptop) {
+    .real-tray {
+        margin-left: -26px;
+        margin-right: -26px;
+    }
+}
+@media (max-width: $tablet) {
+    .mini-tray-viewport {
+        min-height: 125px;
+    }
+}

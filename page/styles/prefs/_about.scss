@@ -1,0 +1,102 @@
+@use '../mixins' as *;
+
+.prefs-native .pref-legal-note {
+    font-size: 13px;
+    color: var(--pref-dim);
+    line-height: 18px;
+    margin: 12px;
+}
+.pref-contributors {
+    display: flex;
+    gap: 12px;
+    overflow: auto;
+    /* The scrollbar's own 4px inset adds to this, 8px under the cards as
+       GTK's overlay scrollbar sits */
+    padding: 4px;
+}
+/* The group's margin would swallow one on the strip */
+.pref-group:has(> .pref-contributors) {
+    padding-bottom: 6px;
+}
+.pref-contributor {
+    flex: 0 0 110px;
+    height: 130px;
+    border-radius: 12px;
+    background: var(--pref-card);
+    padding: 10px 8px 6px;
+    @include column;
+    align-items: center;
+    gap: 4px;
+    overflow: hidden;
+}
+.pref-contributor img {
+    @include size(56px);
+    object-fit: cover;
+    border-radius: 50%;
+    margin-bottom: auto;
+}
+.pref-contributor strong {
+    font-size: 13px;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.pref-contributor small {
+    font-size: 13px;
+    color: var(--pref-dim);
+}
+.pref-about-footer {
+    text-align: center;
+    @include column;
+    align-items: center;
+    gap: 12px;
+    margin: 24px 0;
+    padding: 0;
+}
+.pref-about-footer p {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.4;
+}
+.pref-about-footer img {
+    width: 252.7687px;
+    height: 160px;
+    max-width: 100%;
+    object-fit: contain;
+    margin: 0;
+    flex-shrink: 0;
+}
+.pref-contributor .pref-avatar {
+    @include size(56px);
+    @include center;
+    border-radius: 50%;
+    margin-bottom: auto;
+    background: #426b8e;
+    color: #e5eef6;
+    font-size: 24px;
+    font-weight: 500;
+    flex-shrink: 0;
+}
+.pref-contributor .pref-avatar img {
+    border-radius: 50%;
+    @include size(100%);
+    object-fit: cover;
+    margin: 0;
+}
+.pref-contributor .avatar-1 {
+    background: #745d86;
+}
+.pref-contributor .avatar-2 {
+    background: #5d7a70;
+}
+.pref-contributor .avatar-3 {
+    background: #8b6d58;
+}
+.pref-more-icon {
+    @include size(48px);
+    margin: auto;
+}
+/* ABOUT_INLINE_ICON_SIZE_PX of src/prefs/pages/aboutPage.js */
+.prefs-native .pref-about-inline-icon {
+    @include size(18px);
+}

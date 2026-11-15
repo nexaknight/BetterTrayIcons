@@ -1,0 +1,66 @@
+@use '../mixins' as *;
+
+.pref-token-search {
+    position: relative;
+    @include row(8px);
+    min-height: 36px;
+    padding: 0 12px;
+    border-radius: $control-radius;
+    background: color-mix(in srgb, var(--pref-ink) 10%, transparent);
+}
+.pref-token-search input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    outline: none;
+    background: none;
+    color: inherit;
+    font: inherit;
+}
+.pref-filter-group {
+    position: relative;
+}
+.pref-suggestions {
+    position: absolute;
+    z-index: 5;
+    top: 42px;
+    left: 0;
+    min-width: 200px;
+    padding: 6px 0;
+    border-radius: 12px;
+    background: var(--pref-popover);
+    box-shadow: 0 4px 12px #0004;
+}
+.prefs-native .pref-suggestions button {
+    display: block;
+    width: 100%;
+    padding: 7px 16px;
+    text-align: left;
+}
+.prefs-native .pref-suggestions [aria-selected=true] {
+    background: color-mix(in srgb, var(--pref-ink) 10%, transparent);
+}
+.pref-suggestions[hidden],
+.pref-no-match[hidden],
+.pref-apps-group[hidden],
+.pref-row[hidden] {
+    display: none;
+}
+.pref-status-page {
+    @include column;
+    align-items: center;
+    gap: 12px;
+    padding: 36px 12px;
+    text-align: center;
+}
+.pref-status-page .pref-icon {
+    @include size(64px);
+    opacity: .55;
+}
+.pref-status-page h2 {
+    font-size: 20px;
+    font-weight: 800;
+}
+.pref-status-page p {
+    color: var(--pref-dim);
+}

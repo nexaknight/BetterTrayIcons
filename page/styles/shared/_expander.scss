@@ -1,0 +1,73 @@
+@use '../mixins' as *;
+
+.ui-expander {
+    --expander-hover: color-mix(in srgb, currentColor 7%, transparent);
+    --expander-active: color-mix(in srgb, currentColor 15%, transparent);
+}
+:root[data-theme=light] .ui-expander {
+    --expander-hover: color-mix(in srgb, currentColor 4%, transparent);
+}
+/* libadwaita's row hover and press, the same on every expander */
+.ui-expander-header {
+    cursor: pointer;
+    user-select: none;
+}
+.ui-expander>.ui-expander-header[aria-disabled=true] {
+    cursor: default;
+    opacity: .5;
+}
+.ui-expander>.ui-expander-header:not([aria-disabled=true]):hover {
+    background: var(--expander-hover);
+}
+.ui-expander>.ui-expander-header:not([aria-disabled=true]):active {
+    background: var(--expander-active);
+}
+.ui-expander-body {
+    display: none;
+}
+.ui-expander.open>.ui-expander-body,
+.ui-expander.sliding>.ui-expander-body {
+    display: block;
+}
+.ui-expander.sliding>.ui-expander-body {
+    overflow: hidden;
+}
+/* One glyph that turns half a circle and takes the accent while open, as
+   AdwExpanderRow's arrow does. The header is the click target, never the
+   glyph. */
+.ui-expander-arrow {
+    flex: none;
+    display: inline-block;
+    @include size(16px);
+    background-color: currentColor;
+    transform: rotate(90deg);
+    transition: transform 200ms ease, color 200ms ease;
+    color: color-mix(in srgb, currentColor 55%, transparent);
+    pointer-events: none;
+}
+.ui-expander.open>.ui-expander-header>.ui-expander-arrow {
+    transform: rotate(-90deg);
+    color: var(--accent);
+}
+@media (prefers-reduced-motion:reduce) {
+    .ui-expander-arrow {
+        transition: none;
+    }
+}
+/* AdwExpanderRow keeps its arrow 9px from the last suffix */
+.pref-expander>.ui-expander-header>.ui-expander-arrow {
+    margin-left: 3px;
+}
+.prefs-native .pref-expander>.ui-expander-header:focus-visible {
+    background: var(--pref-row-hover);
+}
+/* libadwaita lays nested rows on a tint between the card and the window */
+.prefs-native .pref-expander>.ui-expander-body {
+    background: color-mix(in srgb, var(--pref-card) 50%, var(--pref-window));
+}
+.pref-expander+.pref-row,
+.pref-row+.pref-expander,
+.pref-expander+.pref-expander,
+.pref-expander>.ui-expander-body>.pref-row {
+    border-top: 1px solid var(--pref-separator);
+}

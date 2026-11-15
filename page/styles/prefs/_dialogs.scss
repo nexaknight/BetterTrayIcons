@@ -1,0 +1,211 @@
+@use '../mixins' as *;
+
+.pref-overlay {
+    @include cover;
+    background: #0008;
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* AdwFloatingSheet's padding for a window up to 720px, the only size
+       where a dialog reaches it. A phone shrinks it along the landing's
+       --fluid ramp. */
+    padding: max(4px, calc(var(--fluid) * 20)) max(4px, calc(var(--fluid) * 30));
+}
+.pref-overlay[hidden] {
+    display: none;
+}
+/* Focused on open so Tab and Escape work, GTK draws no ring there either */
+.pref-dialog:focus {
+    outline: none;
+}
+.pref-dialog {
+    width: var(--dialog-width, 460px);
+    max-width: 100%;
+    max-height: 660px;
+    border-radius: 18px;
+    background: var(--pref-window);
+    /* A ring instead of a border, Adwaita's outline leaves the content its
+       full pinned width */
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--pref-ink) 12%, transparent), 0 12px 40px #0006;
+    @include column;
+    overflow: hidden;
+}
+.pref-dialog-header {
+    height: 46px;
+    flex-shrink: 0;
+    @include center;
+    font-weight: 700;
+    position: relative;
+}
+.pref-dialog-body {
+    padding: 23px calc(var(--clamp-end, 2px) + 12px) 18px calc(var(--clamp-start, 2px) + 12px);
+    overflow: auto;
+}
+.pref-dialog-body .pref-group {
+    margin-bottom: 30px;
+}
+.pref-dialog-body .pref-group:last-child {
+    margin-bottom: 0;
+}
+.pref-dialog-body .pref-select-wrap {
+    min-width: 200px;
+}
+.pref-dialog-body .pref-entry-focused {
+    border-radius: 12px 12px 0 0;
+}
+.pref-dialog-body .pref-description {
+    line-height: 21px;
+    margin-bottom: 12px;
+}
+.pref-dialog-body .pref-group h3 {
+    margin-bottom: 11px;
+}
+.pref-scroll,
+.pref-dialog-body {
+    overscroll-behavior: auto;
+    scroll-behavior: auto;
+    touch-action: pan-y;
+}
+.prefs-native .pref-alert {
+    @include column;
+    width: 340px;
+    border-radius: 20px;
+    border: 1px solid color-mix(in srgb, var(--pref-ink) 5%, transparent);
+    background: var(--pref-popover);
+    padding: 30px 24px 24px;
+    max-height: 100%;
+    box-shadow: 0 12px 30px #0002;
+    text-align: center;
+    gap: 0;
+}
+.prefs-native .pref-alert h2 {
+    font-size: 18px;
+    line-height: 22px;
+    font-weight: 700;
+    letter-spacing: normal;
+    margin: 0;
+    color: var(--pref-ink-soft);
+}
+.prefs-native .pref-alert p {
+    font-size: 15px;
+    line-height: 21px;
+    color: var(--pref-ink-soft);
+    margin: 12px 0 0;
+}
+.pref-alert-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+}
+.prefs-native .pref-alert-actions button {
+    flex: 1;
+    height: 44px;
+    min-width: 0;
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--pref-ink) 14%, transparent);
+    font-size: 15px;
+    line-height: 20px;
+    font-weight: 700;
+    color: var(--pref-ink-soft);
+}
+.prefs-native .pref-alert-actions button:hover {
+    background: color-mix(in srgb, var(--pref-ink) 19%, transparent);
+}
+.prefs-native .pref-alert-actions button.destructive {
+    background: #503b3d;
+    color: #f77972;
+}
+.prefs-native .pref-alert-actions button.destructive:hover {
+    background: #604346;
+}
+.pref-scroll,
+.pref-dialog-body {
+    @include overlay-scrollbar($scrollbar-thumb);
+}
+.pref-contributors {
+    @include thin-scrollbar($scrollbar-thumb);
+}
+@supports selector(::-webkit-scrollbar) {
+    .pref-contributors {
+        @include auto-scrollbar;
+    }
+}
+.pref-backup-expander {
+    border-radius: 12px;
+    background: var(--pref-card);
+    overflow: hidden;
+}
+.pref-modal-path .pref-input {
+    font-size: 15px;
+    text-overflow: clip;
+}
+.pref-dialog-header.ui-toolbar .ui-toolbar-end {
+    position: absolute;
+    right: 7px;
+    gap: 6px;
+}
+.pref-dialog-header.ui-toolbar .ui-toolbar-start {
+    position: absolute;
+    left: 7px;
+}
+.prefs-native.collapsed .pref-dialog:not(.pref-alert) {
+    width: 100%;
+}
+.pref-alert-layer {
+    @include cover;
+    z-index: 42;
+    @include center;
+    padding: 20px;
+    background: #0006;
+}
+.pref-alert-layer[hidden] {
+    display: none;
+}
+.pref-dialog-tabs {
+    margin: auto;
+}
+/* The .bti-alert box of src/prefs/stylesheet.css */
+.pref-alert-box {
+    --alert-color: #7d7d83;
+    padding: 9px 14px;
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--alert-color) 30%, transparent);
+    color: var(--pref-ink);
+    text-align: center;
+    font-weight: 700;
+    line-height: 21px;
+}
+.pref-alert-box.info {
+    --alert-color: var(--pref-accent);
+}
+.pref-alert-box.success {
+    --alert-color: var(--pref-success-bg);
+}
+.pref-alert-box.warning {
+    --alert-color: var(--pref-warning-bg);
+}
+.pref-alert-box.error {
+    --alert-color: var(--pref-error-bg);
+}
+/* The Adw.Dialog of src/prefs/pages/syncDialog.js, Adwaita sets a titled
+   group's header 8px below the group and its header buttons at 36x34 */
+.pref-sync-dialog {
+    padding: 1px 0 6px;
+}
+.pref-sync-dialog .pref-group {
+    margin-bottom: 24px;
+}
+.pref-sync-dialog .pref-group:not(:first-child)>h3 {
+    padding-top: 8px;
+}
+.pref-sync-dialog .pref-group h3 {
+    margin-bottom: 10px;
+}
+.pref-sync-dialog .pref-description {
+    margin-top: -8px;
+}
+.pref-sync-dialog .pref-group-heading {
+    height: 34px;
+    margin-bottom: 6px;
+}

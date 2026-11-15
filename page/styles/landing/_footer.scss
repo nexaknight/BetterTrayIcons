@@ -1,0 +1,95 @@
+@use '../mixins' as *;
+
+.footer {
+    @include column;
+    align-items: center;
+    gap: 28px;
+    padding-top: 36px;
+    padding-bottom: 28px;
+    text-align: center;
+}
+.footer a:not(.creator-logo) {
+    color: var(--accent);
+}
+.footer a:not(.creator-logo):hover {
+    color: var(--accent-dark);
+}
+.footer-credits {
+    list-style: disc;
+    width: 100%;
+    max-width: 900px;
+    margin: 0;
+    padding: 18px 18px 18px 36px;
+    border-radius: var(--card-radius);
+    background: var(--card-bg);
+    box-shadow: var(--card-shadow);
+    text-align: left;
+    font-size: 13px;
+    line-height: 1.9;
+    color: var(--muted);
+}
+.footer-credits li+li {
+    margin-top: 6px;
+}
+.footer-legal {
+    width: 100%;
+}
+.footer-license {
+    font-size: 14px;
+    color: var(--muted);
+    margin: 0;
+}
+.footer-license strong {
+    font-weight: 650;
+    color: var(--ink);
+}
+.footer-disclaimer {
+    font-size: 12px;
+    line-height: 1.8;
+    color: var(--muted);
+    margin: 12px 0 0;
+}
+.footer .creator-credit {
+    @include column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: var(--muted);
+    font-size: 12px;
+}
+.footer .creator-logo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-radius: 8px;
+    color: var(--ink);
+}
+.creator-logo img {
+    width: 126px;
+    height: 80px;
+    object-fit: contain;
+    display: block;
+    opacity: .88;
+    transition: opacity .2s;
+}
+.creator-logo:hover img {
+    opacity: 1;
+}
+:root[data-theme=light] .creator-logo img {
+    filter: invert(1);
+}
+@media (max-width: $tablet-wide) {
+    .footer-credits {
+        padding: 20px 20px 20px 34px;
+    }
+}
+@media (max-width: $tablet) {
+    .footer .creator-credit {
+        width: 100%;
+    }
+    .creator-logo img {
+        width: 110px;
+        height: 70px;
+    }
+}

@@ -1,0 +1,65 @@
+@use '../mixins' as *;
+
+.community {
+    padding-top: 55px;
+    padding-bottom: 55px;
+}
+.community-row {
+    @include row(28px);
+}
+.community-mark {
+    @include size(63px);
+    flex-shrink: 0;
+    background: var(--wash);
+    border: 1px solid var(--line);
+    border-radius: 19px;
+    @include center;
+}
+.community-mark svg {
+    @include size(30px);
+}
+.community .community-copy {
+    max-width: 570px;
+    margin: 0;
+    font-size: 19px;
+    line-height: 1.7;
+    color: var(--ink);
+}
+.community-row>.button {
+    margin-left: auto;
+    flex-shrink: 0;
+    font-size: 14px;
+}
+@media (max-width: $tablet-wide) {
+    .community-row {
+        flex-wrap: wrap;
+        gap: 18px;
+    }
+    .community-row>div:nth-child(2) {
+        flex: 1;
+        min-width: 180px;
+    }
+    .community .community-copy {
+        font-size: 17px;
+    }
+    .community-row>.button {
+        margin-left: 81px;
+    }
+}
+@media (max-width: $tablet) {
+    .community {
+        padding-top: 35px;
+        padding-bottom: 35px;
+    }
+    .community-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .community-mark {
+        display: none;
+    }
+    .community-row>.button {
+        align-self: center;
+        margin-left: 0;
+    }
+}

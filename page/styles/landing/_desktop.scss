@@ -1,0 +1,73 @@
+@use '../mixins' as *;
+
+.wallpaper {
+    @include cover;
+    overflow: hidden;
+    background: linear-gradient(140deg,#15283f,#101c30 65%,#182f4c);
+}
+.wallpaper-grain {
+    @include cover;
+    opacity: .07;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.9'/%3E%3C/svg%3E");
+}
+.activities {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+.activities span {
+    @include size(6px);
+    border-radius: 3px;
+    background: #a5a5a5;
+}
+.activities span.is-active {
+    width: 26px;
+    height: 8px;
+    border-radius: 4px;
+    background: #fff;
+}
+@media (max-width: $tablet) {
+    .activities {
+        gap: 4px;
+    }
+    .activities span.is-active {
+        width: 24px;
+    }
+}
+#desktop,
+#mini-native {
+    --panel-icon-size: 20px;
+}
+#desktop .tray-icon svg,
+#mini-native .tray-icon svg {
+    display: block;
+    width: var(--tray-size,var(--panel-icon-size));
+    height: var(--tray-size,var(--panel-icon-size));
+}
+#desktop .tray-icon,
+#mini-native .tray-icon {
+    padding: 0;
+    width: 28px;
+    height: 30px;
+}
+/* #panel font-weight and the 11pt stage font in gnome-shell
+   data/theme/gnome-shell-sass, narrow screens shrink the hero's below while
+   the miniature scales as a whole */
+#desktop .panel-date,
+#mini-native .panel-date {
+    font-size: 14.667px;
+    font-weight: 700;
+}
+@media (max-width: $tablet-wide) {
+    #desktop {
+        --panel-icon-size: 16px;
+    }
+    #desktop .panel-date {
+        font-size: 11px;
+    }
+}
+@media (max-width: $phone) {
+    #desktop .tray-icon {
+        width: 23px;
+    }
+}

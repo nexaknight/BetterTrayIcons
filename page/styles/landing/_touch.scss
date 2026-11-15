@@ -1,0 +1,60 @@
+/* A long touch on the demo's controls opens no browser menu or selection,
+   text fields stay selectable */
+.panel,
+.overflow,
+.tray-drawer,
+.quick-settings,
+.mini-native,
+.prefs-native {
+    -webkit-touch-callout: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
+.prefs-native input,
+.quick-settings input {
+    user-select: text;
+    -webkit-user-select: text;
+}
+/* A double tap on a control does not zoom the page, scrolling still pans */
+button,
+a,
+input,
+select,
+[role=button] {
+    touch-action: manipulation;
+}
+/* A finger needs 44px. An invisible ring widens the small targets on touch
+   screens only, so the desktop look stays as it is. */
+@media (pointer: coarse) {
+    .panel .tray-icon,
+    .panel .tray-toggle,
+    .panel-system,
+    .qs-round,
+    .prefs-native .pref-icon-button,
+    .prefs-native .pref-stepper button,
+    .prefs-native .pref-picker-tab,
+    .mini-panel .tray-icon {
+        position: relative;
+    }
+    .panel .tray-icon::after,
+    .panel .tray-toggle::after,
+    .panel-system::after,
+    .qs-round::after,
+    .prefs-native .pref-icon-button::after,
+    .prefs-native .pref-stepper button::after,
+    .prefs-native .pref-picker-tab::after,
+    .mini-panel .tray-icon::after {
+        content: '';
+        position: absolute;
+        inset: -6px;
+    }
+    .prefs-native .pref-dialog,
+    .page-dialog {
+        max-height: min(100%, calc(100dvh - 48px - env(keyboard-inset-height, 0px)));
+    }
+    .pref-picker-scroller,
+    .pref-dialog-body,
+    .pref-scroll {
+        overscroll-behavior: contain;
+    }
+}

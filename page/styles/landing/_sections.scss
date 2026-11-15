@@ -1,0 +1,20 @@
+/* A .wrap section paints its tone across the whole width through a
+   border-image outset, the box itself stays at the content width */
+.features-section {
+    border-image: radial-gradient(900px 520px at 50% 40%, var(--tone-wash), transparent) fill 0 / 0 / 0 100vw;
+}
+.install-section {
+    border-image: linear-gradient(var(--tone-line) 0 1px, var(--tone-raised) 1px calc(100% - 1px), var(--tone-line) calc(100% - 1px)) fill 0 / 0 / 0 100vw;
+}
+.footer {
+    border-image: linear-gradient(var(--tone-line) 0 1px, var(--tone-sunken) 1px) fill 0 / 0 / 0 100vw;
+}
+/* Cards sit on the gutter, the text around them on the wider inset */
+.feature-grid,
+.full-features,
+.before-install {
+    margin-inline: calc(var(--gutter) - var(--text-inset));
+}
+.footer-credits {
+    width: calc(100% + 2 * (var(--text-inset) - var(--gutter)));
+}

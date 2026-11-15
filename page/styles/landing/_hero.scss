@@ -1,0 +1,92 @@
+@use '../mixins' as *;
+
+.hero {
+    position: relative;
+    margin: var(--gutter);
+    text-align: center;
+}
+.orb {
+    position: absolute;
+    border-radius: 48% 52% 52% 48%;
+    box-shadow: inset 10px 20px 35px #a6c8ef22,inset -15px -5px 40px #050b1870,10px 30px 45px #00071355;
+}
+.orb-one {
+    width: 120%;
+    height: 100%;
+    top: -56%;
+    left: -32%;
+    transform: rotate(-30deg);
+    background: linear-gradient(145deg,#3d5777,#253e5c 45%,#12253d 80%);
+}
+.orb-two {
+    width: 85%;
+    height: 110%;
+    top: 26%;
+    left: 58%;
+    transform: rotate(-40deg);
+    background: linear-gradient(145deg,#4c6e98,#253e5f 50%,#112641);
+}
+.orb-three {
+    width: 110%;
+    height: 66%;
+    top: 79%;
+    left: -26%;
+    transform: rotate(-28deg);
+    background: linear-gradient(145deg,#4e6b8d,#2c4869 45%,#142e4d);
+}
+@media (max-width: $tablet-wide) {
+    .orb-one {
+        width: 180%;
+        left: -75%;
+        top: -25%;
+        height: 85%;
+    }
+    .orb-two {
+        width: 160%;
+        height: 95%;
+        left: 50%;
+        top: 45%;
+    }
+    .orb-three {
+        width: 180%;
+        height: 70%;
+        left: -110%;
+        top: 90%;
+    }
+}
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 5px 10px;
+    border: 1px solid #ffffff26;
+    background: #14263c65;
+    border-radius: 6px;
+    color: #c8d8ec;
+    font-size: 10px;
+    font-weight: 500;
+    line-height: 1.5;
+    white-space: nowrap;
+}
+.hero-badge svg {
+    @include size(12px);
+}
+a.hero-badge {
+    transition: background .15s,border-color .15s;
+}
+a.hero-badge:hover {
+    background: #254769b3;
+    border-color: #8ab5e573;
+}
+.badge-dot {
+    @include size(5px);
+    border-radius: 50%;
+    background: #79a9e1;
+    display: inline-block;
+}
+@media (max-width: $tablet-wide) {
+    .hero-badge {
+        font-size: 9px;
+        padding: 5px 8px;
+    }
+}
