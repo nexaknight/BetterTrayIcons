@@ -1,6 +1,6 @@
 {
   "name": "Better Tray Icons",
-  "description": "Brings tray icons back to the GNOME panel. Supports the StatusNotifierItem (SNI) and KStatusNotifierItem specs, so apps like Discord, Steam, Telegram, Signal and Nextcloud show up in the panel like they used to.\n\nA configurable number of icons stays inline, the rest are tucked away into an overflow popup behind a toggle button, in row or grid layout.\n\nEvery icon can be renamed, hidden, reordered or swapped out for a custom one on a per-app basis. Left, middle and right click, plus double-click and long-press, are independently bindable. Spacing, padding, radius, hover background and the toggle styling are all up to you.\n\nSettings can be exported, imported and synced across devices through a shared JSON file with automatic backups.\n\nWayland only, X11 sessions are not supported. Conflicts with other tray and AppIndicator extensions, so disable those before enabling this one.",
+  "description": "Brings tray icons back to the GNOME panel. Supports the StatusNotifierItem (SNI) and KStatusNotifierItem specs, so apps like Discord, Steam, Telegram, Signal and Nextcloud show up in the panel like they used to. Wine and Proton apps come along through XEmbed, and windowless background apps get an icon too.\n\nYou decide how many icons stay in the panel. The rest tuck away into a popup in row or grid layout, slide out of a drawer, or move into the Background Apps list in Quick Settings. With Dash to Panel the tray can show on every monitor.\n\nEvery icon can be renamed, hidden, reordered or swapped out for a custom icon or emoji, per app. Left, middle and right click, double-click, long-press, touch and scroll are all yours to bind, per app where you need it. Spacing, padding, radius, colors, blur and the toggle button styling are up to you, with a live preview in the settings.\n\nSettings can be exported, imported and synced across devices through a shared JSON file with automatic backups.\n\nTry every setting in the browser first: https://bti.nexaknight.com\n\nWayland only, X11 sessions are not supported. Conflicts with other tray and AppIndicator extensions, so disable those before enabling this one.",
   "uuid": "BetterTrayIcons@nexaknight.com",
   "version-name": "3.5.0",
   "shell-version": [
@@ -8,7 +8,7 @@
     "50",
     "51"
   ],
-  "url": "https://github.com/nexaknight/BetterTrayIcons",
+  "url": "https://bti.nexaknight.com",
   "settings-schema": "org.gnome.shell.extensions.bettertrayicons",
   "conflicts": [
     "appindicatorsupport@rgcjonas.gmail.com",
