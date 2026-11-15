@@ -5,9 +5,11 @@
   "type": "module",
   "scripts": {
     "lint": "eslint .",
-    "test": "npm run test:schema && npm run test:po && npm run lint",
+    "test": "npm run test:schema && npm run test:po && npm run test:readme && npm run lint",
     "test:schema": "glib-compile-schemas --strict --dry-run schemas/",
+    "test:readme": "node scripts/readmeDonations.js --check",
     "test:po": "for po in po/*.po; do [ -e \"$po\" ] || continue; msgfmt -c -o /dev/null \"$po\" || exit 1; done",
+    "readme": "node scripts/readmeDonations.js",
     "compile-schemas": "glib-compile-schemas schemas/",
     "compile-locales": "mkdir -p locale && for po in po/*.po; do lang=$(basename \"$po\" .po); mkdir -p locale/$lang/LC_MESSAGES; msgfmt \"$po\" -o locale/$lang/LC_MESSAGES/bettertrayicons.mo; done"
   },
