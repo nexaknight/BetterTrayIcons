@@ -1,5 +1,32 @@
 # Changelog
 
+## [3.5.0](https://github.com/nexaknight/BetterTrayIcons/compare/v3.4.1...v3.5.0) (2026-11-15)
+
+
+### Features
+
+* add background blur to icons, toggle and overflow menu ([2d50d9a](https://github.com/nexaknight/BetterTrayIcons/commit/2d50d9acb9fe282b206aa49646309756abd2c7fc))
+* drawer and quick settings modes, the tray on every monitor and per-app click actions ([087b89a](https://github.com/nexaknight/BetterTrayIcons/commit/087b89aa22225428a5a5adbb05b8d545a3482599)), closes [#96](https://github.com/nexaknight/BetterTrayIcons/issues/96) [#98](https://github.com/nexaknight/BetterTrayIcons/issues/98)
+* **prefs:** copy button on code blocks, a plainer icon picker and shared helpers for the website ([4481523](https://github.com/nexaknight/BetterTrayIcons/commit/44815239dbdcb06f514712ecc8c034ae17cdfb7e))
+* **prefs:** credits viewer, donation links and the about footer ([64ecd34](https://github.com/nexaknight/BetterTrayIcons/commit/64ecd349d9f7849714a8cb28c5a06fd5c717abbe))
+* **prefs:** dialog, row and page polish ([9423ad4](https://github.com/nexaknight/BetterTrayIcons/commit/9423ad42a5fcf4339745fbb3ed21ffaf1a0b2e72))
+* **prefs:** filter, search and quick actions on the applications page ([4ae6c0c](https://github.com/nexaknight/BetterTrayIcons/commit/4ae6c0c334d4c50bb0676be0c598eb46f15339af))
+* **prefs:** rebuild the icon picker as a dropdown with emoji and icon packs ([3339597](https://github.com/nexaknight/BetterTrayIcons/commit/33395972b5344b10175d458079133fdb1d57e7ce))
+* **prefs:** rework the cloud sync dialog ([37088ca](https://github.com/nexaknight/BetterTrayIcons/commit/37088ca0b491671a1c8afe8bf41e87777e66e949))
+
+
+### Bug Fixes
+
+* bound icon file reads and menu image sizes ([8d3736b](https://github.com/nexaknight/BetterTrayIcons/commit/8d3736b724409a8a53835dfdf5337018fda8d3ab))
+* import string-list settings and survive a quick disable and enable ([3139c15](https://github.com/nexaknight/BetterTrayIcons/commit/3139c1509504ede98610e1d5409771de3fe8e896))
+* **prefs:** step the icon size by one pixel and cap it at 40 ([a3f0ef0](https://github.com/nexaknight/BetterTrayIcons/commit/a3f0ef0886e7196c74e4d0abd8d9d66398896260))
+* tray icon size zero, scaled embeds and menu teardown on gnome 51 ([904c3a2](https://github.com/nexaknight/BetterTrayIcons/commit/904c3a255bfdf8758f18df07ddcb0d216c693704))
+
+
+### Translations
+
+* translate the new strings and drop the unused ones ([5c054f2](https://github.com/nexaknight/BetterTrayIcons/commit/5c054f235aa52148c43fbfd7812d80e5d7b50e5d))
+
 ## [3.4.1](https://github.com/nexaknight/BetterTrayIcons/compare/v3.4.0...v3.4.1) (2026-11-01)
 
 ### Translations
