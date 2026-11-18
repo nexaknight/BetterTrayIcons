@@ -81,5 +81,4 @@ export const DONATION_SERVICES = Object.freeze({
 export const CONTRIBUTORS_OPTOUT = new Set([
     'github-actions[bot]',
     'dependabot[bot]',
-    'Agent19872',
 ].map(name => name.toLowerCase()));
