@@ -62,6 +62,23 @@ const ICON_RESOLVE_KEYS = Object.freeze([
     'enable-custom-icon-style',
 ]);
 
+/**
+ * The text of an SNI ToolTip property, `(sa(iiay)ss)`: its title and its
+ * description, one per line.
+ *
+ * @param {Array|null} toolTip the unpacked property
+ * @returns {string|null} the text, null when there is none
+ */
+function toolTipText(toolTip) {
+    if (!Array.isArray(toolTip))
+        return null;
+    const text = [toolTip[2], toolTip[3]]
+        .filter(part => typeof part === 'string' && part.trim())
+        .join('\n')
+        .trim();
+    return text || null;
+}
+
 export class TrayIcon {
     constructor(menuInterfaceXml, busName, objectPath, settings, proxy, onReady, onDestroy, onCloseMenu, onDragStateChange = null, onStatusChange, onShownIconChange) {
         this._menuInterfaceXml = menuInterfaceXml;
@@ -177,6 +194,7 @@ export class TrayIcon {
             NewOverlayIcon: () => this._queueUpdate(),
             NewStatus: () => this._queueUpdate(),
             NewTitle: () => this._queueTitleUpdate(),
+            NewToolTip: () => this._queueTitleUpdate(),
         };
         for (const [signal, handler] of Object.entries(handlers)) {
             this._proxySignals.push(
@@ -592,6 +610,15 @@ export class TrayIcon {
                 updateAppConfig(this._settings, this.appId, {title});
 
             title = formatAppName(title);
+
+            // Electron and Chromium apps set a ToolTip but no Title: show it
+            // rather than a name guessed from the process.
+            if (!raw && !freshCustom) {
+                const toolTip = toolTipText(await refreshPropertyOnProxy(this._proxy, 'ToolTip'));
+                if (this._isDestroyed || generation !== this._titleGen)
+                    return;
+                title = toolTip ?? title;
+            }
         }
 
         applyTitle(this.actor, this._tooltip, this._settings, title);
