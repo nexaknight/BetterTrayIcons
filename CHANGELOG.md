@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.5.2](https://github.com/nexaknight/BetterTrayIcons/compare/v3.5.1...v3.5.2) (2026-11-28)
+
+
+### Bug Fixes
+
+* show the tooltip of tray items that set no title ([#103](https://github.com/nexaknight/BetterTrayIcons/issues/103)) ([6193dd4](https://github.com/nexaknight/BetterTrayIcons/commit/6193dd4b90f9d867813c70e9be76f41986370470))
+
 ## [3.5.1](https://github.com/nexaknight/BetterTrayIcons/compare/v3.5.0...v3.5.1) (2026-11-18)
 
 
